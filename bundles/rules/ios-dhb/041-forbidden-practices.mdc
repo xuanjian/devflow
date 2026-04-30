@@ -1,0 +1,101 @@
+---
+description: 禁止事项和谨慎使用的技术
+alwaysApply: true
+---
+
+# 禁止事项
+
+## ⚠️ 严格禁止
+
+### 1. 禁止替换 SDAutoLayout 为 Masonry
+**原因**：已有285个文件使用，替换风险极高
+
+### 2. 禁止使用 performSelector 系列方法
+**替代方案**：使用 MessageThrottle 防抖
+
+### 3. 禁止直接修改第三方库源码
+**替代方案**：通过 Category 扩展
+
+### 4. 禁止在主线程执行耗时操作
+**包括**：
+- 网络请求
+- 数据库操作
+- 大数据处理
+- 文件读写
+- 图片处理
+
+### 5. 禁止硬编码文字
+**替代方案**：使用 `NSLocalizedString` 支持多语言
+
+```objc
+// ❌ 错误
+self.titleLabel.text = @"商品列表";
+
+// ✅ 正确
+self.titleLabel.text = NSLocalizedString(@"goods_list_title", @"商品列表");
+```
+
+### 6. 禁止直接使用 #RRGGBB 颜色
+**替代方案**：使用 `ChangeSkinManager` 支持主题切换
+
+```objc
+// ❌ 错误
+self.view.backgroundColor = [UIColor colorWithRed:0xFF green:0x00 blue:0x00 alpha:1.0];
+
+// ✅ 正确
+self.view.backgroundColor = [ChangeSkinManager colorForKey:@"primary_color"];
+```
+
+### 7. 禁止使用全局变量
+**替代方案**：使用单例或依赖注入
+
+```objc
+// ❌ 错误
+static NSString *globalUserId;
+
+// ✅ 正确
+@property (nonatomic, copy, class) NSString *userId;  // 类属性
+// 或使用单例
+[[DHBUserManager sharedManager] userId];
+```
+
+## ⚠️ 谨慎使用
+
+### 1. 谨慎使用全局通知
+**原因**：可能影响性能，造成难以追踪的bug
+
+**建议**：
+- 优先使用代理(Delegate)或 Block
+- 必要时使用精确通知机制（携带具体变更的ID集合）
+- 避免频繁发送全局通知
+
+### 2. 谨慎使用 KVO
+**原因**：容易造成崩溃，移除不当会导致内存问题
+
+**建议**：
+- 考虑使用 ReactiveCocoa
+- 如果必须使用KVO，确保正确移除观察者
+- 使用安全的KVO库，如 `FBKVOController`
+
+### 3. 谨慎使用分类覆盖方法
+**原因**：可能影响其他模块，造成难以排查的问题
+
+**建议**：
+- 避免在分类中覆盖已有方法
+- 使用 Method Swizzling 时要特别小心
+- 确保分类方法名有唯一前缀
+
+### 4. 谨慎使用 NSUserDefaults 存储大量数据
+**原因**：影响性能，读写慢
+
+**建议**：
+- 小量配置数据使用 NSUserDefaults
+- 大量数据使用 FMDB 数据库
+- 临时数据使用内存缓存
+
+### 5. 谨慎使用 UIWebView
+**原因**：已被废弃，存在安全隐患
+
+**建议**：
+- 使用 WKWebView 替代
+- 项目已使用 WKWebView，不要新增 UIWebView

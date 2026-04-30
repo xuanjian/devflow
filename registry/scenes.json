@@ -1,0 +1,55 @@
+{
+  "version": 1,
+  "scenes": [
+    {
+      "sceneKey": "single-repo-change",
+      "path": "/Users/xj/Documents/ai-context/scenes/single-repo-change.md",
+      "summary": "默认单仓修改场景"
+    },
+    {
+      "sceneKey": "index-h5-webview",
+      "path": "/Users/xj/Documents/ai-context/scenes/index-h5-webview.md",
+      "summary": "index 到 h5 / webview 链路"
+    },
+    {
+      "sceneKey": "cash-index-h5-webview",
+      "path": "/Users/xj/Documents/ai-context/scenes/cash-index-h5-webview.md",
+      "summary": "cash 到 index / h5 / webview 链路"
+    },
+    {
+      "sceneKey": "packages-cash-index-h5-webview",
+      "path": "/Users/xj/Documents/ai-context/scenes/packages-cash-index-h5-webview.md",
+      "summary": "分包到 cash / index / h5 / webview 链路"
+    },
+    {
+      "sceneKey": "mini-program-h5-webview",
+      "path": "/Users/xj/Documents/ai-context/scenes/mini-program-h5-webview.md",
+      "summary": "小程序到 H5 容器链路"
+    },
+    {
+      "sceneKey": "frontend-bff-debug",
+      "path": "/Users/xj/Documents/ai-context/scenes/frontend-bff-debug.md",
+      "summary": "前端与部分 BFF 联调场景"
+    },
+    {
+      "sceneKey": "ios-h5-webview-bff",
+      "path": "/Users/xj/Documents/ai-context/scenes/ios-h5-webview-bff.md",
+      "summary": "iOS + H5 + 容器 + BFF 全链路场景"
+    },
+    {
+      "sceneKey": "profile-growth",
+      "path": "/Users/xj/Documents/ai-context/scenes/profile-growth.md",
+      "summary": "个人长期画像自动增长与晋升规则"
+    },
+    {
+      "sceneKey": "ai-my-pm",
+      "path": "/Users/xj/Documents/ai-context/scenes/ai-my-pm.md",
+      "summary": "XUANJIAN 的个人 AI PM 总控、任务分级、工具选择与多角色执行规则"
+    },
+    {
+      "sceneKey": "xuanjian-symphony",
+      "path": "/Users/xj/Documents/ai-context/scenes/xuanjian-symphony.md",
+      "summary": "Jira 一句话需求到调研、Figma、开发交接和 Design QA 的文件化工作流"
+    }
+  ]
+}

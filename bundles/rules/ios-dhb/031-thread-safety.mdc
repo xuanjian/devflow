@@ -1,0 +1,78 @@
+---
+description: 线程安全规范：主线程UI操作，子线程耗时任务
+alwaysApply: false
+---
+
+# 线程安全规范
+
+## UI操作必须在主线程
+
+```objc
+dispatch_async(dispatch_get_main_queue(), ^{
+    [self.tableView reloadData];
+    [SVProgressHUD showSuccessWithStatus:@"操作成功"];
+    [self updateUIElements];
+});
+```
+
+## 耗时操作在子线程
+
+```objc
+dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+    // 耗时操作
+    NSData *data = [self processLargeData];
+    
+    // 切回主线程更新UI
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self updateUIWithData:data];
+    });
+});
+```
+
+## 使用 coobjc 协程处理异步
+
+```objc
+co_launch(^{
+    // 异步操作
+    id result = await([self asyncNetworkRequest]);
+    
+    // 结果已在主线程，可直接更新UI
+    self.dataSource = result;
+    [self.tableView reloadData];
+});
+```
+
+## 常见耗时操作
+
+以下操作必须在子线程执行：
+
+1. **网络请求**：所有 API 调用
+2. **数据库操作**：FMDB 读写操作
+3. **文件操作**：读取大文件、写入文件
+4. **图片处理**：压缩、裁剪、滤镜
+5. **数据解析**：大量 JSON 解析、XML 解析
+6. **加密解密**：数据加密、解密操作
+
+## 常见UI操作
+
+以下操作必须在主线程执行：
+
+1. **视图更新**：修改任何 UIView 属性
+2. **列表刷新**：`reloadData`、`insertRows` 等
+3. **弹框提示**：`SVProgressHUD`、`UIAlertController`
+4. **导航跳转**：`pushViewController`、`presentViewController`
+5. **动画执行**：UIView 动画、CAAnimation
+
+## 线程检查
+
+```objc
+// 检查当前是否在主线程
+if ([NSThread isMainThread]) {
+    // 主线程代码
+} else {
+    // 子线程代码
+}
+
+// 断言必须在主线程
+NSAssert([NSThread isMainThread], @"Must be called on main thread");
+```

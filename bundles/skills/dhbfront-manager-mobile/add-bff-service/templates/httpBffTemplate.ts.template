@@ -1,0 +1,19 @@
+// {{SERVICE_DESCRIPTION}} BFF HTTP 客户端
+import type { AxiosInstance } from 'axios';
+import { getBffBase } from '../../../utils/httpBffBase';
+
+let httpBff{{SERVICE_NAME}}Instance: AxiosInstance | null = null;
+
+/**
+ * 创建 {{SERVICE_DESCRIPTION}} 服务的 HTTP 客户端实例
+ * 使用全局 domainConfig 配置，确保在不同环境下使用正确的域名
+ * authorization 由 getBffBase 内部的拦截器统一处理
+ */
+export const httpBff{{SERVICE_NAME}} = (): AxiosInstance => {
+    if (!httpBff{{SERVICE_NAME}}Instance) {
+        httpBff{{SERVICE_NAME}}Instance = getBffBase({
+            baseURL: domainConfig.hosts['{{DOMAIN_KEY}}'], // 从全局配置获取 {{DOMAIN_KEY}} 服务域名
+        });
+    }
+    return httpBff{{SERVICE_NAME}}Instance;
+};

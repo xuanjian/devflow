@@ -1,0 +1,95 @@
+---
+description: 内存管理规范：防止循环引用和内存泄漏
+alwaysApply: false
+---
+
+# 内存管理规范
+
+## Weak-Strong Dance 防止循环引用
+
+```objc
+__weak typeof(self) weakSelf = self;
+[self.manager fetchDataWithCompletion:^(id data) {
+    __strong typeof(weakSelf) strongSelf = weakSelf;
+    if (!strongSelf) return;
+    
+    strongSelf.data = data;
+    [strongSelf.tableView reloadData];
+}];
+```
+
+## Block 属性使用 copy
+
+```objc
+@property (nonatomic, copy) void(^completionBlock)(BOOL success);
+@property (nonatomic, copy) void(^successBlock)(id data);
+```
+
+## Delegate 使用 weak
+
+```objc
+@property (nonatomic, weak) id<DHBDelegate> delegate;
+@property (nonatomic, weak) id<UITableViewDelegate> tableDelegate;
+```
+
+## 移除通知观察者
+
+```objc
+- (void)dealloc {
+    // iOS 9+ 自动移除，但建议显式移除
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+```
+
+## 内存泄漏排查
+
+### 使用 Instruments Leaks 工具
+1. Product → Profile → Leaks
+2. 运行应用并执行关键业务流程
+3. 查看内存泄漏报告
+
+### 检查要点
+- Block 循环引用
+- Delegate 是否使用 weak
+- 通知观察者是否移除
+- Timer 是否正确 invalidate
+- KVO 是否正确移除
+
+## 常见内存泄漏场景
+
+### 1. Block 捕获 self
+```objc
+// ❌ 错误：会造成循环引用
+[self.manager fetchData:^{
+    self.data = data;  // 直接使用 self
+}];
+
+// ✅ 正确：使用 weak-strong dance
+__weak typeof(self) weakSelf = self;
+[self.manager fetchData:^{
+    __strong typeof(weakSelf) strongSelf = weakSelf;
+    if (!strongSelf) return;
+    strongSelf.data = data;
+}];
+```
+
+### 2. Delegate 强引用
+```objc
+// ❌ 错误
+@property (nonatomic, strong) id<DHBDelegate> delegate;
+
+// ✅ 正确
+@property (nonatomic, weak) id<DHBDelegate> delegate;
+```
+
+### 3. NSTimer 循环引用
+```objc
+// ❌ 错误：Timer 会强引用 target
+self.timer = [NSTimer scheduledTimerWithTimeInterval:1.0
+                                              target:self
+                                            selector:@selector(timerFired:)
+                                            userInfo:nil
+                                             repeats:YES];
+
+// ✅ 正确：使用 MessageThrottle 或 weakProxy
+```

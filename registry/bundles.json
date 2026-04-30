@@ -1,0 +1,1037 @@
+{
+  "version": 1,
+  "generatedAt": "2026-04-05T14:19:31.681Z",
+  "bundles": [
+    {
+      "bundleKey": "rule:customize-mini-program/customize-mini-program",
+      "kind": "rule",
+      "ref": "customize-mini-program/customize-mini-program.mdc",
+      "title": "customize-mini-program 开发规范",
+      "summary": "**技术栈**: 原生小程序 + npm 包",
+      "path": "/Users/xj/Documents/ai-context/bundles/rules/customize-mini-program/customize-mini-program.mdc",
+      "sourceType": "file",
+      "scope": "project",
+      "repoKeys": [
+        "customize-mini-program"
+      ],
+      "families": [
+        "frontend"
+      ],
+      "tags": [
+        "dhb",
+        "frontend",
+        "mini-program"
+      ],
+      "defaultScenes": [
+        "mini-program-h5-webview",
+        "packages-cash-index-h5-webview",
+        "single-repo-change"
+      ]
+    },
+    {
+      "bundleKey": "rule:dhb-international-mobile/dhb-international-mobile",
+      "kind": "rule",
+      "ref": "dhb-international-mobile/dhb-international-mobile.mdc",
+      "title": "DHB 国际化移动端开发规范",
+      "summary": "**技术栈**: React 19 + TypeScript + Vite + Styled-Components",
+      "path": "/Users/xj/Documents/ai-context/bundles/rules/dhb-international-mobile/dhb-international-mobile.mdc",
+      "sourceType": "file",
+      "scope": "project",
+      "repoKeys": [
+        "dhb-international-mobile"
+      ],
+      "families": [
+        "frontend"
+      ],
+      "tags": [
+        "dhb",
+        "frontend",
+        "international"
+      ],
+      "defaultScenes": [
+        "single-repo-change"
+      ]
+    },
+    {
+      "bundleKey": "rule:dhb-mobile-index",
+      "kind": "rule",
+      "ref": "dhb-mobile-index.mdc",
+      "title": "dhb-mobile-index 开发规范",
+      "summary": "**技术栈**: React + TypeScript + SCSS",
+      "path": "/Users/xj/Documents/ai-context/bundles/rules/dhb-mobile-index.mdc",
+      "sourceType": "file",
+      "scope": "project",
+      "repoKeys": [
+        "dhb-mobile-index"
+      ],
+      "families": [
+        "frontend"
+      ],
+      "tags": [
+        "dhb",
+        "frontend",
+        "h5"
+      ],
+      "defaultScenes": [
+        "cash-index-h5-webview",
+        "frontend-bff-debug",
+        "index-h5-webview",
+        "ios-h5-webview-bff",
+        "mini-program-h5-webview",
+        "packages-cash-index-h5-webview",
+        "single-repo-change"
+      ]
+    },
+    {
+      "bundleKey": "rule:dhbfront-cash-mini",
+      "kind": "rule",
+      "ref": "dhbfront-cash-mini.mdc",
+      "title": "dhbfront-cash-mini 开发规范",
+      "summary": "**技术栈**: Taro 3.6.32 + React 18 + TypeScript + Sass",
+      "path": "/Users/xj/Documents/ai-context/bundles/rules/dhbfront-cash-mini.mdc",
+      "sourceType": "file",
+      "scope": "project",
+      "repoKeys": [
+        "dhbfront-cash-mini"
+      ],
+      "families": [
+        "frontend"
+      ],
+      "tags": [
+        "cash-mini",
+        "dhb",
+        "frontend"
+      ],
+      "defaultScenes": [
+        "cash-index-h5-webview",
+        "frontend-bff-debug",
+        "packages-cash-index-h5-webview",
+        "single-repo-change"
+      ]
+    },
+    {
+      "bundleKey": "rule:i18n-chinese-key",
+      "kind": "rule",
+      "ref": "i18n-chinese-key.mdc",
+      "title": "Taro 项目国际化规范",
+      "summary": "在 `DHB_PACKAGES` 相关分包项目中，所有用户可见文案都必须走国际化。",
+      "path": "/Users/xj/Documents/ai-context/bundles/rules/i18n-chinese-key.mdc",
+      "sourceType": "file",
+      "scope": "project",
+      "repoKeys": [
+        "dhb-packages"
+      ],
+      "families": [
+        "frontend"
+      ],
+      "tags": [
+        "dhb",
+        "frontend",
+        "packages"
+      ],
+      "defaultScenes": [
+        "frontend-bff-debug",
+        "packages-cash-index-h5-webview",
+        "single-repo-change"
+      ]
+    },
+    {
+      "bundleKey": "rule:ios-dhb/001-project-overview",
+      "kind": "rule",
+      "ref": "ios-dhb/001-project-overview.mdc",
+      "title": "DHB (订货宝) iOS项目概述",
+      "summary": "DHB项目概述和技术栈说明",
+      "path": "/Users/xj/Documents/ai-context/bundles/rules/ios-dhb/001-project-overview.mdc",
+      "sourceType": "file",
+      "scope": "project",
+      "repoKeys": [
+        "dhb"
+      ],
+      "families": [
+        "ios"
+      ],
+      "tags": [
+        "dhb",
+        "ios"
+      ],
+      "defaultScenes": [
+        "cash-index-h5-webview",
+        "index-h5-webview",
+        "ios-h5-webview-bff",
+        "packages-cash-index-h5-webview",
+        "single-repo-change"
+      ]
+    },
+    {
+      "bundleKey": "rule:ios-dhb/002-naming-conventions",
+      "kind": "rule",
+      "ref": "ios-dhb/002-naming-conventions.mdc",
+      "title": "命名规范",
+      "summary": "命名规范：类名、变量、常量、通知等命名规则",
+      "path": "/Users/xj/Documents/ai-context/bundles/rules/ios-dhb/002-naming-conventions.mdc",
+      "sourceType": "file",
+      "scope": "project",
+      "repoKeys": [
+        "dhb"
+      ],
+      "families": [
+        "ios"
+      ],
+      "tags": [
+        "dhb",
+        "ios"
+      ],
+      "defaultScenes": [
+        "cash-index-h5-webview",
+        "index-h5-webview",
+        "ios-h5-webview-bff",
+        "packages-cash-index-h5-webview",
+        "single-repo-change"
+      ]
+    },
+    {
+      "bundleKey": "rule:ios-dhb/003-file-structure",
+      "kind": "rule",
+      "ref": "ios-dhb/003-file-structure.mdc",
+      "title": "文件结构规范",
+      "summary": "```objc",
+      "path": "/Users/xj/Documents/ai-context/bundles/rules/ios-dhb/003-file-structure.mdc",
+      "sourceType": "file",
+      "scope": "project",
+      "repoKeys": [
+        "dhb"
+      ],
+      "families": [
+        "ios"
+      ],
+      "tags": [
+        "dhb",
+        "ios"
+      ],
+      "defaultScenes": [
+        "cash-index-h5-webview",
+        "index-h5-webview",
+        "ios-h5-webview-bff",
+        "packages-cash-index-h5-webview",
+        "single-repo-change"
+      ]
+    },
+    {
+      "bundleKey": "rule:ios-dhb/010-page-creation",
+      "kind": "rule",
+      "ref": "ios-dhb/010-page-creation.mdc",
+      "title": "页面创建规范",
+      "summary": "页面创建规范：Controller、Service、XIB、Networking四层架构",
+      "path": "/Users/xj/Documents/ai-context/bundles/rules/ios-dhb/010-page-creation.mdc",
+      "sourceType": "file",
+      "scope": "project",
+      "repoKeys": [
+        "dhb"
+      ],
+      "families": [
+        "ios"
+      ],
+      "tags": [
+        "dhb",
+        "ios"
+      ],
+      "defaultScenes": [
+        "cash-index-h5-webview",
+        "index-h5-webview",
+        "ios-h5-webview-bff",
+        "packages-cash-index-h5-webview",
+        "single-repo-change"
+      ]
+    },
+    {
+      "bundleKey": "rule:ios-dhb/011-layout-sdautolayout",
+      "kind": "rule",
+      "ref": "ios-dhb/011-layout-sdautolayout.mdc",
+      "title": "布局规范 - SDAutoLayout",
+      "summary": "布局规范：SDAutoLayout使用方法和注意事项",
+      "path": "/Users/xj/Documents/ai-context/bundles/rules/ios-dhb/011-layout-sdautolayout.mdc",
+      "sourceType": "file",
+      "scope": "project",
+      "repoKeys": [
+        "dhb"
+      ],
+      "families": [
+        "ios"
+      ],
+      "tags": [
+        "dhb",
+        "ios"
+      ],
+      "defaultScenes": [
+        "cash-index-h5-webview",
+        "index-h5-webview",
+        "ios-h5-webview-bff",
+        "packages-cash-index-h5-webview",
+        "single-repo-change"
+      ]
+    },
+    {
+      "bundleKey": "rule:ios-dhb/012-networking",
+      "kind": "rule",
+      "ref": "ios-dhb/012-networking.mdc",
+      "title": "网络请求规范 (v2.0)",
+      "summary": "网络请求规范：DHBBaseNetworkRequest基类和coobjc协程使用",
+      "path": "/Users/xj/Documents/ai-context/bundles/rules/ios-dhb/012-networking.mdc",
+      "sourceType": "file",
+      "scope": "project",
+      "repoKeys": [
+        "dhb"
+      ],
+      "families": [
+        "ios"
+      ],
+      "tags": [
+        "dhb",
+        "ios"
+      ],
+      "defaultScenes": [
+        "cash-index-h5-webview",
+        "index-h5-webview",
+        "ios-h5-webview-bff",
+        "packages-cash-index-h5-webview",
+        "single-repo-change"
+      ]
+    },
+    {
+      "bundleKey": "rule:ios-dhb/013-data-model",
+      "kind": "rule",
+      "ref": "ios-dhb/013-data-model.mdc",
+      "title": "数据模型规范",
+      "summary": "数据模型规范：YYModel的使用方法",
+      "path": "/Users/xj/Documents/ai-context/bundles/rules/ios-dhb/013-data-model.mdc",
+      "sourceType": "file",
+      "scope": "project",
+      "repoKeys": [
+        "dhb"
+      ],
+      "families": [
+        "ios"
+      ],
+      "tags": [
+        "dhb",
+        "ios"
+      ],
+      "defaultScenes": [
+        "cash-index-h5-webview",
+        "index-h5-webview",
+        "ios-h5-webview-bff",
+        "packages-cash-index-h5-webview",
+        "single-repo-change"
+      ]
+    },
+    {
+      "bundleKey": "rule:ios-dhb/020-notification-system",
+      "kind": "rule",
+      "ref": "ios-dhb/020-notification-system.mdc",
+      "title": "通知机制规范 (v2.0)",
+      "summary": "通知机制规范：v2.0精确通知机制",
+      "path": "/Users/xj/Documents/ai-context/bundles/rules/ios-dhb/020-notification-system.mdc",
+      "sourceType": "file",
+      "scope": "project",
+      "repoKeys": [
+        "dhb"
+      ],
+      "families": [
+        "ios"
+      ],
+      "tags": [
+        "dhb",
+        "ios"
+      ],
+      "defaultScenes": [
+        "cash-index-h5-webview",
+        "index-h5-webview",
+        "ios-h5-webview-bff",
+        "packages-cash-index-h5-webview",
+        "single-repo-change"
+      ]
+    },
+    {
+      "bundleKey": "rule:ios-dhb/021-cart-shopping",
+      "kind": "rule",
+      "ref": "ios-dhb/021-cart-shopping.mdc",
+      "title": "购物车加购规范",
+      "summary": "购物车加购规范：SKU加购标准流程",
+      "path": "/Users/xj/Documents/ai-context/bundles/rules/ios-dhb/021-cart-shopping.mdc",
+      "sourceType": "file",
+      "scope": "project",
+      "repoKeys": [
+        "dhb"
+      ],
+      "families": [
+        "ios"
+      ],
+      "tags": [
+        "dhb",
+        "ios"
+      ],
+      "defaultScenes": [
+        "cash-index-h5-webview",
+        "index-h5-webview",
+        "ios-h5-webview-bff",
+        "packages-cash-index-h5-webview",
+        "single-repo-change"
+      ]
+    },
+    {
+      "bundleKey": "rule:ios-dhb/030-memory-management",
+      "kind": "rule",
+      "ref": "ios-dhb/030-memory-management.mdc",
+      "title": "内存管理规范",
+      "summary": "内存管理规范：防止循环引用和内存泄漏",
+      "path": "/Users/xj/Documents/ai-context/bundles/rules/ios-dhb/030-memory-management.mdc",
+      "sourceType": "file",
+      "scope": "project",
+      "repoKeys": [
+        "dhb"
+      ],
+      "families": [
+        "ios"
+      ],
+      "tags": [
+        "dhb",
+        "ios"
+      ],
+      "defaultScenes": [
+        "cash-index-h5-webview",
+        "index-h5-webview",
+        "ios-h5-webview-bff",
+        "packages-cash-index-h5-webview",
+        "single-repo-change"
+      ]
+    },
+    {
+      "bundleKey": "rule:ios-dhb/031-thread-safety",
+      "kind": "rule",
+      "ref": "ios-dhb/031-thread-safety.mdc",
+      "title": "线程安全规范",
+      "summary": "线程安全规范：主线程UI操作，子线程耗时任务",
+      "path": "/Users/xj/Documents/ai-context/bundles/rules/ios-dhb/031-thread-safety.mdc",
+      "sourceType": "file",
+      "scope": "project",
+      "repoKeys": [
+        "dhb"
+      ],
+      "families": [
+        "ios"
+      ],
+      "tags": [
+        "dhb",
+        "ios"
+      ],
+      "defaultScenes": [
+        "cash-index-h5-webview",
+        "index-h5-webview",
+        "ios-h5-webview-bff",
+        "packages-cash-index-h5-webview",
+        "single-repo-change"
+      ]
+    },
+    {
+      "bundleKey": "rule:ios-dhb/032-error-handling",
+      "kind": "rule",
+      "ref": "ios-dhb/032-error-handling.mdc",
+      "title": "错误处理规范",
+      "summary": "错误处理规范：统一的错误提示和自定义弹框",
+      "path": "/Users/xj/Documents/ai-context/bundles/rules/ios-dhb/032-error-handling.mdc",
+      "sourceType": "file",
+      "scope": "project",
+      "repoKeys": [
+        "dhb"
+      ],
+      "families": [
+        "ios"
+      ],
+      "tags": [
+        "dhb",
+        "ios"
+      ],
+      "defaultScenes": [
+        "cash-index-h5-webview",
+        "index-h5-webview",
+        "ios-h5-webview-bff",
+        "packages-cash-index-h5-webview",
+        "single-repo-change"
+      ]
+    },
+    {
+      "bundleKey": "rule:ios-dhb/040-project-specific",
+      "kind": "rule",
+      "ref": "ios-dhb/040-project-specific.mdc",
+      "title": "项目特定规范",
+      "summary": "项目特定规范：多语言、主题、日志、OSS、埋点",
+      "path": "/Users/xj/Documents/ai-context/bundles/rules/ios-dhb/040-project-specific.mdc",
+      "sourceType": "file",
+      "scope": "project",
+      "repoKeys": [
+        "dhb"
+      ],
+      "families": [
+        "ios"
+      ],
+      "tags": [
+        "dhb",
+        "ios"
+      ],
+      "defaultScenes": [
+        "cash-index-h5-webview",
+        "index-h5-webview",
+        "ios-h5-webview-bff",
+        "packages-cash-index-h5-webview",
+        "single-repo-change"
+      ]
+    },
+    {
+      "bundleKey": "rule:ios-dhb/041-forbidden-practices",
+      "kind": "rule",
+      "ref": "ios-dhb/041-forbidden-practices.mdc",
+      "title": "禁止事项",
+      "summary": "禁止事项和谨慎使用的技术",
+      "path": "/Users/xj/Documents/ai-context/bundles/rules/ios-dhb/041-forbidden-practices.mdc",
+      "sourceType": "file",
+      "scope": "project",
+      "repoKeys": [
+        "dhb"
+      ],
+      "families": [
+        "ios"
+      ],
+      "tags": [
+        "dhb",
+        "ios"
+      ],
+      "defaultScenes": [
+        "cash-index-h5-webview",
+        "index-h5-webview",
+        "ios-h5-webview-bff",
+        "packages-cash-index-h5-webview",
+        "single-repo-change"
+      ]
+    },
+    {
+      "bundleKey": "rule:ios-dhb/050-testing",
+      "kind": "rule",
+      "ref": "ios-dhb/050-testing.mdc",
+      "title": "测试规范",
+      "summary": "测试规范：单元测试和UI测试",
+      "path": "/Users/xj/Documents/ai-context/bundles/rules/ios-dhb/050-testing.mdc",
+      "sourceType": "file",
+      "scope": "project",
+      "repoKeys": [
+        "dhb"
+      ],
+      "families": [
+        "ios"
+      ],
+      "tags": [
+        "dhb",
+        "ios"
+      ],
+      "defaultScenes": [
+        "cash-index-h5-webview",
+        "index-h5-webview",
+        "ios-h5-webview-bff",
+        "packages-cash-index-h5-webview",
+        "single-repo-change"
+      ]
+    },
+    {
+      "bundleKey": "rule:ios-dhb/051-deployment",
+      "kind": "rule",
+      "ref": "ios-dhb/051-deployment.mdc",
+      "title": "打包发布规范",
+      "summary": "打包发布规范：打包脚本、符号表上传、版本管理",
+      "path": "/Users/xj/Documents/ai-context/bundles/rules/ios-dhb/051-deployment.mdc",
+      "sourceType": "file",
+      "scope": "project",
+      "repoKeys": [
+        "dhb"
+      ],
+      "families": [
+        "ios"
+      ],
+      "tags": [
+        "dhb",
+        "ios"
+      ],
+      "defaultScenes": [
+        "cash-index-h5-webview",
+        "index-h5-webview",
+        "ios-h5-webview-bff",
+        "packages-cash-index-h5-webview",
+        "single-repo-change"
+      ]
+    },
+    {
+      "bundleKey": "rule:ios-dhb/052-common-issues",
+      "kind": "rule",
+      "ref": "ios-dhb/052-common-issues.mdc",
+      "title": "常见问题",
+      "summary": "常见问题和解决方案",
+      "path": "/Users/xj/Documents/ai-context/bundles/rules/ios-dhb/052-common-issues.mdc",
+      "sourceType": "file",
+      "scope": "project",
+      "repoKeys": [
+        "dhb"
+      ],
+      "families": [
+        "ios"
+      ],
+      "tags": [
+        "dhb",
+        "ios"
+      ],
+      "defaultScenes": [
+        "cash-index-h5-webview",
+        "index-h5-webview",
+        "ios-h5-webview-bff",
+        "packages-cash-index-h5-webview",
+        "single-repo-change"
+      ]
+    },
+    {
+      "bundleKey": "rule:ios-dhb/053-code-review",
+      "kind": "rule",
+      "ref": "ios-dhb/053-code-review.mdc",
+      "title": "代码审查检查点",
+      "summary": "代码审查检查点和性能优化",
+      "path": "/Users/xj/Documents/ai-context/bundles/rules/ios-dhb/053-code-review.mdc",
+      "sourceType": "file",
+      "scope": "project",
+      "repoKeys": [
+        "dhb"
+      ],
+      "families": [
+        "ios"
+      ],
+      "tags": [
+        "dhb",
+        "ios"
+      ],
+      "defaultScenes": [
+        "cash-index-h5-webview",
+        "index-h5-webview",
+        "ios-h5-webview-bff",
+        "packages-cash-index-h5-webview",
+        "single-repo-change"
+      ]
+    },
+    {
+      "bundleKey": "rule:ios-dhb/NETWORKING_UPDATE_V2.1",
+      "kind": "rule",
+      "ref": "ios-dhb/NETWORKING_UPDATE_V2.1.md",
+      "title": "网络请求规范更新说明 (v2.1)",
+      "summary": "2025-11-11",
+      "path": "/Users/xj/Documents/ai-context/bundles/rules/ios-dhb/NETWORKING_UPDATE_V2.1.md",
+      "sourceType": "file",
+      "scope": "project",
+      "repoKeys": [
+        "dhb"
+      ],
+      "families": [
+        "ios"
+      ],
+      "tags": [
+        "dhb",
+        "ios"
+      ],
+      "defaultScenes": [
+        "cash-index-h5-webview",
+        "index-h5-webview",
+        "ios-h5-webview-bff",
+        "packages-cash-index-h5-webview",
+        "single-repo-change"
+      ]
+    },
+    {
+      "bundleKey": "rule:ios-dhb/README",
+      "kind": "rule",
+      "ref": "ios-dhb/README.md",
+      "title": "DHB 项目 Cursor Rules (新版)",
+      "summary": "本项目已迁移到 Cursor 最新的规则系统，所有规则按功能模块化组织。",
+      "path": "/Users/xj/Documents/ai-context/bundles/rules/ios-dhb/README.md",
+      "sourceType": "file",
+      "scope": "project",
+      "repoKeys": [
+        "dhb"
+      ],
+      "families": [
+        "ios"
+      ],
+      "tags": [
+        "dhb",
+        "ios"
+      ],
+      "defaultScenes": [
+        "cash-index-h5-webview",
+        "index-h5-webview",
+        "ios-h5-webview-bff",
+        "packages-cash-index-h5-webview",
+        "single-repo-change"
+      ]
+    },
+    {
+      "bundleKey": "rule:new-mobile-h5/new-mobile-h5",
+      "kind": "rule",
+      "ref": "new-mobile-h5/new-mobile-h5.mdc",
+      "title": "new_mobile_h5 开发规范",
+      "summary": "**技术栈**: 原生 JavaScript + Zepto + Gulp",
+      "path": "/Users/xj/Documents/ai-context/bundles/rules/new-mobile-h5/new-mobile-h5.mdc",
+      "sourceType": "file",
+      "scope": "project",
+      "repoKeys": [
+        "new-mobile-h5"
+      ],
+      "families": [
+        "frontend"
+      ],
+      "tags": [
+        "container",
+        "dhb",
+        "frontend"
+      ],
+      "defaultScenes": [
+        "cash-index-h5-webview",
+        "index-h5-webview",
+        "ios-h5-webview-bff",
+        "mini-program-h5-webview",
+        "packages-cash-index-h5-webview",
+        "single-repo-change"
+      ]
+    },
+    {
+      "bundleKey": "rule:shared-context",
+      "kind": "rule",
+      "ref": "shared-context.mdc",
+      "title": "统一共享上下文入口",
+      "summary": "请优先阅读：",
+      "path": "/Users/xj/Documents/ai-context/bundles/rules/shared-context.mdc",
+      "sourceType": "file",
+      "scope": "shared",
+      "repoKeys": [
+        "customize-mini-program",
+        "new-mobile-h5"
+      ],
+      "families": [
+        "frontend"
+      ],
+      "tags": [
+        "container",
+        "dhb",
+        "frontend",
+        "mini-program"
+      ],
+      "defaultScenes": [
+        "cash-index-h5-webview",
+        "index-h5-webview",
+        "ios-h5-webview-bff",
+        "mini-program-h5-webview",
+        "packages-cash-index-h5-webview",
+        "single-repo-change"
+      ]
+    },
+    {
+      "bundleKey": "rule:theme-config",
+      "kind": "rule",
+      "ref": "theme-config.mdc",
+      "title": "主题色配置规范",
+      "summary": "在 Taro 组件中通过 `@dhbfront-utils/shell_env` 获取主题色配置。",
+      "path": "/Users/xj/Documents/ai-context/bundles/rules/theme-config.mdc",
+      "sourceType": "file",
+      "scope": "project",
+      "repoKeys": [
+        "dhb-packages"
+      ],
+      "families": [
+        "frontend"
+      ],
+      "tags": [
+        "dhb",
+        "frontend",
+        "packages"
+      ],
+      "defaultScenes": [
+        "frontend-bff-debug",
+        "packages-cash-index-h5-webview",
+        "single-repo-change"
+      ]
+    },
+    {
+      "bundleKey": "skill:dhb-env-switch",
+      "kind": "skill",
+      "ref": "dhb-env-switch",
+      "title": "dhb-env-switch",
+      "summary": "切换 DHB 本地开发环境（测试/预发/线上）。触发词：切环境、切线上、切测试、切预发。",
+      "path": "/Users/xj/Documents/ai-context/bundles/skills/dhb-env-switch",
+      "sourceType": "directory",
+      "scope": "shared",
+      "repoKeys": [
+        "customize-mini-program",
+        "dhb-mobile-index",
+        "dhb-packages",
+        "dhbfront-cash-mini",
+        "new-mobile-h5"
+      ],
+      "families": [
+        "frontend"
+      ],
+      "tags": [
+        "cash-mini",
+        "container",
+        "dhb",
+        "frontend",
+        "h5",
+        "mini-program",
+        "packages"
+      ],
+      "defaultScenes": [
+        "cash-index-h5-webview",
+        "frontend-bff-debug",
+        "index-h5-webview",
+        "ios-h5-webview-bff",
+        "mini-program-h5-webview",
+        "packages-cash-index-h5-webview",
+        "single-repo-change"
+      ]
+    },
+    {
+      "bundleKey": "skill:dhb-packages/add-mobile-icon",
+      "kind": "skill",
+      "ref": "dhb-packages/add-mobile-icon",
+      "title": "add-mobile-icon",
+      "summary": "在 dhbfront-img 项目中新增图标。触发词：新增图标、添加图标、创建图标、添加 svg 图标。支持固定颜色图标和主题色图标，支持任意模块目录（goods、order、payment 等）。",
+      "path": "/Users/xj/Documents/ai-context/bundles/skills/dhb-packages/add-mobile-icon",
+      "sourceType": "directory",
+      "scope": "project",
+      "repoKeys": [
+        "dhb-packages"
+      ],
+      "families": [
+        "frontend"
+      ],
+      "tags": [
+        "dhb",
+        "frontend",
+        "packages"
+      ],
+      "defaultScenes": [
+        "frontend-bff-debug",
+        "packages-cash-index-h5-webview",
+        "single-repo-change"
+      ]
+    },
+    {
+      "bundleKey": "skill:dhb-packages/add-taro-module",
+      "kind": "skill",
+      "ref": "dhb-packages/add-taro-module.md",
+      "title": "Skill: 在 Taro 分包中新增业务模块",
+      "summary": "使用以下提示词触发此工作流：",
+      "path": "/Users/xj/Documents/ai-context/bundles/skills/dhb-packages/add-taro-module.md",
+      "sourceType": "file",
+      "scope": "project",
+      "repoKeys": [
+        "dhb-packages"
+      ],
+      "families": [
+        "frontend"
+      ],
+      "tags": [
+        "dhb",
+        "frontend",
+        "packages"
+      ],
+      "defaultScenes": [
+        "frontend-bff-debug",
+        "packages-cash-index-h5-webview",
+        "single-repo-change"
+      ]
+    },
+    {
+      "bundleKey": "skill:dhb-packages/create-api-request",
+      "kind": "skill",
+      "ref": "dhb-packages/create-api-request.md",
+      "title": "创建 API 请求 Skill",
+      "summary": "- 创建请求",
+      "path": "/Users/xj/Documents/ai-context/bundles/skills/dhb-packages/create-api-request.md",
+      "sourceType": "file",
+      "scope": "project",
+      "repoKeys": [
+        "dhb-packages"
+      ],
+      "families": [
+        "frontend"
+      ],
+      "tags": [
+        "dhb",
+        "frontend",
+        "packages"
+      ],
+      "defaultScenes": [
+        "frontend-bff-debug",
+        "packages-cash-index-h5-webview",
+        "single-repo-change"
+      ]
+    },
+    {
+      "bundleKey": "skill:dhb-packages/mock-api-from-curl",
+      "kind": "skill",
+      "ref": "dhb-packages/mock-api-from-curl.md",
+      "title": "Skill: 根据 curl 生成接口 Mock",
+      "summary": "```",
+      "path": "/Users/xj/Documents/ai-context/bundles/skills/dhb-packages/mock-api-from-curl.md",
+      "sourceType": "file",
+      "scope": "project",
+      "repoKeys": [
+        "dhb-packages"
+      ],
+      "families": [
+        "frontend"
+      ],
+      "tags": [
+        "dhb",
+        "frontend",
+        "packages"
+      ],
+      "defaultScenes": [
+        "frontend-bff-debug",
+        "packages-cash-index-h5-webview",
+        "single-repo-change"
+      ]
+    },
+    {
+      "bundleKey": "skill:dhbfront-cash-mini/add-subpackage-module",
+      "kind": "skill",
+      "ref": "dhbfront-cash-mini/add-subpackage-module",
+      "title": "add-subpackage-module",
+      "summary": "为 dhbfront-cash-mini 项目新增分包业务模块。触发词：新增模块、添加模块、创建分包组件。用于从 npm 包引入业务组件，创建本地包装组件，并配置分包导出。",
+      "path": "/Users/xj/Documents/ai-context/bundles/skills/dhbfront-cash-mini/add-subpackage-module",
+      "sourceType": "directory",
+      "scope": "project",
+      "repoKeys": [
+        "dhbfront-cash-mini"
+      ],
+      "families": [
+        "frontend"
+      ],
+      "tags": [
+        "cash-mini",
+        "dhb",
+        "frontend"
+      ],
+      "defaultScenes": [
+        "cash-index-h5-webview",
+        "frontend-bff-debug",
+        "packages-cash-index-h5-webview",
+        "single-repo-change"
+      ]
+    },
+    {
+      "bundleKey": "skill:dhbfront-cash-mini/update-subpackage-module",
+      "kind": "skill",
+      "ref": "dhbfront-cash-mini/update-subpackage-module",
+      "title": "update-subpackage-module",
+      "summary": "更新已有的分包业务模块。触发词：更新模块、更新分包、发布更新、模块升级。用于修改分包组件代码后，发布新版本并更新主包依赖。",
+      "path": "/Users/xj/Documents/ai-context/bundles/skills/dhbfront-cash-mini/update-subpackage-module",
+      "sourceType": "directory",
+      "scope": "project",
+      "repoKeys": [
+        "dhbfront-cash-mini"
+      ],
+      "families": [
+        "frontend"
+      ],
+      "tags": [
+        "cash-mini",
+        "dhb",
+        "frontend"
+      ],
+      "defaultScenes": [
+        "cash-index-h5-webview",
+        "frontend-bff-debug",
+        "packages-cash-index-h5-webview",
+        "single-repo-change"
+      ]
+    },
+    {
+      "bundleKey": "skill:restore-local-env",
+      "kind": "skill",
+      "ref": "restore-local-env",
+      "title": "restore-local-env",
+      "summary": "恢复 DHB 本地联调环境。触发词：恢复环境、恢复配置、结束开发、还原配置。用于停止统一执行器启动的进程并恢复其备份的配置文件。",
+      "path": "/Users/xj/Documents/ai-context/bundles/skills/restore-local-env",
+      "sourceType": "directory",
+      "scope": "shared",
+      "repoKeys": [
+        "customize-mini-program",
+        "dhb-mobile-index",
+        "dhb-packages",
+        "dhbfront-cash-mini",
+        "new-mobile-h5"
+      ],
+      "families": [
+        "frontend"
+      ],
+      "tags": [
+        "cash-mini",
+        "container",
+        "dhb",
+        "frontend",
+        "h5",
+        "mini-program",
+        "packages"
+      ],
+      "defaultScenes": [
+        "cash-index-h5-webview",
+        "frontend-bff-debug",
+        "index-h5-webview",
+        "ios-h5-webview-bff",
+        "mini-program-h5-webview",
+        "packages-cash-index-h5-webview",
+        "single-repo-change"
+      ]
+    },
+    {
+      "bundleKey": "skill:run-projects",
+      "kind": "skill",
+      "ref": "run-projects",
+      "title": "run-projects",
+      "summary": "Use when running DHB local frontend projects across cash-mini, dhb-mobile-index, new_mobile_h5, customize-mini-program, or linked subpackages, especially when switching environments, linking local packages, or recovering from unstable startup flows.",
+      "path": "/Users/xj/Documents/ai-context/bundles/skills/run-projects",
+      "sourceType": "directory",
+      "scope": "shared",
+      "repoKeys": [
+        "customize-mini-program",
+        "dhb-mobile-index",
+        "dhb-packages",
+        "dhbfront-cash-mini",
+        "new-mobile-h5"
+      ],
+      "families": [
+        "frontend"
+      ],
+      "tags": [
+        "cash-mini",
+        "container",
+        "dhb",
+        "frontend",
+        "h5",
+        "mini-program",
+        "packages"
+      ],
+      "defaultScenes": [
+        "cash-index-h5-webview",
+        "frontend-bff-debug",
+        "index-h5-webview",
+        "ios-h5-webview-bff",
+        "mini-program-h5-webview",
+        "packages-cash-index-h5-webview",
+        "single-repo-change"
+      ]
+    }
+  ]
+}

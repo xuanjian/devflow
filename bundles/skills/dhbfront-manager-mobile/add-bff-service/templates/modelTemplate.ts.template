@@ -1,0 +1,154 @@
+/**
+ * {{SERVICE_DESCRIPTION}} 数据模型
+ */
+
+// ============================================
+// 通用响应类型
+// ============================================
+
+/**
+ * 通用 API 响应结构
+ */
+export interface ApiResponse<T> {
+    /** 响应码，200 表示成功 */
+    code: number;
+    /** 响应消息 */
+    message?: string;
+    /** 响应数据 */
+    data: T;
+}
+
+// ============================================
+// 列表相关类型
+// ============================================
+
+/**
+ * 分页请求参数
+ * @url /{{API_PATH}}/list @httpMethod get @desc 获取列表
+ */
+export interface {{SERVICE_NAME}}ListRequest {
+    /** 页码，从 1 开始 */
+    page: number;
+    /** 每页数量 */
+    pageSize: number;
+    /** 搜索关键字 */
+    keyword?: string;
+}
+
+/**
+ * 列表项类型
+ */
+export interface {{SERVICE_NAME}}ListItem {
+    /** 唯一标识 */
+    id: string;
+    /** 名称 */
+    name: string;
+    /** 创建时间 */
+    createTime?: string;
+    /** 更新时间 */
+    updateTime?: string;
+}
+
+/**
+ * 列表响应数据
+ */
+export interface {{SERVICE_NAME}}ListResponse {
+    /** 列表数据 */
+    list: {{SERVICE_NAME}}ListItem[];
+    /** 总数 */
+    total: number;
+}
+
+// ============================================
+// 详情相关类型
+// ============================================
+
+/**
+ * 详情请求参数
+ * @url /{{API_PATH}}/detail @httpMethod get @desc 获取详情
+ */
+export interface {{SERVICE_NAME}}DetailRequest {
+    /** 记录 ID */
+    id: string;
+}
+
+/**
+ * 详情响应数据
+ */
+export interface {{SERVICE_NAME}}DetailResponse {
+    /** 唯一标识 */
+    id: string;
+    /** 名称 */
+    name: string;
+    /** 描述 */
+    description?: string;
+    /** 创建时间 */
+    createTime: string;
+    /** 更新时间 */
+    updateTime: string;
+}
+
+// ============================================
+// 创建/更新相关类型
+// ============================================
+
+/**
+ * 创建请求参数
+ * @url /{{API_PATH}}/create @httpMethod post @desc 创建记录
+ */
+export interface {{SERVICE_NAME}}CreateRequest {
+    /** 名称 */
+    name: string;
+    /** 描述 */
+    description?: string;
+}
+
+/**
+ * 创建响应数据
+ */
+export interface {{SERVICE_NAME}}CreateResponse {
+    /** 新创建的记录 ID */
+    id: string;
+}
+
+/**
+ * 更新请求参数
+ * @url /{{API_PATH}}/update @httpMethod post @desc 更新记录
+ */
+export interface {{SERVICE_NAME}}UpdateRequest {
+    /** 记录 ID */
+    id: string;
+    /** 名称 */
+    name?: string;
+    /** 描述 */
+    description?: string;
+}
+
+/**
+ * 更新响应数据
+ */
+export interface {{SERVICE_NAME}}UpdateResponse {
+    /** 是否成功 */
+    success: boolean;
+}
+
+// ============================================
+// 删除相关类型
+// ============================================
+
+/**
+ * 删除请求参数
+ * @url /{{API_PATH}}/delete @httpMethod post @desc 删除记录
+ */
+export interface {{SERVICE_NAME}}DeleteRequest {
+    /** 记录 ID */
+    id: string;
+}
+
+/**
+ * 删除响应数据
+ */
+export interface {{SERVICE_NAME}}DeleteResponse {
+    /** 是否成功 */
+    success: boolean;
+}

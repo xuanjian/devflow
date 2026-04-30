@@ -1,0 +1,200 @@
+---
+description: 常见问题和解决方案
+alwaysApply: false
+---
+
+# 常见问题
+
+## 1. Cell高度计算
+
+### 问题
+Cell 高度不正确，内容显示不全或有多余空白
+
+### 解决方案
+
+```objc
+// 在 Cell 中使用 SDAutoLayout 自动高度
+[self setupAutoHeightWithBottomView:self.bottomView bottomMargin:15];
+
+// 在 TableView 中配置
+self.tableView.estimatedRowHeight = 44;
+self.tableView.rowHeight = UITableViewAutomaticDimension;  // iOS 8.0+
+```
+
+### 注意事项
+- 确保最底部的视图正确设置了底部约束
+- `bottomMargin` 要设置合适的值
+- 复杂 Cell 建议先测试高度计算
+
+## 2. 购物车数据同步
+
+### 问题
+购物车数据不同步，刷新不及时
+
+### 解决方案
+
+使用精确通知机制：
+
+```objc
+// 接收通知时精确判断
+__weak typeof(self) weakSelf = self;
+[[NSNotificationCenter defaultCenter] addObserverForName:DHBOptionIsChangeNotification 
+                                                  object:nil 
+                                                   queue:[NSOperationQueue mainQueue] 
+                                              usingBlock:^(NSNotification *note) {
+    __strong typeof(weakSelf) strongSelf = weakSelf;
+    if (!strongSelf) return;
+    
+    NSSet *changedPriceIds = note.userInfo[@"changed_price_ids"];
+    if ([changedPriceIds containsObject:@(strongSelf.priceId)]) {
+        [strongSelf reloadData];
+    }
+}];
+```
+
+### 数据同步策略
+- **本地优先策略**：先更新本地，再同步服务端
+- **防抖处理**：避免频繁请求
+- **精确通知**：只刷新变更项
+
+### 参考文档
+`购物车加购文档/加购完整流程图分析文档.md`
+
+## 3. 内存泄漏排查
+
+### 问题
+应用内存持续增长，可能存在内存泄漏
+
+### 排查步骤
+
+1. **使用 Instruments Leaks 工具**
+   ```
+   Product → Profile → Leaks
+   ```
+
+2. **检查常见泄漏点**
+   - Block 是否捕获了 self
+   - Delegate 是否使用 weak
+   - 通知观察者是否移除
+   - Timer 是否正确 invalidate
+
+3. **使用 weak-strong dance**
+   ```objc
+   __weak typeof(self) weakSelf = self;
+   [self.manager fetchData:^{
+       __strong typeof(weakSelf) strongSelf = weakSelf;
+       if (!strongSelf) return;
+       // 使用 strongSelf
+   }];
+   ```
+
+## 4. 崩溃处理
+
+### 查看崩溃日志
+
+1. **Bugly 控制台**
+   - 登录 Bugly 控制台（AppId: 3590df8df0）
+   - 查看实时崩溃数据
+   - 分析崩溃堆栈
+
+2. **Xcode Organizer**
+   - Window → Organizer → Crashes
+   - 查看本地崩溃日志
+
+### 常见崩溃原因
+
+1. **数组越界**
+   ```objc
+   // ⚠️ 已集成 DYSafeObject 防护
+   // 但仍需注意边界检查
+   if (index < array.count) {
+       id object = array[index];
+   }
+   ```
+
+2. **野指针访问**
+   ```objc
+   // 确保对象不为 nil
+   if (self.delegate && [self.delegate respondsToSelector:@selector(method)]) {
+       [self.delegate method];
+   }
+   ```
+
+3. **多线程访问**
+   ```objc
+   // UI 操作必须在主线程
+   dispatch_async(dispatch_get_main_queue(), ^{
+       [self.tableView reloadData];
+   });
+   ```
+
+## 5. 网络请求问题
+
+### 问题
+网络请求失败或超时
+
+### 排查步骤
+
+1. **检查网络连接**
+   ```objc
+   // 使用 Reachability 检查网络状态
+   ```
+
+2. **检查请求参数**
+   ```objc
+   // 打印请求参数
+   NSLog(@"Request params: %@", params);
+   ```
+
+3. **检查接口返回**
+   ```objc
+   // 打印响应数据
+   NSLog(@"Response: %@", responseObject);
+   ```
+
+4. **检查 SSL 证书**
+   ```objc
+   // Info.plist 中已配置 NSAllowsArbitraryLoads
+   // 生产环境建议配置具体域名
+   ```
+
+## 6. 布局问题
+
+### 问题
+界面布局错乱，控件位置不对
+
+### 解决方案
+
+1. **检查约束冲突**
+   - 查看 Xcode 控制台的约束警告
+   - 使用 `po [[UIWindow keyWindow] _autolayoutTrace]` 调试
+
+2. **确认使用 SDAutoLayout**
+   ```objc
+   // ⚠️ 禁止使用 Masonry
+   // 统一使用 SDAutoLayout
+   view.sd_layout.leftSpaceToView(superView, 15);
+   ```
+
+3. **更新布局**
+   ```objc
+   view.sd_layout.widthIs(newWidth);
+   [view updateLayout];
+   ```
+
+## 7. XIB 连线问题
+
+### 问题
+运行时崩溃，提示 `setValue:forUndefinedKey:`
+
+### 解决方案
+
+1. **检查 IBOutlet 连线**
+   - 打开 XIB，查看 File's Owner 的 Connections
+   - 删除无效的连线（黄色感叹号）
+
+2. **检查类名**
+   - 确认 File's Owner 的 Custom Class 设置正确
+
+3. **重新连线**
+   - 删除旧连线，重新从代码拖拽到 XIB 控件

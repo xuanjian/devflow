@@ -1,0 +1,130 @@
+---
+description: 打包发布规范：打包脚本、符号表上传、版本管理
+alwaysApply: false
+---
+
+# 打包发布规范
+
+## 打包脚本
+
+### 脚本位置
+`/打包/shell_package.sh`
+
+### 输出目录
+- **Debug包**: `/打包/IPADir/Debug/`
+- **Release包**: `/打包/IPADir/Release/`
+
+### 使用方法
+
+```bash
+# 进入打包目录
+cd /Users/xj/Documents/ios/DHB/打包
+
+# 执行打包脚本
+./shell_package.sh
+
+# 按提示选择：
+# 1. 选择打包类型（Debug/Release）
+# 2. 选择签名方式
+# 3. 输入版本号
+```
+
+## 符号表上传
+
+### Bugly 符号表上传
+
+```bash
+# 自动上传（推荐）
+./打包/Bugly上传符号表.sh
+
+# 配置文件位置
+/打包/PackageConfig/DHB/
+```
+
+### 符号表位置
+
+打包完成后，符号表文件位于：
+```
+/打包/build/DHB_[时间戳].xcarchive/dSYMs/
+```
+
+## 版本管理
+
+### 版本号配置
+
+在 `Info.plist` 中配置：
+
+```xml
+<!-- 主版本号 -->
+<key>CFBundleShortVersionString</key>
+<string>8.9.6</string>
+
+<!-- Build号 -->
+<key>CFBundleVersion</key>
+<string>202511011913</string>
+```
+
+### 版本号规则
+
+- **CFBundleShortVersionString**：主版本号（如 8.9.6）
+  - 格式：主版本.次版本.修订版本
+  - 重大更新：8.0.0 → 9.0.0
+  - 功能更新：8.9.0 → 8.10.0
+  - Bug修复：8.9.6 → 8.9.7
+
+- **CFBundleVersion**：Build号（如 202511011913）
+  - 格式：年月日时分（YYYYMMDDHHmm）
+  - 每次打包必须更新
+  - 用于区分同一版本的不同构建
+
+### 发布前检查清单
+
+- [ ] 更新版本号（CFBundleShortVersionString）
+- [ ] 更新 Build 号（CFBundleVersion）
+- [ ] 切换到 Release 配置
+- [ ] 移除所有 NSLog 调试代码
+- [ ] 运行所有单元测试
+- [ ] 测试核心业务流程
+- [ ] 检查崩溃日志
+- [ ] 更新更新日志（CHANGELOG）
+- [ ] 准备 App Store 截图和描述
+
+## 环境配置
+
+### Debug 环境
+- 配置文件：`DHB/Debug.xcconfig`
+- Status 宏：0
+- 用途：开发和测试
+
+### Release 环境
+- 配置文件：`DHB/Release.xcconfig`
+- Status 宏：1
+- 用途：正式发布
+
+## App Store 发布流程
+
+1. **准备发布包**
+   - 使用 Release 配置打包
+   - 选择 App Store 签名
+   - 上传符号表到 Bugly
+
+2. **上传到 App Store Connect**
+   - 使用 Xcode 或 Application Loader 上传
+   - 等待处理完成
+
+3. **配置 App Store 信息**
+   - 填写版本说明
+   - 上传截图
+   - 配置隐私信息
+
+4. **提交审核**
+   - 填写审核信息
+   - 提交审核
+
+5. **审核通过后发布**
+   - 选择自动发布或手动发布
+   - 监控崩溃日志和用户反馈
+
+## 参考文档
+
+详细打包流程请参考：`打包/打包脚本功能描述和技术实现文档.md`

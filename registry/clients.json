@@ -1,0 +1,54 @@
+{
+  "version": 1,
+  "clients": {
+    "codex": {
+      "displayName": "Codex",
+      "role": "primary-agent",
+      "entryFiles": [
+        "AGENTS.md",
+        ".codex/AGENTS.md"
+      ],
+      "supportsSkills": true,
+      "supportsSubagents": true,
+      "supportsMcp": true,
+      "supportsHooks": false,
+      "notes": [
+        "当前主执行工具。",
+        "优先读取 ai-context 生成的 AGENTS 入口。",
+        "只有用户明确授权多 agent / subagent / 并行时，才启用 subagent。"
+      ]
+    },
+    "cursor": {
+      "displayName": "Cursor",
+      "role": "editor-agent",
+      "entryFiles": [
+        ".cursor/rules/00-ai-context.mdc",
+        ".cursor/skills"
+      ],
+      "supportsSkills": "project-symlink",
+      "supportsSubagents": false,
+      "supportsMcp": true,
+      "supportsHooks": false,
+      "notes": [
+        "适合作为编辑器侧规则入口。",
+        "rules 和 skills 由 ai-context 生成器同步或 symlink。"
+      ]
+    },
+    "claudeCode": {
+      "displayName": "Claude Code",
+      "role": "secondary-agent",
+      "entryFiles": [
+        "CLAUDE.md",
+        ".ai-configs/claude.md"
+      ],
+      "supportsSkills": true,
+      "supportsSubagents": true,
+      "supportsMcp": true,
+      "supportsHooks": true,
+      "notes": [
+        "作为候选辅助执行工具。",
+        "入口内容仍由 ai-context 生成。"
+      ]
+    }
+  }
+}

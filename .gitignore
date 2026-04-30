@@ -1,0 +1,17 @@
+.DS_Store
+**/.DS_Store
+
+# Runtime task instances may contain Jira details, screenshots, temporary notes,
+# or environment-specific evidence. Track the protocol README, not ticket data.
+runtime/tasks/*
+!runtime/tasks/README.md
+
+# Skill runtime outputs. Keep source scripts/templates, ignore local backups/logs.
+bundles/skills/run-projects/runtime/backups/*
+bundles/skills/run-projects/runtime/logs/*
+
+# Local editor and tool noise.
+.idea/
+.vscode/
+*.swp
+*.tmp

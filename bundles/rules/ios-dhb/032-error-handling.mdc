@@ -1,0 +1,96 @@
+---
+description: 错误处理规范：统一的错误提示和自定义弹框
+alwaysApply: false
+---
+
+# 错误处理规范
+
+## 使用统一的错误提示
+
+### SVProgressHUD 提示
+
+```objc
+// 错误提示
+[SVProgressHUD showErrorWithStatus:@"错误信息"];
+
+// 成功提示
+[SVProgressHUD showSuccessWithStatus:@"操作成功"];
+
+// 普通提示
+[SVProgressHUD showInfoWithStatus:@"提示信息"];
+
+// 加载中
+[SVProgressHUD show];
+[SVProgressHUD showWithStatus:@"加载中..."];
+
+// 隐藏
+[SVProgressHUD dismiss];
+```
+
+## 自定义弹框
+
+```objc
+[DHBAlertView showWithTitle:@"标题" 
+                    message:@"内容" 
+                    confirm:@"确定" 
+                     cancel:@"取消" 
+              confirmAction:^{
+    // 确定操作
+} cancelAction:^{
+    // 取消操作
+}];
+```
+
+## 网络请求错误处理
+
+```objc
+[self.service fetchDataWithSuccess:^(id data) {
+    // 成功处理
+    [SVProgressHUD showSuccessWithStatus:@"加载成功"];
+} failure:^(NSError *error) {
+    // 错误处理
+    NSString *errorMessage = error.localizedDescription ?: @"网络请求失败";
+    [SVProgressHUD showErrorWithStatus:errorMessage];
+}];
+```
+
+## 用户输入验证
+
+```objc
+- (BOOL)validateInput {
+    if (self.nameTextField.text.length == 0) {
+        [SVProgressHUD showErrorWithStatus:@"请输入名称"];
+        return NO;
+    }
+    
+    if (self.phoneTextField.text.length == 0) {
+        [SVProgressHUD showErrorWithStatus:@"请输入手机号"];
+        return NO;
+    }
+    
+    // 手机号格式验证
+    NSString *phoneRegex = @"^1[3-9]\\d{9}$";
+    NSPredicate *phonePredicate = [NSPredicate predicateWithFormat:@"SELF MATCHES %@", phoneRegex];
+    if (![phonePredicate evaluateWithObject:self.phoneTextField.text]) {
+        [SVProgressHUD showErrorWithStatus:@"手机号格式不正确"];
+        return NO;
+    }
+    
+    return YES;
+}
+```
+
+## 错误日志记录
+
+```objc
+// 使用 DHBLogsManager 记录错误
+[[DHBLogsManager sharedManager] logError:@"错误信息"];
+
+// 开发环境打印
+#if DEBUG
+    NSLog(@"Error: %@", error);
+#endif
+
+// Bugly 自动收集崩溃日志
+// 无需手动处理
+```

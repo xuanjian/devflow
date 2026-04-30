@@ -1,0 +1,86 @@
+---
+description: 数据模型规范：YYModel的使用方法
+globs:
+  - "**/Model/**/*.{h,m}"
+  - "**/*DTO.{h,m}"
+alwaysApply: false
+---
+
+# 数据模型规范
+
+## 使用 YYModel 进行 JSON 解析
+
+```objc
+@interface GoodsBaseDTO : NSObject
+
+@property (nonatomic, copy) NSString *goodsId;
+@property (nonatomic, copy) NSString *goodsName;
+@property (nonatomic, strong) NSArray<OptionDTO *> *options;  // SKU数组
+
+@end
+
+@implementation GoodsBaseDTO
+
+// 自定义属性映射
++ (NSDictionary *)modelCustomPropertyMapper {
+    return @{
+        @"goodsId": @"goods_id",
+        @"goodsName": @"goods_name"
+    };
+}
+
+// 容器类声明
++ (NSDictionary *)modelContainerPropertyGenericClass {
+    return @{
+        @"options": [OptionDTO class]
+    };
+}
+
+@end
+```
+
+## 属性映射
+
+当 JSON 字段名与属性名不一致时，使用 `modelCustomPropertyMapper`:
+
+```objc
++ (NSDictionary *)modelCustomPropertyMapper {
+    return @{
+        @"goodsId": @"goods_id",           // 属性名: JSON字段名
+        @"goodsName": @"goods_name",
+        @"priceId": @"price_id"
+    };
+}
+```
+
+## 容器类声明
+
+当属性是数组或字典时，声明元素类型：
+
+```objc
++ (NSDictionary *)modelContainerPropertyGenericClass {
+    return @{
+        @"options": [OptionDTO class],     // 数组元素类型
+        @"goodsList": [GoodsBaseDTO class]
+    };
+}
+```
+
+## 数据解析示例
+
+### 单个对象
+```objc
+GoodsBaseDTO *goods = [GoodsBaseDTO yy_modelWithJSON:jsonDict];
+```
+
+### 数组
+```objc
+NSArray *goodsArray = [NSArray yy_modelArrayWithClass:[GoodsBaseDTO class] 
+                                                  json:jsonArray];
+```
+
+## 命名约定
+
+- DTO类命名：`模块名 + BaseDTO` 或 `模块名 + DTO`
+- 例如：`GoodsBaseDTO`, `OptionDTO`, `OrderDTO`
+- SKU唯一标识统一使用 `priceId` 属性，对应后端的 `price_id`

@@ -1,0 +1,722 @@
+{
+  "version": 2,
+  "generatedAt": "2026-04-05T14:19:31.667Z",
+  "repos": [
+    {
+      "repoKey": "comfyui-root",
+      "displayName": "ComfyUI",
+      "path": "/Users/xj/Documents/ComfyUI",
+      "family": "comfyui",
+      "repoType": "workspace-root",
+      "summary": "ComfyUI 工作目录根节点，用于工作流、custom_nodes 和模型管理。",
+      "defaultScenes": [
+        "single-repo-change"
+      ],
+      "tags": [
+        "comfyui",
+        "ai"
+      ],
+      "sharedRules": [],
+      "sharedSkills": [],
+      "repoDocPath": "/Users/xj/Documents/ai-context/repos/comfyui-root.md"
+    },
+    {
+      "repoKey": "dhb-packages",
+      "displayName": "DHB_PACKAGES",
+      "path": "/Users/xj/Documents/frontend/DHB_PACKAGES",
+      "family": "frontend",
+      "repoType": "domain-packages",
+      "summary": "DHB 分包业务模块集合，常作为 cash-mini 上游联调仓库。",
+      "defaultScenes": [
+        "single-repo-change",
+        "packages-cash-index-h5-webview",
+        "frontend-bff-debug"
+      ],
+      "tags": [
+        "dhb",
+        "frontend",
+        "packages"
+      ],
+      "sharedRules": [
+        "theme-config.mdc",
+        "i18n-chinese-key.mdc"
+      ],
+      "sharedSkills": [
+        "run-projects",
+        "restore-local-env",
+        "dhb-env-switch",
+        "dhb-packages/add-mobile-icon",
+        "dhb-packages/add-taro-module.md",
+        "dhb-packages/create-api-request.md",
+        "dhb-packages/mock-api-from-curl.md"
+      ],
+      "repoDocPath": "/Users/xj/Documents/ai-context/repos/dhb-packages.md"
+    },
+    {
+      "repoKey": "customize-mini-program",
+      "displayName": "customize-mini-program",
+      "path": "/Users/xj/Documents/frontend/customize-mini-program",
+      "family": "frontend",
+      "repoType": "mini-program-app",
+      "summary": "订货宝原生微信小程序，通过 WebView 承接 H5 链路。",
+      "defaultScenes": [
+        "single-repo-change",
+        "mini-program-h5-webview",
+        "packages-cash-index-h5-webview"
+      ],
+      "tags": [
+        "dhb",
+        "frontend",
+        "mini-program"
+      ],
+      "sharedRules": [
+        "shared-context.mdc",
+        "customize-mini-program/customize-mini-program.mdc"
+      ],
+      "sharedSkills": [
+        "run-projects",
+        "restore-local-env",
+        "dhb-env-switch"
+      ],
+      "repoDocPath": "/Users/xj/Documents/ai-context/repos/customize-mini-program.md"
+    },
+    {
+      "repoKey": "dhb-international-mobile",
+      "displayName": "dhb-International-mobile",
+      "path": "/Users/xj/Documents/frontend/dhb-International-mobile",
+      "family": "frontend",
+      "repoType": "web-app",
+      "summary": "DHB 国际化移动端项目，强调老项目 UI 100% 还原和组件化开发。",
+      "defaultScenes": [
+        "single-repo-change"
+      ],
+      "tags": [
+        "dhb",
+        "frontend",
+        "international"
+      ],
+      "sharedRules": [
+        "dhb-international-mobile/dhb-international-mobile.mdc"
+      ],
+      "sharedSkills": [],
+      "repoDocPath": "/Users/xj/Documents/ai-context/repos/dhb-international-mobile.md"
+    },
+    {
+      "repoKey": "dhb-goods-image-tool",
+      "displayName": "dhb-goods-image-tool",
+      "path": "/Users/xj/Documents/frontend/dhb-goods-image-tool",
+      "family": "frontend",
+      "repoType": "tool",
+      "summary": "图片或商品素材处理相关工具仓库。",
+      "defaultScenes": [
+        "single-repo-change"
+      ],
+      "tags": [
+        "tool"
+      ],
+      "sharedRules": [],
+      "sharedSkills": [],
+      "repoDocPath": "/Users/xj/Documents/ai-context/repos/dhb-goods-image-tool.md"
+    },
+    {
+      "repoKey": "dhb-manager",
+      "displayName": "dhb-manager",
+      "path": "/Users/xj/Documents/frontend/dhb-manager",
+      "family": "frontend",
+      "repoType": "web-app",
+      "summary": "DHB 管理端 PC React 项目。",
+      "defaultScenes": [
+        "single-repo-change"
+      ],
+      "tags": [
+        "dhb",
+        "frontend",
+        "manager"
+      ],
+      "sharedRules": [],
+      "sharedSkills": [],
+      "repoDocPath": "/Users/xj/Documents/ai-context/repos/dhb-manager.md"
+    },
+    {
+      "repoKey": "dhb-mobile-index",
+      "displayName": "dhb-mobile-index",
+      "path": "/Users/xj/Documents/frontend/dhb-mobile-index",
+      "family": "frontend",
+      "repoType": "web-app",
+      "summary": "订货端 React H5 主入口，常处在容器链路和跨端联调中心。",
+      "defaultScenes": [
+        "single-repo-change",
+        "index-h5-webview",
+        "cash-index-h5-webview",
+        "packages-cash-index-h5-webview",
+        "mini-program-h5-webview",
+        "frontend-bff-debug",
+        "ios-h5-webview-bff"
+      ],
+      "tags": [
+        "dhb",
+        "frontend",
+        "h5"
+      ],
+      "sharedRules": [
+        "dhb-mobile-index.mdc"
+      ],
+      "sharedSkills": [
+        "run-projects",
+        "restore-local-env",
+        "dhb-env-switch"
+      ],
+      "repoDocPath": "/Users/xj/Documents/ai-context/repos/dhb-mobile-index.md"
+    },
+    {
+      "repoKey": "dhbfront-cash-mini",
+      "displayName": "dhbfront-cash-mini",
+      "path": "/Users/xj/Documents/frontend/dhbfront-cash-mini",
+      "family": "frontend",
+      "repoType": "frontend-library",
+      "summary": "Taro 跨平台组件库，作为 H5 与小程序的公共组件层。",
+      "defaultScenes": [
+        "single-repo-change",
+        "cash-index-h5-webview",
+        "packages-cash-index-h5-webview",
+        "frontend-bff-debug"
+      ],
+      "tags": [
+        "dhb",
+        "frontend",
+        "cash-mini"
+      ],
+      "sharedRules": [
+        "dhbfront-cash-mini.mdc"
+      ],
+      "sharedSkills": [
+        "run-projects",
+        "restore-local-env",
+        "dhb-env-switch",
+        "dhbfront-cash-mini/add-subpackage-module",
+        "dhbfront-cash-mini/update-subpackage-module"
+      ],
+      "repoDocPath": "/Users/xj/Documents/ai-context/repos/dhbfront-cash-mini.md"
+    },
+    {
+      "repoKey": "dhbfront-img",
+      "displayName": "dhbfront-img",
+      "path": "/Users/xj/Documents/frontend/dhbfront-img",
+      "family": "frontend",
+      "repoType": "asset-service",
+      "summary": "前端图片资源服务仓库。",
+      "defaultScenes": [
+        "single-repo-change"
+      ],
+      "tags": [
+        "dhb",
+        "frontend",
+        "assets"
+      ],
+      "sharedRules": [],
+      "sharedSkills": [],
+      "repoDocPath": "/Users/xj/Documents/ai-context/repos/dhbfront-img.md"
+    },
+    {
+      "repoKey": "dhbfront-manager-mobile",
+      "displayName": "dhbfront-manager-mobile",
+      "path": "/Users/xj/Documents/frontend/dhbfront-manager-mobile",
+      "family": "frontend",
+      "repoType": "web-app",
+      "summary": "DHB 管理端移动 H5 项目。",
+      "defaultScenes": [
+        "single-repo-change"
+      ],
+      "tags": [
+        "dhb",
+        "frontend",
+        "manager"
+      ],
+      "sharedRules": [],
+      "sharedSkills": [],
+      "repoDocPath": "/Users/xj/Documents/ai-context/repos/dhbfront-manager-mobile.md"
+    },
+    {
+      "repoKey": "dhbfront-utils",
+      "displayName": "dhbfront-utils",
+      "path": "/Users/xj/Documents/frontend/dhbfront-utils",
+      "family": "frontend",
+      "repoType": "shared-library",
+      "summary": "DHB 前端公共工具库。",
+      "defaultScenes": [
+        "single-repo-change"
+      ],
+      "tags": [
+        "dhb",
+        "frontend",
+        "shared-library"
+      ],
+      "sharedRules": [],
+      "sharedSkills": [],
+      "repoDocPath": "/Users/xj/Documents/ai-context/repos/dhbfront-utils.md"
+    },
+    {
+      "repoKey": "goods-initialization",
+      "displayName": "goods-initialization",
+      "path": "/Users/xj/Documents/frontend/goods-initialization",
+      "family": "frontend",
+      "repoType": "plugin",
+      "summary": "偏插件或初始化能力的前端工具仓库。",
+      "defaultScenes": [
+        "single-repo-change"
+      ],
+      "tags": [
+        "plugin",
+        "tool"
+      ],
+      "sharedRules": [],
+      "sharedSkills": [],
+      "repoDocPath": "/Users/xj/Documents/ai-context/repos/goods-initialization.md"
+    },
+    {
+      "repoKey": "hxb-mobile",
+      "displayName": "hxb-mobile",
+      "path": "/Users/xj/Documents/frontend/hxb-mobile",
+      "family": "frontend",
+      "repoType": "web-app",
+      "summary": "货销宝移动端项目。",
+      "defaultScenes": [
+        "single-repo-change"
+      ],
+      "tags": [
+        "hxb",
+        "frontend"
+      ],
+      "sharedRules": [],
+      "sharedSkills": [],
+      "repoDocPath": "/Users/xj/Documents/ai-context/repos/hxb-mobile.md"
+    },
+    {
+      "repoKey": "im-h5",
+      "displayName": "im-H5",
+      "path": "/Users/xj/Documents/frontend/im-H5",
+      "family": "frontend",
+      "repoType": "web-app",
+      "summary": "IM 相关 H5 项目。",
+      "defaultScenes": [
+        "single-repo-change"
+      ],
+      "tags": [
+        "frontend"
+      ],
+      "sharedRules": [],
+      "sharedSkills": [],
+      "repoDocPath": "/Users/xj/Documents/ai-context/repos/im-h5.md"
+    },
+    {
+      "repoKey": "new-mobile-h5",
+      "displayName": "new_mobile_h5",
+      "path": "/Users/xj/Documents/frontend/new_mobile_h5",
+      "family": "frontend",
+      "repoType": "legacy-container",
+      "summary": "订货端老 H5 容器，承接 iframe 与 WebView 容器链路。",
+      "defaultScenes": [
+        "single-repo-change",
+        "index-h5-webview",
+        "cash-index-h5-webview",
+        "packages-cash-index-h5-webview",
+        "mini-program-h5-webview",
+        "ios-h5-webview-bff"
+      ],
+      "tags": [
+        "dhb",
+        "frontend",
+        "container"
+      ],
+      "sharedRules": [
+        "shared-context.mdc",
+        "new-mobile-h5/new-mobile-h5.mdc"
+      ],
+      "sharedSkills": [
+        "run-projects",
+        "restore-local-env",
+        "dhb-env-switch"
+      ],
+      "repoDocPath": "/Users/xj/Documents/ai-context/repos/new-mobile-h5.md"
+    },
+    {
+      "repoKey": "yxt-mobile",
+      "displayName": "yxt-mobile",
+      "path": "/Users/xj/Documents/frontend/yxt-mobile",
+      "family": "frontend",
+      "repoType": "web-app",
+      "summary": "其它移动端前端项目。",
+      "defaultScenes": [
+        "single-repo-change"
+      ],
+      "tags": [
+        "frontend"
+      ],
+      "sharedRules": [],
+      "sharedSkills": [],
+      "repoDocPath": "/Users/xj/Documents/ai-context/repos/yxt-mobile.md"
+    },
+    {
+      "repoKey": "brand-app",
+      "displayName": "BrandApp",
+      "path": "/Users/xj/Documents/ios/BrandApp",
+      "family": "ios",
+      "repoType": "ios-app",
+      "summary": "iOS 原生应用仓库。",
+      "defaultScenes": [
+        "single-repo-change",
+        "ios-h5-webview-bff"
+      ],
+      "tags": [
+        "ios"
+      ],
+      "sharedRules": [],
+      "sharedSkills": [],
+      "repoDocPath": "/Users/xj/Documents/ai-context/repos/brand-app.md"
+    },
+    {
+      "repoKey": "dhb",
+      "displayName": "DHB",
+      "path": "/Users/xj/Documents/ios/DHB",
+      "family": "ios",
+      "repoType": "ios-app",
+      "summary": "订货宝 iOS 原生 App，常与 H5、WebView、BFF 联动。",
+      "defaultScenes": [
+        "single-repo-change",
+        "index-h5-webview",
+        "cash-index-h5-webview",
+        "packages-cash-index-h5-webview",
+        "ios-h5-webview-bff"
+      ],
+      "tags": [
+        "dhb",
+        "ios"
+      ],
+      "sharedRules": [
+        "ios-dhb/001-project-overview.mdc",
+        "ios-dhb/002-naming-conventions.mdc",
+        "ios-dhb/003-file-structure.mdc",
+        "ios-dhb/010-page-creation.mdc",
+        "ios-dhb/011-layout-sdautolayout.mdc",
+        "ios-dhb/012-networking.mdc",
+        "ios-dhb/013-data-model.mdc",
+        "ios-dhb/020-notification-system.mdc",
+        "ios-dhb/021-cart-shopping.mdc",
+        "ios-dhb/030-memory-management.mdc",
+        "ios-dhb/031-thread-safety.mdc",
+        "ios-dhb/032-error-handling.mdc",
+        "ios-dhb/040-project-specific.mdc",
+        "ios-dhb/041-forbidden-practices.mdc",
+        "ios-dhb/050-testing.mdc",
+        "ios-dhb/051-deployment.mdc",
+        "ios-dhb/052-common-issues.mdc",
+        "ios-dhb/053-code-review.mdc",
+        "ios-dhb/NETWORKING_UPDATE_V2.1.md",
+        "ios-dhb/README.md"
+      ],
+      "sharedSkills": [],
+      "repoDocPath": "/Users/xj/Documents/ai-context/repos/dhb.md"
+    },
+    {
+      "repoKey": "hxb",
+      "displayName": "HXB",
+      "path": "/Users/xj/Documents/ios/HXB",
+      "family": "ios",
+      "repoType": "ios-app",
+      "summary": "货销宝 iOS 原生 App。",
+      "defaultScenes": [
+        "single-repo-change",
+        "ios-h5-webview-bff"
+      ],
+      "tags": [
+        "hxb",
+        "ios"
+      ],
+      "sharedRules": [],
+      "sharedSkills": [],
+      "repoDocPath": "/Users/xj/Documents/ai-context/repos/hxb.md"
+    },
+    {
+      "repoKey": "open-auto-glm",
+      "displayName": "Open-AutoGLM",
+      "path": "/Users/xj/Documents/ios/Open-AutoGLM",
+      "family": "ios",
+      "repoType": "experiment",
+      "summary": "实验性质的 iOS / AI 项目。",
+      "defaultScenes": [
+        "single-repo-change"
+      ],
+      "tags": [
+        "ios",
+        "experiment"
+      ],
+      "sharedRules": [],
+      "sharedSkills": [],
+      "repoDocPath": "/Users/xj/Documents/ai-context/repos/open-auto-glm.md"
+    },
+    {
+      "repoKey": "apple-app-site-association",
+      "displayName": "apple-app-site-association",
+      "path": "/Users/xj/Documents/ios/apple-app-site-association",
+      "family": "ios",
+      "repoType": "config",
+      "summary": "Apple app site association 配置仓库。",
+      "defaultScenes": [
+        "single-repo-change"
+      ],
+      "tags": [
+        "ios",
+        "config"
+      ],
+      "sharedRules": [],
+      "sharedSkills": [],
+      "repoDocPath": "/Users/xj/Documents/ai-context/repos/apple-app-site-association.md"
+    },
+    {
+      "repoKey": "bff-goods",
+      "displayName": "bff-goods",
+      "path": "/Users/xj/Documents/node/bff-goods",
+      "family": "node",
+      "repoType": "bff-service",
+      "summary": "商品 BFF，同时承接 AI 海报、ComfyUI 相关能力。",
+      "defaultScenes": [
+        "single-repo-change",
+        "frontend-bff-debug",
+        "ios-h5-webview-bff"
+      ],
+      "tags": [
+        "dhb",
+        "node",
+        "bff",
+        "goods"
+      ],
+      "sharedRules": [],
+      "sharedSkills": [],
+      "repoDocPath": "/Users/xj/Documents/ai-context/repos/bff-goods.md"
+    },
+    {
+      "repoKey": "bff-hub",
+      "displayName": "bff-hub",
+      "path": "/Users/xj/Documents/node/bff-hub",
+      "family": "node",
+      "repoType": "bff-service",
+      "summary": "Hub 类 Node 服务仓库。",
+      "defaultScenes": [
+        "single-repo-change",
+        "frontend-bff-debug"
+      ],
+      "tags": [
+        "node",
+        "bff"
+      ],
+      "sharedRules": [],
+      "sharedSkills": [],
+      "repoDocPath": "/Users/xj/Documents/ai-context/repos/bff-hub.md"
+    },
+    {
+      "repoKey": "bff-order",
+      "displayName": "bff-order",
+      "path": "/Users/xj/Documents/node/bff-order",
+      "family": "node",
+      "repoType": "bff-service",
+      "summary": "订单 BFF 服务。",
+      "defaultScenes": [
+        "single-repo-change",
+        "frontend-bff-debug",
+        "ios-h5-webview-bff"
+      ],
+      "tags": [
+        "dhb",
+        "node",
+        "bff",
+        "order"
+      ],
+      "sharedRules": [],
+      "sharedSkills": [],
+      "repoDocPath": "/Users/xj/Documents/ai-context/repos/bff-order.md"
+    },
+    {
+      "repoKey": "bff-payment",
+      "displayName": "bff-payment",
+      "path": "/Users/xj/Documents/node/bff-payment",
+      "family": "node",
+      "repoType": "bff-service",
+      "summary": "支付 BFF 服务。",
+      "defaultScenes": [
+        "single-repo-change",
+        "frontend-bff-debug",
+        "ios-h5-webview-bff"
+      ],
+      "tags": [
+        "dhb",
+        "node",
+        "bff",
+        "payment"
+      ],
+      "sharedRules": [],
+      "sharedSkills": [],
+      "repoDocPath": "/Users/xj/Documents/ai-context/repos/bff-payment.md"
+    },
+    {
+      "repoKey": "bff-user",
+      "displayName": "bff-user",
+      "path": "/Users/xj/Documents/node/bff-user",
+      "family": "node",
+      "repoType": "bff-service",
+      "summary": "用户 BFF 服务。",
+      "defaultScenes": [
+        "single-repo-change",
+        "frontend-bff-debug",
+        "ios-h5-webview-bff"
+      ],
+      "tags": [
+        "dhb",
+        "node",
+        "bff",
+        "user"
+      ],
+      "sharedRules": [],
+      "sharedSkills": [],
+      "repoDocPath": "/Users/xj/Documents/ai-context/repos/bff-user.md"
+    },
+    {
+      "repoKey": "bff-warehouse",
+      "displayName": "bff-warehouse",
+      "path": "/Users/xj/Documents/node/bff-warehouse",
+      "family": "node",
+      "repoType": "bff-service",
+      "summary": "仓储 BFF 服务。",
+      "defaultScenes": [
+        "single-repo-change",
+        "frontend-bff-debug",
+        "ios-h5-webview-bff"
+      ],
+      "tags": [
+        "dhb",
+        "node",
+        "bff",
+        "warehouse"
+      ],
+      "sharedRules": [],
+      "sharedSkills": [],
+      "repoDocPath": "/Users/xj/Documents/ai-context/repos/bff-warehouse.md"
+    },
+    {
+      "repoKey": "comfyui-egg",
+      "displayName": "comfyuiEgg",
+      "path": "/Users/xj/Documents/node/comfyuiEgg",
+      "family": "node",
+      "repoType": "app",
+      "summary": "comfyuiEgg 项目。",
+      "defaultScenes": [
+        "single-repo-change"
+      ],
+      "tags": [
+        "node"
+      ],
+      "sharedRules": [],
+      "sharedSkills": [],
+      "repoDocPath": "/Users/xj/Documents/ai-context/repos/comfyui-egg.md"
+    },
+    {
+      "repoKey": "docs",
+      "displayName": "docs",
+      "path": "/Users/xj/Documents/node/docs",
+      "family": "node",
+      "repoType": "docs",
+      "summary": "文档仓库。",
+      "defaultScenes": [
+        "single-repo-change"
+      ],
+      "tags": [
+        "docs"
+      ],
+      "sharedRules": [],
+      "sharedSkills": [],
+      "repoDocPath": "/Users/xj/Documents/ai-context/repos/docs.md"
+    },
+    {
+      "repoKey": "egg-business",
+      "displayName": "egg-business",
+      "path": "/Users/xj/Documents/node/egg-business",
+      "family": "node",
+      "repoType": "shared-library",
+      "summary": "Egg 公共业务模块仓库。",
+      "defaultScenes": [
+        "single-repo-change",
+        "frontend-bff-debug",
+        "ios-h5-webview-bff"
+      ],
+      "tags": [
+        "dhb",
+        "node",
+        "shared-library"
+      ],
+      "sharedRules": [],
+      "sharedSkills": [],
+      "repoDocPath": "/Users/xj/Documents/ai-context/repos/egg-business.md"
+    },
+    {
+      "repoKey": "egg-dhb-framework",
+      "displayName": "egg-dhb-framework",
+      "path": "/Users/xj/Documents/node/plugin/egg-dhb-framework",
+      "family": "node",
+      "repoType": "plugin",
+      "summary": "DHB BFF 基础框架插件仓库，提供 Controller/Service 基类、权限中间件和请求封装。",
+      "defaultScenes": [
+        "single-repo-change",
+        "frontend-bff-debug",
+        "ios-h5-webview-bff"
+      ],
+      "tags": [
+        "dhb",
+        "node",
+        "plugin",
+        "framework"
+      ],
+      "sharedRules": [],
+      "sharedSkills": [],
+      "repoDocPath": "/Users/xj/Documents/ai-context/repos/egg-dhb-framework.md"
+    },
+    {
+      "repoKey": "egg-dhb-permission",
+      "displayName": "egg-dhb-permission",
+      "path": "/Users/xj/Documents/node/plugin/egg-dhb-permission",
+      "family": "node",
+      "repoType": "plugin",
+      "summary": "DHB 接口权限控制插件仓库。",
+      "defaultScenes": [
+        "single-repo-change",
+        "frontend-bff-debug",
+        "ios-h5-webview-bff"
+      ],
+      "tags": [
+        "dhb",
+        "node",
+        "plugin",
+        "permission"
+      ],
+      "sharedRules": [],
+      "sharedSkills": [],
+      "repoDocPath": "/Users/xj/Documents/ai-context/repos/egg-dhb-permission.md"
+    },
+    {
+      "repoKey": "print",
+      "displayName": "print",
+      "path": "/Users/xj/Documents/node/print",
+      "family": "node",
+      "repoType": "tool",
+      "summary": "打印或输出相关工具仓库。",
+      "defaultScenes": [
+        "single-repo-change"
+      ],
+      "tags": [
+        "node",
+        "tool"
+      ],
+      "sharedRules": [],
+      "sharedSkills": [],
+      "repoDocPath": "/Users/xj/Documents/ai-context/repos/print.md"
+    }
+  ]
+}

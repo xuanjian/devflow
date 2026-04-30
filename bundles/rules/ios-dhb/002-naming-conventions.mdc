@@ -1,0 +1,50 @@
+---
+description: 命名规范：类名、变量、常量、通知等命名规则
+alwaysApply: true
+---
+
+# 命名规范
+
+## 文件命名
+
+### 前缀规则
+所有类必须使用 `DHB` 前缀
+
+### 模块命名
+- **管理端**: `DHBS` 前缀 (S for Supplier)
+- **订货端**: `DHBD` 前缀 (D for Dealer)
+- **公共组件**: `DHB` 前缀
+
+### 示例
+```objc
+DHBGoodsViewController.h/.m        // 商品控制器
+DHBSGoodsViewController.h/.m       // 管理端商品控制器
+DHBDGoodsViewController.h/.m       // 订货端商品控制器
+```
+
+## 变量命名
+
+### 属性命名
+使用驼峰命名法，禁止使用下划线前缀
+
+```objc
+@property (nonatomic, strong) UITableView *tableView;
+@property (nonatomic, copy) NSString *goodsName;
+@property (nonatomic, assign) NSInteger priceId;  // SKU唯一标识使用price_id
+```
+
+### 常量命名
+使用 `k` 前缀 + 驼峰
+
+```objc
+static NSString * const kDHBUserDefaultKey = @"DHBUserInfo";
+static CGFloat const kDHBCellHeight = 44.0;
+```
+
+### 通知命名
+使用完整描述 + Notification后缀
+
+```objc
+NSString * const DHBGoodsIsChangeNotification = @"goodsIsChange";
+NSString * const DHBOptionIsChangeNotification = @"optionIsChange";
+```

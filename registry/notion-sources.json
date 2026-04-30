@@ -1,0 +1,30 @@
+{
+  "version": 1,
+  "sources": {
+    "dhbProjectMap": {
+      "title": "DHB  项目地图",
+      "url": "https://www.notion.so/34ae6217e0478002a13fe51d0d0c5c2c",
+      "pageId": "34ae6217-e047-8002-a13f-e51d0d0c5c2c",
+      "purpose": "DHB 项目总入口，用于恢复项目清单、核心项目详情、术语约定和项目关系。",
+      "useWhen": [
+        "用户只描述 DHB/HXB 相关需求，需要自动判断涉及哪些项目或链路",
+        "需要确认项目关系、项目职责、启动/发布方式或术语约定",
+        "本地 repos/*.md 信息不足或需要和 Notion 项目地图对齐"
+      ],
+      "children": {
+        "overview": {
+          "title": "项目总览",
+          "url": "https://www.notion.so/34ae6217e04781049155cbe93bed3d7c"
+        },
+        "coreDetails": {
+          "title": "核心项目详情",
+          "url": "https://www.notion.so/34ae6217e04781109832db198c87c78d"
+        },
+        "terms": {
+          "title": "术语与约定",
+          "url": "https://www.notion.so/34ae6217e047817a871dc3a977c23988"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,13 @@
+---
+alwaysApply: true
+---
+# 统一共享上下文入口
+
+请优先阅读：
+
+1. `/Users/xj/AGENTS.md`
+2. `/Users/xj/WORK_CONTEXT.md`
+3. 当前仓库对应的 `ai-context/repos/*.md`
+4. `/Users/xj/Documents/ai-context/registry/scenes.json`
+
+默认先使用 `single-repo-change`，只有当用户明确提到跨项目链路时，再扩展 scene。
