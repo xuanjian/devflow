@@ -50,13 +50,13 @@
 写入：
 
 ```text
-runtime/tasks/<ticket-key>/pc-research.md
+runtime/tasks/<ticket-key>/01-discovery.md
 ```
 
 使用模板：
 
 ```text
-templates/pc-research-report.md
+templates/01-discovery.md
 ```
 
 ## 不做什么

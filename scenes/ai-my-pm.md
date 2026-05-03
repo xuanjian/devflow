@@ -34,7 +34,7 @@
 - DHB/HXB 相关需求需要项目路由时，优先把 Notion `DHB 项目地图` 作为项目关系来源之一。
 - 判断使用单 agent、角色化 checklist，还是用户授权后的 Codex subagent。
 - 维护结果沉淀：必要时更新 `runtime/current-work.md`、学习记录、画像候选、项目说明或 Notion。
-- 当任务需要跨聊天框交接、需求调研或 Design QA 时，读取 `scenes/xuanjian-symphony.md`，并把任务产物写入 `runtime/tasks/<ticket-key>/`。
+- 当任务需要跨聊天框交接、需求调研、Figma 设计或 Design QA 时，读取 `scenes/xuanjian-symphony.md`，并按 G0-G5 Gate 把任务产物写入 `runtime/tasks/<ticket-key>/`。
 
 ## Notion 项目地图
 
@@ -58,7 +58,7 @@
 7. 执行模式：L1 单 agent；L2 PM checklist；L3/L4 进入 `ai-dev-team mode`；只有用户明确授权才启用 Codex subagent。
 8. 验证方式：选择最小但有意义的构建、测试、lint、浏览器、模拟器或接口验证。
 9. 沉淀位置：判断是否需要更新 `runtime/current-work.md`、`repos/*.md`、学习记录、画像候选或 Notion。
-10. 如果单聊天框上下文会过重，按 `xuanjian-symphony` 生成 `runtime/tasks/<ticket-key>/dev-handoff.md`，再交给项目执行 Chat。
+10. 如果单聊天框上下文会过重，按 `xuanjian-symphony` 生成 `runtime/tasks/<ticket-key>/04-<project>-handoff.md`，再交给项目执行 Chat。
 
 ## superpowers 选择表
 

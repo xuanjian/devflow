@@ -118,7 +118,7 @@
 - `scenes/ai-my-pm.md`
   - 定义任务分级、上下文读取、工具选择、多角色执行模式、写入规则
 - `scenes/xuanjian-symphony.md`
-  - 定义 Jira 到需求调研、Figma、开发交接和 Design QA 的第一阶段文件化工作流
+  - 定义 Jira 到需求采集、Figma、开发文档、分项目开发和 Design QA 的 G0-G5 Gate 工作流
 - `bundles/skills/ai-my-pm/SKILL.md`
   - 定义 Codex 中如何执行 ai-my-pm 流程
 
@@ -133,7 +133,7 @@
 - `ai-dev-team mode` 只是 `ai-my-pm` 里的大任务多角色执行模式
 - 没有用户明确授权时，`ai-dev-team mode` 只作为角色化思考框架
 - 如果用户明确授权多 agent / subagent / 并行，才使用 Codex subagent
-- `xuanjian-symphony` 是当前新增的第一阶段交接协议：主 PM Chat 生成 `runtime/tasks/<ticket-key>/dev-handoff.md`，项目执行 Chat 只读取任务包和目标项目入口，避免单聊天框上下文过重
+- `xuanjian-symphony` 是当前新增的第一阶段交接协议：主 PM Chat 维护 `runtime/tasks/<ticket-key>/00-07` Gate 文件，项目执行 Chat 只读取 `04-<project>-handoff.md` 和指定资料，避免单聊天框上下文过重
 
 ## 长期画像自动增长
 

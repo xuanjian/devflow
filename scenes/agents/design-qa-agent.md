@@ -12,8 +12,9 @@
 ## 输入
 
 - `runtime/tasks/<ticket-key>/requirement.md`
-- `runtime/tasks/<ticket-key>/figma.md`
-- `runtime/tasks/<ticket-key>/dev-handoff.md`
+- `runtime/tasks/<ticket-key>/02-product-ui.md`
+- `runtime/tasks/<ticket-key>/03-tech-plan.md`
+- `runtime/tasks/<ticket-key>/05-<project>-result.md`
 - 开发 Agent 的变更说明和验证结果。
 - 必要时读取 PC 调研、参考调研和项目页面。
 
@@ -52,13 +53,13 @@
 写入：
 
 ```text
-runtime/tasks/<ticket-key>/design-qa.md
+runtime/tasks/<ticket-key>/06-acceptance.md
 ```
 
 使用模板：
 
 ```text
-templates/design-qa-report.md
+templates/06-acceptance.md
 ```
 
 ## 结论规则

@@ -1,242 +1,344 @@
 # Scene: xuanjian-symphony
 
-> XUANJIAN 专属的需求调研、项目交接、开发验收流水线。这里不是复制官方 Symphony，而是先把 Jira / ai-context / PC 代码 / 参考 App / Figma / Codex 项目会话之间的交接标准固定下来。
+> XUANJIAN 专属的 Jira 需求到研发验收工作流。外层由本文件定义固定 Gate；内层按需使用 superpowers 做澄清、方案、TDD、调试、验证和 review。
+
+## 一句话定位
+
+`xuanjian-symphony` 不是复制官方 Symphony，也不是把所有 agent 名称堆起来。它只做一件事：把一条 Jira 或临时需求，从“读任务”推进到“你最终验收”，中间每个阶段都有明确产物和是否能继续的闸口。
 
 ## 适用场景
 
-- Jira 任务只有一句话，需要先调研和补需求。
-- 一个需求可能要参考 PC 端已有功能、类似 App、竞品流程或现有 Figma 风格。
-- 主聊天框上下文已经很重，需要把工作拆到具体项目聊天框执行。
-- 需要让开发完成后对照需求文档、Figma 原型和沟通结论做验收，不通过就打回重做。
-- 后续准备把手工交接升级为自动调度服务。
+- 用户给 Jira 地址，需要读取标题、描述、备注、附件和链接。
+- Jira 描述里可能带 Figma、Notion、产品原型、UI、接口文档或录屏链接。
+- 任务可能是 Bug，也可能是新增功能、改版、联调或调研。
+- 需求可能需要先问用户、查 PC 端代码和页面、参考移动端已有功能或参考外部 App。
+- 没有产品/UI 时，需要按现有移动端风格设计 Figma，并和用户多轮确认。
+- 开发前必须有技术方案文档，用户审核后才建分支。
+- 多项目开发时，需要给每个项目执行 Chat 生成自己的上下文和开发任务。
+- 开发后必须验收功能、需求边界、接口数据来源和 UI/Figma 一致性，不通过打回。
 
-## 总体原则
+## 核心原则
 
-- 第一阶段只做任务交接包，不做自动 daemon。
-- 主 PM Chat 负责分诊、调研组织、产物归档和验收判断。
-- 项目执行 Chat 负责在一个明确项目里完成代码修改和验证。
-- `ai-context` 的全局上下文只给 PM Router 使用；worker agent 默认只读取任务包和目标项目入口。
-- 所有任务都沉淀到 `runtime/tasks/<ticket-key>/`，避免把关键决策只留在聊天记录里。
-- 不要让一句话 Jira 直接进入开发；需求不清时先进入澄清或调研。
+- `ai-context` 的全局上下文只给 PM Chat 读取；项目执行 Chat 默认只读自己的任务包。
+- 不让一句话 Jira 直接进入开发。
+- 不清楚就问用户，不凭空补业务规则。
+- Bug 先走复现、影响项目、模块、根因和改法判断；新增功能先走需求采集和产品/UI确认。
+- 有产品/UI 就读取并对齐；没有产品/UI 才进入 Figma 设计。
+- 开发文档必须由用户审核通过后，才能创建分支和进入开发。
+- 每个开发 Agent 必须先写自己的开发计划，PM Chat 通过后才能改代码。
+- 验收 Agent 不直接改代码，只写通过/不通过/返工单。
+- 第一阶段用文件做跨对话框通信；后续调度服务只能执行这些文件协议。
 
-## 目录约定
+## 6 个 Gate
+
+```text
+G0 Intake
+-> G1 Discovery
+-> G2 Product/UI
+-> G3 Tech Plan
+-> G4 Development
+-> G5 Acceptance
+-> Human Review
+```
+
+### G0 Intake：读 Jira 和任务分类
+
+目标：
+
+- 读取 Jira 标题、描述、备注、附件和链接。
+- 判断任务类型：Bug / 新功能 / 改版 / 联调 / 调研 / 设计。
+- 提取 Figma、Notion、产品原型、UI、接口文档、录屏、截图链接。
+- 判断是否缺少产品原型或 UI；缺少时问用户是否有。
+
+产物：
+
+```text
+runtime/tasks/<ticket-key>/00-intake.md
+```
+
+进入下一 Gate 的条件：
+
+- Jira 关键信息已采集。
+- 任务类型有初步判断。
+- 已列出缺失信息和需要问用户的问题。
+
+### G1 Discovery：采集足够信息
+
+Bug 任务重点采集：
+
+- 哪个产品、项目、模块、页面或接口出问题。
+- 复现路径、当前表现、期望表现、影响范围。
+- 可能的代码位置、数据来源、接口和错误日志。
+- 初步根因和改法选择。
+
+新增功能重点采集：
+
+- 目标用户、入口、业务目标、页面范围和不做范围。
+- 是否有产品设计和 UI。
+- PC 端是否已有此功能，若有则查 PC 页面、代码、接口、状态、权限。
+- 移动端是否有相似功能可参照。
+- 是否需要参考外部 App、截图、录屏或竞品流程。
+- 接口信息、老接口、数据来源、字段来源、状态和权限。
+
+产物：
+
+```text
+runtime/tasks/<ticket-key>/01-discovery.md
+```
+
+进入下一 Gate 的条件：
+
+- Bug 已能说明项目、模块、复现、影响范围和建议改法。
+- 新功能已能说明需求边界、页面范围、数据来源和仍需设计/确认的内容。
+- 不清楚的问题已经问过用户，或被明确记录为待确认。
+
+### G2 Product/UI：产品和 UI 设计
+
+跳过条件：
+
+- Jira、备注或用户已提供可用产品原型和 UI。
+- 现有 Figma/Notion 已足够作为开发依据。
+
+需要执行时：
+
+- 先读取现有移动端页面、组件和 Figma 风格。
+- 设计必须和当前移动端风格一致，不做风格迥异的新视觉。
+- 创建或更新 Figma 原型。
+- 和用户多轮沟通，直到产品流程和 UI 都确认。
+
+产物：
+
+```text
+runtime/tasks/<ticket-key>/02-product-ui.md
+```
+
+进入下一 Gate 的条件：
+
+- 有明确 Figma / Notion / 原型链接，或明确本任务不需要 UI。
+- 页面结构、交互、状态、空态、异常和主要文案已确认。
+
+### G3 Tech Plan：开发文档和分支准备
+
+目标：
+
+- 根据需求和原型生成开发文档。
+- 写清楚涉及项目、技术方案、实现方式、接口、老接口、数据来源。
+- 写清楚前端页面、组件、服务、状态逻辑和文件规划。
+- 写清楚 BFF / iOS / 小程序 / PC 是否需要改。
+- 文档要结合产品和 UI 页面风格，附上原型或 UI 链接。
+- 用户多轮审核，确认后才能创建分支。
+
+分支规则：
+
+```text
+功能分支：xuanjian/<ticket-key>-<feature-name>
+Bug 分支：xuanjian/bugfix-<ticket-key>-<bug-name>
+```
+
+分支来源默认：
+
+```text
+master
+```
+
+产物：
+
+```text
+runtime/tasks/<ticket-key>/03-tech-plan.md
+```
+
+进入下一 Gate 的条件：
+
+- 用户确认技术方案。
+- 每个项目的写入范围和验证方式明确。
+- 分支已从 `master` 创建，或明确由用户手动创建。
+
+### G4 Development：分项目 TDD 开发
+
+目标：
+
+- 给每个涉及项目生成独立 handoff。
+- 每个项目执行 Chat 读取自己的 handoff。
+- 每个开发 Agent 先写自己的开发计划文档，PM Chat 审核通过后才能开发。
+- 开发过程按任务风险使用 TDD、debug、verification 等 superpowers。
+
+典型产物：
+
+```text
+runtime/tasks/<ticket-key>/04-frontend-handoff.md
+runtime/tasks/<ticket-key>/04-bff-handoff.md
+runtime/tasks/<ticket-key>/04-ios-handoff.md
+
+runtime/tasks/<ticket-key>/05-frontend-dev-plan.md
+runtime/tasks/<ticket-key>/05-bff-dev-plan.md
+runtime/tasks/<ticket-key>/05-ios-dev-plan.md
+
+runtime/tasks/<ticket-key>/05-frontend-result.md
+runtime/tasks/<ticket-key>/05-bff-result.md
+runtime/tasks/<ticket-key>/05-ios-result.md
+```
+
+进入下一 Gate 的条件：
+
+- 所有涉及项目都有开发结果说明。
+- 关键构建、测试、lint、浏览器、接口或模拟器验证已执行，或明确说明为什么不能执行。
+- 每个项目列出改动文件、验证结果和剩余风险。
+
+### G5 Acceptance：验收和打回
+
+目标：
+
+- 验收 Agent 对照需求文档、Figma/UI、沟通结论、接口数据来源和开发结果检查。
+- 验收不只是功能，还包括 UI 一致性、文案、布局、状态、空态、异常、权限和边界。
+- 不通过时生成返工单，说明打回哪个项目、哪个 Agent、依据是什么、期望怎么改。
+- 返工后重新回到 G4，对应项目重做，再进入 G5。
+
+产物：
+
+```text
+runtime/tasks/<ticket-key>/06-acceptance.md
+runtime/tasks/<ticket-key>/07-rework.md
+```
+
+进入 Human Review 的条件：
+
+- 验收结论为通过，或有条件通过且用户接受剩余偏差。
+- 所有高/中风险问题已关闭。
+- UI/Figma 一致性已经明确检查。
+
+## 任务包目录
 
 每个任务一个目录：
 
 ```text
 runtime/tasks/<ticket-key>/
-  intake.md
-  pc-research.md
-  reference-research.md
-  requirement.md
-  figma.md
-  dev-handoff.md
-  design-qa.md
+  00-intake.md
+  01-discovery.md
+  02-product-ui.md
+  03-tech-plan.md
+  04-<project>-handoff.md
+  05-<project>-dev-plan.md
+  05-<project>-result.md
+  06-acceptance.md
+  07-rework.md
 ```
 
-允许按任务实际情况缺省文件。例如纯 Bug 不一定需要 `reference-research.md` 和 `figma.md`。
-
-模板来源：
+`<project>` 使用简短项目标识，例如：
 
 ```text
-templates/jira-intake-report.md
-templates/pc-research-report.md
-templates/reference-research-report.md
-templates/requirement-draft.md
-templates/dev-handoff.md
-templates/design-qa-report.md
+frontend
+bff
+ios
+mini-program
+pc
 ```
 
-## 状态机
+## 模板来源
 
 ```text
-New
--> Intake
--> Need Clarification
--> PC Research
--> Reference Research
--> Requirement Draft
--> Figma Design
--> Ready for Dev
--> In Dev
--> Build Verification
--> Design QA
--> Rework / Human Review
--> Done
+templates/00-intake.md
+templates/01-discovery.md
+templates/02-product-ui.md
+templates/03-tech-plan.md
+templates/04-project-handoff.md
+templates/05-dev-plan.md
+templates/05-dev-result.md
+templates/06-acceptance.md
+templates/07-rework.md
 ```
 
-状态含义：
+## 多对话框通信协议
 
-- `New`：Jira 原始任务刚进入，尚未判断。
-- `Intake`：PM Router 读取 Jira、`ai-context`、当前工作上下文，判断任务类型和影响范围。
-- `Need Clarification`：需求不足，必须向用户补问。
-- `PC Research`：需要从 PC 页面、代码、接口和权限逻辑反推业务事实。
-- `Reference Research`：需要从参考 App、竞品、截图或录屏提取流程和交互。
-- `Requirement Draft`：整理移动端需求、字段、流程、状态和验收标准。
-- `Figma Design`：按需求和现有产品风格画原型。
-- `Ready for Dev`：需求和原型已确认，可以生成开发交接包。
-- `In Dev`：项目执行 Chat 或后续自动 worker 正在开发。
-- `Build Verification`：开发侧完成构建、测试、页面或接口验证。
-- `Design QA`：对照需求、Figma、沟通结论和现有风格验收。
-- `Rework`：验收不通过，生成返工单并打回开发。
-- `Human Review`：机器验收通过，等待 XUANJIAN 或团队最终确认。
-- `Done`：已完成。
+### PM Chat
 
-## Agent 分工
+PM Chat 负责：
 
-### PM Router Agent
+- 读取 Jira 和全局上下文。
+- 维护 `runtime/tasks/<ticket-key>/`。
+- 审核 G1 / G2 / G3 / G5 产物。
+- 生成各项目 handoff。
+- 接收各项目 result。
+- 根据验收结果分发返工。
 
-读取：
+### 项目执行 Chat
 
-- `person/profile.md`
-- `runtime/current-work.md`
-- `scenes/ai-my-pm.md`
-- 本文件
-- 必要时读取 `repos/*.md`、`registry/*.json`、Notion 项目地图
-
-负责：
-
-- 判断 Bug / 新功能 / 改版 / 联调 / 调研 / 设计 / 高风险任务。
-- 判断 L1 / L2 / L3 / L4。
-- 判断需要哪些调研 agent。
-- 判断是否必须问用户。
-- 建立 `runtime/tasks/<ticket-key>/` 任务目录。
-- 生成 `intake.md` 和后续任务包。
-
-不负责：
-
-- 直接凭一句话需求写代码。
-- 把所有 worker 都塞进同一个聊天上下文。
-
-### Clarifier Agent
-
-负责把不清楚的 Jira 转成少量高价值问题。一次优先问最阻塞的问题，不要一次性抛出长问卷。
-
-输出到：
+项目执行 Chat 启动语：
 
 ```text
-runtime/tasks/<ticket-key>/intake.md
+读取 /Users/xj/Documents/ai-context/runtime/tasks/<ticket-key>/04-<project>-handoff.md。
+先生成 05-<project>-dev-plan.md，等待 PM Chat 审核通过后再开发。
 ```
 
-### PC Research Agent
+项目执行 Chat 只读：
 
-规则见：
+- 自己的 `04-<project>-handoff.md`。
+- handoff 明确列出的需求、Figma、技术方案和项目入口。
+- 当前项目代码。
 
-```text
-scenes/agents/pc-research-agent.md
-```
+项目执行 Chat 不默认读：
 
-输出到：
+- 完整 `ai-context`。
+- 其他项目 handoff。
+- 其他项目开发结果，除非 PM Chat 指定。
 
-```text
-runtime/tasks/<ticket-key>/pc-research.md
-```
+### 验收 Chat / 验收 Agent
 
-### Reference Research Agent
+验收 Chat 读取：
 
-规则见：
+- `00-intake.md`
+- `01-discovery.md`
+- `02-product-ui.md`
+- `03-tech-plan.md`
+- 所有 `05-<project>-result.md`
+- Figma / Notion / UI 链接
 
-```text
-scenes/agents/reference-research-agent.md
-```
+验收 Chat 输出：
 
-输出到：
+- `06-acceptance.md`
+- 必要时输出 `07-rework.md`
 
-```text
-runtime/tasks/<ticket-key>/reference-research.md
-```
+## superpowers 使用方式
 
-### Requirement Writer Agent
+`xuanjian-symphony` 是外层工作流；superpowers 是内层执行纪律。
 
-负责把 intake、PC 调研、参考调研和用户确认合并成移动端需求文档。
+| 阶段 | 推荐 superpower |
+| --- | --- |
+| G0 / G1 需求不清 | `brainstorming` |
+| G3 生成开发文档 | `writing-plans` |
+| G4 开始开发 | `test-driven-development` |
+| G4 遇到失败或线上 Bug 根因不清 | `systematic-debugging` |
+| G4 开发完成前 | `verification-before-completion` |
+| G5 验收或大改完成 | `requesting-code-review` |
+| G5 返工处理 | `receiving-code-review` |
 
-输出到：
+不要为了形式加载全部 superpowers。按当前 Gate 的风险选择最小必要集合。
 
-```text
-runtime/tasks/<ticket-key>/requirement.md
-```
+## Jira 读取边界
 
-### Figma Designer Agent
+理想情况：
 
-负责按已确认需求和现有产品风格画 Figma 原型。它只能在需求基本稳定后启动。
+- PM Chat 能直接读取 Jira 地址、描述、备注、附件和链接。
 
-输出到：
+读不到时：
 
-```text
-runtime/tasks/<ticket-key>/figma.md
-```
-
-### Dev Handoff Agent
-
-负责把已确认需求转成项目执行 Chat 可直接使用的任务包。
-
-输出到：
-
-```text
-runtime/tasks/<ticket-key>/dev-handoff.md
-```
-
-### Design QA Agent
-
-规则见：
-
-```text
-scenes/agents/design-qa-agent.md
-```
-
-输出到：
-
-```text
-runtime/tasks/<ticket-key>/design-qa.md
-```
-
-## 主 Chat 到项目 Chat 的交接方式
-
-主 PM Chat 生成 `dev-handoff.md` 后，项目执行 Chat 只需要读取：
-
-```text
-/Users/xj/Documents/ai-context/runtime/tasks/<ticket-key>/dev-handoff.md
-```
-
-项目执行 Chat 的第一句话可以是：
-
-```text
-读取 /Users/xj/Documents/ai-context/runtime/tasks/<ticket-key>/dev-handoff.md，按里面的目标项目、写入范围和验收标准执行。
-```
-
-项目执行 Chat 不默认读取完整 `ai-context`，除非 `dev-handoff.md` 明确要求。
-
-## 通过条件
-
-一个任务进入 `Ready for Dev` 前，至少要有：
-
-- 明确目标用户和入口。
-- 明确页面、接口或业务流程范围。
-- 明确必须保留、可以简化、不做的内容。
-- 明确验收标准。
-- 如果需要设计，明确 Figma 链接或待画原型说明。
-
-一个任务进入 `Human Review` 前，至少要有：
-
-- 开发侧验证结果。
-- Design QA 结论为通过，或明确列出人工接受的偏差。
-- 关键差异、未验证项和风险已写入 `design-qa.md`。
+- 让用户贴 Jira 标题、描述、备注或截图。
+- 如果链接需要登录态或权限，先说明无法直接读取，不猜测内容。
 
 ## 第二阶段演进
 
-第一阶段稳定后，再建设自动调度服务。候选路径：
+第一阶段先用文件通信。稳定后再建设半自动调度服务：
 
 ```text
 /Users/xj/Documents/node/xuanjian-symphony
 ```
 
-第二阶段服务只负责自动化这些动作：
+第二阶段服务只做：
 
-- 轮询 Jira。
+- 轮询或读取 Jira。
 - 创建任务目录。
-- 调用 PM Router 生成 intake。
-- 根据状态启动对应 agent 或生成 handoff。
-- 回写 Jira 状态和评论。
-- 在 Design QA 不通过时生成返工任务。
+- 生成 `00-intake.md` 初稿。
+- 根据当前 Gate 提醒下一步。
+- 生成项目执行 Chat 启动语。
+- 汇总 result 和 rework。
 
-第二阶段不能替代当前文档协议；它只能执行这些协议。
+第二阶段不替代本文件协议，也不默认自动改代码。
