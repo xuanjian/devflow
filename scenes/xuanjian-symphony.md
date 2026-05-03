@@ -25,7 +25,7 @@
 - Bug 先走复现、影响项目、模块、根因和改法判断；新增功能先走需求采集和产品/UI确认。
 - 有产品/UI 就读取并对齐；没有产品/UI 才进入 Figma 设计。
 - 开发文档必须由用户审核通过后，才能创建分支和进入开发。
-- 每个开发 Agent 必须先写自己的开发计划，PM Chat 通过后才能改代码。
+- 每个开发 Agent 必须执行 handoff 指定的 superpowers；如果 `writing-plans` 生成实施计划，则 PM Chat 审核该 superpower 产物后再进入代码开发。
 - 验收 Agent 不直接改代码，只写通过/不通过/返工单。
 - 第一阶段用文件做跨对话框通信；后续调度服务只能执行这些文件协议。
 
@@ -159,8 +159,9 @@ runtime/tasks/<ticket-key>/03-tech-plan.md
 
 - 给每个涉及项目生成独立 handoff。
 - 每个项目执行 Chat 读取自己的 handoff。
-- 每个开发 Agent 先写自己的开发计划文档，PM Chat 审核通过后才能开发。
-- 开发过程按任务风险使用 TDD、debug、verification 等 superpowers。
+- 每个项目执行 Chat 按 handoff 指定的 superpowers 执行，不再额外维护一套自定义开发计划。
+- `writing-plans`、`test-driven-development`、`systematic-debugging`、`verification-before-completion` 等 superpower 的原生产物统一写入本任务目录。
+- 如果 `writing-plans` 生成实施计划，PM Chat 审核通过该计划后才能开发。
 
 典型产物：
 
@@ -169,9 +170,9 @@ runtime/tasks/<ticket-key>/04-frontend-handoff.md
 runtime/tasks/<ticket-key>/04-bff-handoff.md
 runtime/tasks/<ticket-key>/04-ios-handoff.md
 
-runtime/tasks/<ticket-key>/05-frontend-dev-plan.md
-runtime/tasks/<ticket-key>/05-bff-dev-plan.md
-runtime/tasks/<ticket-key>/05-ios-dev-plan.md
+runtime/tasks/<ticket-key>/superpowers/frontend/<superpower-generated-files>
+runtime/tasks/<ticket-key>/superpowers/bff/<superpower-generated-files>
+runtime/tasks/<ticket-key>/superpowers/ios/<superpower-generated-files>
 
 runtime/tasks/<ticket-key>/05-frontend-result.md
 runtime/tasks/<ticket-key>/05-bff-result.md
@@ -181,6 +182,7 @@ runtime/tasks/<ticket-key>/05-ios-result.md
 进入下一 Gate 的条件：
 
 - 所有涉及项目都有开发结果说明。
+- 必要的 superpower 产物已经生成并写入 `superpowers/<project>/`。
 - 关键构建、测试、lint、浏览器、接口或模拟器验证已执行，或明确说明为什么不能执行。
 - 每个项目列出改动文件、验证结果和剩余风险。
 
@@ -217,7 +219,7 @@ runtime/tasks/<ticket-key>/
   02-product-ui.md
   03-tech-plan.md
   04-<project>-handoff.md
-  05-<project>-dev-plan.md
+  superpowers/<project>/<superpower-generated-files>
   05-<project>-result.md
   06-acceptance.md
   07-rework.md
@@ -241,8 +243,7 @@ templates/01-discovery.md
 templates/02-product-ui.md
 templates/03-tech-plan.md
 templates/04-project-handoff.md
-templates/05-dev-plan.md
-templates/05-dev-result.md
+templates/05-project-result.md
 templates/06-acceptance.md
 templates/07-rework.md
 ```
@@ -266,7 +267,8 @@ PM Chat 负责：
 
 ```text
 读取 /Users/xj/Documents/ai-context/runtime/tasks/<ticket-key>/04-<project>-handoff.md。
-先生成 05-<project>-dev-plan.md，等待 PM Chat 审核通过后再开发。
+按 handoff 指定的 superpowers 执行；将 superpower 产物写入 /Users/xj/Documents/ai-context/runtime/tasks/<ticket-key>/superpowers/<project>/。
+如果 writing-plans 生成实施计划，等待 PM Chat 审核通过后再开发。完成后生成 05-<project>-result.md。
 ```
 
 项目执行 Chat 只读：
@@ -274,6 +276,7 @@ PM Chat 负责：
 - 自己的 `04-<project>-handoff.md`。
 - handoff 明确列出的需求、Figma、技术方案和项目入口。
 - 当前项目代码。
+- handoff 指定的 superpowers。
 
 项目执行 Chat 不默认读：
 
@@ -304,7 +307,8 @@ PM Chat 负责：
 | 阶段 | 推荐 superpower |
 | --- | --- |
 | G0 / G1 需求不清 | `brainstorming` |
-| G3 生成开发文档 | `writing-plans` |
+| G3 生成总技术方案 | 可参考 `writing-plans`，但不替代 `03-tech-plan.md` |
+| G4 分项目实施计划 | `writing-plans`，产物写入 `superpowers/<project>/` |
 | G4 开始开发 | `test-driven-development` |
 | G4 遇到失败或线上 Bug 根因不清 | `systematic-debugging` |
 | G4 开发完成前 | `verification-before-completion` |

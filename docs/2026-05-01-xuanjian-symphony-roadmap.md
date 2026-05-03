@@ -25,8 +25,7 @@ templates/01-discovery.md
 templates/02-product-ui.md
 templates/03-tech-plan.md
 templates/04-project-handoff.md
-templates/05-dev-plan.md
-templates/05-dev-result.md
+templates/05-project-result.md
 templates/06-acceptance.md
 templates/07-rework.md
 runtime/tasks/README.md
@@ -52,7 +51,8 @@ G0 Intake
 - 没有产品/UI 时，能进入 `02-product-ui.md` 并记录 Figma 设计和多轮确认。
 - 用户确认 `03-tech-plan.md` 后，才允许从 `master` 创建 `xuanjian/...` 分支。
 - 项目执行 Chat 可以只靠 `04-<project>-handoff.md` 启动。
-- 每个项目 Agent 必须先写 `05-<project>-dev-plan.md`，PM 审核通过后才能开发。
+- 每个项目 Agent 必须按 handoff 执行自己的 superpowers；superpower 产物写入 `superpowers/<project>/`。
+- 如果 `writing-plans` 生成实施计划，PM 审核该 superpower 产物后才能开发。
 - 开发结果写入 `05-<project>-result.md`。
 - 验收 Agent 使用 `06-acceptance.md` 检查功能和 UI/Figma 一致性。
 - 不通过时使用 `07-rework.md` 打回对应项目。
