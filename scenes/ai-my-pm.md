@@ -21,6 +21,7 @@
 - `ai-dev-team mode` 是 `ai-my-pm` 里的大任务执行模式，不是默认入口。
 - 没有用户明确授权“用多个 agent / 并行 agent / subagent”时，Codex 只能把 `ai-dev-team mode` 当作角色化思考框架，不主动 spawn subagent。
 - 一旦启用 subagent，必须先明确每个 agent 的目标、读写边界和验证方式。
+- 如果当前 Chat 能通过子 Agent 承载调研、走查、review 或分项目执行，优先用同一聊天框内的子 Agent；只有单 Chat 上下文或写入协作承载不了时，才升级到 `xuanjian-symphony` 的跨聊天框 handoff。
 
 ## PM 总控职责
 
@@ -34,7 +35,7 @@
 - DHB/HXB 相关需求需要项目路由时，优先把 Notion `DHB 项目地图` 作为项目关系来源之一。
 - 判断使用单 agent、角色化 checklist，还是用户授权后的 Codex subagent。
 - 维护结果沉淀：必要时更新 `runtime/current-work.md`、学习记录、画像候选、项目说明或 Notion。
-- 当任务需要跨聊天框交接、需求调研、Figma 设计或 Design QA 时，读取 `scenes/xuanjian-symphony.md`，并按 G0-G5 Gate 把任务产物写入 `runtime/tasks/<ticket-key>/`。
+- 当任务被判断为 L3/L4，且需要跨聊天框交接、需求调研、Figma 设计或 Design QA 时，读取 `scenes/xuanjian-symphony.md`，并按 G0-G5 Gate 把任务产物写入 `runtime/tasks/<ticket-key>/`。
 
 ## Notion 项目地图
 
@@ -55,10 +56,10 @@
 4. 技术路线：优先采用项目现有技术栈、封装、目录结构和业务约定。
 5. 工具选择：按需使用 Notion、Figma、OpenSpec、Playwright、Xcode、BFF 调试、项目 skill。
 6. 执行纪律：按下方 superpowers 选择表决定是否加载对应 skill。
-7. 执行模式：L1 单 agent；L2 PM checklist；L3/L4 进入 `ai-dev-team mode`；只有用户明确授权才启用 Codex subagent。
+7. 执行模式：L1 单 agent；L2 PM checklist；L2/L3 在用户授权后可用同一 Chat 子 Agent；L3/L4 才考虑 `xuanjian-symphony` 跨聊天框 handoff；只有用户明确授权才启用 Codex subagent。
 8. 验证方式：选择最小但有意义的构建、测试、lint、浏览器、模拟器或接口验证。
 9. 沉淀位置：判断是否需要更新 `runtime/current-work.md`、`repos/*.md`、学习记录、画像候选或 Notion。
-10. 如果单聊天框上下文会过重，按 `xuanjian-symphony` 生成 `runtime/tasks/<ticket-key>/04-<project>-handoff.md`，再交给项目执行 Chat。
+10. 如果是 L3/L4 且同一 Chat + 子 Agent 也承载不了，按 `xuanjian-symphony` 生成 `runtime/tasks/<ticket-key>/04-<project>-handoff.md`，再交给项目执行 Chat；L1/L2 默认不启用该流程。
 
 ## superpowers 选择表
 
@@ -95,6 +96,7 @@
 
 - Codex 单 agent 直接处理。
 - 不启用 `ai-dev-team mode`。
+- 不启用 `xuanjian-symphony`。
 - 完成前跑最小验证。
 
 ### L2 中任务
@@ -110,6 +112,7 @@
 - Codex 单 worker 实现。
 - Reviewer 视角做自审。
 - 需要时写 OpenSpec change。
+- 默认不启用 `xuanjian-symphony`，除非用户明确要求或后续发现影响范围扩大到 L3/L4。
 
 ### L3 大任务
 
@@ -121,6 +124,7 @@
 处理方式：
 
 - 先读 `person/profile.md`、`runtime/current-work.md`、相关 `repos/*.md` 和 scene。
+- 如果需要需求调研、Figma 或 Design QA，先判断是否能在同一 Chat 内用子 Agent 完成；不能承载时再启用 `xuanjian-symphony`。
 - 需要时写 OpenSpec proposal / design / tasks。
 - 进入 `ai-dev-team mode`，按角色拆分。
 - 如果用户授权并行，才使用 Codex subagent。
