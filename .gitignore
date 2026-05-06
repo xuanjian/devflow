@@ -11,6 +11,7 @@ bundles/skills/run-projects/runtime/backups/*
 bundles/skills/run-projects/runtime/logs/*
 
 # Local editor and tool noise.
+.superpowers/
 .idea/
 .vscode/
 *.swp

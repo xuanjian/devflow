@@ -40,7 +40,11 @@
 - 开发文档必须由用户审核通过后，才能创建分支和进入开发。
 - 每个开发 Agent 必须执行 handoff 指定的 superpowers；如果 `writing-plans` 生成实施计划，则 PM Chat 审核该 superpower 产物后再进入代码开发。
 - 验收 Agent 不直接改代码，只写通过/不通过/返工单。
-- 第一阶段用文件做跨对话框通信；后续调度服务只能执行这些文件协议。
+- 用户最终验收发现的问题统一提交给 PM Agent；PM 负责判断责任边界、拆分返工项、更新 Gate 状态，并打回前端、BFF、iOS、设计或 Acceptance Agent。
+- PM Agent 的关键判断必须输出可见的“决策过程”：事实、假设、依据、判断、下一步动作、信心/风险和可纠错点；用户可以随时纠正 PM 的判断。
+- 不把模型内部原始思维链作为产品能力；控制台展示的是可审计、可复盘、可纠错的结构化决策记录。
+- 第一阶段可以用文件做任务产物和审计记录；正式形态应升级为 Web Console + Orchestrator Service + 多 Codex app-server Workers，不长期依赖人工复制文件到多个聊天窗口。
+- 原型、需求采集文档、产品/UI、技术方案、验收报告、返工单都属于关键产物；关键产物必须进入 `Pending User Review`，由用户确认后才能进入下一 Gate。
 
 ## 执行模式优先级
 
@@ -50,15 +54,16 @@
 L1：当前 Chat 单 Agent
 L2：当前 Chat + 必要 superpowers
 L2/L3：当前 Chat + 子 Agent（用户授权后）
-L3/L4：xuanjian-symphony 文件化 Gate + 必要的项目 Chat
-未来：自动调度服务
+L3/L4：xuanjian-symphony Gate + Web Console 产物确认 + 必要的项目 Chat
+未来：Orchestrator Service + 多 Codex app-server Workers
 ```
 
 选择规则：
 
 - 当前 Chat 能处理完，就不创建 `runtime/tasks/<ticket-key>/`。
 - 需要并行调研、代码走查或独立 review，但上下文仍可控，优先用当前 Chat 的子 Agent。
-- 需要长期跨项目协作、多个项目独立写代码、验收打回、多轮产品/UI确认，才进入 G0-G5 文件化 Gate。
+- 需要长期跨项目协作、多个项目独立写代码、验收打回、多轮产品/UI确认，才进入 G0-G5 Gate。
+- 当前 MVP 可以把产物先落文件；控制台必须能展示这些产物，并清楚标记哪些需要用户确认。
 
 ## 6 个 Gate
 
@@ -86,6 +91,11 @@ G0 Intake
 ```text
 runtime/tasks/<ticket-key>/00-intake.md
 ```
+
+产物状态：
+
+- 初始为 `Draft`。
+- PM Chat 认为采集完整后变为 `Pending User Review` 或进入 G1。
 
 进入下一 Gate 的条件：
 
@@ -117,6 +127,11 @@ Bug 任务重点采集：
 runtime/tasks/<ticket-key>/01-discovery.md
 ```
 
+产物状态：
+
+- 若 Discovery 改变任务边界、涉及项目、是否需要 UI 或实现路线，必须进入 `Pending User Review`。
+- 用户确认后才能进入 G2 或 G3。
+
 进入下一 Gate 的条件：
 
 - Bug 已能说明项目、模块、复现、影响范围和建议改法。
@@ -142,6 +157,11 @@ runtime/tasks/<ticket-key>/01-discovery.md
 ```text
 runtime/tasks/<ticket-key>/02-product-ui.md
 ```
+
+产物状态：
+
+- 原型、UI、Figma、页面信息架构都必须进入 `Pending User Review`。
+- 用户确认后才能进入 G3。
 
 进入下一 Gate 的条件：
 
@@ -178,6 +198,11 @@ master
 runtime/tasks/<ticket-key>/03-tech-plan.md
 ```
 
+产物状态：
+
+- 技术方案必须进入 `Pending User Review`。
+- 用户确认后才能创建分支、启动项目 Agent 或 Codex app-server worker。
+
 进入下一 Gate 的条件：
 
 - 用户确认技术方案。
@@ -210,6 +235,11 @@ runtime/tasks/<ticket-key>/05-bff-result.md
 runtime/tasks/<ticket-key>/05-ios-result.md
 ```
 
+产物状态：
+
+- 每个项目的开发结果必须进入 `Pending Acceptance`。
+- 验收 Agent 通过后才能进入用户最终验收。
+
 进入下一 Gate 的条件：
 
 - 所有涉及项目都有开发结果说明。
@@ -224,6 +254,7 @@ runtime/tasks/<ticket-key>/05-ios-result.md
 - 验收 Agent 对照需求文档、Figma/UI、沟通结论、接口数据来源和开发结果检查。
 - 验收不只是功能，还包括 UI 一致性、文案、布局、状态、空态、异常、权限和边界。
 - 不通过时生成返工单，说明打回哪个项目、哪个 Agent、依据是什么、期望怎么改。
+- 用户人工验收发现的问题也先提交给 PM Agent；PM Agent 必须判断是前端、BFF、iOS 原生、设计、需求边界还是验收标准问题，不能要求用户直接找具体开发 Agent。
 - 返工后重新回到 G4，对应项目重做，再进入 G5。
 
 产物：
@@ -232,6 +263,11 @@ runtime/tasks/<ticket-key>/05-ios-result.md
 runtime/tasks/<ticket-key>/06-acceptance.md
 runtime/tasks/<ticket-key>/07-rework.md
 ```
+
+产物状态：
+
+- 验收报告必须进入 `Pending User Review`。
+- 返工单必须明确打回项目、依据和期望结果。
 
 进入 Human Review 的条件：
 
