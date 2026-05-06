@@ -218,4 +218,4 @@ PM 的关键判断必须输出结构化决策过程：
 
 ## 下一步
 
-生成 `AIAGENT-93` 实施计划，创建 `/Users/xj/Documents/node/xuanjian-symphony`，先实现 Web Console + Orchestrator MVP。Codex app-server worker 在第一版只保留适配层和 mock 状态。
+生成 `AIAGENT-93` 实施计划，创建 `/Users/xj/Documents/xuanjian-symphony`，先实现 Web Console + Orchestrator MVP。Codex app-server worker 在第一版只保留适配层和 mock 状态。

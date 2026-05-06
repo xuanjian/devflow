@@ -4,7 +4,7 @@
 
 **Goal:** Build the first local Xuanjian Symphony MVP: a Web Console plus Orchestrator service that lets XUANJIAN manually create tasks, shows Gate/artifact review state, supports PM Agent communication, and keeps Codex app-server workers as a mockable adapter.
 
-**Architecture:** Create a new Node/TypeScript app under `/Users/xj/Documents/node/xuanjian-symphony`. Use a single local web app with API routes, local JSON persistence, and React UI. Keep Codex worker execution behind an adapter so MVP can ship with mock workers before real `codex app-server` integration.
+**Architecture:** Create a new Node/TypeScript app under `/Users/xj/Documents/xuanjian-symphony`. Use a single local web app with API routes, local JSON persistence, and React UI. Keep Codex worker execution behind an adapter so MVP can ship with mock workers before real `codex app-server` integration.
 
 **Tech Stack:** Node.js, TypeScript, React, Vite, Express or Fastify, local JSON store, Vitest, Playwright-ready browser validation.
 
@@ -15,23 +15,23 @@
 ### Task 1: Create Project Skeleton
 
 **Files:**
-- Create: `/Users/xj/Documents/node/xuanjian-symphony/package.json`
-- Create: `/Users/xj/Documents/node/xuanjian-symphony/tsconfig.json`
-- Create: `/Users/xj/Documents/node/xuanjian-symphony/vite.config.ts`
-- Create: `/Users/xj/Documents/node/xuanjian-symphony/src/main.tsx`
-- Create: `/Users/xj/Documents/node/xuanjian-symphony/src/App.tsx`
-- Create: `/Users/xj/Documents/node/xuanjian-symphony/src/styles.css`
-- Create: `/Users/xj/Documents/node/xuanjian-symphony/server/index.ts`
-- Create: `/Users/xj/Documents/node/xuanjian-symphony/server/app.ts`
-- Create: `/Users/xj/Documents/node/xuanjian-symphony/data/.gitkeep`
+- Create: `/Users/xj/Documents/xuanjian-symphony/package.json`
+- Create: `/Users/xj/Documents/xuanjian-symphony/tsconfig.json`
+- Create: `/Users/xj/Documents/xuanjian-symphony/vite.config.ts`
+- Create: `/Users/xj/Documents/xuanjian-symphony/src/main.tsx`
+- Create: `/Users/xj/Documents/xuanjian-symphony/src/App.tsx`
+- Create: `/Users/xj/Documents/xuanjian-symphony/src/styles.css`
+- Create: `/Users/xj/Documents/xuanjian-symphony/server/index.ts`
+- Create: `/Users/xj/Documents/xuanjian-symphony/server/app.ts`
+- Create: `/Users/xj/Documents/xuanjian-symphony/data/.gitkeep`
 
 - [ ] **Step 1: Create directory and initialize package**
 
 Run:
 
 ```bash
-mkdir -p /Users/xj/Documents/node/xuanjian-symphony
-cd /Users/xj/Documents/node/xuanjian-symphony
+mkdir -p /Users/xj/Documents/xuanjian-symphony
+cd /Users/xj/Documents/xuanjian-symphony
 npm init -y
 ```
 
@@ -99,10 +99,10 @@ git commit -m "chore: scaffold xuanjian symphony"
 ### Task 2: Add Task, Artifact, PM Message, Decision, Worker Models
 
 **Files:**
-- Create: `/Users/xj/Documents/node/xuanjian-symphony/server/domain/types.ts`
-- Create: `/Users/xj/Documents/node/xuanjian-symphony/server/store/jsonStore.ts`
-- Create: `/Users/xj/Documents/node/xuanjian-symphony/server/store/seed.ts`
-- Test: `/Users/xj/Documents/node/xuanjian-symphony/server/store/jsonStore.test.ts`
+- Create: `/Users/xj/Documents/xuanjian-symphony/server/domain/types.ts`
+- Create: `/Users/xj/Documents/xuanjian-symphony/server/store/jsonStore.ts`
+- Create: `/Users/xj/Documents/xuanjian-symphony/server/store/seed.ts`
+- Test: `/Users/xj/Documents/xuanjian-symphony/server/store/jsonStore.test.ts`
 
 - [ ] **Step 1: Write failing tests for local store**
 
@@ -129,7 +129,7 @@ Entities:
 
 - [ ] **Step 3: Implement JSON store**
 
-Persist to `/Users/xj/Documents/node/xuanjian-symphony/data/store.json`.
+Persist to `/Users/xj/Documents/xuanjian-symphony/data/store.json`.
 
 - [ ] **Step 4: Add AIAGENT-93 seed**
 
@@ -159,9 +159,9 @@ git commit -m "feat: add local orchestration store"
 ### Task 3: Create Tasks Manually
 
 **Files:**
-- Create: `/Users/xj/Documents/node/xuanjian-symphony/server/tasks/taskInput.ts`
-- Test: `/Users/xj/Documents/node/xuanjian-symphony/server/tasks/taskInput.test.ts`
-- Modify: `/Users/xj/Documents/node/xuanjian-symphony/server/app.ts`
+- Create: `/Users/xj/Documents/xuanjian-symphony/server/tasks/taskInput.ts`
+- Test: `/Users/xj/Documents/xuanjian-symphony/server/tasks/taskInput.test.ts`
+- Modify: `/Users/xj/Documents/xuanjian-symphony/server/app.ts`
 
 - [ ] **Step 1: Write task input validation tests**
 
@@ -211,10 +211,10 @@ git commit -m "feat: add manual task intake"
 ### Task 4: Add Gate, Artifact, PM, Decision, Feedback APIs
 
 **Files:**
-- Create: `/Users/xj/Documents/node/xuanjian-symphony/server/orchestrator/orchestrator.ts`
-- Create: `/Users/xj/Documents/node/xuanjian-symphony/server/orchestrator/gates.ts`
-- Test: `/Users/xj/Documents/node/xuanjian-symphony/server/orchestrator/gates.test.ts`
-- Modify: `/Users/xj/Documents/node/xuanjian-symphony/server/app.ts`
+- Create: `/Users/xj/Documents/xuanjian-symphony/server/orchestrator/orchestrator.ts`
+- Create: `/Users/xj/Documents/xuanjian-symphony/server/orchestrator/gates.ts`
+- Test: `/Users/xj/Documents/xuanjian-symphony/server/orchestrator/gates.test.ts`
+- Modify: `/Users/xj/Documents/xuanjian-symphony/server/app.ts`
 
 - [ ] **Step 1: Write gate rule tests**
 
@@ -272,19 +272,19 @@ git commit -m "feat: add orchestrator APIs"
 ### Task 5: Build Desktop And Mobile Console
 
 **Files:**
-- Create: `/Users/xj/Documents/node/xuanjian-symphony/src/api/client.ts`
-- Create: `/Users/xj/Documents/node/xuanjian-symphony/src/components/Sidebar.tsx`
-- Create: `/Users/xj/Documents/node/xuanjian-symphony/src/components/TaskPool.tsx`
-- Create: `/Users/xj/Documents/node/xuanjian-symphony/src/components/MobileTaskSwitcher.tsx`
-- Create: `/Users/xj/Documents/node/xuanjian-symphony/src/components/GateTimeline.tsx`
-- Create: `/Users/xj/Documents/node/xuanjian-symphony/src/components/ArtifactReviewPanel.tsx`
-- Create: `/Users/xj/Documents/node/xuanjian-symphony/src/components/PmCommunicationPanel.tsx`
-- Create: `/Users/xj/Documents/node/xuanjian-symphony/src/components/PmDecisionTrace.tsx`
-- Create: `/Users/xj/Documents/node/xuanjian-symphony/src/components/AgentOutputPanel.tsx`
-- Create: `/Users/xj/Documents/node/xuanjian-symphony/src/components/HumanAcceptancePanel.tsx`
-- Create: `/Users/xj/Documents/node/xuanjian-symphony/src/components/WorkerStatusPanel.tsx`
-- Modify: `/Users/xj/Documents/node/xuanjian-symphony/src/App.tsx`
-- Modify: `/Users/xj/Documents/node/xuanjian-symphony/src/styles.css`
+- Create: `/Users/xj/Documents/xuanjian-symphony/src/api/client.ts`
+- Create: `/Users/xj/Documents/xuanjian-symphony/src/components/Sidebar.tsx`
+- Create: `/Users/xj/Documents/xuanjian-symphony/src/components/TaskPool.tsx`
+- Create: `/Users/xj/Documents/xuanjian-symphony/src/components/MobileTaskSwitcher.tsx`
+- Create: `/Users/xj/Documents/xuanjian-symphony/src/components/GateTimeline.tsx`
+- Create: `/Users/xj/Documents/xuanjian-symphony/src/components/ArtifactReviewPanel.tsx`
+- Create: `/Users/xj/Documents/xuanjian-symphony/src/components/PmCommunicationPanel.tsx`
+- Create: `/Users/xj/Documents/xuanjian-symphony/src/components/PmDecisionTrace.tsx`
+- Create: `/Users/xj/Documents/xuanjian-symphony/src/components/AgentOutputPanel.tsx`
+- Create: `/Users/xj/Documents/xuanjian-symphony/src/components/HumanAcceptancePanel.tsx`
+- Create: `/Users/xj/Documents/xuanjian-symphony/src/components/WorkerStatusPanel.tsx`
+- Modify: `/Users/xj/Documents/xuanjian-symphony/src/App.tsx`
+- Modify: `/Users/xj/Documents/xuanjian-symphony/src/styles.css`
 
 - [ ] **Step 1: Build API client**
 
@@ -367,10 +367,10 @@ git commit -m "feat: build orchestration console"
 ### Task 6: Add Codex Worker Adapter Interface
 
 **Files:**
-- Create: `/Users/xj/Documents/node/xuanjian-symphony/server/workers/workerTypes.ts`
-- Create: `/Users/xj/Documents/node/xuanjian-symphony/server/workers/mockWorkerAdapter.ts`
-- Create: `/Users/xj/Documents/node/xuanjian-symphony/server/workers/codexAppServerAdapter.ts`
-- Test: `/Users/xj/Documents/node/xuanjian-symphony/server/workers/mockWorkerAdapter.test.ts`
+- Create: `/Users/xj/Documents/xuanjian-symphony/server/workers/workerTypes.ts`
+- Create: `/Users/xj/Documents/xuanjian-symphony/server/workers/mockWorkerAdapter.ts`
+- Create: `/Users/xj/Documents/xuanjian-symphony/server/workers/codexAppServerAdapter.ts`
+- Test: `/Users/xj/Documents/xuanjian-symphony/server/workers/mockWorkerAdapter.test.ts`
 
 - [ ] **Step 1: Define adapter interface**
 
@@ -427,7 +427,7 @@ git commit -m "feat: add codex worker adapter shell"
 - [ ] **Step 1: Run full verification**
 
 ```bash
-cd /Users/xj/Documents/node/xuanjian-symphony
+cd /Users/xj/Documents/xuanjian-symphony
 npm test
 npm run build
 ```

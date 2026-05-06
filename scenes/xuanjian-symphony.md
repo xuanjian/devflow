@@ -400,7 +400,7 @@ PM Chat 负责：
 第一阶段先用文件通信。稳定后再建设半自动调度服务：
 
 ```text
-/Users/xj/Documents/node/xuanjian-symphony
+/Users/xj/Documents/xuanjian-symphony
 ```
 
 第二阶段服务只做：

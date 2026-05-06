@@ -66,7 +66,7 @@ G0 Intake
 候选项目：
 
 ```text
-/Users/xj/Documents/node/xuanjian-symphony
+/Users/xj/Documents/xuanjian-symphony
 ```
 
 职责：
