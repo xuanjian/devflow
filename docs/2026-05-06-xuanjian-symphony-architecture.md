@@ -15,13 +15,17 @@ Web Console
 -> Acceptance / Rework Loop
 ```
 
-OpenAI Symphony 的参考价值主要是调度模型，而不是直接复用 Elixir 实现。
+OpenAI Symphony 的参考价值主要是调度模型，而不是直接复用 Elixir 实现。实现时必须以官方仓库为参考：
+
+- GitHub：https://github.com/openai/symphony
+- 本地参考仓库：`/Users/xj/Documents/openai-symphony`
+- 关键文件：`SPEC.md`、`elixir/WORKFLOW.md`、`elixir/lib/symphony_elixir/orchestrator.ex`、`elixir/lib/symphony_elixir/agent_runner.ex`、`elixir/lib/symphony_elixir/codex/app_server.ex`
 
 ## 参考 OpenAI Symphony 的核心概念
 
 ### 1. Orchestrator
 
-负责轮询任务、选择可执行任务、控制并发、处理重试、停止失效任务、记录运行状态。
+负责轮询任务、选择可执行任务、claim/lock 任务、控制并发、处理重试、停止失效任务、记录运行状态。官方 Symphony 的 Orchestrator 持有 `running / claimed / retry_attempts / completed` 等运行态；XJamesSymphony 也要有等价 runtime state，只是任务来源先从手动任务开始。
 
 对应到 XJamesSymphony：
 
