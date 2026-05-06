@@ -11,6 +11,29 @@
 
 ## 当前重点
 
+- **XJamesSymphony：自定义 Symphony / PM 调度控制台**
+  - 项目位置：`/Users/xj/Documents/xuanjian-symphony`
+  - 交接文档：`/Users/xj/Documents/xuanjian-symphony/docs/PROJECT_STATUS.md`
+  - 当前阶段：G3 -> G4 之间。产品/UI 核心方向已确认，MVP 技术路线已基本明确，已开始实现真实 Codex app-server PM 链路
+  - 当前关键进展：
+    - 控制台已改名为 XJamesSymphony
+    - 第一版任务来源改为手动创建，不做 Jira 导入
+    - 中间主区是 PM 聊天，右侧只看上下文、流程、产物和 Agent 状态
+    - 支持回车发送、发送后清空输入框、附件按钮选择文件、桌面文件拖拽到输入框
+    - 支持 PM 模型、速度、智能等级选择，默认 `gpt-5.5 / fast / high`
+    - 创建任务时立即创建 PM thread，并把 `pmThreadId` 保存到任务
+    - 发送 PM 消息时只复用已有 `pmThreadId`，正常情况下不再开新 thread
+    - 旧 thread 失效返回 `thread not found` 时会重建 PM thread 并重试一次
+    - 删除任务会尝试归档 PM thread，但归档失败不阻塞本地删除
+  - 当前重要限制：
+    - 本机当前没有 Codex desktop proxy socket：`/Users/xj/.codex/app-server-control/app-server-control.sock`
+    - 因此 XJamesSymphony 会优先尝试 `codex app-server proxy`，失败后回退到自己持有的长驻 `codex app-server`
+    - 回退模式能跑真实 PM，但不一定显示在 Codex App 左侧的 `xuanjian-symphony` 会话列表里
+  - 下一步：
+    - 把 AIAGENT-93 看板状态从 G2 历史状态推进到 G3/G4
+    - 实现开发 worker thread：PM 根据涉及项目路径在项目根目录创建 Codex worker
+    - 实现验收 agent：按需求文档、产品/UI、技术方案、diff 和测试结果验收，失败则由 PM 生成返工单
+
 - **管理端移动 H5：盘点单改造**
   - 主要涉及项目：
     - `/Users/xj/Documents/frontend/dhbfront-manager-mobile`
