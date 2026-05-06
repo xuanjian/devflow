@@ -1,4 +1,4 @@
-# Xuanjian Symphony Architecture
+# XJamesSymphony Architecture
 
 > 目标：参考 OpenAI Symphony 的调度思想，搭建 XUANJIAN 自己的 Jira / Figma / Notion / Codex 多 Agent 编排控制台。
 
@@ -23,7 +23,7 @@ OpenAI Symphony 的参考价值主要是调度模型，而不是直接复用 Eli
 
 负责轮询任务、选择可执行任务、控制并发、处理重试、停止失效任务、记录运行状态。
 
-对应到 Xuanjian Symphony：
+对应到 XJamesSymphony：
 
 - 读取手动任务；Jira / Notion / 未来其它任务来源作为后续适配器。
 - 判断任务是 L1/L2/L3/L4。
@@ -34,7 +34,7 @@ OpenAI Symphony 的参考价值主要是调度模型，而不是直接复用 Eli
 
 ### 2. Workflow / Policy
 
-OpenAI Symphony 用 `WORKFLOW.md` 承载项目内规则和 prompt。Xuanjian Symphony 应复用 `ai-context` 作为上层策略中心：
+OpenAI Symphony 用 `WORKFLOW.md` 承载项目内规则和 prompt。XJamesSymphony 应复用 `ai-context` 作为上层策略中心：
 
 - `scenes/xuanjian-symphony.md`：Gate 流程。
 - `scenes/ai-my-pm.md`：需求路由。
@@ -90,7 +90,7 @@ retry / continuation
 - 验收和返工。
 - 每个任务的 Jira / Figma / Notion / 技术方案 / 开发结果 / 验收报告链接。
 
-## Xuanjian Symphony 组件
+## XJamesSymphony 组件
 
 ### Web Console
 

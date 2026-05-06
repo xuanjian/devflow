@@ -4,7 +4,7 @@
 
 ## 一句话定位
 
-`xuanjian-symphony` 不是复制官方 Symphony，也不是把所有 agent 名称堆起来。它只做一件事：把一条 Jira 或临时需求，从“读任务”推进到“你最终验收”，中间每个阶段都有明确产物和是否能继续的闸口。
+`XJamesSymphony` 不是复制官方 Symphony，也不是把所有 agent 名称堆起来。它只做一件事：把一条 Jira 或临时需求，从“读任务”推进到“你最终验收”，中间每个阶段都有明确产物和是否能继续的闸口。
 
 ## 适用场景
 
@@ -369,7 +369,7 @@ PM Chat 负责：
 
 ## superpowers 使用方式
 
-`xuanjian-symphony` 是外层工作流；superpowers 是内层执行纪律。
+`XJamesSymphony` 是外层工作流；superpowers 是内层执行纪律。
 
 | 阶段 | 推荐 superpower |
 | --- | --- |
