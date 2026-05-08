@@ -13,6 +13,6 @@ test("App renders loading state then main regions", async () => {
 
   render(<App />);
 
-  expect(screen.getByText(/Context Studio/i)).toBeInTheDocument();
-  expect(await screen.findByText(/Overview/i)).toBeInTheDocument();
+  expect(screen.getByText("上下文工作台")).toBeInTheDocument();
+  expect(await screen.findByText("总览")).toBeInTheDocument();
 });

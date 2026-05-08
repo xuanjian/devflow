@@ -15,6 +15,7 @@ test("GraphView renders nodes and calls onSelectNode", async () => {
   };
 
   render(<GraphView graph={graph} selectedNodeId="" onSelectNode={onSelectNode} />);
+  expect(screen.getByText("全局关系")).toBeInTheDocument();
   await userEvent.click(screen.getByRole("button", { name: /Demo/ }));
   expect(onSelectNode).toHaveBeenCalledWith("project:demo");
 });
@@ -38,6 +39,7 @@ test("GraphView hides cross links until a related node is selected", () => {
   expect(screen.queryByTestId("edge-project:demo-scene:demo-uses-scene")).not.toBeInTheDocument();
 
   rerender(<GraphView graph={graph} selectedNodeId="project:demo" onSelectNode={() => {}} />);
+  expect(screen.getByText("聚焦关系")).toBeInTheDocument();
   expect(screen.getByTestId("edge-project:demo-scene:demo-uses-scene")).toBeInTheDocument();
 });
 
@@ -59,7 +61,7 @@ test("GraphView expands the canvas height to include long node columns", () => {
 
   render(<GraphView graph={graph} selectedNodeId="" onSelectNode={() => {}} />);
 
-  const svg = screen.getByRole("img", { name: /relationship map/i });
+  const svg = screen.getByRole("img", { name: /上下文关系图/i });
   const [, , , height] = svg.getAttribute("viewBox").split(" ").map(Number);
   expect(height).toBeGreaterThan(900);
 });

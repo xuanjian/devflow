@@ -1,4 +1,5 @@
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
+import { labelForType, titleForNode } from "../labels.js";
 
 export default function GraphView({ graph, selectedNodeId, onSelectNode }) {
   const nodes = graph.nodes || [];
@@ -8,6 +9,21 @@ export default function GraphView({ graph, selectedNodeId, onSelectNode }) {
   const highlightedNodeIds = getHighlightedNodeIds(visibleEdges, selectedNodeId);
   const viewportRef = useRef(null);
   const dragRef = useRef(null);
+  const hasCenteredRef = useRef(false);
+
+  useEffect(() => {
+    if (hasCenteredRef.current) {
+      return;
+    }
+    const element = viewportRef.current;
+    if (!element) {
+      return;
+    }
+    hasCenteredRef.current = true;
+    requestAnimationFrame(() => {
+      element.scrollLeft = element.clientWidth < 500 ? 250 : 40;
+    });
+  }, [viewport.width]);
 
   function handleMouseDown(event) {
     if (event.button !== 0 || event.target.closest(".graph-node")) {
@@ -44,7 +60,7 @@ export default function GraphView({ graph, selectedNodeId, onSelectNode }) {
   return (
     <section
       className="graph-view"
-      aria-label="Relationship graph"
+      aria-label="上下文关系图"
       onMouseDown={handleMouseDown}
       onMouseLeave={stopDrag}
       onMouseMove={handleMouseMove}
@@ -52,15 +68,15 @@ export default function GraphView({ graph, selectedNodeId, onSelectNode }) {
       ref={viewportRef}
     >
       <div className="graph-toolbar">
-        <strong>{selectedNodeId ? "Focused relationships" : "Overview relationships"}</strong>
-        <span>{selectedNodeId ? "Showing selected-node links" : "Showing only main structure lines. Drag the canvas to pan."}</span>
+        <strong>{selectedNodeId ? "聚焦关系" : "全局关系"}</strong>
+        <span>{selectedNodeId ? "正在显示当前节点的直接关联" : "仅显示主结构线，可拖动画布查看全图"}</span>
       </div>
       <svg
         height={viewport.height}
         viewBox={`0 0 ${viewport.width} ${viewport.height}`}
         width={viewport.width}
         role="img"
-        aria-label="ai-context relationship map"
+        aria-label="ai-context 上下文关系图"
       >
         {visibleEdges.map((edge) => {
           const from = positions.get(edge.from);
@@ -87,8 +103,8 @@ export default function GraphView({ graph, selectedNodeId, onSelectNode }) {
                 onClick={() => onSelectNode(node.id)}
                 type="button"
               >
-                <strong>{node.title}</strong>
-                <span>{node.type}</span>
+                <strong>{titleForNode(node)}</strong>
+                <span>{labelForType(node.type)}</span>
               </button>
             </foreignObject>
           );

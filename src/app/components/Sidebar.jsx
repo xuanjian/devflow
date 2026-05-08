@@ -1,43 +1,80 @@
-const VIEWS = ["Overview", "Projects", "Scenes", "Skills", "Rules", "Persona", "Checks"];
+import {
+  STATUS_LABELS,
+  TYPE_LABELS,
+  VIEW_LABELS
+} from "../labels.js";
+import {
+  BadgeCheck,
+  CircleUserRound,
+  FolderKanban,
+  LayoutDashboard,
+  Route,
+  Search,
+  ShieldCheck,
+  Sparkles
+} from "lucide-react";
+
+const VIEW_ICONS = {
+  overview: LayoutDashboard,
+  projects: FolderKanban,
+  scenes: Route,
+  skills: Sparkles,
+  rules: ShieldCheck,
+  persona: CircleUserRound,
+  checks: BadgeCheck
+};
 
 export default function Sidebar({ activeView, filters, onViewChange, onFiltersChange }) {
   return (
     <aside className="sidebar">
-      <h1>Context Studio</h1>
-      <nav aria-label="Primary">
-        {VIEWS.map((view) => (
+      <div className="brand-block">
+        <span className="brand-mark">CS</span>
+        <div>
+          <h1>上下文工作台</h1>
+          <p>ai-context 关系图谱</p>
+        </div>
+      </div>
+      <nav aria-label="主导航">
+        {VIEW_LABELS.map((view) => {
+          const Icon = VIEW_ICONS[view.key];
+          return (
           <button
-            className={activeView === view.toLowerCase() ? "active" : ""}
-            key={view}
-            onClick={() => onViewChange(view.toLowerCase())}
+            className={activeView === view.key ? "active" : ""}
+            key={view.key}
+            onClick={() => onViewChange(view.key)}
             type="button"
           >
-            {view}
+            <Icon aria-hidden="true" size={17} strokeWidth={1.9} />
+            {view.label}
           </button>
-        ))}
+          );
+        })}
       </nav>
       <div className="filters">
         <label>
-          Search
-          <input
-            placeholder="Search nodes"
-            value={filters.query}
-            onChange={(event) => onFiltersChange({ query: event.target.value })}
-          />
+          搜索
+          <span className="search-field">
+            <Search aria-hidden="true" size={15} />
+            <input
+              placeholder="搜索节点、文件或说明"
+              value={filters.query}
+              onChange={(event) => onFiltersChange({ query: event.target.value })}
+            />
+          </span>
         </label>
         <label>
-          Type
+          类型
           <select value={filters.typeFilter} onChange={(event) => onFiltersChange({ typeFilter: event.target.value })}>
             {["all", "project", "scene", "skill", "rule", "profile", "task"].map((type) => (
-              <option key={type} value={type}>{type}</option>
+              <option key={type} value={type}>{TYPE_LABELS[type] || type}</option>
             ))}
           </select>
         </label>
         <label>
-          Status
+          状态
           <select value={filters.statusFilter} onChange={(event) => onFiltersChange({ statusFilter: event.target.value })}>
             {["all", "ok", "warning", "missing", "unknown"].map((status) => (
-              <option key={status} value={status}>{status}</option>
+              <option key={status} value={status}>{STATUS_LABELS[status] || status}</option>
             ))}
           </select>
         </label>
@@ -47,7 +84,7 @@ export default function Sidebar({ activeView, filters, onViewChange, onFiltersCh
             type="checkbox"
             onChange={(event) => onFiltersChange({ showWarningsOnly: event.target.checked })}
           />
-          Only warnings
+          只看预警
         </label>
       </div>
     </aside>

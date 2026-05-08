@@ -16,6 +16,8 @@ test("DetailsDrawer renders metadata, relationships, warnings, and actions", asy
   render(<DetailsDrawer details={details} onRunAction={onRunAction} />);
   expect(screen.getByText("Demo")).toBeInTheDocument();
   expect(screen.getByText("Demo docs")).toBeInTheDocument();
+  expect(screen.getByText("来源")).toBeInTheDocument();
+  expect(screen.getByText("关联场景")).toBeInTheDocument();
   expect(screen.getByText("Missing doc")).toBeInTheDocument();
   await userEvent.click(screen.getByRole("button", { name: "Sync project" }));
   expect(onRunAction).toHaveBeenCalledWith("sync_project_entry", { projectId: "demo" });

@@ -99,8 +99,8 @@ export default function App() {
         onViewChange={setActiveView}
       />
       <section className="workspace">
-        {loading ? <p>Loading context graph...</p> : null}
-        {error ? <p role="alert">{error}</p> : null}
+        {loading ? <p className="state-message">正在加载上下文关系...</p> : null}
+        {error ? <p className="state-message error-message" role="alert">{error}</p> : null}
         {!loading && activeView === "checks" ? (
           <ChecksView checks={checks} onRunAction={handleRunAction} />
         ) : null}

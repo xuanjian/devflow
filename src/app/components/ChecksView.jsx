@@ -1,3 +1,5 @@
+import { labelForArea, labelForStatus } from "../labels.js";
+
 export default function ChecksView({ checks, onRunAction }) {
   const groups = groupByArea(checks || []);
 
@@ -5,16 +7,19 @@ export default function ChecksView({ checks, onRunAction }) {
     <section className="checks-view">
       {[...groups.entries()].map(([area, items]) => (
         <div className="check-group" key={area}>
-          <h2>{area}</h2>
+          <h2>{labelForArea(area)}</h2>
           {items.map((check) => (
             <article className={`check-card status-${check.status}`} key={check.id}>
               <div>
                 <h3>{check.title}</h3>
-                <p>{check.message}</p>
+                <p>
+                  <span className={`status-dot status-${check.status}`} aria-hidden="true" />
+                  {labelForStatus(check.status)} · {check.message}
+                </p>
               </div>
               {check.actionId ? (
                 <button onClick={() => onRunAction(check.actionId, {})} type="button">
-                  Fix {check.title}
+                  修复 {check.title}
                 </button>
               ) : null}
             </article>
