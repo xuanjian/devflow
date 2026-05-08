@@ -1,15 +1,132 @@
 {
   "version": 1,
-  "generatedAt": "2026-05-08T03:32:27.015Z",
+  "generatedAt": "2026-05-08T04:34:58.716Z",
   "rules": [
+    {
+      "id": "bff/egg-business",
+      "name": "egg-business 接入规范",
+      "purpose": "BFF 服务接入或修改 egg-business 公共业务能力时的归属、兼容和验证规则。",
+      "sourcePath": "bundles/rules/bff/egg-business.md",
+      "projectIds": [
+        "bff-goods",
+        "bff-hub",
+        "bff-order",
+        "bff-payment",
+        "bff-user",
+        "bff-warehouse",
+        "egg-business"
+      ],
+      "technologyFamilyIds": [
+        "bff"
+      ],
+      "sceneIds": [
+        "frontend-bff-debug",
+        "ios-h5-webview-bff",
+        "single-repo-change"
+      ],
+      "tags": [
+        "bff",
+        "egg-business",
+        "shared-library"
+      ],
+      "scope": "technology-family",
+      "whenToRead": "Read when a BFF task touches egg-business shared business logic, shared helper ownership, package consumption, or cross-service compatibility.",
+      "applyMode": "project-on-demand",
+      "globs": [
+        "app/**/*.{ts,js}",
+        "lib/**/*.{ts,js}",
+        "config/**/*",
+        "package.json"
+      ],
+      "sourceExists": true,
+      "sourceType": "file"
+    },
+    {
+      "id": "bff/egg-dhb-framework",
+      "name": "egg-dhb-framework 接入规范",
+      "purpose": "DHB BFF 框架插件、基类、中间件、上下文、权限和插件接入边界。",
+      "sourcePath": "bundles/rules/bff/egg-dhb-framework.md",
+      "projectIds": [
+        "bff-goods",
+        "bff-hub",
+        "bff-order",
+        "bff-payment",
+        "bff-user",
+        "bff-warehouse",
+        "egg-dhb-framework",
+        "egg-dhb-permission"
+      ],
+      "technologyFamilyIds": [
+        "bff"
+      ],
+      "sceneIds": [
+        "frontend-bff-debug",
+        "ios-h5-webview-bff",
+        "single-repo-change"
+      ],
+      "tags": [
+        "bff",
+        "egg",
+        "framework",
+        "plugin",
+        "permission"
+      ],
+      "scope": "technology-family",
+      "whenToRead": "Read when editing egg-dhb-framework, framework base classes, middleware, request context, permissions, or BFF plugin integration.",
+      "applyMode": "project-on-demand",
+      "globs": [
+        "app/**/*.{ts,js}",
+        "config/**/*",
+        "lib/**/*.{ts,js}",
+        "package.json"
+      ],
+      "sourceExists": true,
+      "sourceType": "file"
+    },
+    {
+      "id": "bff/egg-service",
+      "name": "BFF Egg 服务通用规范",
+      "purpose": "DHB BFF 服务的 Controller/Service 边界、字段语义、上游调用、缓存和错误日志底线。",
+      "sourcePath": "bundles/rules/bff/egg-service.md",
+      "projectIds": [
+        "bff-goods",
+        "bff-hub",
+        "bff-order",
+        "bff-payment",
+        "bff-user",
+        "bff-warehouse"
+      ],
+      "technologyFamilyIds": [
+        "bff"
+      ],
+      "sceneIds": [
+        "frontend-bff-debug",
+        "ios-h5-webview-bff",
+        "single-repo-change"
+      ],
+      "tags": [
+        "bff",
+        "egg",
+        "node",
+        "service"
+      ],
+      "scope": "technology-family",
+      "whenToRead": "Read when editing DHB BFF service Controller, Service, upstream calls, field mapping, cache, logging, or API response behavior.",
+      "applyMode": "project-on-demand",
+      "globs": [
+        "app/**/*.{ts,js}",
+        "config/**/*",
+        "test/**/*.{ts,js}",
+        "package.json"
+      ],
+      "sourceExists": true,
+      "sourceType": "file"
+    },
     {
       "id": "customize-mini-program/customize-mini-program",
       "name": "customize-mini-program 开发规范",
-      "purpose": "**技术栈**: 原生小程序 + npm 包",
-      "sourcePath": "bundles/rules/customize-mini-program/customize-mini-program.mdc",
-      "sourceExists": true,
-      "sourceType": "file",
-      "scope": "project",
+      "purpose": "原生小程序配置、webview、npm 包和自动生成配置文件边界。",
+      "sourcePath": "bundles/rules/customize-mini-program/customize-mini-program.md",
       "projectIds": [
         "customize-mini-program"
       ],
@@ -26,16 +143,23 @@
         "frontend",
         "mini-program"
       ],
-      "whenToRead": "**技术栈**: 原生小程序 + npm 包"
+      "sourceExists": true,
+      "sourceType": "file",
+      "scope": "project",
+      "whenToRead": "Read when editing customize-mini-program config, webview, npm package usage, or generated environment files.",
+      "applyMode": "project-on-demand",
+      "globs": [
+        "**/*.js",
+        "**/*.json",
+        "**/*.wxml",
+        "**/*.wxss"
+      ]
     },
     {
       "id": "dhb-international-mobile/dhb-international-mobile",
       "name": "DHB 国际化移动端开发规范",
-      "purpose": "**技术栈**: React 19 + TypeScript + Vite + Styled-Components",
-      "sourcePath": "bundles/rules/dhb-international-mobile/dhb-international-mobile.mdc",
-      "sourceExists": true,
-      "sourceType": "file",
-      "scope": "project",
+      "purpose": "国际化移动端 UI 还原、组件化、主题、多语言和多货币边界。",
+      "sourcePath": "bundles/rules/dhb-international-mobile/dhb-international-mobile.md",
       "projectIds": [
         "dhb-international-mobile"
       ],
@@ -50,16 +174,21 @@
         "frontend",
         "international"
       ],
-      "whenToRead": "**技术栈**: React 19 + TypeScript + Vite + Styled-Components"
+      "sourceExists": true,
+      "sourceType": "file",
+      "scope": "project",
+      "whenToRead": "Read when editing DHB international mobile UI, components, theme, i18n, or multi-currency display.",
+      "applyMode": "project-on-demand",
+      "globs": [
+        "src/**/*.{ts,tsx,js,jsx,css,scss}",
+        "components/**/*.{ts,tsx,js,jsx,css,scss}"
+      ]
     },
     {
       "id": "dhb-mobile-index",
       "name": "dhb-mobile-index 开发规范",
-      "purpose": "**技术栈**: React + TypeScript + SCSS",
-      "sourcePath": "bundles/rules/dhb-mobile-index.mdc",
-      "sourceExists": true,
-      "sourceType": "file",
-      "scope": "project",
+      "purpose": "React H5 容器、路由、环境配置和 iframe 集成边界。",
+      "sourcePath": "bundles/rules/dhb-mobile-index.md",
       "projectIds": [
         "dhb-mobile-index"
       ],
@@ -80,16 +209,54 @@
         "frontend",
         "h5"
       ],
-      "whenToRead": "**技术栈**: React + TypeScript + SCSS"
+      "sourceExists": true,
+      "sourceType": "file",
+      "scope": "project",
+      "whenToRead": "Read when editing dhb-mobile-index H5 routes, env config, iframe/container integration, or runtime behavior.",
+      "applyMode": "project-on-demand",
+      "globs": [
+        "src/**/*.{ts,tsx,js,jsx,scss}",
+        "config/**/*",
+        "local/**/*"
+      ]
+    },
+    {
+      "id": "dhb-packages/core",
+      "name": "DHB_PACKAGES 核心规范",
+      "purpose": "DHB_PACKAGES 的 i18n、主题色、模块导出和资源边界。",
+      "sourcePath": "bundles/rules/dhb-packages/core.md",
+      "projectIds": [
+        "dhb-packages"
+      ],
+      "technologyFamilyIds": [
+        "frontend"
+      ],
+      "sceneIds": [
+        "frontend-bff-debug",
+        "packages-cash-index-h5-webview",
+        "single-repo-change"
+      ],
+      "tags": [
+        "dhb",
+        "frontend",
+        "packages",
+        "taro"
+      ],
+      "sourceExists": true,
+      "sourceType": "file",
+      "scope": "project",
+      "whenToRead": "Read when editing DHB_PACKAGES Taro module text, theme color, exports, or image/resource helpers.",
+      "applyMode": "project-on-demand",
+      "globs": [
+        "**/*.{ts,tsx,js,jsx,scss}",
+        "package.json"
+      ]
     },
     {
       "id": "dhbfront-cash-mini",
       "name": "dhbfront-cash-mini 开发规范",
-      "purpose": "**技术栈**: Taro 3.6.32 + React 18 + TypeScript + Sass",
-      "sourcePath": "bundles/rules/dhbfront-cash-mini.mdc",
-      "sourceExists": true,
-      "sourceType": "file",
-      "scope": "project",
+      "purpose": "Taro 主包组件开发、平台兼容、导出和发布边界。",
+      "sourcePath": "bundles/rules/dhbfront-cash-mini.md",
       "projectIds": [
         "dhbfront-cash-mini"
       ],
@@ -105,44 +272,79 @@
       "tags": [
         "cash-mini",
         "dhb",
-        "frontend"
-      ],
-      "whenToRead": "**技术栈**: Taro 3.6.32 + React 18 + TypeScript + Sass"
-    },
-    {
-      "id": "i18n-chinese-key",
-      "name": "Taro 项目国际化规范",
-      "purpose": "在 `DHB_PACKAGES` 相关分包项目中，所有用户可见文案都必须走国际化。",
-      "sourcePath": "bundles/rules/i18n-chinese-key.mdc",
-      "sourceExists": true,
-      "sourceType": "file",
-      "scope": "project",
-      "projectIds": [
-        "dhb-packages"
-      ],
-      "technologyFamilyIds": [
-        "frontend"
-      ],
-      "sceneIds": [
-        "frontend-bff-debug",
-        "packages-cash-index-h5-webview",
-        "single-repo-change"
-      ],
-      "tags": [
-        "dhb",
         "frontend",
-        "packages"
+        "taro"
       ],
-      "whenToRead": "在 `DHB_PACKAGES` 相关分包项目中，所有用户可见文案都必须走国际化。"
-    },
-    {
-      "id": "ios-dhb/001-project-overview",
-      "name": "DHB (订货宝) iOS项目概述",
-      "purpose": "DHB项目概述和技术栈说明",
-      "sourcePath": "bundles/rules/ios-dhb/001-project-overview.mdc",
       "sourceExists": true,
       "sourceType": "file",
       "scope": "project",
+      "whenToRead": "Read when editing dhbfront-cash-mini Taro components, exports, platform compatibility, or package integration.",
+      "applyMode": "project-on-demand",
+      "globs": [
+        "src/**/*.{ts,tsx,js,jsx,scss}",
+        "config/**/*",
+        "package.json"
+      ]
+    },
+    {
+      "id": "frontend/core",
+      "name": "前端通用规范",
+      "purpose": "前端项目的 UI 状态、字段语义、组件复用、平台差异和验证底线。",
+      "sourcePath": "bundles/rules/frontend/core.md",
+      "projectIds": [
+        "customize-mini-program",
+        "dhb-goods-image-tool",
+        "dhb-international-mobile",
+        "dhb-manager",
+        "dhb-mobile-index",
+        "dhb-packages",
+        "dhbfront-cash-mini",
+        "dhbfront-img",
+        "dhbfront-manager-mobile",
+        "dhbfront-utils",
+        "goods-initialization",
+        "hxb-mobile",
+        "im-h5",
+        "new-mobile-h5",
+        "yxt-mobile"
+      ],
+      "technologyFamilyIds": [
+        "frontend"
+      ],
+      "sceneIds": [
+        "cash-index-h5-webview",
+        "frontend-bff-debug",
+        "index-h5-webview",
+        "ios-h5-webview-bff",
+        "mini-program-h5-webview",
+        "packages-cash-index-h5-webview",
+        "single-repo-change"
+      ],
+      "tags": [
+        "frontend",
+        "h5",
+        "taro",
+        "webview",
+        "ui"
+      ],
+      "scope": "technology-family",
+      "whenToRead": "Read when editing frontend UI, API mapping, routing, platform differences, shared components, or package/container integration.",
+      "applyMode": "project-on-demand",
+      "globs": [
+        "src/**/*.{ts,tsx,js,jsx,vue,scss,css}",
+        "components/**/*.{ts,tsx,js,jsx,vue,scss,css}",
+        "pages/**/*.{ts,tsx,js,jsx,vue,scss,css}",
+        "config/**/*",
+        "package.json"
+      ],
+      "sourceExists": true,
+      "sourceType": "file"
+    },
+    {
+      "id": "ios-dhb/core",
+      "name": "DHB iOS 核心规范",
+      "purpose": "DHB iOS 命名、结构、布局、模型、内存、线程和禁止事项。",
+      "sourcePath": "bundles/rules/ios-dhb/core.md",
       "projectIds": [
         "dhb"
       ],
@@ -158,18 +360,59 @@
       ],
       "tags": [
         "dhb",
-        "ios"
+        "ios",
+        "objective-c"
       ],
-      "whenToRead": "DHB项目概述和技术栈说明"
-    },
-    {
-      "id": "ios-dhb/002-naming-conventions",
-      "name": "命名规范",
-      "purpose": "命名规范：类名、变量、常量、通知等命名规则",
-      "sourcePath": "bundles/rules/ios-dhb/002-naming-conventions.mdc",
       "sourceExists": true,
       "sourceType": "file",
       "scope": "project",
+      "whenToRead": "Read when editing DHB iOS Objective-C UI, model, controller, memory, thread, or project structure code.",
+      "applyMode": "project-on-demand",
+      "globs": [
+        "**/*.{h,m,mm,xib,storyboard}"
+      ]
+    },
+    {
+      "id": "ios-dhb/networking",
+      "name": "DHB iOS 网络规范",
+      "purpose": "DHB iOS Request/Service/Controller 边界、Node/BFF 请求和 coobjc 用法。",
+      "sourcePath": "bundles/rules/ios-dhb/networking.md",
+      "projectIds": [
+        "dhb"
+      ],
+      "technologyFamilyIds": [
+        "ios"
+      ],
+      "sceneIds": [
+        "cash-index-h5-webview",
+        "index-h5-webview",
+        "ios-h5-webview-bff",
+        "packages-cash-index-h5-webview",
+        "single-repo-change"
+      ],
+      "tags": [
+        "bff",
+        "dhb",
+        "ios",
+        "networking"
+      ],
+      "sourceExists": true,
+      "sourceType": "file",
+      "scope": "project",
+      "whenToRead": "Read when adding or changing DHB iOS Request, Service, network, BFF, coroutine, or WebView bridge data loading code.",
+      "applyMode": "project-on-demand",
+      "globs": [
+        "**/*Request*.{h,m,mm}",
+        "**/*Service*.{h,m,mm}",
+        "**/*Network*.{h,m,mm}",
+        "**/*Bridge*.{h,m,mm}"
+      ]
+    },
+    {
+      "id": "ios-dhb/release-check",
+      "name": "DHB iOS 验收发布检查",
+      "purpose": "DHB iOS 验收、代码检查、WebView 桥接说明和打包归档。",
+      "sourcePath": "bundles/rules/ios-dhb/release-check.md",
       "projectIds": [
         "dhb"
       ],
@@ -185,504 +428,25 @@
       ],
       "tags": [
         "dhb",
-        "ios"
+        "ios",
+        "release",
+        "verification"
       ],
-      "whenToRead": "命名规范：类名、变量、常量、通知等命名规则"
-    },
-    {
-      "id": "ios-dhb/003-file-structure",
-      "name": "文件结构规范",
-      "purpose": "```objc",
-      "sourcePath": "bundles/rules/ios-dhb/003-file-structure.mdc",
       "sourceExists": true,
       "sourceType": "file",
       "scope": "project",
-      "projectIds": [
-        "dhb"
-      ],
-      "technologyFamilyIds": [
-        "ios"
-      ],
-      "sceneIds": [
-        "cash-index-h5-webview",
-        "index-h5-webview",
-        "ios-h5-webview-bff",
-        "packages-cash-index-h5-webview",
-        "single-repo-change"
-      ],
-      "tags": [
-        "dhb",
-        "ios"
-      ],
-      "whenToRead": "```objc"
-    },
-    {
-      "id": "ios-dhb/010-page-creation",
-      "name": "页面创建规范",
-      "purpose": "页面创建规范：Controller、Service、XIB、Networking四层架构",
-      "sourcePath": "bundles/rules/ios-dhb/010-page-creation.mdc",
-      "sourceExists": true,
-      "sourceType": "file",
-      "scope": "project",
-      "projectIds": [
-        "dhb"
-      ],
-      "technologyFamilyIds": [
-        "ios"
-      ],
-      "sceneIds": [
-        "cash-index-h5-webview",
-        "index-h5-webview",
-        "ios-h5-webview-bff",
-        "packages-cash-index-h5-webview",
-        "single-repo-change"
-      ],
-      "tags": [
-        "dhb",
-        "ios"
-      ],
-      "whenToRead": "页面创建规范：Controller、Service、XIB、Networking四层架构"
-    },
-    {
-      "id": "ios-dhb/011-layout-sdautolayout",
-      "name": "布局规范 - SDAutoLayout",
-      "purpose": "布局规范：SDAutoLayout使用方法和注意事项",
-      "sourcePath": "bundles/rules/ios-dhb/011-layout-sdautolayout.mdc",
-      "sourceExists": true,
-      "sourceType": "file",
-      "scope": "project",
-      "projectIds": [
-        "dhb"
-      ],
-      "technologyFamilyIds": [
-        "ios"
-      ],
-      "sceneIds": [
-        "cash-index-h5-webview",
-        "index-h5-webview",
-        "ios-h5-webview-bff",
-        "packages-cash-index-h5-webview",
-        "single-repo-change"
-      ],
-      "tags": [
-        "dhb",
-        "ios"
-      ],
-      "whenToRead": "布局规范：SDAutoLayout使用方法和注意事项"
-    },
-    {
-      "id": "ios-dhb/012-networking",
-      "name": "网络请求规范 (v2.0)",
-      "purpose": "网络请求规范：DHBBaseNetworkRequest基类和coobjc协程使用",
-      "sourcePath": "bundles/rules/ios-dhb/012-networking.mdc",
-      "sourceExists": true,
-      "sourceType": "file",
-      "scope": "project",
-      "projectIds": [
-        "dhb"
-      ],
-      "technologyFamilyIds": [
-        "ios"
-      ],
-      "sceneIds": [
-        "cash-index-h5-webview",
-        "index-h5-webview",
-        "ios-h5-webview-bff",
-        "packages-cash-index-h5-webview",
-        "single-repo-change"
-      ],
-      "tags": [
-        "dhb",
-        "ios"
-      ],
-      "whenToRead": "网络请求规范：DHBBaseNetworkRequest基类和coobjc协程使用"
-    },
-    {
-      "id": "ios-dhb/013-data-model",
-      "name": "数据模型规范",
-      "purpose": "数据模型规范：YYModel的使用方法",
-      "sourcePath": "bundles/rules/ios-dhb/013-data-model.mdc",
-      "sourceExists": true,
-      "sourceType": "file",
-      "scope": "project",
-      "projectIds": [
-        "dhb"
-      ],
-      "technologyFamilyIds": [
-        "ios"
-      ],
-      "sceneIds": [
-        "cash-index-h5-webview",
-        "index-h5-webview",
-        "ios-h5-webview-bff",
-        "packages-cash-index-h5-webview",
-        "single-repo-change"
-      ],
-      "tags": [
-        "dhb",
-        "ios"
-      ],
-      "whenToRead": "数据模型规范：YYModel的使用方法"
-    },
-    {
-      "id": "ios-dhb/020-notification-system",
-      "name": "通知机制规范 (v2.0)",
-      "purpose": "通知机制规范：v2.0精确通知机制",
-      "sourcePath": "bundles/rules/ios-dhb/020-notification-system.mdc",
-      "sourceExists": true,
-      "sourceType": "file",
-      "scope": "project",
-      "projectIds": [
-        "dhb"
-      ],
-      "technologyFamilyIds": [
-        "ios"
-      ],
-      "sceneIds": [
-        "cash-index-h5-webview",
-        "index-h5-webview",
-        "ios-h5-webview-bff",
-        "packages-cash-index-h5-webview",
-        "single-repo-change"
-      ],
-      "tags": [
-        "dhb",
-        "ios"
-      ],
-      "whenToRead": "通知机制规范：v2.0精确通知机制"
-    },
-    {
-      "id": "ios-dhb/021-cart-shopping",
-      "name": "购物车加购规范",
-      "purpose": "购物车加购规范：SKU加购标准流程",
-      "sourcePath": "bundles/rules/ios-dhb/021-cart-shopping.mdc",
-      "sourceExists": true,
-      "sourceType": "file",
-      "scope": "project",
-      "projectIds": [
-        "dhb"
-      ],
-      "technologyFamilyIds": [
-        "ios"
-      ],
-      "sceneIds": [
-        "cash-index-h5-webview",
-        "index-h5-webview",
-        "ios-h5-webview-bff",
-        "packages-cash-index-h5-webview",
-        "single-repo-change"
-      ],
-      "tags": [
-        "dhb",
-        "ios"
-      ],
-      "whenToRead": "购物车加购规范：SKU加购标准流程"
-    },
-    {
-      "id": "ios-dhb/030-memory-management",
-      "name": "内存管理规范",
-      "purpose": "内存管理规范：防止循环引用和内存泄漏",
-      "sourcePath": "bundles/rules/ios-dhb/030-memory-management.mdc",
-      "sourceExists": true,
-      "sourceType": "file",
-      "scope": "project",
-      "projectIds": [
-        "dhb"
-      ],
-      "technologyFamilyIds": [
-        "ios"
-      ],
-      "sceneIds": [
-        "cash-index-h5-webview",
-        "index-h5-webview",
-        "ios-h5-webview-bff",
-        "packages-cash-index-h5-webview",
-        "single-repo-change"
-      ],
-      "tags": [
-        "dhb",
-        "ios"
-      ],
-      "whenToRead": "内存管理规范：防止循环引用和内存泄漏"
-    },
-    {
-      "id": "ios-dhb/031-thread-safety",
-      "name": "线程安全规范",
-      "purpose": "线程安全规范：主线程UI操作，子线程耗时任务",
-      "sourcePath": "bundles/rules/ios-dhb/031-thread-safety.mdc",
-      "sourceExists": true,
-      "sourceType": "file",
-      "scope": "project",
-      "projectIds": [
-        "dhb"
-      ],
-      "technologyFamilyIds": [
-        "ios"
-      ],
-      "sceneIds": [
-        "cash-index-h5-webview",
-        "index-h5-webview",
-        "ios-h5-webview-bff",
-        "packages-cash-index-h5-webview",
-        "single-repo-change"
-      ],
-      "tags": [
-        "dhb",
-        "ios"
-      ],
-      "whenToRead": "线程安全规范：主线程UI操作，子线程耗时任务"
-    },
-    {
-      "id": "ios-dhb/032-error-handling",
-      "name": "错误处理规范",
-      "purpose": "错误处理规范：统一的错误提示和自定义弹框",
-      "sourcePath": "bundles/rules/ios-dhb/032-error-handling.mdc",
-      "sourceExists": true,
-      "sourceType": "file",
-      "scope": "project",
-      "projectIds": [
-        "dhb"
-      ],
-      "technologyFamilyIds": [
-        "ios"
-      ],
-      "sceneIds": [
-        "cash-index-h5-webview",
-        "index-h5-webview",
-        "ios-h5-webview-bff",
-        "packages-cash-index-h5-webview",
-        "single-repo-change"
-      ],
-      "tags": [
-        "dhb",
-        "ios"
-      ],
-      "whenToRead": "错误处理规范：统一的错误提示和自定义弹框"
-    },
-    {
-      "id": "ios-dhb/040-project-specific",
-      "name": "项目特定规范",
-      "purpose": "项目特定规范：多语言、主题、日志、OSS、埋点",
-      "sourcePath": "bundles/rules/ios-dhb/040-project-specific.mdc",
-      "sourceExists": true,
-      "sourceType": "file",
-      "scope": "project",
-      "projectIds": [
-        "dhb"
-      ],
-      "technologyFamilyIds": [
-        "ios"
-      ],
-      "sceneIds": [
-        "cash-index-h5-webview",
-        "index-h5-webview",
-        "ios-h5-webview-bff",
-        "packages-cash-index-h5-webview",
-        "single-repo-change"
-      ],
-      "tags": [
-        "dhb",
-        "ios"
-      ],
-      "whenToRead": "项目特定规范：多语言、主题、日志、OSS、埋点"
-    },
-    {
-      "id": "ios-dhb/041-forbidden-practices",
-      "name": "禁止事项",
-      "purpose": "禁止事项和谨慎使用的技术",
-      "sourcePath": "bundles/rules/ios-dhb/041-forbidden-practices.mdc",
-      "sourceExists": true,
-      "sourceType": "file",
-      "scope": "project",
-      "projectIds": [
-        "dhb"
-      ],
-      "technologyFamilyIds": [
-        "ios"
-      ],
-      "sceneIds": [
-        "cash-index-h5-webview",
-        "index-h5-webview",
-        "ios-h5-webview-bff",
-        "packages-cash-index-h5-webview",
-        "single-repo-change"
-      ],
-      "tags": [
-        "dhb",
-        "ios"
-      ],
-      "whenToRead": "禁止事项和谨慎使用的技术"
-    },
-    {
-      "id": "ios-dhb/050-testing",
-      "name": "测试规范",
-      "purpose": "测试规范：单元测试和UI测试",
-      "sourcePath": "bundles/rules/ios-dhb/050-testing.mdc",
-      "sourceExists": true,
-      "sourceType": "file",
-      "scope": "project",
-      "projectIds": [
-        "dhb"
-      ],
-      "technologyFamilyIds": [
-        "ios"
-      ],
-      "sceneIds": [
-        "cash-index-h5-webview",
-        "index-h5-webview",
-        "ios-h5-webview-bff",
-        "packages-cash-index-h5-webview",
-        "single-repo-change"
-      ],
-      "tags": [
-        "dhb",
-        "ios"
-      ],
-      "whenToRead": "测试规范：单元测试和UI测试"
-    },
-    {
-      "id": "ios-dhb/051-deployment",
-      "name": "打包发布规范",
-      "purpose": "打包发布规范：打包脚本、符号表上传、版本管理",
-      "sourcePath": "bundles/rules/ios-dhb/051-deployment.mdc",
-      "sourceExists": true,
-      "sourceType": "file",
-      "scope": "project",
-      "projectIds": [
-        "dhb"
-      ],
-      "technologyFamilyIds": [
-        "ios"
-      ],
-      "sceneIds": [
-        "cash-index-h5-webview",
-        "index-h5-webview",
-        "ios-h5-webview-bff",
-        "packages-cash-index-h5-webview",
-        "single-repo-change"
-      ],
-      "tags": [
-        "dhb",
-        "ios"
-      ],
-      "whenToRead": "打包发布规范：打包脚本、符号表上传、版本管理"
-    },
-    {
-      "id": "ios-dhb/052-common-issues",
-      "name": "常见问题",
-      "purpose": "常见问题和解决方案",
-      "sourcePath": "bundles/rules/ios-dhb/052-common-issues.mdc",
-      "sourceExists": true,
-      "sourceType": "file",
-      "scope": "project",
-      "projectIds": [
-        "dhb"
-      ],
-      "technologyFamilyIds": [
-        "ios"
-      ],
-      "sceneIds": [
-        "cash-index-h5-webview",
-        "index-h5-webview",
-        "ios-h5-webview-bff",
-        "packages-cash-index-h5-webview",
-        "single-repo-change"
-      ],
-      "tags": [
-        "dhb",
-        "ios"
-      ],
-      "whenToRead": "常见问题和解决方案"
-    },
-    {
-      "id": "ios-dhb/053-code-review",
-      "name": "代码审查检查点",
-      "purpose": "代码审查检查点和性能优化",
-      "sourcePath": "bundles/rules/ios-dhb/053-code-review.mdc",
-      "sourceExists": true,
-      "sourceType": "file",
-      "scope": "project",
-      "projectIds": [
-        "dhb"
-      ],
-      "technologyFamilyIds": [
-        "ios"
-      ],
-      "sceneIds": [
-        "cash-index-h5-webview",
-        "index-h5-webview",
-        "ios-h5-webview-bff",
-        "packages-cash-index-h5-webview",
-        "single-repo-change"
-      ],
-      "tags": [
-        "dhb",
-        "ios"
-      ],
-      "whenToRead": "代码审查检查点和性能优化"
-    },
-    {
-      "id": "ios-dhb/NETWORKING_UPDATE_V2.1",
-      "name": "网络请求规范更新说明 (v2.1)",
-      "purpose": "2025-11-11",
-      "sourcePath": "bundles/rules/ios-dhb/NETWORKING_UPDATE_V2.1.md",
-      "sourceExists": true,
-      "sourceType": "file",
-      "scope": "project",
-      "projectIds": [
-        "dhb"
-      ],
-      "technologyFamilyIds": [
-        "ios"
-      ],
-      "sceneIds": [
-        "cash-index-h5-webview",
-        "index-h5-webview",
-        "ios-h5-webview-bff",
-        "packages-cash-index-h5-webview",
-        "single-repo-change"
-      ],
-      "tags": [
-        "dhb",
-        "ios"
-      ],
-      "whenToRead": "2025-11-11"
-    },
-    {
-      "id": "ios-dhb/README",
-      "name": "DHB 项目 Cursor Rules (新版)",
-      "purpose": "本项目已迁移到 Cursor 最新的规则系统，所有规则按功能模块化组织。",
-      "sourcePath": "bundles/rules/ios-dhb/README.md",
-      "sourceExists": true,
-      "sourceType": "file",
-      "scope": "project",
-      "projectIds": [
-        "dhb"
-      ],
-      "technologyFamilyIds": [
-        "ios"
-      ],
-      "sceneIds": [
-        "cash-index-h5-webview",
-        "index-h5-webview",
-        "ios-h5-webview-bff",
-        "packages-cash-index-h5-webview",
-        "single-repo-change"
-      ],
-      "tags": [
-        "dhb",
-        "ios"
-      ],
-      "whenToRead": "本项目已迁移到 Cursor 最新的规则系统，所有规则按功能模块化组织。"
+      "whenToRead": "Read during G6/G7 for DHB iOS verification, WebView bridge handoff, packaging, or release notes.",
+      "applyMode": "task-gate",
+      "globs": [
+        "**/*.{h,m,mm,xib,storyboard}",
+        "project.pbxproj"
+      ]
     },
     {
       "id": "new-mobile-h5/new-mobile-h5",
       "name": "new_mobile_h5 开发规范",
-      "purpose": "**技术栈**: 原生 JavaScript + Zepto + Gulp",
-      "sourcePath": "bundles/rules/new-mobile-h5/new-mobile-h5.mdc",
-      "sourceExists": true,
-      "sourceType": "file",
-      "scope": "project",
+      "purpose": "老 H5 容器、代理配置、传统 JS/Gulp 项目边界。",
+      "sourcePath": "bundles/rules/new-mobile-h5/new-mobile-h5.md",
       "projectIds": [
         "new-mobile-h5"
       ],
@@ -700,66 +464,109 @@
       "tags": [
         "container",
         "dhb",
-        "frontend"
-      ],
-      "whenToRead": "**技术栈**: 原生 JavaScript + Zepto + Gulp"
-    },
-    {
-      "id": "shared-context",
-      "name": "统一共享上下文入口",
-      "purpose": "请优先阅读：",
-      "sourcePath": "bundles/rules/shared-context.mdc",
-      "sourceExists": true,
-      "sourceType": "file",
-      "scope": "shared",
-      "projectIds": [
-        "customize-mini-program",
-        "new-mobile-h5"
-      ],
-      "technologyFamilyIds": [
-        "frontend"
-      ],
-      "sceneIds": [
-        "cash-index-h5-webview",
-        "index-h5-webview",
-        "ios-h5-webview-bff",
-        "mini-program-h5-webview",
-        "packages-cash-index-h5-webview",
-        "single-repo-change"
-      ],
-      "tags": [
-        "container",
-        "dhb",
         "frontend",
-        "mini-program"
+        "legacy-h5"
       ],
-      "whenToRead": "请优先阅读："
-    },
-    {
-      "id": "theme-config",
-      "name": "主题色配置规范",
-      "purpose": "在 Taro 组件中通过 `@dhbfront-utils/shell_env` 获取主题色配置。",
-      "sourcePath": "bundles/rules/theme-config.mdc",
       "sourceExists": true,
       "sourceType": "file",
       "scope": "project",
-      "projectIds": [
-        "dhb-packages"
-      ],
+      "whenToRead": "Read when editing new_mobile_h5 legacy H5 container, proxy config, gulp flow, or iframe/webview integration.",
+      "applyMode": "project-on-demand",
+      "globs": [
+        "**/*.js",
+        "**/*.html",
+        "**/*.css",
+        "gulpfile.js",
+        "package.json",
+        "local/**/*"
+      ]
+    },
+    {
+      "id": "scenes/frontend-bff-debug",
+      "name": "前端 BFF 联调场景规则",
+      "purpose": "前端与 BFF 联调时的范围控制、接口契约、复现和验证规则。",
+      "sourcePath": "bundles/rules/scenes/frontend-bff-debug.md",
+      "projectIds": [],
       "technologyFamilyIds": [
-        "frontend"
+        "frontend",
+        "bff"
       ],
       "sceneIds": [
-        "frontend-bff-debug",
-        "packages-cash-index-h5-webview",
-        "single-repo-change"
+        "frontend-bff-debug"
       ],
       "tags": [
-        "dhb",
+        "scene",
         "frontend",
-        "packages"
+        "bff",
+        "debug"
       ],
-      "whenToRead": "在 Taro 组件中通过 `@dhbfront-utils/shell_env` 获取主题色配置。"
+      "scope": "scene",
+      "whenToRead": "Read when scene frontend-bff-debug is selected and the task needs frontend plus BFF contract or debugging guidance.",
+      "applyMode": "scene-on-demand",
+      "globs": [
+        "**/*"
+      ],
+      "sourceExists": true,
+      "sourceType": "file"
+    },
+    {
+      "id": "scenes/ios-h5-webview-bff",
+      "name": "iOS H5 WebView BFF 场景规则",
+      "purpose": "iOS、H5、WebView bridge、容器和 BFF 全链路的归属、契约和验证规则。",
+      "sourcePath": "bundles/rules/scenes/ios-h5-webview-bff.md",
+      "projectIds": [],
+      "technologyFamilyIds": [
+        "ios",
+        "frontend",
+        "bff"
+      ],
+      "sceneIds": [
+        "ios-h5-webview-bff"
+      ],
+      "tags": [
+        "scene",
+        "ios",
+        "h5",
+        "webview",
+        "bff"
+      ],
+      "scope": "scene",
+      "whenToRead": "Read when scene ios-h5-webview-bff is selected and native, H5, WebView bridge, container, or BFF ownership matters.",
+      "applyMode": "scene-on-demand",
+      "globs": [
+        "**/*"
+      ],
+      "sourceExists": true,
+      "sourceType": "file"
+    },
+    {
+      "id": "scenes/packages-cash-index-h5-webview",
+      "name": "分包到容器链路场景规则",
+      "purpose": "DHB_PACKAGES 到 cash-mini、index、H5 容器、iOS/小程序链路的顺序、边界和验证规则。",
+      "sourcePath": "bundles/rules/scenes/packages-cash-index-h5-webview.md",
+      "projectIds": [],
+      "technologyFamilyIds": [
+        "frontend",
+        "ios"
+      ],
+      "sceneIds": [
+        "packages-cash-index-h5-webview"
+      ],
+      "tags": [
+        "scene",
+        "packages",
+        "cash-mini",
+        "h5",
+        "webview"
+      ],
+      "scope": "scene",
+      "whenToRead": "Read when scene packages-cash-index-h5-webview is selected and the task crosses packages, cash-mini, H5 entry, legacy container, or native/mini-program container.",
+      "applyMode": "scene-on-demand",
+      "globs": [
+        "**/*"
+      ],
+      "sourceExists": true,
+      "sourceType": "file"
     }
   ]
 }

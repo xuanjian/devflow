@@ -34,7 +34,50 @@
     }
   ],
   "skills": [],
-  "rules": [],
+  "rules": [
+    {
+      "id": "bff/egg-service",
+      "name": "BFF Egg 服务通用规范",
+      "purpose": "DHB BFF 服务的 Controller/Service 边界、字段语义、上游调用、缓存和错误日志底线。",
+      "sourcePath": "bundles/rules/bff/egg-service.md",
+      "applyMode": "project-on-demand",
+      "globs": [
+        "app/**/*.{ts,js}",
+        "config/**/*",
+        "test/**/*.{ts,js}",
+        "package.json"
+      ],
+      "whenToRead": "Read when editing DHB BFF service Controller, Service, upstream calls, field mapping, cache, logging, or API response behavior."
+    },
+    {
+      "id": "bff/egg-business",
+      "name": "egg-business 接入规范",
+      "purpose": "BFF 服务接入或修改 egg-business 公共业务能力时的归属、兼容和验证规则。",
+      "sourcePath": "bundles/rules/bff/egg-business.md",
+      "applyMode": "project-on-demand",
+      "globs": [
+        "app/**/*.{ts,js}",
+        "lib/**/*.{ts,js}",
+        "config/**/*",
+        "package.json"
+      ],
+      "whenToRead": "Read when a BFF task touches egg-business shared business logic, shared helper ownership, package consumption, or cross-service compatibility."
+    },
+    {
+      "id": "bff/egg-dhb-framework",
+      "name": "egg-dhb-framework 接入规范",
+      "purpose": "DHB BFF 框架插件、基类、中间件、上下文、权限和插件接入边界。",
+      "sourcePath": "bundles/rules/bff/egg-dhb-framework.md",
+      "applyMode": "project-on-demand",
+      "globs": [
+        "app/**/*.{ts,js}",
+        "config/**/*",
+        "lib/**/*.{ts,js}",
+        "package.json"
+      ],
+      "whenToRead": "Read when editing egg-dhb-framework, framework base classes, middleware, request context, permissions, or BFF plugin integration."
+    }
+  ],
   "tools": {
     "figma": false,
     "notion": true,
@@ -50,7 +93,10 @@
     "onDemandRead": [
       "docs/repos/bff-hub.md",
       "docs/scenes/single-repo-change.md",
-      "docs/scenes/frontend-bff-debug.md"
+      "docs/scenes/frontend-bff-debug.md",
+      "bundles/rules/bff/egg-dhb-framework.md",
+      "bundles/rules/bff/egg-business.md",
+      "bundles/rules/bff/egg-service.md"
     ],
     "notes": "Start with this JSON. Load source Markdown, rules, or skills only when the task requires detailed instructions."
   }

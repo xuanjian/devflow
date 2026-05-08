@@ -54,8 +54,8 @@
     }
   ],
   "operationGuide": {
-    "environmentSwitching": "Use dhb-env-switch for test/pre/prod H5 settings and restore-local-env when ending local debugging.",
-    "startup": "Use run-projects for planning the H5/package/container startup order, then run commands manually per project when needed.",
+    "environmentSwitching": "Use dhb-local-env for test/pre/prod H5 settings and restore mode when ending local debugging.",
+    "startup": "Use dhb-local-env for H5/package/container startup planning, then run commands manually per project when needed.",
     "notes": [
       "For package chains, start/build upstream package before downstream container."
     ]
@@ -71,8 +71,22 @@
       "config/projects/dhb-mobile-index.json",
       "config/projects/dhb-packages.json",
       "config/projects/dhbfront-cash-mini.json",
-      "config/projects/new-mobile-h5.json"
+      "config/projects/new-mobile-h5.json",
+      "bundles/rules/scenes/packages-cash-index-h5-webview.md"
     ],
     "notes": "Do not load every project in the scene. Select projects based on the user request first."
-  }
+  },
+  "rules": [
+    {
+      "id": "scenes/packages-cash-index-h5-webview",
+      "name": "分包到容器链路场景规则",
+      "purpose": "DHB_PACKAGES 到 cash-mini、index、H5 容器、iOS/小程序链路的顺序、边界和验证规则。",
+      "sourcePath": "bundles/rules/scenes/packages-cash-index-h5-webview.md",
+      "applyMode": "scene-on-demand",
+      "globs": [
+        "**/*"
+      ],
+      "whenToRead": "Read when scene packages-cash-index-h5-webview is selected and the task crosses packages, cash-mini, H5 entry, legacy container, or native/mini-program container."
+    }
+  ]
 }

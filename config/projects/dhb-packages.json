@@ -43,69 +43,61 @@
   ],
   "skills": [
     {
-      "id": "run-projects",
-      "name": "run-projects",
-      "description": "Use when running DHB local frontend projects across cash-mini, dhb-mobile-index, new_mobile_h5, customize-mini-program, or linked subpackages, especially when switching environments, linking local packages, or recovering from unstable startup flows.",
-      "sourcePath": "bundles/skills/run-projects/SKILL.md",
-      "whenToLoad": "Load when dhb-packages task matches this skill trigger."
-    },
-    {
-      "id": "restore-local-env",
-      "name": "restore-local-env",
-      "description": "恢复 DHB 本地联调环境。触发词：恢复环境、恢复配置、结束开发、还原配置。用于停止统一执行器启动的进程并恢复其备份的配置文件。",
-      "sourcePath": "bundles/skills/restore-local-env/SKILL.md",
-      "whenToLoad": "Load when dhb-packages task matches this skill trigger."
-    },
-    {
-      "id": "dhb-env-switch",
-      "name": "dhb-env-switch",
-      "description": "切换 DHB 本地开发环境（测试/预发/线上）。触发词：切环境、切线上、切测试、切预发。",
-      "sourcePath": "bundles/skills/dhb-env-switch/SKILL.md",
-      "whenToLoad": "Load when dhb-packages task matches this skill trigger."
+      "id": "dhb-local-env",
+      "name": "dhb-local-env",
+      "description": "Use when running, switching, restoring, or diagnosing local DHB frontend integration environments across cash-mini, dhb-mobile-index, new_mobile_h5, customize-mini-program, or DHB_PACKAGES.",
+      "sourcePath": "bundles/skills/dhb-local-env/SKILL.md",
+      "whenToLoad": "Load when dhb-packages task needs dhb-local-env."
     },
     {
       "id": "dhb-packages/add-mobile-icon",
       "name": "add-mobile-icon",
-      "description": "在 dhbfront-img 项目中新增图标。触发词：新增图标、添加图标、创建图标、添加 svg 图标。支持固定颜色图标和主题色图标，支持任意模块目录（goods、order、payment 等）。",
+      "description": "Use when adding SVG mobile image assets to dhbfront-img for DHB frontend packages, including fixed-color icons or theme-color icon variants.",
       "sourcePath": "bundles/skills/dhb-packages/add-mobile-icon/SKILL.md",
-      "whenToLoad": "Load when dhb-packages task matches this skill trigger."
+      "whenToLoad": "Load when dhb-packages task needs add-mobile-icon."
     },
     {
-      "id": "dhb-packages/add-taro-module",
-      "name": "Skill: 在 Taro 分包中新增业务模块",
-      "description": "使用以下提示词触发此工作流：",
-      "sourcePath": "bundles/skills/dhb-packages/add-taro-module.md",
-      "whenToLoad": "Load when dhb-packages task matches this skill trigger."
+      "id": "dhb-taro-module",
+      "name": "dhb-taro-module",
+      "description": "Use when creating a new Taro business module/package under DHB_PACKAGES.",
+      "sourcePath": "bundles/skills/dhb-taro-module/SKILL.md",
+      "whenToLoad": "Load when dhb-packages task needs dhb-taro-module."
     },
     {
-      "id": "dhb-packages/create-api-request",
-      "name": "创建 API 请求 Skill",
-      "description": "- 创建请求",
-      "sourcePath": "bundles/skills/dhb-packages/create-api-request.md",
-      "whenToLoad": "Load when dhb-packages task matches this skill trigger."
-    },
-    {
-      "id": "dhb-packages/mock-api-from-curl",
-      "name": "Skill: 根据 curl 生成接口 Mock",
-      "description": "```",
-      "sourcePath": "bundles/skills/dhb-packages/mock-api-from-curl.md",
-      "whenToLoad": "Load when dhb-packages task matches this skill trigger."
+      "id": "dhb-api-from-curl",
+      "name": "dhb-api-from-curl",
+      "description": "Use when the user provides a curl request and wants DHB Taro request code, a mock file, or both.",
+      "sourcePath": "bundles/skills/dhb-api-from-curl/SKILL.md",
+      "whenToLoad": "Load when dhb-packages task needs dhb-api-from-curl."
     }
   ],
   "rules": [
     {
-      "id": "theme-config",
-      "name": "主题色配置规范",
-      "purpose": "在 Taro 组件中通过 `@dhbfront-utils/shell_env` 获取主题色配置。",
-      "sourcePath": "bundles/rules/theme-config.mdc",
-      "whenToRead": "Read when working in dhb-packages and this rule affects the requested change."
+      "id": "frontend/core",
+      "name": "前端通用规范",
+      "purpose": "前端项目的 UI 状态、字段语义、组件复用、平台差异和验证底线。",
+      "sourcePath": "bundles/rules/frontend/core.md",
+      "applyMode": "project-on-demand",
+      "globs": [
+        "src/**/*.{ts,tsx,js,jsx,vue,scss,css}",
+        "components/**/*.{ts,tsx,js,jsx,vue,scss,css}",
+        "pages/**/*.{ts,tsx,js,jsx,vue,scss,css}",
+        "config/**/*",
+        "package.json"
+      ],
+      "whenToRead": "Read when editing frontend UI, API mapping, routing, platform differences, shared components, or package/container integration."
     },
     {
-      "id": "i18n-chinese-key",
-      "name": "Taro 项目国际化规范",
-      "purpose": "在 `DHB_PACKAGES` 相关分包项目中，所有用户可见文案都必须走国际化。",
-      "sourcePath": "bundles/rules/i18n-chinese-key.mdc",
-      "whenToRead": "Read when working in dhb-packages and this rule affects the requested change."
+      "id": "dhb-packages/core",
+      "name": "DHB_PACKAGES 核心规范",
+      "purpose": "DHB_PACKAGES 的 i18n、主题色、模块导出和资源边界。",
+      "sourcePath": "bundles/rules/dhb-packages/core.md",
+      "applyMode": "project-on-demand",
+      "globs": [
+        "**/*.{ts,tsx,js,jsx,scss}",
+        "package.json"
+      ],
+      "whenToRead": "Read when editing DHB_PACKAGES Taro module text, theme color, exports, or image/resource helpers."
     }
   ],
   "tools": {
@@ -125,15 +117,12 @@
       "docs/scenes/single-repo-change.md",
       "docs/scenes/packages-cash-index-h5-webview.md",
       "docs/scenes/frontend-bff-debug.md",
-      "bundles/rules/theme-config.mdc",
-      "bundles/rules/i18n-chinese-key.mdc",
-      "bundles/skills/run-projects/SKILL.md",
-      "bundles/skills/restore-local-env/SKILL.md",
-      "bundles/skills/dhb-env-switch/SKILL.md",
       "bundles/skills/dhb-packages/add-mobile-icon/SKILL.md",
-      "bundles/skills/dhb-packages/add-taro-module.md",
-      "bundles/skills/dhb-packages/create-api-request.md",
-      "bundles/skills/dhb-packages/mock-api-from-curl.md"
+      "bundles/rules/dhb-packages/core.md",
+      "bundles/skills/dhb-local-env/SKILL.md",
+      "bundles/skills/dhb-taro-module/SKILL.md",
+      "bundles/skills/dhb-api-from-curl/SKILL.md",
+      "bundles/rules/frontend/core.md"
     ],
     "notes": "Start with this JSON. Load source Markdown, rules, or skills only when the task requires detailed instructions."
   }

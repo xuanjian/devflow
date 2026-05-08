@@ -8,8 +8,9 @@ runtime/tasks/*
 !runtime/tasks/*.json
 
 # Skill runtime outputs. Keep source scripts/templates, ignore local backups/logs.
-bundles/skills/run-projects/runtime/backups/*
-bundles/skills/run-projects/runtime/logs/*
+bundles/skills/dhb-local-env/runtime/backups/*
+bundles/skills/dhb-local-env/runtime/logs/*
+bundles/skills/dhb-local-env/runtime/pids/*
 
 # Local editor and tool noise.
 .superpowers/

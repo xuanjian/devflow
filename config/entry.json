@@ -7,16 +7,25 @@
     "config/profile.json",
     "runtime/current.json",
     "runtime/tasks/<activeTaskId>.json",
-    "config/projects/index.json or matched config/projects/<project>.json",
-    "config/scenes/index.json or matched config/scenes/<scene>.json",
+    "config/projects/index.json",
+    "matched config/projects/<project-id>.json",
+    "config/scenes/index.json",
+    "matched config/scenes/<scene-id>.json",
     "config/skills/skills.json only when skill selection is needed",
     "config/rules/rules.json only when rule lookup is needed"
   ],
+  "routingDecision": {
+    "projectsIndex": "Read config/projects/index.json first as the candidate list. Use id, name, technologyFamilyId, path, and summary to choose matched project JSON files.",
+    "projectDetail": "After selecting a project, read config/projects/<project-id>.json for doc path, mounted skills, scenes, rules, and source read policy.",
+    "scenesIndex": "Read config/scenes/index.json as the candidate list when the task may involve a workflow scene or multiple projects.",
+    "sceneDetail": "After selecting a scene, read config/scenes/<scene-id>.json for included projects, mounted scene rules, composition reason, environment switching, run/debug, and source scene doc path.",
+    "fallback": "If no project or scene is clear, use projects index and scenes index to ask one concise clarification instead of reading all source documents."
+  },
   "sourceReadPolicy": {
     "projectDocs": "Read docs/repos/*.md only after a project JSON is selected and the summary is insufficient.",
     "scenes": "Read docs/scenes/*.md only after a scene JSON is selected and detailed workflow text is needed.",
-    "rules": "Read bundles/rules/** only when a selected project JSON lists the rule and the task needs full rule details.",
-    "skills": "Read bundles/skills/** only when a selected project JSON or explicit user request triggers the skill.",
+    "rules": "Read config/rules/rules.json for applyMode, globs, and whenToRead. Active rule sources under bundles/rules/** are Markdown .md files and are loaded only when a selected project, selected scene, or task gate requires full rule details. Project JSON triggers project-on-demand rules. Scene JSON triggers scene-on-demand rules. Read docs/reference/rules/** only when an active rule points there and compact guidance is insufficient.",
+    "skills": "Read active bundles/skills/** only when a selected project JSON or explicit user request triggers the skill. Read docs/reference/skills/** only for archived detail when the active skill is insufficient.",
     "profile": "Read docs/person/profile.md only when long-term preferences or project map details matter."
   },
   "installation": {

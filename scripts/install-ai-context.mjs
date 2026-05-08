@@ -10,6 +10,7 @@ const skillSource = path.join(root, 'bundles', 'skills', 'ai-context');
 const skillsHome = process.env.AI_CONTEXT_SKILLS_HOME || path.join(process.env.HOME || '', '.agents', 'skills');
 const skillLink = path.join(skillsHome, 'ai-context');
 const globalHome = process.env.AI_CONTEXT_GLOBAL_HOME || '/Users/xj';
+const allowedRuleApplyModes = new Set(['global', 'project-on-demand', 'scene-on-demand', 'task-gate', 'manual']);
 
 function usage() {
   console.log(`Usage:
@@ -148,6 +149,52 @@ function pushUniqueError(errors, message) {
   if (!errors.includes(message)) errors.push(message);
 }
 
+function validateRuleMetadata(rule, label, errors) {
+  if (!rule.sourcePath) {
+    pushUniqueError(errors, `${label} missing sourcePath`);
+  } else {
+    if (!rule.sourcePath.startsWith('bundles/rules/')) {
+      pushUniqueError(errors, `${label} sourcePath must stay under bundles/rules/: ${rule.sourcePath}`);
+    }
+    if (rule.sourcePath.endsWith('.mdc')) {
+      pushUniqueError(errors, `${label} active rule source must be .md, not .mdc: ${rule.sourcePath}`);
+    }
+    if (!rule.sourcePath.endsWith('.md')) {
+      pushUniqueError(errors, `${label} active rule source must be Markdown .md: ${rule.sourcePath}`);
+    }
+    if (!exists(rule.sourcePath)) {
+      pushUniqueError(errors, `${label} source missing: ${rule.sourcePath}`);
+    }
+  }
+  if (!allowedRuleApplyModes.has(rule.applyMode)) {
+    pushUniqueError(errors, `${label} invalid applyMode: ${rule.applyMode || '<missing>'}`);
+  }
+  if (!Array.isArray(rule.globs) || rule.globs.length === 0) {
+    pushUniqueError(errors, `${label} must define non-empty globs`);
+  }
+  if (!rule.whenToRead) {
+    pushUniqueError(errors, `${label} missing whenToRead`);
+  }
+}
+
+function validateRuleMount(rule, catalogRule, label, errors, expectedApplyMode) {
+  if (rule.sourcePath && rule.sourcePath !== catalogRule.sourcePath) {
+    pushUniqueError(errors, `${label} sourcePath differs from catalog`);
+  }
+  if (rule.applyMode && rule.applyMode !== catalogRule.applyMode) {
+    pushUniqueError(errors, `${label} applyMode differs from catalog`);
+  }
+  if (expectedApplyMode && catalogRule.applyMode !== expectedApplyMode) {
+    pushUniqueError(errors, `${label} must use applyMode ${expectedApplyMode}, got ${catalogRule.applyMode}`);
+  }
+  if (rule.whenToRead && rule.whenToRead !== catalogRule.whenToRead) {
+    pushUniqueError(errors, `${label} whenToRead differs from catalog`);
+  }
+  if (rule.sourcePath || rule.applyMode || rule.globs || rule.whenToRead) {
+    validateRuleMetadata({ ...catalogRule, ...rule }, label, errors);
+  }
+}
+
 function validate() {
   const errors = [];
   const warnings = [];
@@ -178,6 +225,7 @@ function validate() {
 
   const skillIds = new Set((skillCatalog.skills || []).map(item => item.id));
   const ruleIds = new Set((ruleCatalog.rules || []).map(item => item.id));
+  const ruleById = new Map((ruleCatalog.rules || []).map(item => [item.id, item]));
   const sceneIds = new Set((sceneIndex.scenes || []).map(item => item.id));
   const projectIds = new Set((projectIndex.projects || []).map(item => item.id));
 
@@ -213,7 +261,12 @@ function validate() {
       if (!skillIds.has(skill.id)) pushUniqueError(errors, `project ${project.id} references unknown skill ${skill.id}`);
     }
     for (const rule of project.rules || []) {
-      if (!ruleIds.has(rule.id)) pushUniqueError(errors, `project ${project.id} references unknown rule ${rule.id}`);
+      if (!ruleIds.has(rule.id)) {
+        pushUniqueError(errors, `project ${project.id} references unknown rule ${rule.id}`);
+      } else {
+        const catalogRule = ruleById.get(rule.id);
+        validateRuleMount(rule, catalogRule, `project ${project.id} rule ${rule.id}`, errors);
+      }
     }
   }
 
@@ -227,6 +280,14 @@ function validate() {
       if (!projectIds.has(project.id)) pushUniqueError(errors, `scene ${scene.id} references unknown project ${project.id}`);
       if (project.projectIndexPath && !exists(project.projectIndexPath)) pushUniqueError(errors, `scene ${scene.id} missing project index ${project.projectIndexPath}`);
     }
+    for (const rule of scene.rules || []) {
+      if (!ruleIds.has(rule.id)) {
+        pushUniqueError(errors, `scene ${scene.id} references unknown rule ${rule.id}`);
+      } else {
+        const catalogRule = ruleById.get(rule.id);
+        validateRuleMount(rule, catalogRule, `scene ${scene.id} rule ${rule.id}`, errors, 'scene-on-demand');
+      }
+    }
   }
 
   for (const skill of skillCatalog.skills || []) {
@@ -239,7 +300,7 @@ function validate() {
   }
 
   for (const rule of ruleCatalog.rules || []) {
-    if (rule.sourcePath && !exists(rule.sourcePath)) warnings.push(`rule source not present: ${rule.id} -> ${rule.sourcePath}`);
+    validateRuleMetadata(rule, `rule catalog ${rule.id}`, errors);
   }
 
   for (const gate of gates.gates || []) {

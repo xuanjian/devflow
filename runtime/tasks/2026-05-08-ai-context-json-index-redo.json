@@ -57,7 +57,8 @@
         "docs/person/*",
         "docs/repos/*",
         "docs/scenes/*",
-        "docs/templates/*"
+        "docs/templates/*",
+        "docs/reference/*"
       ]
     },
     {
@@ -107,7 +108,7 @@
     {
       "projectId": "ai-context",
       "status": "ready_for_user_test",
-      "summary": "保留原始 md/rules/skills/scenes，新增 JSON 索引层、安装脚本、ai-context skill、任务 Gate JSON 和 HTML 配置面板原型；正文文档统一收进 docs/。"
+      "summary": "保留原始 md/rules/skills/scenes，新增 JSON 索引层、安装脚本、ai-context skill、任务 Gate JSON 和 HTML 配置面板原型；正文文档统一收进 docs/；profile 已压缩为长期画像；active rules 统一改为 .md，并补充 BFF/前端技术族规则与 scene-on-demand 场景规则，active skills 从 10 个收敛为 6 个，长内容和旧 .mdc 归档到 docs/reference/。"
     }
   ],
   "artifacts": [
@@ -117,6 +118,8 @@
     "config/scenes/*.json",
     "config/skills/skills.json",
     "config/rules/rules.json",
+    "bundles/rules/**/*.md",
+    "docs/reference/**",
     "config/tasks/gates.json",
     "scripts/install-ai-context.mjs",
     "bundles/skills/ai-context/SKILL.md"
@@ -128,5 +131,5 @@
     "syncProjectEntries": "node scripts/install-ai-context.mjs sync-projects",
     "package": "No package step yet. Future app code belongs under src/."
   },
-  "updatedAt": "2026-05-08T03:50:35Z"
+  "updatedAt": "2026-05-08T04:15:00Z"
 }

@@ -43,7 +43,22 @@
     }
   ],
   "skills": [],
-  "rules": [],
+  "rules": [
+    {
+      "id": "bff/egg-dhb-framework",
+      "name": "egg-dhb-framework 接入规范",
+      "purpose": "DHB BFF 框架插件、基类、中间件、上下文、权限和插件接入边界。",
+      "sourcePath": "bundles/rules/bff/egg-dhb-framework.md",
+      "applyMode": "project-on-demand",
+      "globs": [
+        "app/**/*.{ts,js}",
+        "config/**/*",
+        "lib/**/*.{ts,js}",
+        "package.json"
+      ],
+      "whenToRead": "Read when editing egg-dhb-framework, framework base classes, middleware, request context, permissions, or BFF plugin integration."
+    }
+  ],
   "tools": {
     "figma": false,
     "notion": true,
@@ -60,7 +75,8 @@
       "docs/repos/egg-dhb-framework.md",
       "docs/scenes/single-repo-change.md",
       "docs/scenes/frontend-bff-debug.md",
-      "docs/scenes/ios-h5-webview-bff.md"
+      "docs/scenes/ios-h5-webview-bff.md",
+      "bundles/rules/bff/egg-dhb-framework.md"
     ],
     "notes": "Start with this JSON. Load source Markdown, rules, or skills only when the task requires detailed instructions."
   }

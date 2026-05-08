@@ -7,7 +7,7 @@ const { spawn, execSync } = require('child_process');
 const { buildExecutionPlan } = require('./run-projects.core');
 const config = require('./presets.json');
 
-const SKILL_DIR = __dirname;
+const SKILL_DIR = path.resolve(__dirname, '..');
 const RUNTIME_DIR = path.join(SKILL_DIR, 'runtime');
 const BACKUP_DIR = path.join(RUNTIME_DIR, 'backups');
 const LOG_DIR = path.join(RUNTIME_DIR, 'logs');

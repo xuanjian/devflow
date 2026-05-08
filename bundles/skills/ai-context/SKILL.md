@@ -27,11 +27,21 @@ Do not read every file under `docs/repos/`, `docs/scenes/`, `bundles/rules/`, or
 
 ## Routing Model
 
-- Project index: `config/projects/<project-id>.json`
-- Scene index: `config/scenes/<scene-id>.json`
+- Project candidate index: `config/projects/index.json`
+- Project detail index: `config/projects/<project-id>.json`
+- Scene candidate index: `config/scenes/index.json`
+- Scene detail index: `config/scenes/<scene-id>.json`
 - Skill catalog: `config/skills/skills.json`
-- Rule catalog: `config/rules/rules.json`
+- Rule catalog: `config/rules/rules.json` (`applyMode`, `globs`, `whenToRead` decide when a rule applies)
 - Gate catalog: `config/tasks/gates.json`
+
+Routing order:
+
+1. Read project and scene indexes as candidate lists.
+2. Select the smallest matching project and scene set.
+3. Read only those detail JSON files.
+4. Load source Markdown, rules, or skills only when the selected detail JSON requires them.
+5. When a selected scene has `rules`, resolve those ids through `config/rules/rules.json` and load only the matching `scene-on-demand` rule sources when the task needs scene-level guidance.
 
 Project JSON owns project relationships:
 
@@ -39,6 +49,12 @@ Project JSON owns project relationships:
 - Project skills.
 - Project scenes.
 - Project rules.
+
+Scene JSON owns scene relationships:
+
+- Scene projects.
+- Scene operation guide.
+- Scene rules for cross-project behavior.
 
 Skill JSON does not list mounted projects. Avoid maintaining reverse project relationships in skill files.
 
@@ -78,5 +94,6 @@ node scripts/install-ai-context.mjs sync-projects
 
 - Prefer updating JSON indexes through scripts.
 - If manually editing JSON, run `node scripts/install-ai-context.mjs validate`.
-- Keep original Markdown/rule/skill files; do not delete them to reduce context.
+- Keep active rule files as `.md` under `bundles/rules/**`; `.mdc` is only for generated Cursor entrypoints or archived reference material.
+- Keep original Markdown/rule/skill knowledge by moving long or old content to `docs/reference/**`; do not delete it just to reduce context.
 - Deprecate `runtime/current-work.md`; current state belongs in `runtime/current.json` plus task JSON.

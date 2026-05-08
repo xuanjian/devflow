@@ -30,11 +30,31 @@
   "skills": [],
   "rules": [
     {
+      "id": "frontend/core",
+      "name": "前端通用规范",
+      "purpose": "前端项目的 UI 状态、字段语义、组件复用、平台差异和验证底线。",
+      "sourcePath": "bundles/rules/frontend/core.md",
+      "applyMode": "project-on-demand",
+      "globs": [
+        "src/**/*.{ts,tsx,js,jsx,vue,scss,css}",
+        "components/**/*.{ts,tsx,js,jsx,vue,scss,css}",
+        "pages/**/*.{ts,tsx,js,jsx,vue,scss,css}",
+        "config/**/*",
+        "package.json"
+      ],
+      "whenToRead": "Read when editing frontend UI, API mapping, routing, platform differences, shared components, or package/container integration."
+    },
+    {
       "id": "dhb-international-mobile/dhb-international-mobile",
       "name": "DHB 国际化移动端开发规范",
-      "purpose": "**技术栈**: React 19 + TypeScript + Vite + Styled-Components",
-      "sourcePath": "bundles/rules/dhb-international-mobile/dhb-international-mobile.mdc",
-      "whenToRead": "Read when working in dhb-international-mobile and this rule affects the requested change."
+      "purpose": "国际化移动端 UI 还原、组件化、主题、多语言和多货币边界。",
+      "sourcePath": "bundles/rules/dhb-international-mobile/dhb-international-mobile.md",
+      "applyMode": "project-on-demand",
+      "globs": [
+        "src/**/*.{ts,tsx,js,jsx,css,scss}",
+        "components/**/*.{ts,tsx,js,jsx,css,scss}"
+      ],
+      "whenToRead": "Read when editing DHB international mobile UI, components, theme, i18n, or multi-currency display."
     }
   ],
   "tools": {
@@ -52,7 +72,8 @@
     "onDemandRead": [
       "docs/repos/dhb-international-mobile.md",
       "docs/scenes/single-repo-change.md",
-      "bundles/rules/dhb-international-mobile/dhb-international-mobile.mdc"
+      "bundles/rules/dhb-international-mobile/dhb-international-mobile.md",
+      "bundles/rules/frontend/core.md"
     ],
     "notes": "Start with this JSON. Load source Markdown, rules, or skills only when the task requires detailed instructions."
   }

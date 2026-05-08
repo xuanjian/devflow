@@ -40,8 +40,8 @@
     }
   ],
   "operationGuide": {
-    "environmentSwitching": "Use dhb-env-switch for test/pre/prod H5 settings and restore-local-env when ending local debugging.",
-    "startup": "Use run-projects for planning the H5/package/container startup order, then run commands manually per project when needed.",
+    "environmentSwitching": "Use dhb-local-env for test/pre/prod H5 settings and restore mode when ending local debugging.",
+    "startup": "Use dhb-local-env for H5/package/container startup planning, then run commands manually per project when needed.",
     "notes": [
       "For package chains, start/build upstream package before downstream container."
     ]

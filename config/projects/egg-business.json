@@ -42,7 +42,22 @@
     }
   ],
   "skills": [],
-  "rules": [],
+  "rules": [
+    {
+      "id": "bff/egg-business",
+      "name": "egg-business 接入规范",
+      "purpose": "BFF 服务接入或修改 egg-business 公共业务能力时的归属、兼容和验证规则。",
+      "sourcePath": "bundles/rules/bff/egg-business.md",
+      "applyMode": "project-on-demand",
+      "globs": [
+        "app/**/*.{ts,js}",
+        "lib/**/*.{ts,js}",
+        "config/**/*",
+        "package.json"
+      ],
+      "whenToRead": "Read when a BFF task touches egg-business shared business logic, shared helper ownership, package consumption, or cross-service compatibility."
+    }
+  ],
   "tools": {
     "figma": false,
     "notion": true,
@@ -59,7 +74,8 @@
       "docs/repos/egg-business.md",
       "docs/scenes/single-repo-change.md",
       "docs/scenes/frontend-bff-debug.md",
-      "docs/scenes/ios-h5-webview-bff.md"
+      "docs/scenes/ios-h5-webview-bff.md",
+      "bundles/rules/bff/egg-business.md"
     ],
     "notes": "Start with this JSON. Load source Markdown, rules, or skills only when the task requires detailed instructions."
   }

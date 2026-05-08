@@ -104,7 +104,7 @@
   ],
   "operationGuide": {
     "environmentSwitching": "Use project-specific config and only switch H5/BFF environments that are actually involved.",
-    "startup": "Start iOS from Xcode when native behavior is in scope; start H5/BFF projects according to selected project JSON and run-projects skill when needed.",
+    "startup": "Start iOS from Xcode when native behavior is in scope; start H5/BFF projects according to selected project JSON and dhb-local-env skill when needed.",
     "notes": [
       "Do not load all H5/BFF projects by default."
     ]
@@ -127,8 +127,22 @@
       "config/projects/egg-dhb-framework.json",
       "config/projects/egg-dhb-permission.json",
       "config/projects/hxb.json",
-      "config/projects/new-mobile-h5.json"
+      "config/projects/new-mobile-h5.json",
+      "bundles/rules/scenes/ios-h5-webview-bff.md"
     ],
     "notes": "Do not load every project in the scene. Select projects based on the user request first."
-  }
+  },
+  "rules": [
+    {
+      "id": "scenes/ios-h5-webview-bff",
+      "name": "iOS H5 WebView BFF 场景规则",
+      "purpose": "iOS、H5、WebView bridge、容器和 BFF 全链路的归属、契约和验证规则。",
+      "sourcePath": "bundles/rules/scenes/ios-h5-webview-bff.md",
+      "applyMode": "scene-on-demand",
+      "globs": [
+        "**/*"
+      ],
+      "whenToRead": "Read when scene ios-h5-webview-bff is selected and native, H5, WebView bridge, container, or BFF ownership matters."
+    }
+  ]
 }

@@ -27,7 +27,23 @@
     }
   ],
   "skills": [],
-  "rules": [],
+  "rules": [
+    {
+      "id": "frontend/core",
+      "name": "前端通用规范",
+      "purpose": "前端项目的 UI 状态、字段语义、组件复用、平台差异和验证底线。",
+      "sourcePath": "bundles/rules/frontend/core.md",
+      "applyMode": "project-on-demand",
+      "globs": [
+        "src/**/*.{ts,tsx,js,jsx,vue,scss,css}",
+        "components/**/*.{ts,tsx,js,jsx,vue,scss,css}",
+        "pages/**/*.{ts,tsx,js,jsx,vue,scss,css}",
+        "config/**/*",
+        "package.json"
+      ],
+      "whenToRead": "Read when editing frontend UI, API mapping, routing, platform differences, shared components, or package/container integration."
+    }
+  ],
   "tools": {
     "figma": true,
     "notion": true,
@@ -42,7 +58,8 @@
     ],
     "onDemandRead": [
       "docs/repos/hxb-mobile.md",
-      "docs/scenes/single-repo-change.md"
+      "docs/scenes/single-repo-change.md",
+      "bundles/rules/frontend/core.md"
     ],
     "notes": "Start with this JSON. Load source Markdown, rules, or skills only when the task requires detailed instructions."
   }

@@ -96,8 +96,8 @@
     }
   ],
   "operationGuide": {
-    "environmentSwitching": "Use dhb-env-switch or project-specific BFF configuration only for selected projects.",
-    "startup": "Start the frontend entry and the exact BFF service involved. Use run-projects for frontend chain planning when applicable.",
+    "environmentSwitching": "Use dhb-local-env for selected frontend projects, and project-specific BFF configuration only for selected BFF services.",
+    "startup": "Start the frontend entry and the exact BFF service involved. Use dhb-local-env for frontend chain planning when applicable.",
     "notes": [
       "Keep BFF scope narrow; do not expand to every service by default."
     ]
@@ -119,8 +119,22 @@
       "config/projects/dhbfront-cash-mini.json",
       "config/projects/egg-business.json",
       "config/projects/egg-dhb-framework.json",
-      "config/projects/egg-dhb-permission.json"
+      "config/projects/egg-dhb-permission.json",
+      "bundles/rules/scenes/frontend-bff-debug.md"
     ],
     "notes": "Do not load every project in the scene. Select projects based on the user request first."
-  }
+  },
+  "rules": [
+    {
+      "id": "scenes/frontend-bff-debug",
+      "name": "前端 BFF 联调场景规则",
+      "purpose": "前端与 BFF 联调时的范围控制、接口契约、复现和验证规则。",
+      "sourcePath": "bundles/rules/scenes/frontend-bff-debug.md",
+      "applyMode": "scene-on-demand",
+      "globs": [
+        "**/*"
+      ],
+      "whenToRead": "Read when scene frontend-bff-debug is selected and the task needs frontend plus BFF contract or debugging guidance."
+    }
+  ]
 }

@@ -1,16 +1,14 @@
 {
   "version": 1,
-  "generatedAt": "2026-05-08T03:32:27.014Z",
+  "generatedAt": "2026-05-08T04:13:42.429Z",
   "note": "Skill catalog describes skills only. Project bindings live in config/projects/<project>.json.",
   "skills": [
     {
       "id": "ai-context",
       "name": "ai-context",
-      "description": "统一读取 ai-context JSON 索引、安装入口、配置写入和 G1-G7 任务流转。",
-      "trigger": "Use when installing ai-context, checking configuration, routing a new task, or updating project/scene/skill indexes.",
+      "description": "Use when entering, installing, validating, or modifying ai-context, or when routing tasks through project/scene/rule/skill JSON indexes.",
+      "trigger": "Use when installing ai-context, checking configuration, routing a new task, updating indexes, or advancing G1-G7 task flow.",
       "sourcePath": "bundles/skills/ai-context/SKILL.md",
-      "sourceExists": true,
-      "sourceType": "directory",
       "tags": [
         "ai-context",
         "workflow"
@@ -18,16 +16,16 @@
       "defaultSceneIds": [
         "ai-context-config"
       ],
-      "whenToLoad": "Load at the start of ai-context setup or when a task modifies this repository."
+      "whenToLoad": "Load at the start of ai-context setup or when a task modifies this repository.",
+      "sourceExists": true,
+      "sourceType": "file"
     },
     {
-      "id": "dhb-env-switch",
-      "name": "dhb-env-switch",
-      "description": "切换 DHB 本地开发环境（测试/预发/线上）。触发词：切环境、切线上、切测试、切预发。",
-      "trigger": "切换 DHB 本地开发环境（测试/预发/线上）。触发词：切环境、切线上、切测试、切预发。",
-      "sourcePath": "bundles/skills/dhb-env-switch/SKILL.md",
-      "sourceExists": true,
-      "sourceType": "directory",
+      "id": "dhb-local-env",
+      "name": "dhb-local-env",
+      "description": "Use when running, switching, restoring, or diagnosing local DHB frontend integration environments across cash-mini, dhb-mobile-index, new_mobile_h5, customize-mini-program, or DHB_PACKAGES.",
+      "trigger": "Run local DHB frontend projects, switch env, restore local env, or diagnose multi-project H5/container integration.",
+      "sourcePath": "bundles/skills/dhb-local-env/SKILL.md",
       "tags": [
         "cash-mini",
         "container",
@@ -46,19 +44,20 @@
         "packages-cash-index-h5-webview",
         "single-repo-change"
       ],
-      "whenToLoad": "切换 DHB 本地开发环境（测试/预发/线上）。触发词：切环境、切线上、切测试、切预发。"
+      "whenToLoad": "Load for local run, env switch, restore, or multi-project frontend integration tasks.",
+      "sourceExists": true,
+      "sourceType": "file"
     },
     {
       "id": "dhb-packages/add-mobile-icon",
       "name": "add-mobile-icon",
-      "description": "在 dhbfront-img 项目中新增图标。触发词：新增图标、添加图标、创建图标、添加 svg 图标。支持固定颜色图标和主题色图标，支持任意模块目录（goods、order、payment 等）。",
-      "trigger": "在 dhbfront-img 项目中新增图标。触发词：新增图标、添加图标、创建图标、添加 svg 图标。支持固定颜色图标和主题色图标，支持任意模块目录（goods、order、payment 等）。",
+      "description": "Use when adding SVG mobile image assets to dhbfront-img for DHB frontend packages, including fixed-color icons or theme-color icon variants.",
+      "trigger": "Add mobile icon, SVG icon, Base64 icon, fixed-color icon, or theme-color icon to dhbfront-img.",
       "sourcePath": "bundles/skills/dhb-packages/add-mobile-icon/SKILL.md",
-      "sourceExists": true,
-      "sourceType": "directory",
       "tags": [
         "dhb",
         "frontend",
+        "icons",
         "packages"
       ],
       "defaultSceneIds": [
@@ -66,80 +65,65 @@
         "packages-cash-index-h5-webview",
         "single-repo-change"
       ],
-      "whenToLoad": "在 dhbfront-img 项目中新增图标。触发词：新增图标、添加图标、创建图标、添加 svg 图标。支持固定颜色图标和主题色图标，支持任意模块目录（goods、order、payment 等）。"
+      "whenToLoad": "Load when the task creates or updates dhbfront-img mobile SVG assets.",
+      "sourceExists": true,
+      "sourceType": "file"
     },
     {
-      "id": "dhb-packages/add-taro-module",
-      "name": "Skill: 在 Taro 分包中新增业务模块",
-      "description": "使用以下提示词触发此工作流：",
-      "trigger": "使用以下提示词触发此工作流：",
-      "sourcePath": "bundles/skills/dhb-packages/add-taro-module.md",
-      "sourceExists": true,
-      "sourceType": "file",
+      "id": "dhb-taro-module",
+      "name": "dhb-taro-module",
+      "description": "Use when creating a new Taro business module/package under DHB_PACKAGES.",
+      "trigger": "Create new DHB_PACKAGES Taro package, business module, demo shell entry, package exports, or package i18n scaffold.",
+      "sourcePath": "bundles/skills/dhb-taro-module/SKILL.md",
       "tags": [
         "dhb",
         "frontend",
-        "packages"
+        "packages",
+        "taro"
       ],
       "defaultSceneIds": [
         "frontend-bff-debug",
         "packages-cash-index-h5-webview",
         "single-repo-change"
       ],
-      "whenToLoad": "使用以下提示词触发此工作流："
+      "whenToLoad": "Load when adding a new Taro business module under DHB_PACKAGES.",
+      "sourceExists": true,
+      "sourceType": "file"
     },
     {
-      "id": "dhb-packages/create-api-request",
-      "name": "创建 API 请求 Skill",
-      "description": "- 创建请求",
-      "trigger": "- 创建请求",
-      "sourcePath": "bundles/skills/dhb-packages/create-api-request.md",
-      "sourceExists": true,
-      "sourceType": "file",
+      "id": "dhb-api-from-curl",
+      "name": "dhb-api-from-curl",
+      "description": "Use when the user provides a curl request and wants DHB Taro request code, a mock file, or both.",
+      "trigger": "Generate request code or mock data from curl for DHB frontend packages.",
+      "sourcePath": "bundles/skills/dhb-api-from-curl/SKILL.md",
       "tags": [
+        "api",
+        "curl",
         "dhb",
         "frontend",
-        "packages"
+        "mock"
       ],
       "defaultSceneIds": [
         "frontend-bff-debug",
         "packages-cash-index-h5-webview",
         "single-repo-change"
       ],
-      "whenToLoad": "- 创建请求"
+      "whenToLoad": "Load when converting curl to request code or mock data.",
+      "sourceExists": true,
+      "sourceType": "file"
     },
     {
-      "id": "dhb-packages/mock-api-from-curl",
-      "name": "Skill: 根据 curl 生成接口 Mock",
-      "description": "```",
-      "trigger": "```",
-      "sourcePath": "bundles/skills/dhb-packages/mock-api-from-curl.md",
-      "sourceExists": true,
-      "sourceType": "file",
-      "tags": [
-        "dhb",
-        "frontend",
-        "packages"
-      ],
-      "defaultSceneIds": [
-        "frontend-bff-debug",
-        "packages-cash-index-h5-webview",
-        "single-repo-change"
-      ],
-      "whenToLoad": "```"
-    },
-    {
-      "id": "dhbfront-cash-mini/add-subpackage-module",
-      "name": "add-subpackage-module",
-      "description": "为 dhbfront-cash-mini 项目新增分包业务模块。触发词：新增模块、添加模块、创建分包组件。用于从 npm 包引入业务组件，创建本地包装组件，并配置分包导出。",
-      "trigger": "为 dhbfront-cash-mini 项目新增分包业务模块。触发词：新增模块、添加模块、创建分包组件。用于从 npm 包引入业务组件，创建本地包装组件，并配置分包导出。",
-      "sourcePath": "bundles/skills/dhbfront-cash-mini/add-subpackage-module/SKILL.md",
-      "sourceExists": true,
-      "sourceType": "directory",
+      "id": "dhb-subpackage-release",
+      "name": "dhb-subpackage-release",
+      "description": "Use when publishing or integrating DHB_PACKAGES subpackage modules into dhbfront-cash-mini, including adding a new subpackage wrapper or updating an existing subpackage version.",
+      "trigger": "Add subpackage wrapper, update subpackage version, publish DHB_PACKAGES module, or integrate package into dhbfront-cash-mini.",
+      "sourcePath": "bundles/skills/dhb-subpackage-release/SKILL.md",
       "tags": [
         "cash-mini",
         "dhb",
-        "frontend"
+        "frontend",
+        "packages",
+        "release"
       ],
       "defaultSceneIds": [
         "cash-index-h5-webview",
@@ -147,84 +131,9 @@
         "packages-cash-index-h5-webview",
         "single-repo-change"
       ],
-      "whenToLoad": "为 dhbfront-cash-mini 项目新增分包业务模块。触发词：新增模块、添加模块、创建分包组件。用于从 npm 包引入业务组件，创建本地包装组件，并配置分包导出。"
-    },
-    {
-      "id": "dhbfront-cash-mini/update-subpackage-module",
-      "name": "update-subpackage-module",
-      "description": "更新已有的分包业务模块。触发词：更新模块、更新分包、发布更新、模块升级。用于修改分包组件代码后，发布新版本并更新主包依赖。",
-      "trigger": "更新已有的分包业务模块。触发词：更新模块、更新分包、发布更新、模块升级。用于修改分包组件代码后，发布新版本并更新主包依赖。",
-      "sourcePath": "bundles/skills/dhbfront-cash-mini/update-subpackage-module/SKILL.md",
+      "whenToLoad": "Load for DHB_PACKAGES to dhbfront-cash-mini publish/update/integration tasks.",
       "sourceExists": true,
-      "sourceType": "directory",
-      "tags": [
-        "cash-mini",
-        "dhb",
-        "frontend"
-      ],
-      "defaultSceneIds": [
-        "cash-index-h5-webview",
-        "frontend-bff-debug",
-        "packages-cash-index-h5-webview",
-        "single-repo-change"
-      ],
-      "whenToLoad": "更新已有的分包业务模块。触发词：更新模块、更新分包、发布更新、模块升级。用于修改分包组件代码后，发布新版本并更新主包依赖。"
-    },
-    {
-      "id": "restore-local-env",
-      "name": "restore-local-env",
-      "description": "恢复 DHB 本地联调环境。触发词：恢复环境、恢复配置、结束开发、还原配置。用于停止统一执行器启动的进程并恢复其备份的配置文件。",
-      "trigger": "恢复 DHB 本地联调环境。触发词：恢复环境、恢复配置、结束开发、还原配置。用于停止统一执行器启动的进程并恢复其备份的配置文件。",
-      "sourcePath": "bundles/skills/restore-local-env/SKILL.md",
-      "sourceExists": true,
-      "sourceType": "directory",
-      "tags": [
-        "cash-mini",
-        "container",
-        "dhb",
-        "frontend",
-        "h5",
-        "mini-program",
-        "packages"
-      ],
-      "defaultSceneIds": [
-        "cash-index-h5-webview",
-        "frontend-bff-debug",
-        "index-h5-webview",
-        "ios-h5-webview-bff",
-        "mini-program-h5-webview",
-        "packages-cash-index-h5-webview",
-        "single-repo-change"
-      ],
-      "whenToLoad": "恢复 DHB 本地联调环境。触发词：恢复环境、恢复配置、结束开发、还原配置。用于停止统一执行器启动的进程并恢复其备份的配置文件。"
-    },
-    {
-      "id": "run-projects",
-      "name": "run-projects",
-      "description": "Use when running DHB local frontend projects across cash-mini, dhb-mobile-index, new_mobile_h5, customize-mini-program, or linked subpackages, especially when switching environments, linking local packages, or recovering from unstable startup flows.",
-      "trigger": "Use when running DHB local frontend projects across cash-mini, dhb-mobile-index, new_mobile_h5, customize-mini-program, or linked subpackages, especially when switching environments, linking local packages, or recovering from unstable startup flows.",
-      "sourcePath": "bundles/skills/run-projects/SKILL.md",
-      "sourceExists": true,
-      "sourceType": "directory",
-      "tags": [
-        "cash-mini",
-        "container",
-        "dhb",
-        "frontend",
-        "h5",
-        "mini-program",
-        "packages"
-      ],
-      "defaultSceneIds": [
-        "cash-index-h5-webview",
-        "frontend-bff-debug",
-        "index-h5-webview",
-        "ios-h5-webview-bff",
-        "mini-program-h5-webview",
-        "packages-cash-index-h5-webview",
-        "single-repo-change"
-      ],
-      "whenToLoad": "Use when running DHB local frontend projects across cash-mini, dhb-mobile-index, new_mobile_h5, customize-mini-program, or linked subpackages, especially when switching environments, linking local packages, or recovering from unstable startup flows."
+      "sourceType": "file"
     }
   ]
 }

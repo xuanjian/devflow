@@ -145,7 +145,7 @@ runTest('subpackage dry-run does not auto install dependencies', () => {
   const output = execFileSync(
     process.execPath,
     [
-      '/Users/xj/Documents/ai-context/bundles/skills/run-projects/run-projects.js',
+      '/Users/xj/Documents/ai-context/bundles/skills/dhb-local-env/scripts/run-projects.js',
       '--preset',
       'preset-2',
       '--env',

@@ -43,41 +43,42 @@
   ],
   "skills": [
     {
-      "id": "run-projects",
-      "name": "run-projects",
-      "description": "Use when running DHB local frontend projects across cash-mini, dhb-mobile-index, new_mobile_h5, customize-mini-program, or linked subpackages, especially when switching environments, linking local packages, or recovering from unstable startup flows.",
-      "sourcePath": "bundles/skills/run-projects/SKILL.md",
-      "whenToLoad": "Load when customize-mini-program task matches this skill trigger."
-    },
-    {
-      "id": "restore-local-env",
-      "name": "restore-local-env",
-      "description": "恢复 DHB 本地联调环境。触发词：恢复环境、恢复配置、结束开发、还原配置。用于停止统一执行器启动的进程并恢复其备份的配置文件。",
-      "sourcePath": "bundles/skills/restore-local-env/SKILL.md",
-      "whenToLoad": "Load when customize-mini-program task matches this skill trigger."
-    },
-    {
-      "id": "dhb-env-switch",
-      "name": "dhb-env-switch",
-      "description": "切换 DHB 本地开发环境（测试/预发/线上）。触发词：切环境、切线上、切测试、切预发。",
-      "sourcePath": "bundles/skills/dhb-env-switch/SKILL.md",
-      "whenToLoad": "Load when customize-mini-program task matches this skill trigger."
+      "id": "dhb-local-env",
+      "name": "dhb-local-env",
+      "description": "Use when running, switching, restoring, or diagnosing local DHB frontend integration environments across cash-mini, dhb-mobile-index, new_mobile_h5, customize-mini-program, or DHB_PACKAGES.",
+      "sourcePath": "bundles/skills/dhb-local-env/SKILL.md",
+      "whenToLoad": "Load when customize-mini-program task needs dhb-local-env."
     }
   ],
   "rules": [
     {
-      "id": "shared-context",
-      "name": "统一共享上下文入口",
-      "purpose": "请优先阅读：",
-      "sourcePath": "bundles/rules/shared-context.mdc",
-      "whenToRead": "Read when working in customize-mini-program and this rule affects the requested change."
+      "id": "frontend/core",
+      "name": "前端通用规范",
+      "purpose": "前端项目的 UI 状态、字段语义、组件复用、平台差异和验证底线。",
+      "sourcePath": "bundles/rules/frontend/core.md",
+      "applyMode": "project-on-demand",
+      "globs": [
+        "src/**/*.{ts,tsx,js,jsx,vue,scss,css}",
+        "components/**/*.{ts,tsx,js,jsx,vue,scss,css}",
+        "pages/**/*.{ts,tsx,js,jsx,vue,scss,css}",
+        "config/**/*",
+        "package.json"
+      ],
+      "whenToRead": "Read when editing frontend UI, API mapping, routing, platform differences, shared components, or package/container integration."
     },
     {
       "id": "customize-mini-program/customize-mini-program",
       "name": "customize-mini-program 开发规范",
-      "purpose": "**技术栈**: 原生小程序 + npm 包",
-      "sourcePath": "bundles/rules/customize-mini-program/customize-mini-program.mdc",
-      "whenToRead": "Read when working in customize-mini-program and this rule affects the requested change."
+      "purpose": "原生小程序配置、webview、npm 包和自动生成配置文件边界。",
+      "sourcePath": "bundles/rules/customize-mini-program/customize-mini-program.md",
+      "applyMode": "project-on-demand",
+      "globs": [
+        "**/*.js",
+        "**/*.json",
+        "**/*.wxml",
+        "**/*.wxss"
+      ],
+      "whenToRead": "Read when editing customize-mini-program config, webview, npm package usage, or generated environment files."
     }
   ],
   "tools": {
@@ -97,11 +98,9 @@
       "docs/scenes/single-repo-change.md",
       "docs/scenes/mini-program-h5-webview.md",
       "docs/scenes/packages-cash-index-h5-webview.md",
-      "bundles/rules/shared-context.mdc",
-      "bundles/rules/customize-mini-program/customize-mini-program.mdc",
-      "bundles/skills/run-projects/SKILL.md",
-      "bundles/skills/restore-local-env/SKILL.md",
-      "bundles/skills/dhb-env-switch/SKILL.md"
+      "bundles/rules/customize-mini-program/customize-mini-program.md",
+      "bundles/skills/dhb-local-env/SKILL.md",
+      "bundles/rules/frontend/core.md"
     ],
     "notes": "Start with this JSON. Load source Markdown, rules, or skills only when the task requires detailed instructions."
   }

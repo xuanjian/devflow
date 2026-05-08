@@ -30,9 +30,9 @@
     {
       "id": "ai-context",
       "name": "ai-context",
-      "description": "统一读取 ai-context JSON 索引、安装入口、配置写入和 G1-G7 任务流转。",
+      "description": "Use when entering, installing, validating, or modifying ai-context, or when routing tasks through project/scene/rule/skill JSON indexes.",
       "sourcePath": "bundles/skills/ai-context/SKILL.md",
-      "whenToLoad": "Load when ai-context task matches this skill trigger."
+      "whenToLoad": "Load when ai-context task needs ai-context."
     }
   ],
   "rules": [],

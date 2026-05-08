@@ -57,144 +57,41 @@
   "skills": [],
   "rules": [
     {
-      "id": "ios-dhb/001-project-overview",
-      "name": "DHB (订货宝) iOS项目概述",
-      "purpose": "DHB项目概述和技术栈说明",
-      "sourcePath": "bundles/rules/ios-dhb/001-project-overview.mdc",
-      "whenToRead": "Read when working in dhb and this rule affects the requested change."
+      "id": "ios-dhb/core",
+      "name": "DHB iOS 核心规范",
+      "purpose": "DHB iOS 命名、结构、布局、模型、内存、线程和禁止事项。",
+      "sourcePath": "bundles/rules/ios-dhb/core.md",
+      "applyMode": "project-on-demand",
+      "globs": [
+        "**/*.{h,m,mm,xib,storyboard}"
+      ],
+      "whenToRead": "Read when editing DHB iOS Objective-C UI, model, controller, memory, thread, or project structure code."
     },
     {
-      "id": "ios-dhb/002-naming-conventions",
-      "name": "命名规范",
-      "purpose": "命名规范：类名、变量、常量、通知等命名规则",
-      "sourcePath": "bundles/rules/ios-dhb/002-naming-conventions.mdc",
-      "whenToRead": "Read when working in dhb and this rule affects the requested change."
+      "id": "ios-dhb/networking",
+      "name": "DHB iOS 网络规范",
+      "purpose": "DHB iOS Request/Service/Controller 边界、Node/BFF 请求和 coobjc 用法。",
+      "sourcePath": "bundles/rules/ios-dhb/networking.md",
+      "applyMode": "project-on-demand",
+      "globs": [
+        "**/*Request*.{h,m,mm}",
+        "**/*Service*.{h,m,mm}",
+        "**/*Network*.{h,m,mm}",
+        "**/*Bridge*.{h,m,mm}"
+      ],
+      "whenToRead": "Read when adding or changing DHB iOS Request, Service, network, BFF, coroutine, or WebView bridge data loading code."
     },
     {
-      "id": "ios-dhb/003-file-structure",
-      "name": "文件结构规范",
-      "purpose": "```objc",
-      "sourcePath": "bundles/rules/ios-dhb/003-file-structure.mdc",
-      "whenToRead": "Read when working in dhb and this rule affects the requested change."
-    },
-    {
-      "id": "ios-dhb/010-page-creation",
-      "name": "页面创建规范",
-      "purpose": "页面创建规范：Controller、Service、XIB、Networking四层架构",
-      "sourcePath": "bundles/rules/ios-dhb/010-page-creation.mdc",
-      "whenToRead": "Read when working in dhb and this rule affects the requested change."
-    },
-    {
-      "id": "ios-dhb/011-layout-sdautolayout",
-      "name": "布局规范 - SDAutoLayout",
-      "purpose": "布局规范：SDAutoLayout使用方法和注意事项",
-      "sourcePath": "bundles/rules/ios-dhb/011-layout-sdautolayout.mdc",
-      "whenToRead": "Read when working in dhb and this rule affects the requested change."
-    },
-    {
-      "id": "ios-dhb/012-networking",
-      "name": "网络请求规范 (v2.0)",
-      "purpose": "网络请求规范：DHBBaseNetworkRequest基类和coobjc协程使用",
-      "sourcePath": "bundles/rules/ios-dhb/012-networking.mdc",
-      "whenToRead": "Read when working in dhb and this rule affects the requested change."
-    },
-    {
-      "id": "ios-dhb/013-data-model",
-      "name": "数据模型规范",
-      "purpose": "数据模型规范：YYModel的使用方法",
-      "sourcePath": "bundles/rules/ios-dhb/013-data-model.mdc",
-      "whenToRead": "Read when working in dhb and this rule affects the requested change."
-    },
-    {
-      "id": "ios-dhb/020-notification-system",
-      "name": "通知机制规范 (v2.0)",
-      "purpose": "通知机制规范：v2.0精确通知机制",
-      "sourcePath": "bundles/rules/ios-dhb/020-notification-system.mdc",
-      "whenToRead": "Read when working in dhb and this rule affects the requested change."
-    },
-    {
-      "id": "ios-dhb/021-cart-shopping",
-      "name": "购物车加购规范",
-      "purpose": "购物车加购规范：SKU加购标准流程",
-      "sourcePath": "bundles/rules/ios-dhb/021-cart-shopping.mdc",
-      "whenToRead": "Read when working in dhb and this rule affects the requested change."
-    },
-    {
-      "id": "ios-dhb/030-memory-management",
-      "name": "内存管理规范",
-      "purpose": "内存管理规范：防止循环引用和内存泄漏",
-      "sourcePath": "bundles/rules/ios-dhb/030-memory-management.mdc",
-      "whenToRead": "Read when working in dhb and this rule affects the requested change."
-    },
-    {
-      "id": "ios-dhb/031-thread-safety",
-      "name": "线程安全规范",
-      "purpose": "线程安全规范：主线程UI操作，子线程耗时任务",
-      "sourcePath": "bundles/rules/ios-dhb/031-thread-safety.mdc",
-      "whenToRead": "Read when working in dhb and this rule affects the requested change."
-    },
-    {
-      "id": "ios-dhb/032-error-handling",
-      "name": "错误处理规范",
-      "purpose": "错误处理规范：统一的错误提示和自定义弹框",
-      "sourcePath": "bundles/rules/ios-dhb/032-error-handling.mdc",
-      "whenToRead": "Read when working in dhb and this rule affects the requested change."
-    },
-    {
-      "id": "ios-dhb/040-project-specific",
-      "name": "项目特定规范",
-      "purpose": "项目特定规范：多语言、主题、日志、OSS、埋点",
-      "sourcePath": "bundles/rules/ios-dhb/040-project-specific.mdc",
-      "whenToRead": "Read when working in dhb and this rule affects the requested change."
-    },
-    {
-      "id": "ios-dhb/041-forbidden-practices",
-      "name": "禁止事项",
-      "purpose": "禁止事项和谨慎使用的技术",
-      "sourcePath": "bundles/rules/ios-dhb/041-forbidden-practices.mdc",
-      "whenToRead": "Read when working in dhb and this rule affects the requested change."
-    },
-    {
-      "id": "ios-dhb/050-testing",
-      "name": "测试规范",
-      "purpose": "测试规范：单元测试和UI测试",
-      "sourcePath": "bundles/rules/ios-dhb/050-testing.mdc",
-      "whenToRead": "Read when working in dhb and this rule affects the requested change."
-    },
-    {
-      "id": "ios-dhb/051-deployment",
-      "name": "打包发布规范",
-      "purpose": "打包发布规范：打包脚本、符号表上传、版本管理",
-      "sourcePath": "bundles/rules/ios-dhb/051-deployment.mdc",
-      "whenToRead": "Read when working in dhb and this rule affects the requested change."
-    },
-    {
-      "id": "ios-dhb/052-common-issues",
-      "name": "常见问题",
-      "purpose": "常见问题和解决方案",
-      "sourcePath": "bundles/rules/ios-dhb/052-common-issues.mdc",
-      "whenToRead": "Read when working in dhb and this rule affects the requested change."
-    },
-    {
-      "id": "ios-dhb/053-code-review",
-      "name": "代码审查检查点",
-      "purpose": "代码审查检查点和性能优化",
-      "sourcePath": "bundles/rules/ios-dhb/053-code-review.mdc",
-      "whenToRead": "Read when working in dhb and this rule affects the requested change."
-    },
-    {
-      "id": "ios-dhb/NETWORKING_UPDATE_V2.1",
-      "name": "网络请求规范更新说明 (v2.1)",
-      "purpose": "2025-11-11",
-      "sourcePath": "bundles/rules/ios-dhb/NETWORKING_UPDATE_V2.1.md",
-      "whenToRead": "Read when working in dhb and this rule affects the requested change."
-    },
-    {
-      "id": "ios-dhb/README",
-      "name": "DHB 项目 Cursor Rules (新版)",
-      "purpose": "本项目已迁移到 Cursor 最新的规则系统，所有规则按功能模块化组织。",
-      "sourcePath": "bundles/rules/ios-dhb/README.md",
-      "whenToRead": "Read when working in dhb and this rule affects the requested change."
+      "id": "ios-dhb/release-check",
+      "name": "DHB iOS 验收发布检查",
+      "purpose": "DHB iOS 验收、代码检查、WebView 桥接说明和打包归档。",
+      "sourcePath": "bundles/rules/ios-dhb/release-check.md",
+      "applyMode": "task-gate",
+      "globs": [
+        "**/*.{h,m,mm,xib,storyboard}",
+        "project.pbxproj"
+      ],
+      "whenToRead": "Read during G6/G7 for DHB iOS verification, WebView bridge handoff, packaging, or release notes."
     }
   ],
   "tools": {
@@ -216,26 +113,9 @@
       "docs/scenes/cash-index-h5-webview.md",
       "docs/scenes/packages-cash-index-h5-webview.md",
       "docs/scenes/ios-h5-webview-bff.md",
-      "bundles/rules/ios-dhb/001-project-overview.mdc",
-      "bundles/rules/ios-dhb/002-naming-conventions.mdc",
-      "bundles/rules/ios-dhb/003-file-structure.mdc",
-      "bundles/rules/ios-dhb/010-page-creation.mdc",
-      "bundles/rules/ios-dhb/011-layout-sdautolayout.mdc",
-      "bundles/rules/ios-dhb/012-networking.mdc",
-      "bundles/rules/ios-dhb/013-data-model.mdc",
-      "bundles/rules/ios-dhb/020-notification-system.mdc",
-      "bundles/rules/ios-dhb/021-cart-shopping.mdc",
-      "bundles/rules/ios-dhb/030-memory-management.mdc",
-      "bundles/rules/ios-dhb/031-thread-safety.mdc",
-      "bundles/rules/ios-dhb/032-error-handling.mdc",
-      "bundles/rules/ios-dhb/040-project-specific.mdc",
-      "bundles/rules/ios-dhb/041-forbidden-practices.mdc",
-      "bundles/rules/ios-dhb/050-testing.mdc",
-      "bundles/rules/ios-dhb/051-deployment.mdc",
-      "bundles/rules/ios-dhb/052-common-issues.mdc",
-      "bundles/rules/ios-dhb/053-code-review.mdc",
-      "bundles/rules/ios-dhb/NETWORKING_UPDATE_V2.1.md",
-      "bundles/rules/ios-dhb/README.md"
+      "bundles/rules/ios-dhb/core.md",
+      "bundles/rules/ios-dhb/networking.md",
+      "bundles/rules/ios-dhb/release-check.md"
     ],
     "notes": "Start with this JSON. Load source Markdown, rules, or skills only when the task requires detailed instructions."
   }
