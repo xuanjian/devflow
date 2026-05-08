@@ -120,6 +120,27 @@ select {
   border-radius: 8px;
   min-height: calc(100vh - 40px);
   overflow: auto;
+  position: relative;
+}
+
+.graph-toolbar {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.94);
+  border-bottom: 1px solid #e4e7ec;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  left: 0;
+  padding: 12px 16px;
+  position: sticky;
+  right: 0;
+  top: 0;
+  z-index: 2;
+}
+
+.graph-toolbar span {
+  color: #667085;
+  font-size: 13px;
 }
 
 .graph-view svg {
@@ -130,6 +151,11 @@ select {
 .graph-edge {
   stroke: #cbd2dc;
   stroke-width: 1.5;
+}
+
+.graph-edge.focused-edge {
+  stroke: #2563eb;
+  stroke-width: 2.25;
 }
 
 .graph-node {
@@ -164,6 +190,11 @@ select {
 .graph-node:focus {
   outline: 2px solid #2563eb;
   outline-offset: 2px;
+}
+
+.graph-node.highlighted {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.12);
 }
 
 .status-warning {
