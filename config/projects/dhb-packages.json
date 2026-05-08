@@ -43,6 +43,13 @@
   ],
   "skills": [
     {
+      "id": "dhb-api-from-curl",
+      "name": "dhb-api-from-curl",
+      "description": "Use when the user provides a curl request and wants DHB Taro request code, a mock file, or both.",
+      "sourcePath": "bundles/skills/dhb-api-from-curl/SKILL.md",
+      "whenToLoad": "Load when dhb-packages task needs dhb-api-from-curl."
+    },
+    {
       "id": "dhb-local-env",
       "name": "dhb-local-env",
       "description": "Use when running, switching, restoring, or diagnosing local DHB frontend integration environments across cash-mini, dhb-mobile-index, new_mobile_h5, customize-mini-program, or DHB_PACKAGES.",
@@ -64,11 +71,11 @@
       "whenToLoad": "Load when dhb-packages task needs dhb-taro-module."
     },
     {
-      "id": "dhb-api-from-curl",
-      "name": "dhb-api-from-curl",
-      "description": "Use when the user provides a curl request and wants DHB Taro request code, a mock file, or both.",
-      "sourcePath": "bundles/skills/dhb-api-from-curl/SKILL.md",
-      "whenToLoad": "Load when dhb-packages task needs dhb-api-from-curl."
+      "id": "ui-ux-pro-max",
+      "name": "ui-ux-pro-max",
+      "description": "UI/UX design intelligence for web and mobile. Includes 50+ styles, 161 color palettes, 57 font pairings, 161 product types, 99 UX guidelines, and 25 chart types across 10 stacks (React, Next.js, Vue, Svelte, SwiftUI, React Native, Flutter, Tailwind, shadcn/ui, and HTML/CSS). Actions: plan, build, create, design, implement, review, fix, improve, optimize, enhance, refactor, and check UI/UX code. Projects: website, landing page, dashboard, admin panel, e-commerce, SaaS, portfolio, blog, and mobile app. Elements: button, modal, navbar, sidebar, card, table, form, and chart. Styles: glassmorphism, claymorphism, minimalism, brutalism, neumorphism, bento grid, dark mode, responsive, skeuomorphism, and flat design. Topics: color systems, accessibility, animation, layout, typography, font pairing, spacing, interaction states, shadow, and gradient. Integrations: shadcn/ui MCP for component search and examples.",
+      "sourcePath": "bundles/skills/ui-ux-pro-max/SKILL.md",
+      "whenToLoad": "UI/UX design intelligence for web and mobile. Includes 50+ styles, 161 color palettes, 57 font pairings, 161 product types, 99 UX guidelines, and 25 chart types across 10 stacks (React, Next.js, Vue, Svelte, SwiftUI, React Native, Flutter, Tailwind, shadcn/ui, and HTML/CSS). Actions: plan, build, create, design, implement, review, fix, improve, optimize, enhance, refactor, and check UI/UX code. Projects: website, landing page, dashboard, admin panel, e-commerce, SaaS, portfolio, blog, and mobile app. Elements: button, modal, navbar, sidebar, card, table, form, and chart. Styles: glassmorphism, claymorphism, minimalism, brutalism, neumorphism, bento grid, dark mode, responsive, skeuomorphism, and flat design. Topics: color systems, accessibility, animation, layout, typography, font pairing, spacing, interaction states, shadow, and gradient. Integrations: shadcn/ui MCP for component search and examples."
     }
   ],
   "rules": [
@@ -113,16 +120,17 @@
       "config/projects/dhb-packages.json"
     ],
     "onDemandRead": [
-      "docs/repos/dhb-packages.md",
-      "docs/scenes/single-repo-change.md",
-      "docs/scenes/packages-cash-index-h5-webview.md",
-      "docs/scenes/frontend-bff-debug.md",
-      "bundles/skills/dhb-packages/add-mobile-icon/SKILL.md",
       "bundles/rules/dhb-packages/core.md",
-      "bundles/skills/dhb-local-env/SKILL.md",
-      "bundles/skills/dhb-taro-module/SKILL.md",
+      "bundles/rules/frontend/core.md",
       "bundles/skills/dhb-api-from-curl/SKILL.md",
-      "bundles/rules/frontend/core.md"
+      "bundles/skills/dhb-local-env/SKILL.md",
+      "bundles/skills/dhb-packages/add-mobile-icon/SKILL.md",
+      "bundles/skills/dhb-taro-module/SKILL.md",
+      "bundles/skills/ui-ux-pro-max/SKILL.md",
+      "docs/repos/dhb-packages.md",
+      "docs/scenes/frontend-bff-debug.md",
+      "docs/scenes/packages-cash-index-h5-webview.md",
+      "docs/scenes/single-repo-change.md"
     ],
     "notes": "Start with this JSON. Load source Markdown, rules, or skills only when the task requires detailed instructions."
   }

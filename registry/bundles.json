@@ -29,30 +29,6 @@
       ]
     },
     {
-      "bundleKey": "rule:dhb-international-mobile/dhb-international-mobile",
-      "kind": "rule",
-      "ref": "dhb-international-mobile/dhb-international-mobile.mdc",
-      "title": "DHB 国际化移动端开发规范",
-      "summary": "**技术栈**: React 19 + TypeScript + Vite + Styled-Components",
-      "path": "/Users/xj/Documents/ai-context/bundles/rules/dhb-international-mobile/dhb-international-mobile.mdc",
-      "sourceType": "file",
-      "scope": "project",
-      "repoKeys": [
-        "dhb-international-mobile"
-      ],
-      "families": [
-        "frontend"
-      ],
-      "tags": [
-        "dhb",
-        "frontend",
-        "international"
-      ],
-      "defaultScenes": [
-        "single-repo-change"
-      ]
-    },
-    {
       "bundleKey": "rule:dhb-mobile-index",
       "kind": "rule",
       "ref": "dhb-mobile-index.mdc",

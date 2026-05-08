@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-05-08T04:34:58.716Z",
+  "generatedAt": "2026-05-08T06:45:15.787Z",
   "rules": [
     {
       "id": "bff/egg-business",
@@ -9,7 +9,6 @@
       "sourcePath": "bundles/rules/bff/egg-business.md",
       "projectIds": [
         "bff-goods",
-        "bff-hub",
         "bff-order",
         "bff-payment",
         "bff-user",
@@ -48,7 +47,6 @@
       "sourcePath": "bundles/rules/bff/egg-dhb-framework.md",
       "projectIds": [
         "bff-goods",
-        "bff-hub",
         "bff-order",
         "bff-payment",
         "bff-user",
@@ -90,7 +88,6 @@
       "sourcePath": "bundles/rules/bff/egg-service.md",
       "projectIds": [
         "bff-goods",
-        "bff-hub",
         "bff-order",
         "bff-payment",
         "bff-user",
@@ -153,35 +150,6 @@
         "**/*.json",
         "**/*.wxml",
         "**/*.wxss"
-      ]
-    },
-    {
-      "id": "dhb-international-mobile/dhb-international-mobile",
-      "name": "DHB 国际化移动端开发规范",
-      "purpose": "国际化移动端 UI 还原、组件化、主题、多语言和多货币边界。",
-      "sourcePath": "bundles/rules/dhb-international-mobile/dhb-international-mobile.md",
-      "projectIds": [
-        "dhb-international-mobile"
-      ],
-      "technologyFamilyIds": [
-        "frontend"
-      ],
-      "sceneIds": [
-        "single-repo-change"
-      ],
-      "tags": [
-        "dhb",
-        "frontend",
-        "international"
-      ],
-      "sourceExists": true,
-      "sourceType": "file",
-      "scope": "project",
-      "whenToRead": "Read when editing DHB international mobile UI, components, theme, i18n, or multi-currency display.",
-      "applyMode": "project-on-demand",
-      "globs": [
-        "src/**/*.{ts,tsx,js,jsx,css,scss}",
-        "components/**/*.{ts,tsx,js,jsx,css,scss}"
       ]
     },
     {
@@ -293,8 +261,6 @@
       "sourcePath": "bundles/rules/frontend/core.md",
       "projectIds": [
         "customize-mini-program",
-        "dhb-goods-image-tool",
-        "dhb-international-mobile",
         "dhb-manager",
         "dhb-mobile-index",
         "dhb-packages",

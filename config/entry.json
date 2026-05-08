@@ -2,6 +2,12 @@
   "version": 1,
   "name": "ai-context entry",
   "purpose": "Stable AI entrypoint. Read JSON indexes first, then load source markdown/rules/skills only when selected by task context.",
+  "workflowOrder": [
+    "Read entry/profile/current JSON first.",
+    "Use ai-my-pm as the workflow router for development, debugging, documentation, integration, research, and context-maintenance tasks.",
+    "After ai-my-pm classifies the task, load only the selected project JSON, scene JSON, rules, skills, and superpowers.",
+    "Superpowers are execution discipline selected by ai-my-pm; they are not the first routing layer."
+  ],
   "defaultReadOrder": [
     "config/entry.json",
     "config/profile.json",
@@ -25,28 +31,38 @@
     "projectDocs": "Read docs/repos/*.md only after a project JSON is selected and the summary is insufficient.",
     "scenes": "Read docs/scenes/*.md only after a scene JSON is selected and detailed workflow text is needed.",
     "rules": "Read config/rules/rules.json for applyMode, globs, and whenToRead. Active rule sources under bundles/rules/** are Markdown .md files and are loaded only when a selected project, selected scene, or task gate requires full rule details. Project JSON triggers project-on-demand rules. Scene JSON triggers scene-on-demand rules. Read docs/reference/rules/** only when an active rule points there and compact guidance is insufficient.",
-    "skills": "Read active bundles/skills/** only when a selected project JSON or explicit user request triggers the skill. Read docs/reference/skills/** only for archived detail when the active skill is insufficient.",
+    "skills": "Read active bundles/skills/** only when ai-my-pm, a selected project JSON, or an explicit user request triggers the skill. Read docs/reference/skills/** only for archived detail when the active skill is insufficient. Superpowers are selected after ai-my-pm classification, not before it.",
     "profile": "Read docs/person/profile.md only when long-term preferences or project map details matter."
   },
   "installation": {
     "script": "scripts/install-ai-context.mjs",
     "commands": [
       "install",
+      "install --project-skills",
       "check",
       "uninstall",
       "sync-projects",
+      "sync-projects --write",
+      "sync-projects --project <project-id> --write",
+      "sync-projects --project <project-id> --skills-only --write",
       "validate"
     ],
-    "codexSkillLink": "~/.agents/skills/ai-context -> /Users/xj/Documents/ai-context/bundles/skills/ai-context",
-    "globalEntrypoints": [
-      "/Users/xj/AGENTS.md",
-      "/Users/xj/CLAUDE.md",
-      "/Users/xj/WORK_CONTEXT.md"
+    "skillLinks": [
+      "~/.agents/skills/ai-context -> <ai-context-root>/bundles/skills/ai-context",
+      "~/.codex/skills/ai-context -> <ai-context-root>/bundles/skills/ai-context",
+      "~/.claude/skills/ai-context -> <ai-context-root>/bundles/skills/ai-context"
     ],
+    "globalEntrypoints": [],
+    "globalEntrypointsStatus": "deprecated; do not create home-level AGENTS.md, CLAUDE.md, or WORK_CONTEXT.md by default",
     "projectEntrypoints": [
       "AGENTS.md",
       "CLAUDE.md",
+      ".ai-configs/claude.md",
+      ".claude/CLAUDE.md",
       ".cursor/rules/00-ai-context.mdc"
+    ],
+    "legacyProjectEntrypointsToPrune": [
+      "claude.md"
     ]
   },
   "taskFlow": {

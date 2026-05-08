@@ -7,17 +7,94 @@ const root = path.resolve(new URL('..', import.meta.url).pathname);
 const entryPath = path.join(root, 'config', 'entry.json');
 const currentPath = path.join(root, 'runtime', 'current.json');
 const skillSource = path.join(root, 'bundles', 'skills', 'ai-context');
-const skillsHome = process.env.AI_CONTEXT_SKILLS_HOME || path.join(process.env.HOME || '', '.agents', 'skills');
-const skillLink = path.join(skillsHome, 'ai-context');
-const globalHome = process.env.AI_CONTEXT_GLOBAL_HOME || '/Users/xj';
+const managedSkillsRoot = path.join(root, 'bundles', 'skills');
+const managedEntryMarker = '<!-- ai-context:managed-entry:start -->';
+const managedEntryEndMarker = '<!-- ai-context:managed-entry:end -->';
+const userHome = process.env.HOME || path.resolve(root, '..', '..');
+const projectPathOverrides = resolveProjectPathOverrides();
+const projectSearchRoots = resolveProjectSearchRoots();
 const allowedRuleApplyModes = new Set(['global', 'project-on-demand', 'scene-on-demand', 'task-gate', 'manual']);
+const skillsHomes = resolveSkillsHomes();
+const skillLinks = skillsHomes.map(skillsHome => path.join(skillsHome, 'ai-context'));
+
+function resolveSkillsHomes() {
+  const explicitHomes = process.env.AI_CONTEXT_SKILLS_HOMES || process.env.AI_CONTEXT_SKILLS_HOME;
+  if (explicitHomes) {
+    return unique(
+      explicitHomes
+        .split(/[,;]/)
+        .map(item => item.trim())
+        .filter(Boolean)
+    );
+  }
+  const home = userHome;
+  return unique([
+    path.join(home, '.agents', 'skills'),
+    path.join(home, '.codex', 'skills'),
+    path.join(home, '.claude', 'skills'),
+  ]);
+}
+
+function unique(items) {
+  return [...new Set(items)];
+}
+
+function resolveProjectPathOverrides() {
+  const rawOverrides = process.env.AI_CONTEXT_PROJECT_PATH_OVERRIDES || '';
+  const overrides = new Map();
+  for (const item of rawOverrides.split(/[,;]/).map(value => value.trim()).filter(Boolean)) {
+    const [id, ...pathParts] = item.split('=');
+    const projectPath = pathParts.join('=').trim();
+    if (id?.trim() && projectPath) overrides.set(id.trim(), projectPath);
+  }
+  return overrides;
+}
+
+function resolveProjectSearchRoots() {
+  const rawRoots = process.env.AI_CONTEXT_PROJECT_ROOTS || process.env.AI_CONTEXT_PROJECT_ROOT || '';
+  return unique(
+    rawRoots
+      .split(/[,;]/)
+      .map(item => item.trim())
+      .filter(Boolean)
+  );
+}
+
+function projectPathSuffixes(projectPath) {
+  const suffixes = [];
+  for (const marker of ['/Documents/', '/documents/']) {
+    const index = projectPath.indexOf(marker);
+    if (index >= 0) suffixes.push(projectPath.slice(index + marker.length));
+  }
+  return unique(suffixes);
+}
+
+function resolveProjectPath(project) {
+  const overridePath = projectPathOverrides.get(project.id);
+  if (overridePath && fs.existsSync(overridePath)) return overridePath;
+  if (project.path && fs.existsSync(project.path)) return project.path;
+
+  const candidateNames = unique([
+    project.path ? path.basename(project.path) : undefined,
+    project.name,
+    project.id,
+    ...projectPathSuffixes(project.path || ''),
+  ].filter(Boolean));
+  for (const searchRoot of projectSearchRoots) {
+    for (const candidateName of candidateNames) {
+      const candidatePath = path.join(searchRoot, candidateName);
+      if (fs.existsSync(candidatePath)) return candidatePath;
+    }
+  }
+  return null;
+}
 
 function usage() {
   console.log(`Usage:
-  node scripts/install-ai-context.mjs install
+  node scripts/install-ai-context.mjs install [--project-skills]
   node scripts/install-ai-context.mjs check
   node scripts/install-ai-context.mjs uninstall
-  node scripts/install-ai-context.mjs sync-projects
+  node scripts/install-ai-context.mjs sync-projects [--project <project-id>] [--entries-only|--skills-only] [--write]
   node scripts/install-ai-context.mjs validate`);
 }
 
@@ -38,16 +115,73 @@ function writeFile(filePath, content) {
   fs.writeFileSync(filePath, content);
 }
 
+function readTextIfExists(filePath) {
+  try {
+    const stat = fs.lstatSync(filePath);
+    if (!stat.isFile()) return undefined;
+    return fs.readFileSync(filePath, 'utf8');
+  } catch (error) {
+    if (error.code === 'ENOENT') return null;
+    throw error;
+  }
+}
+
+function isInsidePath(candidatePath, parentPath) {
+  const relativePath = path.relative(parentPath, candidatePath);
+  return relativePath === '' || Boolean(relativePath) && !relativePath.startsWith('..') && !path.isAbsolute(relativePath);
+}
+
+function hasExactDirEntry(filePath) {
+  const dirPath = path.dirname(filePath);
+  if (!fs.existsSync(dirPath)) return false;
+  return fs.readdirSync(dirPath).includes(path.basename(filePath));
+}
+
+function ensureSymlink(linkPath, targetPath) {
+  fs.mkdirSync(path.dirname(linkPath), { recursive: true });
+  let existingStat;
+  try {
+    existingStat = fs.lstatSync(linkPath);
+  } catch (error) {
+    if (error.code !== 'ENOENT') throw error;
+  }
+  if (existingStat) {
+    const stat = fs.lstatSync(linkPath);
+    if (!stat.isSymbolicLink()) throw new Error(`refusing to replace non-symlink: ${linkPath}`);
+    const currentTarget = fs.readlinkSync(linkPath);
+    const resolvedTarget = path.resolve(path.dirname(linkPath), currentTarget);
+    if (resolvedTarget === targetPath) return false;
+    fs.unlinkSync(linkPath);
+  }
+  fs.symlinkSync(targetPath, linkPath);
+  return true;
+}
+
+function projectSkillsSection(project) {
+  const skills = project.skills || [];
+  if (!skills.length) return '';
+
+  const lines = skills.map(skill => `- ${skill.id}: ${skill.description || skill.whenToLoad || 'Mounted project skill.'}`);
+  return `
+Mounted skills:
+
+${lines.join('\n')}
+`;
+}
+
 function projectEntry(project) {
-  return `# ${project.name || project.id} AI Entry
+  return `${managedEntryMarker}
+# ${project.name || project.id} AI Entry
 
 Read first:
 
-1. /Users/xj/Documents/ai-context/config/entry.json
-2. /Users/xj/Documents/ai-context/config/projects/${project.id}.json
-3. /Users/xj/Documents/ai-context/runtime/current.json
+1. ${path.join(root, 'config', 'entry.json')}
+2. ${path.join(root, 'config', 'projects', `${project.id}.json`)}
+3. ${path.join(root, 'runtime', 'current.json')}
 
 Only load source Markdown, rules, or skills when the JSON index selects them for the current task.
+${projectSkillsSection(project)}
+${managedEntryEndMarker}
 `;
 }
 
@@ -55,28 +189,143 @@ function cursorRule(project) {
   return `---
 alwaysApply: true
 ---
+${managedEntryMarker}
 # ${project.name || project.id} ai-context entry
 
 Read first:
-1. \`/Users/xj/Documents/ai-context/config/entry.json\`
-2. \`/Users/xj/Documents/ai-context/config/projects/${project.id}.json\`
-3. \`/Users/xj/Documents/ai-context/runtime/current.json\`
+1. \`${path.join(root, 'config', 'entry.json')}\`
+2. \`${path.join(root, 'config', 'projects', `${project.id}.json`)}\`
+3. \`${path.join(root, 'runtime', 'current.json')}\`
 
 Do not load all ai-context Markdown by default. Follow the selected JSON indexes.
+${projectSkillsSection(project)}
+${managedEntryEndMarker}
 `;
 }
 
-function globalEntry(kind) {
-  return `# XUANJIAN ${kind} Entry
+function isManagedProjectEntryContent(content) {
+  if (!content) return false;
+  if (content.includes(managedEntryMarker)) return true;
+  const managedMarkers = [
+    path.join(root, 'config', 'entry.json'),
+    path.join(root, 'runtime', 'current.json'),
+    '/Users/xj/AGENTS.md',
+    '/Users/xj/WORK_CONTEXT.md',
+    'ai-context/repos/',
+    'registry/scenes.json',
+  ];
+  return managedMarkers.some(marker => content.includes(marker));
+}
 
-Read first:
+function upsertManagedProjectEntryContent(currentContent, managedContent) {
+  if (currentContent === null || isManagedProjectEntryContent(currentContent) && !currentContent.includes(managedEntryEndMarker)) {
+    return managedContent;
+  }
+  if (currentContent === undefined) return undefined;
 
-1. /Users/xj/Documents/ai-context/config/entry.json
-2. /Users/xj/Documents/ai-context/config/profile.json
-3. /Users/xj/Documents/ai-context/runtime/current.json
+  const startIndex = currentContent.indexOf(managedEntryMarker);
+  const endIndex = currentContent.indexOf(managedEntryEndMarker);
+  if (startIndex >= 0 && endIndex >= startIndex) {
+    if (managedContent.trimStart().startsWith('---')) return managedContent;
+    const afterEndIndex = endIndex + managedEntryEndMarker.length;
+    return `${currentContent.slice(0, startIndex)}${managedContent.trimEnd()}${currentContent.slice(afterEndIndex)}`;
+  }
+  return `${currentContent.trimEnd()}\n\n${managedContent}`;
+}
 
-Then select project and scene JSON by the user's task. Do not read every Markdown/rule/skill file by default.
-`;
+function projectEntryWriteAction(filePath, content) {
+  const currentContent = readTextIfExists(filePath);
+  const nextContent = upsertManagedProjectEntryContent(currentContent, content);
+  if (nextContent === undefined) {
+    return { action: 'skip-protected', filePath, reason: 'existing entry path is not a regular file' };
+  }
+  if (currentContent === null) return { action: 'create', filePath, content: nextContent };
+  if (currentContent === nextContent) return { action: 'unchanged', filePath, content: nextContent };
+  return { action: 'update', filePath, content: nextContent };
+}
+
+function projectEntryPruneTargets(project) {
+  const targets = [];
+  const legacyEntryPaths = [
+    path.join(project.path, 'claude.md'),
+  ];
+
+  for (const filePath of legacyEntryPaths) {
+    if (!hasExactDirEntry(filePath)) continue;
+    const stat = fs.lstatSync(filePath);
+    if (!stat.isFile()) {
+      targets.push({ filePath, action: 'manual-review', reason: 'legacy entry path is not a regular file' });
+      continue;
+    }
+    const content = fs.readFileSync(filePath, 'utf8');
+    if (isManagedProjectEntryContent(content)) {
+      targets.push({ filePath, action: 'delete', reason: 'managed legacy lowercase Claude entry' });
+    } else {
+      targets.push({ filePath, action: 'skip-protected', reason: 'lowercase Claude entry is not recognized as ai-context managed content' });
+    }
+  }
+
+  return targets;
+}
+
+function linkNameForSkill(skill) {
+  return skill.name || String(skill.id || '').split('/').filter(Boolean).pop();
+}
+
+function aliasNamesForSkill(skill) {
+  const aliasesById = {
+    'dhb-local-env': ['run-projects', 'run_project', 'dhb-env-switch', 'restore-local-env'],
+    'dhb-subpackage-release': ['add-subpackage-module', 'update-subpackage-module', 'add-subpackage-module.md', 'update-subpackage-module.md'],
+    'dhb-api-from-curl': ['create-api-request', 'mock-api-from-curl', 'create-api-request.md', 'mock-api-from-curl.md'],
+    'dhb-taro-module': ['add-taro-module', 'add-taro-module.md'],
+    'dhb-packages/add-mobile-icon': ['add-mobile-icon.md'],
+  };
+  return aliasesById[skill.id] || [];
+}
+
+function projectSkillTargets(project) {
+  const targets = [];
+  const skillHomes = ['.agents/skills', '.codex/skills', '.claude/skills'];
+  for (const skill of project.skills || []) {
+    if (!skill.sourcePath) continue;
+    const rawSourcePath = path.join(root, skill.sourcePath);
+    const sourcePath = rawSourcePath.endsWith('SKILL.md') ? path.dirname(rawSourcePath) : rawSourcePath;
+    if (!fs.existsSync(path.join(sourcePath, 'SKILL.md'))) continue;
+    const linkNames = unique([linkNameForSkill(skill), ...aliasNamesForSkill(skill)].filter(Boolean));
+    for (const skillHome of skillHomes) {
+      for (const linkName of linkNames) {
+        targets.push([path.join(project.path, skillHome, linkName), sourcePath]);
+      }
+    }
+  }
+  return targets;
+}
+
+function existingManagedProjectSkillLinks(project) {
+  const links = [];
+  const skillHomes = ['.agents/skills', '.codex/skills', '.claude/skills'];
+  for (const skillHome of skillHomes) {
+    const dir = path.join(project.path, skillHome);
+    if (!fs.existsSync(dir)) continue;
+    for (const linkName of fs.readdirSync(dir)) {
+      const linkPath = path.join(dir, linkName);
+      let stat;
+      try {
+        stat = fs.lstatSync(linkPath);
+      } catch {
+        continue;
+      }
+      if (!stat.isSymbolicLink()) continue;
+      const resolvedTarget = path.resolve(path.dirname(linkPath), fs.readlinkSync(linkPath));
+      if (isInsidePath(resolvedTarget, managedSkillsRoot)) links.push([linkPath, resolvedTarget]);
+    }
+  }
+  return links;
+}
+
+function projectSkillPruneTargets(project, desiredTargets) {
+  const desiredLinkPaths = new Set(desiredTargets.map(([linkPath]) => linkPath));
+  return existingManagedProjectSkillLinks(project).filter(([linkPath]) => !desiredLinkPaths.has(linkPath));
 }
 
 function ensureSkill() {
@@ -86,63 +335,162 @@ function ensureSkill() {
   }
 }
 
-function install() {
+function ensureSkillLink(skillLink) {
+  ensureSymlink(skillLink, skillSource);
+}
+
+function install(options = {}) {
   ensureSkill();
   validate();
-  fs.mkdirSync(skillsHome, { recursive: true });
-  if (fs.existsSync(skillLink) || fs.existsSync(path.dirname(skillLink)) && fs.existsSync(skillLink)) {
-    const stat = fs.lstatSync(skillLink);
-    if (!stat.isSymbolicLink()) throw new Error(`refusing to replace non-symlink: ${skillLink}`);
-    const target = fs.readlinkSync(skillLink);
-    if (target !== skillSource) throw new Error(`refusing to replace symlink with unexpected target: ${skillLink} -> ${target}`);
-  } else {
-    fs.symlinkSync(skillSource, skillLink);
-  }
+  for (const skillLink of skillLinks) ensureSkillLink(skillLink);
 
-  writeFile(path.join(globalHome, 'AGENTS.md'), globalEntry('Codex'));
-  writeFile(path.join(globalHome, 'CLAUDE.md'), globalEntry('Claude'));
-  writeFile(path.join(globalHome, 'WORK_CONTEXT.md'), globalEntry('Current Work'));
-  console.log(`installed skill: ${skillLink} -> ${skillSource}`);
-  console.log(`wrote global entry pointers under ${globalHome}`);
+  for (const skillLink of skillLinks) console.log(`installed skill: ${skillLink} -> ${skillSource}`);
+  if (options.projectSkills) syncProjects({ write: true, skillsOnly: true });
 }
 
 function uninstall() {
-  if (!fs.existsSync(skillLink)) {
-    console.log(`skill link not installed: ${skillLink}`);
-    return;
+  for (const skillLink of skillLinks) {
+    if (!fs.existsSync(skillLink)) {
+      console.log(`skill link not installed: ${skillLink}`);
+      continue;
+    }
+    const stat = fs.lstatSync(skillLink);
+    if (!stat.isSymbolicLink()) throw new Error(`refusing to remove non-symlink: ${skillLink}`);
+    const target = fs.readlinkSync(skillLink);
+    if (target !== skillSource) throw new Error(`refusing to remove symlink with unexpected target: ${skillLink} -> ${target}`);
+    fs.unlinkSync(skillLink);
+    console.log(`removed skill link: ${skillLink}`);
   }
-  const stat = fs.lstatSync(skillLink);
-  if (!stat.isSymbolicLink()) throw new Error(`refusing to remove non-symlink: ${skillLink}`);
-  const target = fs.readlinkSync(skillLink);
-  if (target !== skillSource) throw new Error(`refusing to remove symlink with unexpected target: ${skillLink} -> ${target}`);
-  fs.unlinkSync(skillLink);
-  console.log(`removed skill link: ${skillLink}`);
 }
 
 function check() {
-  const installed = fs.existsSync(skillLink)
+  const installedLinks = skillLinks.filter(skillLink => fs.existsSync(skillLink)
     && fs.lstatSync(skillLink).isSymbolicLink()
-    && fs.readlinkSync(skillLink) === skillSource;
+    && fs.readlinkSync(skillLink) === skillSource);
   console.log(`entry: ${exists('config/entry.json') ? 'ok' : 'missing'}`);
   console.log(`profile: ${exists('config/profile.json') ? 'ok' : 'missing'}`);
   console.log(`current: ${exists('runtime/current.json') ? 'ok' : 'missing'}`);
   console.log(`skill source: ${exists('bundles/skills/ai-context/SKILL.md') ? 'ok' : 'missing'}`);
-  console.log(`skill installed: ${installed ? 'yes' : 'no'}`);
+  console.log(`skill installed: ${installedLinks.length === skillLinks.length ? 'yes' : installedLinks.length ? 'partial' : 'no'}`);
+  for (const skillLink of skillLinks) {
+    const installed = fs.existsSync(skillLink)
+      && fs.lstatSync(skillLink).isSymbolicLink()
+      && fs.readlinkSync(skillLink) === skillSource;
+    console.log(`skill link ${skillLink}: ${installed ? 'ok' : 'missing'}`);
+  }
 }
 
-function syncProjects() {
+function syncProjects(options = {}) {
+  const write = Boolean(options.write);
+  const projectFilter = options.projectId;
+  const syncEntries = !options.skillsOnly;
+  const syncSkills = !options.entriesOnly;
   validate();
   const index = readJson('config/projects/index.json');
   let count = 0;
   for (const item of index.projects || []) {
+    if (projectFilter && item.id !== projectFilter) continue;
     const project = readJson(item.path);
-    if (!project.path || !fs.existsSync(project.path)) continue;
-    writeFile(path.join(project.path, 'AGENTS.md'), projectEntry(project));
-    writeFile(path.join(project.path, 'CLAUDE.md'), projectEntry(project));
-    writeFile(path.join(project.path, '.cursor', 'rules', '00-ai-context.mdc'), cursorRule(project));
+    const projectPath = resolveProjectPath(project);
+    if (!projectPath) {
+      if (!write) console.log(`dry-run would skip missing project path: ${project.id} -> ${project.path || '<missing>'}`);
+      continue;
+    }
+    const localProject = { ...project, path: projectPath };
+    const entryTargets = [
+      [path.join(localProject.path, 'AGENTS.md'), projectEntry(project)],
+      [path.join(localProject.path, 'CLAUDE.md'), projectEntry(project)],
+      [path.join(localProject.path, '.ai-configs', 'claude.md'), projectEntry(project)],
+      [path.join(localProject.path, '.claude', 'CLAUDE.md'), projectEntry(project)],
+      [path.join(localProject.path, '.cursor', 'rules', '00-ai-context.mdc'), cursorRule(project)],
+    ];
+    const entryWriteActions = syncEntries
+      ? entryTargets.map(([filePath, content]) => projectEntryWriteAction(filePath, content))
+      : [];
+    const entryPruneTargets = syncEntries ? projectEntryPruneTargets(localProject) : [];
+    const skillTargets = projectSkillTargets(localProject);
+    const skillPruneTargets = syncSkills ? projectSkillPruneTargets(localProject, skillTargets) : [];
+    if (write) {
+      if (syncEntries) {
+        for (const target of entryPruneTargets) {
+          if (target.action === 'delete') {
+            fs.unlinkSync(target.filePath);
+          } else {
+            console.warn(`manual review required: ${target.filePath} (${target.reason})`);
+          }
+        }
+        for (const action of entryWriteActions) {
+          if (['create', 'update'].includes(action.action)) {
+            writeFile(action.filePath, action.content);
+            console.log(`${action.action}d entry: ${action.filePath}`);
+          } else if (action.action === 'unchanged') {
+            console.log(`unchanged entry: ${action.filePath}`);
+          } else {
+            console.warn(`protected entry skipped: ${action.filePath} (${action.reason})`);
+          }
+        }
+      }
+      if (syncSkills) {
+        for (const [linkPath, sourcePath] of skillTargets) ensureSymlink(linkPath, sourcePath);
+        for (const [linkPath] of skillPruneTargets) fs.unlinkSync(linkPath);
+      }
+    } else {
+      if (syncEntries) {
+        for (const action of entryWriteActions) {
+          if (action.action === 'create') {
+            console.log(`dry-run would create: ${action.filePath}`);
+          } else if (action.action === 'update') {
+            console.log(`dry-run would update: ${action.filePath}`);
+          } else if (action.action === 'unchanged') {
+            console.log(`dry-run unchanged: ${action.filePath}`);
+          } else {
+            console.log(`dry-run would keep protected non-managed entry: ${action.filePath} (${action.reason})`);
+          }
+        }
+        for (const target of entryPruneTargets) {
+          if (target.action === 'delete') {
+            console.log(`dry-run would remove managed legacy entry: ${target.filePath} (${target.reason})`);
+          } else {
+            console.log(`dry-run would keep protected non-managed entry: ${target.filePath} (${target.reason})`);
+          }
+        }
+      }
+      if (syncSkills) {
+        for (const [linkPath, sourcePath] of skillTargets) console.log(`dry-run would link: ${linkPath} -> ${sourcePath}`);
+        for (const [linkPath, targetPath] of skillPruneTargets) console.log(`dry-run would unlink: ${linkPath} -> ${targetPath}`);
+      }
+    }
     count += 1;
   }
-  console.log(`synced ${count} project entry set(s)`);
+  console.log(`${write ? 'synced' : 'dry-run'} ${count} project set(s)`);
+  if (!write) console.log('pass --write to update selected project files or skill links');
+}
+
+function parseOptions(args) {
+  const options = {
+    write: false,
+    projectId: undefined,
+    entriesOnly: false,
+    skillsOnly: false,
+  };
+  for (let index = 0; index < args.length; index += 1) {
+    const arg = args[index];
+    if (arg === '--write') {
+      options.write = true;
+    } else if (arg === '--project') {
+      options.projectId = args[index + 1];
+      index += 1;
+      if (!options.projectId) throw new Error('--project requires a project id');
+    } else if (arg === '--entries-only') {
+      options.entriesOnly = true;
+    } else if (arg === '--skills-only') {
+      options.skillsOnly = true;
+    } else {
+      throw new Error(`unknown option: ${arg}`);
+    }
+  }
+  if (options.entriesOnly && options.skillsOnly) throw new Error('cannot combine --entries-only and --skills-only');
+  return options;
 }
 
 function pushUniqueError(errors, message) {
@@ -346,17 +694,17 @@ function finishValidation(errors, warnings) {
 }
 
 try {
-  const [command] = process.argv.slice(2);
+  const [command, ...args] = process.argv.slice(2);
   if (!command || command === 'help' || command === '-h' || command === '--help') {
     usage();
   } else if (command === 'install') {
-    install();
+    install({ projectSkills: args.includes('--project-skills') });
   } else if (command === 'check') {
     check();
   } else if (command === 'uninstall') {
     uninstall();
   } else if (command === 'sync-projects') {
-    syncProjects();
+    syncProjects(parseOptions(args));
   } else if (command === 'validate') {
     validate();
   } else {

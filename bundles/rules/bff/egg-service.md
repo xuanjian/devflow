@@ -1,6 +1,6 @@
 # BFF Egg Service Rules
 
-Use this rule when editing DHB BFF service repositories such as `bff-goods`, `bff-order`, `bff-user`, `bff-warehouse`, `bff-payment`, or `bff-hub`.
+Use this rule when editing DHB BFF service repositories such as `bff-goods`, `bff-order`, `bff-user`, `bff-warehouse`, or `bff-payment`.
 
 ## Service Boundary
 

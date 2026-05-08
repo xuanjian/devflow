@@ -11,8 +11,8 @@ scenes/                 # Human-readable workflow and scenario descriptions
 templates/              # G1-G7 task artifact templates
 prototypes/             # Product/UI prototypes
 reference/              # Archived long rules, old skills, and detailed examples
-superpowers/plans/      # Historical implementation plans
-*.md                    # Design notes, migration notes, and historical docs
+reference/history/      # Archived migration notes, generated overviews, and old roadmap docs
+reference/workflows/    # Archived workflow/agent plans that are not active by default
 ```
 
 Machine-readable indexes stay in `../config/`.
@@ -22,3 +22,5 @@ Executable skills and rule bundles stay in `../bundles/`.
 Files under `reference/` are not active by default. Active rules and skills are listed only in `../config/rules/rules.json` and `../config/skills/skills.json`.
 
 Active rules use `.md`. Old `.mdc` files belong only to archived Cursor-era reference material or generated project-level Cursor entrypoints.
+
+Top-level `docs/` should stay small. Active human-readable sources are mainly `person/`, `repos/`, `scenes/`, `templates/`, and `prototypes/`. Historical design notes belong under `reference/`.

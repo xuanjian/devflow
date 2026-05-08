@@ -1,30 +1,24 @@
 # DHB
 
 - repoKey: `dhb`
-- 路径: `/Users/xj/Documents/ios/DHB`
-- family: `ios`
+- path: `/Users/xj/Documents/ios/DHB`
+- technologyFamilyId: `ios`
+- technologyFamilyName: `iOS`
 - repoType: `ios-app`
 
 ## 摘要
 
 订货宝 iOS 原生 App，常与 H5、WebView、BFF 联动。
 
-## 默认加载场景
+## 默认场景
 
-- `single-repo-change`
-- `index-h5-webview`
-- `cash-index-h5-webview`
-- `packages-cash-index-h5-webview`
-- `ios-h5-webview-bff`
+- `single-repo-change` - 默认单仓修改场景
+- `index-h5-webview` - index 到 h5 / webview 链路
+- `cash-index-h5-webview` - cash 到 index / h5 / webview 链路
+- `packages-cash-index-h5-webview` - 分包到 cash / index / h5 / webview 链路
+- `ios-h5-webview-bff` - iOS + H5 + 容器 + BFF 全链路场景
 
 ## 标签
 
 - `dhb`
 - `ios`
-
-## 读取建议
-
-- 先读取全局长期画像：`/Users/xj/AGENTS.md`
-- 再读取当前工作上下文：`/Users/xj/WORK_CONTEXT.md`
-- 若用户只讨论当前仓库，优先使用 `single-repo-change`
-- 若用户提到跨仓联调、容器、BFF、iOS 或小程序，再补充 scene

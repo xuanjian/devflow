@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-05-08T03:32:27.014Z",
+  "generatedAt": "2026-05-08T07:07:41.128Z",
   "scenes": [
     {
       "id": "ai-context-config",
@@ -12,7 +12,7 @@
     {
       "id": "ai-my-pm",
       "name": "ai-my-pm",
-      "summary": "XUANJIAN 的个人 AI PM 总控、任务分级、工具选择与多角色执行规则",
+      "summary": "XUANJIAN 的个人 AI PM 总控，统一需求路由、任务分级、多角色执行和 G1-G7 Gate 流程。",
       "path": "config/scenes/ai-my-pm.json",
       "sourcePath": "docs/scenes/ai-my-pm.md"
     },
@@ -71,13 +71,6 @@
       "summary": "默认单仓修改场景",
       "path": "config/scenes/single-repo-change.json",
       "sourcePath": "docs/scenes/single-repo-change.md"
-    },
-    {
-      "id": "xuanjian-symphony",
-      "name": "xuanjian-symphony",
-      "summary": "Jira 一句话需求到调研、Figma、开发交接和 Design QA 的文件化工作流",
-      "path": "config/scenes/xuanjian-symphony.json",
-      "sourcePath": "docs/scenes/xuanjian-symphony.md"
     }
   ]
 }

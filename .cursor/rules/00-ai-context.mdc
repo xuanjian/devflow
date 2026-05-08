@@ -1,0 +1,18 @@
+---
+alwaysApply: true
+---
+<!-- ai-context:managed-entry:start -->
+# ai-context ai-context entry
+
+Read first:
+1. `/Users/xj/Documents/ai-context/config/entry.json`
+2. `/Users/xj/Documents/ai-context/config/projects/ai-context.json`
+3. `/Users/xj/Documents/ai-context/runtime/current.json`
+
+Do not load all ai-context Markdown by default. Follow the selected JSON indexes.
+
+Mounted skills:
+
+- ai-context: Use when entering, installing, validating, or modifying ai-context, or when routing tasks through project/scene/rule/skill JSON indexes.
+
+<!-- ai-context:managed-entry:end -->

@@ -81,44 +81,6 @@
       "repoDocPath": "/Users/xj/Documents/ai-context/repos/customize-mini-program.md"
     },
     {
-      "repoKey": "dhb-international-mobile",
-      "displayName": "dhb-International-mobile",
-      "path": "/Users/xj/Documents/frontend/dhb-International-mobile",
-      "family": "frontend",
-      "repoType": "web-app",
-      "summary": "DHB 国际化移动端项目，强调老项目 UI 100% 还原和组件化开发。",
-      "defaultScenes": [
-        "single-repo-change"
-      ],
-      "tags": [
-        "dhb",
-        "frontend",
-        "international"
-      ],
-      "sharedRules": [
-        "dhb-international-mobile/dhb-international-mobile.mdc"
-      ],
-      "sharedSkills": [],
-      "repoDocPath": "/Users/xj/Documents/ai-context/repos/dhb-international-mobile.md"
-    },
-    {
-      "repoKey": "dhb-goods-image-tool",
-      "displayName": "dhb-goods-image-tool",
-      "path": "/Users/xj/Documents/frontend/dhb-goods-image-tool",
-      "family": "frontend",
-      "repoType": "tool",
-      "summary": "图片或商品素材处理相关工具仓库。",
-      "defaultScenes": [
-        "single-repo-change"
-      ],
-      "tags": [
-        "tool"
-      ],
-      "sharedRules": [],
-      "sharedSkills": [],
-      "repoDocPath": "/Users/xj/Documents/ai-context/repos/dhb-goods-image-tool.md"
-    },
-    {
       "repoKey": "dhb-manager",
       "displayName": "dhb-manager",
       "path": "/Users/xj/Documents/frontend/dhb-manager",
@@ -437,42 +399,6 @@
       "repoDocPath": "/Users/xj/Documents/ai-context/repos/hxb.md"
     },
     {
-      "repoKey": "open-auto-glm",
-      "displayName": "Open-AutoGLM",
-      "path": "/Users/xj/Documents/ios/Open-AutoGLM",
-      "family": "ios",
-      "repoType": "experiment",
-      "summary": "实验性质的 iOS / AI 项目。",
-      "defaultScenes": [
-        "single-repo-change"
-      ],
-      "tags": [
-        "ios",
-        "experiment"
-      ],
-      "sharedRules": [],
-      "sharedSkills": [],
-      "repoDocPath": "/Users/xj/Documents/ai-context/repos/open-auto-glm.md"
-    },
-    {
-      "repoKey": "apple-app-site-association",
-      "displayName": "apple-app-site-association",
-      "path": "/Users/xj/Documents/ios/apple-app-site-association",
-      "family": "ios",
-      "repoType": "config",
-      "summary": "Apple app site association 配置仓库。",
-      "defaultScenes": [
-        "single-repo-change"
-      ],
-      "tags": [
-        "ios",
-        "config"
-      ],
-      "sharedRules": [],
-      "sharedSkills": [],
-      "repoDocPath": "/Users/xj/Documents/ai-context/repos/apple-app-site-association.md"
-    },
-    {
       "repoKey": "bff-goods",
       "displayName": "bff-goods",
       "path": "/Users/xj/Documents/node/bff-goods",
@@ -493,25 +419,6 @@
       "sharedRules": [],
       "sharedSkills": [],
       "repoDocPath": "/Users/xj/Documents/ai-context/repos/bff-goods.md"
-    },
-    {
-      "repoKey": "bff-hub",
-      "displayName": "bff-hub",
-      "path": "/Users/xj/Documents/node/bff-hub",
-      "family": "node",
-      "repoType": "bff-service",
-      "summary": "Hub 类 Node 服务仓库。",
-      "defaultScenes": [
-        "single-repo-change",
-        "frontend-bff-debug"
-      ],
-      "tags": [
-        "node",
-        "bff"
-      ],
-      "sharedRules": [],
-      "sharedSkills": [],
-      "repoDocPath": "/Users/xj/Documents/ai-context/repos/bff-hub.md"
     },
     {
       "repoKey": "bff-order",
@@ -600,40 +507,6 @@
       "sharedRules": [],
       "sharedSkills": [],
       "repoDocPath": "/Users/xj/Documents/ai-context/repos/bff-warehouse.md"
-    },
-    {
-      "repoKey": "comfyui-egg",
-      "displayName": "comfyuiEgg",
-      "path": "/Users/xj/Documents/node/comfyuiEgg",
-      "family": "node",
-      "repoType": "app",
-      "summary": "comfyuiEgg 项目。",
-      "defaultScenes": [
-        "single-repo-change"
-      ],
-      "tags": [
-        "node"
-      ],
-      "sharedRules": [],
-      "sharedSkills": [],
-      "repoDocPath": "/Users/xj/Documents/ai-context/repos/comfyui-egg.md"
-    },
-    {
-      "repoKey": "docs",
-      "displayName": "docs",
-      "path": "/Users/xj/Documents/node/docs",
-      "family": "node",
-      "repoType": "docs",
-      "summary": "文档仓库。",
-      "defaultScenes": [
-        "single-repo-change"
-      ],
-      "tags": [
-        "docs"
-      ],
-      "sharedRules": [],
-      "sharedSkills": [],
-      "repoDocPath": "/Users/xj/Documents/ai-context/repos/docs.md"
     },
     {
       "repoKey": "egg-business",

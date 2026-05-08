@@ -2,19 +2,20 @@
   "version": 1,
   "id": "ai-my-pm",
   "name": "ai-my-pm",
-  "summary": "XUANJIAN 的个人 AI PM 总控、任务分级、工具选择与多角色执行规则",
-  "purpose": "- 用户只说“我要做什么需求”但没有指定项目、工具、流程或技术方案。",
+  "summary": "XUANJIAN 的个人 AI PM 总控，统一需求路由、任务分级、多角色执行和 G1-G7 Gate 流程。",
+  "purpose": "用户只描述需求时，用于自动判断项目、场景、工具、流程、角色、验证方式；L3/L4 时在同一场景内启用 G1-G7 Gate。",
   "source": {
     "path": "docs/scenes/ai-my-pm.md",
     "whenToRead": "Read the full scene when this scene is selected or the task needs chain-specific execution details."
   },
-  "whyThisComposition": "This scene describes XUANJIAN 的个人 AI PM 总控、任务分级、工具选择与多角色执行规则.",
+  "whyThisComposition": "This scene is the single workflow authority for XUANJIAN requirement routing and complex-task Gate flow.",
   "projects": [],
   "operationGuide": {
     "environmentSwitching": "Not a runtime environment scene.",
     "startup": "Load entry/profile/task JSON first, then read the scene markdown only if the workflow is selected.",
     "notes": [
-      "This scene controls AI workflow, not a software runtime."
+      "This scene controls AI workflow, not a software runtime.",
+      "Use G1-G7 only for L3/L4 or when explicit intake/discovery/plan/handoff/acceptance tracking is needed."
     ]
   },
   "readPolicy": {
@@ -22,7 +23,8 @@
       "config/scenes/ai-my-pm.json"
     ],
     "onDemandRead": [
-      "docs/scenes/ai-my-pm.md"
+      "docs/scenes/ai-my-pm.md",
+      "config/tasks/gates.json"
     ],
     "notes": "Do not load every project in the scene. Select projects based on the user request first."
   }

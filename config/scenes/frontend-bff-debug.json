@@ -18,13 +18,6 @@
       "reason": "bff-goods is part of 前端与部分 BFF 联调场景."
     },
     {
-      "id": "bff-hub",
-      "name": "bff-hub",
-      "role": "api-or-business-service",
-      "projectIndexPath": "config/projects/bff-hub.json",
-      "reason": "bff-hub is part of 前端与部分 BFF 联调场景."
-    },
-    {
       "id": "bff-order",
       "name": "bff-order",
       "role": "api-or-business-service",
@@ -109,7 +102,6 @@
     "onDemandRead": [
       "docs/scenes/frontend-bff-debug.md",
       "config/projects/bff-goods.json",
-      "config/projects/bff-hub.json",
       "config/projects/bff-order.json",
       "config/projects/bff-payment.json",
       "config/projects/bff-user.json",

@@ -69,6 +69,13 @@
       "description": "Use when running, switching, restoring, or diagnosing local DHB frontend integration environments across cash-mini, dhb-mobile-index, new_mobile_h5, customize-mini-program, or DHB_PACKAGES.",
       "sourcePath": "bundles/skills/dhb-local-env/SKILL.md",
       "whenToLoad": "Load when new-mobile-h5 task needs dhb-local-env."
+    },
+    {
+      "id": "ui-ux-pro-max",
+      "name": "ui-ux-pro-max",
+      "description": "UI/UX design intelligence for web and mobile. Includes 50+ styles, 161 color palettes, 57 font pairings, 161 product types, 99 UX guidelines, and 25 chart types across 10 stacks (React, Next.js, Vue, Svelte, SwiftUI, React Native, Flutter, Tailwind, shadcn/ui, and HTML/CSS). Actions: plan, build, create, design, implement, review, fix, improve, optimize, enhance, refactor, and check UI/UX code. Projects: website, landing page, dashboard, admin panel, e-commerce, SaaS, portfolio, blog, and mobile app. Elements: button, modal, navbar, sidebar, card, table, form, and chart. Styles: glassmorphism, claymorphism, minimalism, brutalism, neumorphism, bento grid, dark mode, responsive, skeuomorphism, and flat design. Topics: color systems, accessibility, animation, layout, typography, font pairing, spacing, interaction states, shadow, and gradient. Integrations: shadcn/ui MCP for component search and examples.",
+      "sourcePath": "bundles/skills/ui-ux-pro-max/SKILL.md",
+      "whenToLoad": "UI/UX design intelligence for web and mobile. Includes 50+ styles, 161 color palettes, 57 font pairings, 161 product types, 99 UX guidelines, and 25 chart types across 10 stacks (React, Next.js, Vue, Svelte, SwiftUI, React Native, Flutter, Tailwind, shadcn/ui, and HTML/CSS). Actions: plan, build, create, design, implement, review, fix, improve, optimize, enhance, refactor, and check UI/UX code. Projects: website, landing page, dashboard, admin panel, e-commerce, SaaS, portfolio, blog, and mobile app. Elements: button, modal, navbar, sidebar, card, table, form, and chart. Styles: glassmorphism, claymorphism, minimalism, brutalism, neumorphism, bento grid, dark mode, responsive, skeuomorphism, and flat design. Topics: color systems, accessibility, animation, layout, typography, font pairing, spacing, interaction states, shadow, and gradient. Integrations: shadcn/ui MCP for component search and examples."
     }
   ],
   "rules": [
@@ -117,16 +124,17 @@
       "config/projects/new-mobile-h5.json"
     ],
     "onDemandRead": [
-      "docs/repos/new-mobile-h5.md",
-      "docs/scenes/single-repo-change.md",
-      "docs/scenes/index-h5-webview.md",
-      "docs/scenes/cash-index-h5-webview.md",
-      "docs/scenes/packages-cash-index-h5-webview.md",
-      "docs/scenes/mini-program-h5-webview.md",
-      "docs/scenes/ios-h5-webview-bff.md",
+      "bundles/rules/frontend/core.md",
       "bundles/rules/new-mobile-h5/new-mobile-h5.md",
       "bundles/skills/dhb-local-env/SKILL.md",
-      "bundles/rules/frontend/core.md"
+      "bundles/skills/ui-ux-pro-max/SKILL.md",
+      "docs/repos/new-mobile-h5.md",
+      "docs/scenes/cash-index-h5-webview.md",
+      "docs/scenes/index-h5-webview.md",
+      "docs/scenes/ios-h5-webview-bff.md",
+      "docs/scenes/mini-program-h5-webview.md",
+      "docs/scenes/packages-cash-index-h5-webview.md",
+      "docs/scenes/single-repo-change.md"
     ],
     "notes": "Start with this JSON. Load source Markdown, rules, or skills only when the task requires detailed instructions."
   }

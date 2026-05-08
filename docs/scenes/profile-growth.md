@@ -13,7 +13,7 @@
 
 ```text
 项目事实
-  docs/repos/*.md / OpenSpec / runtime/current-work.md / 项目代码 / Notion
+  docs/repos/*.md / OpenSpec / runtime/current.json / runtime/tasks/*.json / 项目代码 / Notion
 
 学习记录
   docs/person/learning-log.md

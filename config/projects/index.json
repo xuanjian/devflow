@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-05-08T03:32:27.013Z",
+  "generatedAt": "2026-05-08T07:01:45.604Z",
   "projects": [
     {
       "id": "ai-context",
@@ -10,25 +10,11 @@
       "summary": "本地 AI 上下文中心、JSON 索引、安装入口和任务 Gate 流程项目。"
     },
     {
-      "id": "apple-app-site-association",
-      "name": "apple-app-site-association",
-      "technologyFamilyId": "ios",
-      "path": "config/projects/apple-app-site-association.json",
-      "summary": "Apple app site association 配置仓库。"
-    },
-    {
       "id": "bff-goods",
       "name": "bff-goods",
       "technologyFamilyId": "bff",
       "path": "config/projects/bff-goods.json",
       "summary": "商品 BFF，同时承接 AI 海报、ComfyUI 相关能力。"
-    },
-    {
-      "id": "bff-hub",
-      "name": "bff-hub",
-      "technologyFamilyId": "bff",
-      "path": "config/projects/bff-hub.json",
-      "summary": "Hub 类 Node 服务仓库。"
     },
     {
       "id": "bff-order",
@@ -66,13 +52,6 @@
       "summary": "iOS 原生应用仓库。"
     },
     {
-      "id": "comfyui-egg",
-      "name": "comfyuiEgg",
-      "technologyFamilyId": "bff",
-      "path": "config/projects/comfyui-egg.json",
-      "summary": "comfyuiEgg 项目。"
-    },
-    {
       "id": "comfyui-root",
       "name": "ComfyUI",
       "technologyFamilyId": "ai-tools",
@@ -92,20 +71,6 @@
       "technologyFamilyId": "ios",
       "path": "config/projects/dhb.json",
       "summary": "订货宝 iOS 原生 App，常与 H5、WebView、BFF 联动。"
-    },
-    {
-      "id": "dhb-goods-image-tool",
-      "name": "dhb-goods-image-tool",
-      "technologyFamilyId": "frontend",
-      "path": "config/projects/dhb-goods-image-tool.json",
-      "summary": "图片或商品素材处理相关工具仓库。"
-    },
-    {
-      "id": "dhb-international-mobile",
-      "name": "dhb-International-mobile",
-      "technologyFamilyId": "frontend",
-      "path": "config/projects/dhb-international-mobile.json",
-      "summary": "DHB 国际化移动端项目，强调老项目 UI 100% 还原和组件化开发。"
     },
     {
       "id": "dhb-manager",
@@ -155,13 +120,6 @@
       "technologyFamilyId": "frontend",
       "path": "config/projects/dhbfront-utils.json",
       "summary": "DHB 前端公共工具库。"
-    },
-    {
-      "id": "docs",
-      "name": "docs",
-      "technologyFamilyId": "bff",
-      "path": "config/projects/docs.json",
-      "summary": "文档仓库。"
     },
     {
       "id": "egg-business",
@@ -218,13 +176,6 @@
       "technologyFamilyId": "frontend",
       "path": "config/projects/new-mobile-h5.json",
       "summary": "订货端老 H5 容器，承接 iframe 与 WebView 容器链路。"
-    },
-    {
-      "id": "open-auto-glm",
-      "name": "Open-AutoGLM",
-      "technologyFamilyId": "ios",
-      "path": "config/projects/open-auto-glm.json",
-      "summary": "实验性质的 iOS / AI 项目。"
     },
     {
       "id": "print",
