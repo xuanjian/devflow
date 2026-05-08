@@ -1,0 +1,32 @@
+{
+  "version": 1,
+  "id": "demo-project",
+  "name": "Demo Project",
+  "technologyFamilyId": "frontend",
+  "summary": "Demo project detail summary.",
+  "path": "/tmp/demo-project",
+  "doc": {
+    "path": "docs/repos/demo-project.md",
+    "title": "Demo Project"
+  },
+  "scenes": [
+    {
+      "id": "demo-scene",
+      "name": "Demo Scene"
+    }
+  ],
+  "skills": [
+    {
+      "id": "demo-skill",
+      "name": "Demo Skill",
+      "sourcePath": "bundles/skills/demo-skill/SKILL.md"
+    }
+  ],
+  "rules": [
+    {
+      "id": "demo-rule",
+      "name": "Demo Rule",
+      "sourcePath": "bundles/rules/demo-rule.md"
+    }
+  ]
+}

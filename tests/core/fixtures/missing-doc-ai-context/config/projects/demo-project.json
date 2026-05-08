@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "id": "demo-project",
+  "name": "Demo Project",
+  "summary": "Demo project summary.",
+  "doc": {
+    "path": "docs/repos/missing.md"
+  },
+  "scenes": [],
+  "skills": [],
+  "rules": []
+}

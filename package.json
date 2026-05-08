@@ -1,0 +1,28 @@
+{
+  "name": "ai-context",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite src/app --host 127.0.0.1",
+    "build": "vite build src/app --outDir ../../dist/app",
+    "test": "node --test tests/**/*.test.mjs && vitest run --config src/app/vitest.config.js",
+    "test:core": "node --test tests/**/*.test.mjs",
+    "test:ui": "vitest run --config src/app/vitest.config.js",
+    "start": "node src/server.mjs"
+  },
+  "dependencies": {
+    "lucide-react": "latest",
+    "react": "latest",
+    "react-dom": "latest"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "latest",
+    "@testing-library/react": "latest",
+    "@testing-library/user-event": "latest",
+    "@vitejs/plugin-react": "latest",
+    "jsdom": "latest",
+    "vite": "latest",
+    "vitest": "latest"
+  }
+}

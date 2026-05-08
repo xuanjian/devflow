@@ -1,0 +1,6 @@
+{
+  "version": 1,
+  "sourceReadPolicy": {
+    "profile": "Read docs/person/profile.md when needed."
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "scenes": [
+    {
+      "id": "demo-scene",
+      "name": "Demo Scene",
+      "summary": "Demo scene summary.",
+      "path": "config/scenes/demo-scene.json",
+      "sourcePath": "docs/scenes/demo-scene.md"
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": [
+    {
+      "id": "demo-skill",
+      "name": "Demo Skill",
+      "description": "Demo skill description.",
+      "sourcePath": "bundles/skills/demo-skill/SKILL.md"
+    }
+  ]
+}

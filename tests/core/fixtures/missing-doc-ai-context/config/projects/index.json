@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "projects": [
+    {
+      "id": "demo-project",
+      "name": "Demo Project",
+      "path": "config/projects/demo-project.json",
+      "summary": "Demo project summary."
+    }
+  ]
+}

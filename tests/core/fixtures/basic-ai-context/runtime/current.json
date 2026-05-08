@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "activeTaskId": "demo-task",
+  "activeTaskPath": "runtime/tasks/demo-task.json",
+  "activeProjectIds": [
+    "demo-project"
+  ],
+  "activeSceneIds": [
+    "demo-scene"
+  ]
+}

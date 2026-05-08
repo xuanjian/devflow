@@ -13,6 +13,7 @@ bundles/skills/dhb-local-env/runtime/logs/*
 bundles/skills/dhb-local-env/runtime/pids/*
 
 # Local editor and tool noise.
+node_modules/
 .superpowers/
 .idea/
 .vscode/

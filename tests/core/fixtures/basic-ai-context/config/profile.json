@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "sourcePath": "docs/person/profile.md",
+  "role": "Fixture engineer",
+  "collaborationPreferences": [
+    "Use fixture data."
+  ]
+}

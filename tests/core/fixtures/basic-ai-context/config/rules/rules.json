@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "rules": [
+    {
+      "id": "demo-rule",
+      "name": "Demo Rule",
+      "purpose": "Demo rule purpose.",
+      "sourcePath": "bundles/rules/demo-rule.md",
+      "projectIds": [
+        "demo-project"
+      ],
+      "sceneIds": [
+        "demo-scene"
+      ]
+    }
+  ]
+}

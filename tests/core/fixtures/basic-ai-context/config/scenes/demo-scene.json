@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "id": "demo-scene",
+  "name": "Demo Scene",
+  "summary": "Demo scene detail summary.",
+  "source": {
+    "path": "docs/scenes/demo-scene.md"
+  },
+  "projects": [
+    {
+      "id": "demo-project",
+      "name": "Demo Project"
+    }
+  ],
+  "rules": [
+    {
+      "id": "demo-rule",
+      "name": "Demo Rule"
+    }
+  ]
+}
