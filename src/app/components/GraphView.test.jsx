@@ -40,3 +40,26 @@ test("GraphView hides cross links until a related node is selected", () => {
   rerender(<GraphView graph={graph} selectedNodeId="project:demo" onSelectNode={() => {}} />);
   expect(screen.getByTestId("edge-project:demo-scene:demo-uses-scene")).toBeInTheDocument();
 });
+
+test("GraphView expands the canvas height to include long node columns", () => {
+  const projectNodes = Array.from({ length: 18 }, (_, index) => ({
+    id: `project:demo-${index}`,
+    type: "project",
+    title: `Project ${index}`,
+    status: "ok"
+  }));
+  const graph = {
+    nodes: [
+      { id: "root:ai-context", type: "root", title: "ai-context", status: "ok" },
+      { id: "group:projects", type: "group", title: "Projects", status: "ok" },
+      ...projectNodes
+    ],
+    edges: []
+  };
+
+  render(<GraphView graph={graph} selectedNodeId="" onSelectNode={() => {}} />);
+
+  const svg = screen.getByRole("img", { name: /relationship map/i });
+  const [, , , height] = svg.getAttribute("viewBox").split(" ").map(Number);
+  expect(height).toBeGreaterThan(900);
+});
