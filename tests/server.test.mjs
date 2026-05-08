@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { startServer } from "../src/server.mjs";
+import { handleApiRequest, startServer } from "../src/server.mjs";
 
 test("server serves bootstrap HTML without frontend build", async () => {
   const server = await startServer({ rootDir: new URL("./core/fixtures/basic-ai-context/", import.meta.url), port: 0 });
@@ -53,4 +53,40 @@ test("server rejects malformed JSON action bodies", async () => {
   } finally {
     await server.close();
   }
+});
+
+test("handleApiRequest handles API routes for Vite middleware", async () => {
+  let statusCode = 200;
+  let body = "";
+  const headers = {};
+  const request = {
+    method: "GET",
+    url: "/api/graph",
+    headers: { host: "127.0.0.1:5173" },
+    [Symbol.asyncIterator]: async function* noop() {}
+  };
+  const response = {
+    setHeader(name, value) {
+      headers[name.toLowerCase()] = value;
+    },
+    writeHead(status, nextHeaders) {
+      statusCode = status;
+      Object.assign(headers, nextHeaders);
+    },
+    end(chunk = "") {
+      body += chunk;
+    }
+  };
+
+  const handled = await handleApiRequest({
+    request,
+    response,
+    rootDir: new URL("./core/fixtures/basic-ai-context/", import.meta.url)
+  });
+  const payload = JSON.parse(body);
+
+  assert.equal(handled, true);
+  assert.equal(statusCode, 200);
+  assert.ok(headers["content-type"].includes("application/json"));
+  assert.ok(payload.nodes.length > 0);
 });

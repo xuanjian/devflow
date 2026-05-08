@@ -4,8 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite src/app --host 127.0.0.1",
-    "build": "vite build src/app --outDir ../../dist/app",
+    "dev": "vite src/app --host 127.0.0.1 --config src/app/vite.config.js",
+    "build": "vite build src/app --outDir ../../dist/app --config src/app/vite.config.js",
     "test": "node --test tests/**/*.test.mjs && vitest run --config src/app/vitest.config.js",
     "test:core": "node --test tests/**/*.test.mjs",
     "test:ui": "vitest run --config src/app/vitest.config.js",

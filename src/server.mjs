@@ -34,9 +34,31 @@ export async function startServer({ rootDir = process.cwd(), port = 0, host = DE
   };
 }
 
+export async function handleApiRequest({ request, response, rootDir = process.cwd() }) {
+  const rootPath = toPath(rootDir);
+  const url = new URL(request.url, `http://${request.headers.host || "localhost"}`);
+  if (!url.pathname.startsWith("/api/")) {
+    return false;
+  }
+  await handleApiRoute({ request, response, rootPath, url });
+  return true;
+}
+
 async function handleRequest({ request, response, rootPath }) {
   const url = new URL(request.url, `http://${request.headers.host || "localhost"}`);
 
+  if (url.pathname.startsWith("/api/")) {
+    return handleApiRoute({ request, response, rootPath, url });
+  }
+
+  if (request.method !== "GET") {
+    return sendJson(response, 405, { error: { code: "method_not_allowed", message: "Only GET is supported." } });
+  }
+
+  return serveAppOrBootstrap(response, rootPath, url.pathname);
+}
+
+async function handleApiRoute({ request, response, rootPath, url }) {
   if (url.pathname === "/api/graph" && request.method === "GET") {
     return sendJson(response, 200, await buildContextGraph({ rootDir: rootPath }));
   }
@@ -68,11 +90,7 @@ async function handleRequest({ request, response, rootPath }) {
     return sendJson(response, result.ok ? 200 : 400, result);
   }
 
-  if (request.method !== "GET") {
-    return sendJson(response, 405, { error: { code: "method_not_allowed", message: "Only GET is supported." } });
-  }
-
-  return serveAppOrBootstrap(response, rootPath, url.pathname);
+  return sendJson(response, 404, { error: { code: "unknown_api_route", message: `Unknown API route: ${url.pathname}` } });
 }
 
 async function serveAppOrBootstrap(response, rootPath, requestPath) {
