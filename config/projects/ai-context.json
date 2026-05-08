@@ -1,0 +1,51 @@
+{
+  "version": 1,
+  "id": "ai-context",
+  "name": "ai-context",
+  "technologyFamilyId": "workflow",
+  "technologyFamilyName": "工作流",
+  "repoType": "context-config-center",
+  "summary": "本地 AI 上下文中心、JSON 索引、安装入口和任务 Gate 流程项目。",
+  "path": "/Users/xj/Documents/ai-context",
+  "tags": [
+    "ai-context",
+    "workflow"
+  ],
+  "doc": {
+    "path": "README.md",
+    "title": "ai-context",
+    "summary": "本地 AI 上下文中心、JSON 索引、安装入口和任务 Gate 流程项目。",
+    "whenToRead": "Read only after this project is selected for the task or the JSON summary is insufficient."
+  },
+  "scenes": [
+    {
+      "id": "ai-context-config",
+      "name": "ai-context 配置索引流程",
+      "summary": "ai-context 自身的配置、安装、任务 Gate 和索引生成流程。",
+      "sourcePath": "config/entry.json",
+      "reason": "ai-context participates in ai-context 自身的配置、安装、任务 Gate 和索引生成流程。."
+    }
+  ],
+  "skills": [
+    {
+      "id": "ai-context",
+      "name": "ai-context",
+      "description": "统一读取 ai-context JSON 索引、安装入口、配置写入和 G1-G7 任务流转。",
+      "sourcePath": "bundles/skills/ai-context/SKILL.md",
+      "whenToLoad": "Load when ai-context task matches this skill trigger."
+    }
+  ],
+  "rules": [],
+  "tools": {},
+  "readPolicy": {
+    "defaultRead": [
+      "config/projects/ai-context.json"
+    ],
+    "onDemandRead": [
+      "README.md",
+      "config/entry.json",
+      "bundles/skills/ai-context/SKILL.md"
+    ],
+    "notes": "Start with this JSON. Load source Markdown, rules, or skills only when the task requires detailed instructions."
+  }
+}

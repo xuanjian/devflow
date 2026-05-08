@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "id": "dhbfront-manager-mobile",
+  "name": "dhbfront-manager-mobile",
+  "technologyFamilyId": "frontend",
+  "technologyFamilyName": "前端",
+  "repoType": "web-app",
+  "summary": "DHB 管理端移动 H5 项目。",
+  "path": "/Users/xj/Documents/frontend/dhbfront-manager-mobile",
+  "tags": [
+    "dhb",
+    "frontend",
+    "manager"
+  ],
+  "doc": {
+    "path": "docs/repos/dhbfront-manager-mobile.md",
+    "title": "dhbfront-manager-mobile",
+    "summary": "DHB 管理端移动 H5 项目。",
+    "whenToRead": "Read only after this project is selected for the task or the JSON summary is insufficient."
+  },
+  "scenes": [
+    {
+      "id": "single-repo-change",
+      "name": "single-repo-change",
+      "summary": "默认单仓修改场景",
+      "sourcePath": "docs/scenes/single-repo-change.md",
+      "reason": "Default scene for isolated work in this project."
+    }
+  ],
+  "skills": [],
+  "rules": [],
+  "tools": {
+    "figma": true,
+    "notion": true,
+    "playwright": true,
+    "xcode": false,
+    "bffDebug": true,
+    "codex": true
+  },
+  "readPolicy": {
+    "defaultRead": [
+      "config/projects/dhbfront-manager-mobile.json"
+    ],
+    "onDemandRead": [
+      "docs/repos/dhbfront-manager-mobile.md",
+      "docs/scenes/single-repo-change.md"
+    ],
+    "notes": "Start with this JSON. Load source Markdown, rules, or skills only when the task requires detailed instructions."
+  }
+}

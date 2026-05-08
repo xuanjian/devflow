@@ -23,15 +23,15 @@
 核心文件：
 
 ```text
-scenes/xuanjian-symphony.md
-templates/00-intake.md
-templates/01-discovery.md
-templates/02-product-ui.md
-templates/03-tech-plan.md
-templates/04-project-handoff.md
-templates/05-project-result.md
-templates/06-acceptance.md
-templates/07-rework.md
+docs/scenes/xuanjian-symphony.md
+docs/templates/00-intake.md
+docs/templates/01-discovery.md
+docs/templates/02-product-ui.md
+docs/templates/03-tech-plan.md
+docs/templates/04-project-handoff.md
+docs/templates/05-project-result.md
+docs/templates/06-acceptance.md
+docs/templates/07-rework.md
 runtime/tasks/README.md
 ```
 

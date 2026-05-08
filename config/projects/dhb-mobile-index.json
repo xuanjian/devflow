@@ -1,0 +1,132 @@
+{
+  "version": 1,
+  "id": "dhb-mobile-index",
+  "name": "dhb-mobile-index",
+  "technologyFamilyId": "frontend",
+  "technologyFamilyName": "前端",
+  "repoType": "web-app",
+  "summary": "订货端 React H5 主入口，常处在容器链路和跨端联调中心。",
+  "path": "/Users/xj/Documents/frontend/dhb-mobile-index",
+  "tags": [
+    "dhb",
+    "frontend",
+    "h5"
+  ],
+  "doc": {
+    "path": "docs/repos/dhb-mobile-index.md",
+    "title": "dhb-mobile-index",
+    "summary": "订货端 React H5 主入口，常处在容器链路和跨端联调中心。",
+    "whenToRead": "Read only after this project is selected for the task or the JSON summary is insufficient."
+  },
+  "scenes": [
+    {
+      "id": "single-repo-change",
+      "name": "single-repo-change",
+      "summary": "默认单仓修改场景",
+      "sourcePath": "docs/scenes/single-repo-change.md",
+      "reason": "Default scene for isolated work in this project."
+    },
+    {
+      "id": "index-h5-webview",
+      "name": "index-h5-webview",
+      "summary": "index 到 h5 / webview 链路",
+      "sourcePath": "docs/scenes/index-h5-webview.md",
+      "reason": "dhb-mobile-index participates in index 到 h5 / webview 链路."
+    },
+    {
+      "id": "cash-index-h5-webview",
+      "name": "cash-index-h5-webview",
+      "summary": "cash 到 index / h5 / webview 链路",
+      "sourcePath": "docs/scenes/cash-index-h5-webview.md",
+      "reason": "dhb-mobile-index participates in cash 到 index / h5 / webview 链路."
+    },
+    {
+      "id": "packages-cash-index-h5-webview",
+      "name": "packages-cash-index-h5-webview",
+      "summary": "分包到 cash / index / h5 / webview 链路",
+      "sourcePath": "docs/scenes/packages-cash-index-h5-webview.md",
+      "reason": "dhb-mobile-index participates in 分包到 cash / index / h5 / webview 链路."
+    },
+    {
+      "id": "mini-program-h5-webview",
+      "name": "mini-program-h5-webview",
+      "summary": "小程序到 H5 容器链路",
+      "sourcePath": "docs/scenes/mini-program-h5-webview.md",
+      "reason": "dhb-mobile-index participates in 小程序到 H5 容器链路."
+    },
+    {
+      "id": "frontend-bff-debug",
+      "name": "frontend-bff-debug",
+      "summary": "前端与部分 BFF 联调场景",
+      "sourcePath": "docs/scenes/frontend-bff-debug.md",
+      "reason": "dhb-mobile-index participates in 前端与部分 BFF 联调场景."
+    },
+    {
+      "id": "ios-h5-webview-bff",
+      "name": "ios-h5-webview-bff",
+      "summary": "iOS + H5 + 容器 + BFF 全链路场景",
+      "sourcePath": "docs/scenes/ios-h5-webview-bff.md",
+      "reason": "dhb-mobile-index participates in iOS + H5 + 容器 + BFF 全链路场景."
+    }
+  ],
+  "skills": [
+    {
+      "id": "run-projects",
+      "name": "run-projects",
+      "description": "Use when running DHB local frontend projects across cash-mini, dhb-mobile-index, new_mobile_h5, customize-mini-program, or linked subpackages, especially when switching environments, linking local packages, or recovering from unstable startup flows.",
+      "sourcePath": "bundles/skills/run-projects/SKILL.md",
+      "whenToLoad": "Load when dhb-mobile-index task matches this skill trigger."
+    },
+    {
+      "id": "restore-local-env",
+      "name": "restore-local-env",
+      "description": "恢复 DHB 本地联调环境。触发词：恢复环境、恢复配置、结束开发、还原配置。用于停止统一执行器启动的进程并恢复其备份的配置文件。",
+      "sourcePath": "bundles/skills/restore-local-env/SKILL.md",
+      "whenToLoad": "Load when dhb-mobile-index task matches this skill trigger."
+    },
+    {
+      "id": "dhb-env-switch",
+      "name": "dhb-env-switch",
+      "description": "切换 DHB 本地开发环境（测试/预发/线上）。触发词：切环境、切线上、切测试、切预发。",
+      "sourcePath": "bundles/skills/dhb-env-switch/SKILL.md",
+      "whenToLoad": "Load when dhb-mobile-index task matches this skill trigger."
+    }
+  ],
+  "rules": [
+    {
+      "id": "dhb-mobile-index",
+      "name": "dhb-mobile-index 开发规范",
+      "purpose": "**技术栈**: React + TypeScript + SCSS",
+      "sourcePath": "bundles/rules/dhb-mobile-index.mdc",
+      "whenToRead": "Read when working in dhb-mobile-index and this rule affects the requested change."
+    }
+  ],
+  "tools": {
+    "figma": true,
+    "notion": true,
+    "playwright": true,
+    "xcode": false,
+    "bffDebug": true,
+    "codex": true
+  },
+  "readPolicy": {
+    "defaultRead": [
+      "config/projects/dhb-mobile-index.json"
+    ],
+    "onDemandRead": [
+      "docs/repos/dhb-mobile-index.md",
+      "docs/scenes/single-repo-change.md",
+      "docs/scenes/index-h5-webview.md",
+      "docs/scenes/cash-index-h5-webview.md",
+      "docs/scenes/packages-cash-index-h5-webview.md",
+      "docs/scenes/mini-program-h5-webview.md",
+      "docs/scenes/frontend-bff-debug.md",
+      "docs/scenes/ios-h5-webview-bff.md",
+      "bundles/rules/dhb-mobile-index.mdc",
+      "bundles/skills/run-projects/SKILL.md",
+      "bundles/skills/restore-local-env/SKILL.md",
+      "bundles/skills/dhb-env-switch/SKILL.md"
+    ],
+    "notes": "Start with this JSON. Load source Markdown, rules, or skills only when the task requires detailed instructions."
+  }
+}

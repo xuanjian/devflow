@@ -1,0 +1,1585 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ai-context 拖拽配置工作台</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%232563eb'/%3E%3Cpath d='M8 10h9v9H8zM18 14h6v8h-6z' fill='white'/%3E%3C/svg%3E" />
+  <style>
+    :root {
+      --bg: #f4f6f9;
+      --panel: #ffffff;
+      --soft: #f1f4f8;
+      --text: #17202b;
+      --muted: #667382;
+      --line: #d7e0ea;
+      --blue: #2563eb;
+      --green: #0f8b62;
+      --amber: #b56b00;
+      --red: #c43b3b;
+      --dark: #111822;
+      --shadow: 0 16px 42px rgba(23, 32, 43, .08);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      overflow: hidden;
+      color: var(--text);
+      background: var(--bg);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      letter-spacing: 0;
+    }
+
+    button,
+    input,
+    select,
+    textarea {
+      font: inherit;
+    }
+
+    button {
+      border: 0;
+      cursor: pointer;
+    }
+
+    .app {
+      display: grid;
+      grid-template-columns: 308px minmax(0, 1fr);
+      height: 100vh;
+    }
+
+    .sidebar {
+      display: grid;
+      grid-template-rows: auto auto auto 1fr auto;
+      gap: 14px;
+      padding: 16px 14px;
+      background: #121923;
+      color: #edf3fb;
+      min-width: 0;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo {
+      display: grid;
+      place-items: center;
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #21c69a, #2563eb);
+      flex: 0 0 auto;
+    }
+
+    h1, h2, h3, p { margin: 0; }
+
+    .brand h1 {
+      font-size: 15px;
+      line-height: 1.15;
+    }
+
+    .brand p {
+      margin-top: 2px;
+      color: #9aa8bb;
+      font-size: 12px;
+      line-height: 1.25;
+    }
+
+    .mode-tabs {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+    }
+
+    .mode-tab {
+      height: 34px;
+      border-radius: 8px;
+      color: #b8c6d8;
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.08);
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .mode-tab.active {
+      color: #fff;
+      background: var(--blue);
+      border-color: var(--blue);
+    }
+
+    .hint {
+      padding: 10px;
+      border-radius: 8px;
+      color: #b6c2d2;
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.08);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .palette {
+      display: grid;
+      align-content: start;
+      gap: 12px;
+      overflow: auto;
+      min-height: 0;
+      padding-right: 2px;
+    }
+
+    details {
+      display: grid;
+      gap: 7px;
+    }
+
+    summary {
+      list-style: none;
+      color: #8e9bad;
+      font-size: 12px;
+      font-weight: 800;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    summary::-webkit-details-marker { display: none; }
+
+    .palette-list {
+      display: grid;
+      gap: 7px;
+      margin-top: 7px;
+    }
+
+    .palette-node {
+      display: grid;
+      grid-template-columns: 34px minmax(0, 1fr);
+      align-items: center;
+      gap: 3px;
+      padding: 9px 10px;
+      border-radius: 8px;
+      color: #dce6f4;
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.08);
+      cursor: grab;
+      user-select: none;
+    }
+
+    .palette-node:active { cursor: grabbing; }
+
+    .shape-mark {
+      width: 26px;
+      height: 26px;
+      background: rgba(255,255,255,.16);
+      border: 1px solid rgba(255,255,255,.28);
+    }
+
+    .shape-mark.family { border-radius: 4px; }
+    .shape-mark.project { border-radius: 999px; }
+    .shape-mark.skill { transform: rotate(45deg) scale(.78); border-radius: 5px; }
+    .shape-mark.scene { clip-path: polygon(18% 0, 82% 0, 100% 50%, 82% 100%, 18% 100%, 0 50%); }
+    .shape-mark.gate { clip-path: polygon(0 0, 88% 0, 100% 50%, 88% 100%, 0 100%); }
+    .shape-mark.task { border-radius: 5px 14px 5px 14px; }
+
+    .palette-node strong {
+      font-size: 13px;
+      line-height: 1.2;
+    }
+
+    .palette-node span {
+      color: #9aa8bb;
+      font-size: 12px;
+      line-height: 1.25;
+    }
+
+    .task-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .task-item,
+    .task-add {
+      width: 100%;
+      min-height: 52px;
+      display: grid;
+      align-items: center;
+      gap: 3px;
+      padding: 9px 10px;
+      border-radius: 8px;
+      text-align: left;
+      color: #dce6f4;
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.08);
+    }
+
+    .task-item.active {
+      color: #fff;
+      border-color: rgba(37,99,235,.8);
+      background: rgba(37,99,235,.45);
+    }
+
+    .task-item strong {
+      font-size: 13px;
+      line-height: 1.2;
+    }
+
+    .task-item span {
+      color: #9aa8bb;
+      font-size: 12px;
+      line-height: 1.25;
+    }
+
+    .task-item.active span {
+      color: #d8e5ff;
+    }
+
+    .task-add {
+      min-height: 42px;
+      place-items: center;
+      text-align: center;
+      font-size: 22px;
+      font-weight: 780;
+    }
+
+    .side-note {
+      padding: 10px;
+      border-radius: 8px;
+      color: #aebacc;
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.09);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .workspace {
+      display: grid;
+      grid-template-rows: auto 1fr;
+      min-width: 0;
+      min-height: 0;
+    }
+
+    .topbar {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 12px;
+      align-items: center;
+      padding: 16px 18px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(244,246,249,.94);
+      backdrop-filter: blur(12px);
+    }
+
+    .topbar h2 {
+      font-size: 18px;
+      line-height: 1.2;
+    }
+
+    .topbar p {
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 36px;
+      padding: 0 12px;
+      border-radius: 8px;
+      color: var(--text);
+      background: #fff;
+      border: 1px solid var(--line);
+      font-size: 13px;
+      font-weight: 760;
+      white-space: nowrap;
+    }
+
+    .btn.primary {
+      color: #fff;
+      background: var(--blue);
+      border-color: var(--blue);
+    }
+
+    .btn.red {
+      color: #fff;
+      background: var(--red);
+      border-color: var(--red);
+    }
+
+    .canvas-shell {
+      position: relative;
+      min-width: 0;
+      min-height: 0;
+      overflow: auto;
+      background:
+        linear-gradient(rgba(23,32,43,.045) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(23,32,43,.045) 1px, transparent 1px),
+        #fbfcfe;
+      background-size: 28px 28px;
+    }
+
+    .canvas {
+      position: absolute;
+      inset: 0;
+      min-width: 1288px;
+      overflow: hidden;
+    }
+
+    .links {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .link {
+      stroke: #a9b6c7;
+      stroke-width: 1.8;
+      stroke-dasharray: 7 5;
+      opacity: .78;
+    }
+
+    .node {
+      position: absolute;
+      z-index: 2;
+      display: grid;
+      gap: 6px;
+      width: 190px;
+      min-height: 94px;
+      padding: 11px;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      border-left: 4px solid var(--blue);
+      background: #fff;
+      box-shadow: var(--shadow);
+      cursor: grab;
+      user-select: none;
+    }
+
+    .node.family {
+      border-radius: 5px;
+    }
+
+    .node.project {
+      border-radius: 18px;
+    }
+
+    .node.skill {
+      border-radius: 8px;
+      clip-path: polygon(10% 0, 100% 0, 90% 100%, 0 100%);
+      padding-left: 18px;
+      padding-right: 18px;
+    }
+
+    .node.scene {
+      clip-path: polygon(10% 0, 90% 0, 100% 50%, 90% 100%, 10% 100%, 0 50%);
+      padding-left: 18px;
+      padding-right: 18px;
+    }
+
+    .node.gate {
+      clip-path: polygon(0 0, 90% 0, 100% 50%, 90% 100%, 0 100%);
+      padding-right: 22px;
+    }
+
+    .node.task {
+      border-radius: 6px 20px 6px 20px;
+    }
+
+    .node:active { cursor: grabbing; }
+
+    .node.selected {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 4px rgba(37,99,235,.12), var(--shadow);
+    }
+
+    .node.family { border-left-color: var(--blue); }
+    .node.project { border-left-color: var(--green); }
+    .node.skill { border-left-color: var(--amber); }
+    .node.scene { border-left-color: #6d4aff; }
+    .node.gate { border-left-color: var(--red); }
+
+    .node strong {
+      font-size: 13px;
+      line-height: 1.25;
+    }
+
+    .node-title {
+      font-size: 13px;
+      line-height: 1.25;
+      font-weight: 800;
+    }
+
+    .node span {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .node select {
+      width: 100%;
+      min-height: 30px;
+      border-radius: 7px;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--text);
+      padding: 4px 7px;
+      font-size: 12px;
+      font-weight: 750;
+      outline: 0;
+    }
+
+    .node small {
+      display: inline-flex;
+      width: fit-content;
+      min-height: 21px;
+      align-items: center;
+      padding: 0 7px;
+      border-radius: 7px;
+      color: #3e4a59;
+      background: var(--soft);
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .drop-tip {
+      position: absolute;
+      left: 18px;
+      bottom: 18px;
+      z-index: 3;
+      max-width: 420px;
+      padding: 11px 12px;
+      border-radius: 8px;
+      color: var(--muted);
+      background: rgba(255,255,255,.9);
+      border: 1px solid var(--line);
+      font-size: 12px;
+      line-height: 1.45;
+      box-shadow: var(--shadow);
+    }
+
+    .inspector {
+      position: fixed;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 8;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      width: min(382px, calc(100vw - 28px));
+      background: #fff;
+      border-left: 1px solid var(--line);
+      box-shadow: -18px 0 48px rgba(23,32,43,.16);
+      transform: translateX(104%);
+      transition: transform .18s ease;
+    }
+
+    .inspector.open {
+      transform: translateX(0);
+    }
+
+    .inspector-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 16px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .inspector-head h3 {
+      font-size: 16px;
+      line-height: 1.25;
+    }
+
+    .inspector-head p {
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.3;
+    }
+
+    .inspector-body {
+      display: grid;
+      align-content: start;
+      gap: 14px;
+      overflow: auto;
+      padding: 14px 16px;
+    }
+
+    .inspect-section {
+      display: grid;
+      gap: 10px;
+    }
+
+    .inspect-section h4 {
+      margin: 0;
+      color: #354153;
+      font-size: 12px;
+      line-height: 1.25;
+      font-weight: 860;
+    }
+
+    .inspect-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .inspect-field {
+      display: grid;
+      gap: 5px;
+    }
+
+    .inspect-field.full {
+      grid-column: 1 / -1;
+    }
+
+    .inspect-field label,
+    .inspect-readonly dt {
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.25;
+      font-weight: 820;
+    }
+
+    .inspect-field input,
+    .inspect-field select,
+    .inspect-field textarea {
+      width: 100%;
+      min-height: 34px;
+      padding: 7px 9px;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      color: var(--text);
+      background: #fff;
+      outline: 0;
+      font-size: 12px;
+    }
+
+    .inspect-field textarea {
+      min-height: 76px;
+      line-height: 1.45;
+      resize: vertical;
+    }
+
+    .inspect-field input[readonly] {
+      color: var(--muted);
+      background: var(--soft);
+    }
+
+    .inspect-readonly {
+      display: grid;
+      grid-template-columns: 96px minmax(0, 1fr);
+      gap: 8px;
+      margin: 0;
+      padding: 9px 10px;
+      border-radius: 8px;
+      background: var(--soft);
+      border: 1px solid var(--line);
+    }
+
+    .inspect-readonly dd {
+      margin: 0;
+      color: var(--text);
+      font-size: 12px;
+      line-height: 1.35;
+      overflow-wrap: anywhere;
+    }
+
+    .inspector-foot {
+      padding: 12px 16px;
+      color: var(--muted);
+      background: #fbfcfe;
+      border-top: 1px solid var(--line);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 10;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      background: rgba(18,25,35,.36);
+      backdrop-filter: blur(8px);
+    }
+
+    .modal-backdrop.open { display: flex; }
+
+    .modal {
+      width: min(560px, 100%);
+      border-radius: 8px;
+      background: #fff;
+      border: 1px solid var(--line);
+      box-shadow: 0 24px 80px rgba(23,32,43,.2);
+      overflow: hidden;
+    }
+
+    .modal-head,
+    .modal-foot {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .modal-head h3 {
+      font-size: 16px;
+    }
+
+    .modal-foot {
+      border-top: 1px solid var(--line);
+      border-bottom: 0;
+      justify-content: flex-end;
+    }
+
+    .form {
+      display: grid;
+      gap: 12px;
+      padding: 16px;
+    }
+
+    .field {
+      display: grid;
+      gap: 6px;
+    }
+
+    .field label {
+      color: #354153;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .field input,
+    .field select,
+    .field textarea {
+      width: 100%;
+      min-height: 38px;
+      padding: 8px 10px;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      color: var(--text);
+      background: #fff;
+      outline: 0;
+      font-size: 13px;
+    }
+
+    .field textarea {
+      min-height: 82px;
+      resize: vertical;
+      line-height: 1.45;
+    }
+
+    .family-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    @media (max-width: 920px) {
+      body { overflow: auto; }
+
+      .app {
+        grid-template-columns: 1fr;
+        height: auto;
+        min-height: 100vh;
+      }
+
+      .sidebar {
+        min-height: auto;
+      }
+
+      .workspace {
+        min-height: 720px;
+      }
+
+      .topbar {
+        grid-template-columns: 1fr;
+      }
+
+      .actions {
+        justify-content: flex-start;
+      }
+
+      .inspector {
+        width: min(360px, calc(100vw - 20px));
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="logo" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 7h7v7H4z"></path>
+            <path d="M13 10h7v7h-7z"></path>
+            <path d="M8 14v3h5"></path>
+            <path d="M11 7h3"></path>
+          </svg>
+        </div>
+        <div>
+          <h1>ai-context 工作台</h1>
+          <p>拖拽节点配置关系</p>
+        </div>
+      </div>
+
+      <div class="mode-tabs" aria-label="工作台模式">
+        <button class="mode-tab active" data-mode="project">项目</button>
+        <button class="mode-tab" data-mode="scene">场景</button>
+        <button class="mode-tab" data-mode="task">任务</button>
+      </div>
+
+      <div class="hint" id="modeHint">项目视图：技术族是根节点，项目挂在技术族下，Skill 直接挂到项目下。</div>
+
+      <div class="palette" id="palette"></div>
+
+      <div class="side-note" id="sideNote">拖拽规则：左侧只放节点模板。拖进画布后，在节点里的下拉框选择具体配置项，再点父节点继续拖入子节点自动连线。</div>
+    </aside>
+
+    <main class="workspace">
+      <header class="topbar">
+        <div>
+          <h2 id="canvasTitle">项目配置画布</h2>
+          <p id="canvasDesc">技术族为根节点，项目挂在技术族下，Skill 直接挂到项目下。</p>
+        </div>
+        <div class="actions" id="actions">
+          <button class="btn primary" data-add="project">新增项目</button>
+          <button class="btn" data-add="skill">新增 Skill</button>
+        </div>
+      </header>
+
+      <section class="canvas-shell">
+        <div class="canvas" id="canvas">
+          <svg class="links" id="links"></svg>
+        </div>
+        <div class="drop-tip" id="dropTip">当前选中：frontend。把项目节点拖进来会挂到技术族下；把 Skill 拖进来会挂到选中的项目下。</div>
+      </section>
+    </main>
+  </div>
+
+  <div class="modal-backdrop" id="modal">
+    <div class="modal">
+      <div class="modal-head">
+        <h3 id="modalTitle">新增项目</h3>
+        <button class="btn" id="closeModal">关闭</button>
+      </div>
+      <div class="form">
+        <div class="field">
+          <label id="nameLabel">名称</label>
+          <input id="newName" value="stock-inventory-review" />
+        </div>
+        <div class="field hidden" id="familyField">
+          <label>技术族</label>
+          <div class="family-row">
+            <select id="techFamily">
+              <option value="frontend">frontend</option>
+              <option value="node">node</option>
+              <option value="ios">ios</option>
+            </select>
+            <button class="btn" id="toggleNewFamily" type="button">新增技术族</button>
+          </div>
+          <input class="hidden" id="newFamilyName" placeholder="例如 ai-tools" />
+        </div>
+        <div class="field">
+          <label>说明</label>
+          <textarea id="newDesc">盘点单视觉 review 与字段口径核对</textarea>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn" id="cancelModal">取消</button>
+        <button class="btn primary" id="confirmAdd">添加到画布</button>
+      </div>
+    </div>
+  </div>
+
+  <aside class="inspector" id="inspector" aria-label="节点详情">
+    <div class="inspector-head">
+      <div>
+        <h3 id="inspectorTitle">节点详情</h3>
+        <p id="inspectorSubtitle">只编辑节点自身</p>
+      </div>
+      <button class="btn" id="closeInspector">关闭</button>
+    </div>
+    <div class="inspector-body" id="inspectorBody"></div>
+    <div class="inspector-foot">抽屉只编辑当前 node 自身。父子关系、挂载关系、连线关系只在画布上处理。</div>
+  </aside>
+
+  <script>
+    const modeCopy = {
+      project: {
+        title: "项目配置画布",
+        desc: "技术族为根节点，项目挂在技术族下，Skill 直接挂到项目下。",
+        hint: "项目视图：技术族是根节点，项目挂在技术族下，Skill 直接挂到项目下。"
+      },
+      scene: {
+        title: "场景理解画布",
+        desc: "场景名称为根节点，可连接相关对象；场景本身可以是项目组合，也可以是操作流程。",
+        hint: "场景视图：场景是 AI 理解包，可以描述项目组合、操作方式或固定流程；Skill 不在场景中出现。"
+      },
+      task: {
+        title: "任务 Gate 画布",
+        desc: "根为任务节点，横向展示 G0-G7 全流程，项目进度挂在 G4 开发阶段下。",
+        hint: "任务视图：左侧是任务列表，点击任务查看完整 Gate 进度；G4 后继续展示联调、验证、完成。"
+      }
+    };
+
+    const paletteData = {
+      project: [
+        { title: "节点模板", items: [
+          ["技术族 Node", "拖入后选择具体技术族", "family"],
+          ["项目 Node", "拖入后选择具体项目", "project"],
+          ["Skill Node", "拖入后选择具体 Skill", "skill"]
+        ]}
+      ],
+      scene: [
+        { title: "节点模板", items: [
+          ["场景 Node", "拖入后选择具体场景", "scene"],
+          ["项目 Node", "拖入后选择具体项目", "project"]
+        ]}
+      ],
+      task: [
+        { title: "节点模板", items: [
+          ["任务 Node", "拖入后选择真实任务", "task"],
+          ["Gate Node", "拖入后选择 Gate", "gate"],
+          ["项目 Node", "拖入后选择开发项目", "project"]
+        ]}
+      ]
+    };
+
+    const registryData = {
+      technologies: [
+        { id: "workflow", name: "工作流", description: "AI 协作、任务流程和配置中心项目" },
+        { id: "frontend", name: "前端", description: "React / Taro / H5 / 小程序等前端项目" },
+        { id: "bff", name: "BFF / Node", description: "Node.js、Egg、BFF、后端服务和接口项目" },
+        { id: "ios", name: "iOS", description: "Objective-C / Swift 原生 App、WebView 和桥接项目" }
+      ],
+      projects: [
+        { id: "ai-context", name: "ai-context", technologyFamilyId: "workflow", path: "<ai-context 仓库>", summary: "AI 上下文中心、配置软件、JSON 权威层和任务 Gate 流程仓库。" },
+        { id: "dhbfront-manager-mobile", name: "管理端移动 H5", technologyFamilyId: "frontend", path: "frontend/dhbfront-manager-mobile", summary: "管理端移动 H5 项目示例。" },
+        { id: "bff-warehouse", name: "仓库 BFF", technologyFamilyId: "bff", path: "node/bff-warehouse", summary: "仓库相关 BFF 项目示例。" },
+        { id: "ios-dhb", name: "DHB iOS", technologyFamilyId: "ios", path: "ios/DHB", summary: "iOS 原生容器和 WebView 项目示例。" }
+      ],
+      skills: [
+        { id: "ai-context-bootstrap", name: "ai-context-bootstrap", description: "安装、初始化、新电脑或缺失入口检查。" },
+        { id: "ai-context-config-writer", name: "ai-context-config-writer", description: "新增/删除/修改技术族、项目、Skill、场景和关系。" },
+        { id: "ai-context-task-flow", name: "ai-context-task-flow", description: "创建任务、选择当前任务、推进 G0-G7。" },
+        { id: "ai-my-pm", name: "ai-my-pm", description: "需求路由、项目判断、工具和流程选择。" },
+        { id: "run-projects", name: "run-projects", description: "联动启动与环境切换。" }
+      ],
+      projectSkills: [
+        { projectId: "ai-context", skillIds: ["ai-context-bootstrap", "ai-context-config-writer", "ai-context-task-flow", "ai-my-pm"] },
+        { projectId: "dhbfront-manager-mobile", skillIds: ["run-projects"] }
+      ],
+      scenes: [
+        { id: "ai-context-config-studio", name: "ai-context 配置软件流程", description: "配置软件、JSON 权威层和任务 Gate 自动流转流程。" },
+        { id: "ios-h5-webview-bff", name: "iOS + H5 + BFF 联调", description: "H5 + 原生 + BFF 理解包。" },
+        { id: "frontend-bff-debug", name: "前端 + BFF 排障", description: "前端与 BFF 排障理解包。" }
+      ],
+      sceneProjects: [
+        { sceneId: "ai-context-config-studio", projectIds: ["ai-context"] },
+        { sceneId: "ios-h5-webview-bff", projectIds: ["dhbfront-manager-mobile", "ios-dhb", "bff-warehouse"] },
+        { sceneId: "frontend-bff-debug", projectIds: ["dhbfront-manager-mobile", "bff-warehouse"] }
+      ],
+      tasks: [
+        { id: "2026-05-07-ai-context-config-studio", title: "ai-context 配置软件与 JSON 任务流程改造", status: "G4 准备开发", projectIds: ["ai-context"] }
+      ],
+      gates: [
+        { id: "G0 Intake", description: "需求入口" },
+        { id: "G1 Discovery", description: "需求调研" },
+        { id: "G2 Product/UI", description: "产品 UI" },
+        { id: "G3 Tech Plan", description: "技术方案" },
+        { id: "G4 Development", description: "项目开发" },
+        { id: "G5 Integration", description: "跨项目联调" },
+        { id: "G6 Verification", description: "验收与回归" },
+        { id: "G7 Run/Package", description: "运行调试与打包发布归档" }
+      ]
+    };
+
+    const optionData = {
+      family: registryData.technologies.map(item => [item.id, item.description]),
+      project: registryData.projects.map(item => [item.id, item.name]),
+      skill: registryData.skills.map(item => [item.id, item.description]),
+      scene: registryData.scenes.map(item => [item.id, item.description]),
+      gate: registryData.gates.map(item => [item.id, item.description]),
+      task: registryData.tasks.map(item => [item.id, item.title])
+    };
+
+    const state = {
+      mode: "project",
+      selectedId: null,
+      modalType: "project",
+      activeTask: "2026-05-07-ai-context-config-studio",
+      inspectorOpen: false,
+      nodes: [],
+      links: []
+    };
+
+    const seeds = {
+      project: {
+        nodes: [
+          node("family-workflow", "workflow", "工作流技术族", "family", 92, 94),
+          node("project-ai-context", "ai-context", "配置中心项目", "project", 322, 70),
+          node("skill-bootstrap", "ai-context-bootstrap", "安装与初始化", "skill", 562, 8),
+          node("skill-config-writer", "ai-context-config-writer", "配置写入", "skill", 562, 118),
+          node("skill-task-flow", "ai-context-task-flow", "任务 Gate 流转", "skill", 562, 228),
+          node("family-frontend", "frontend", "前端技术族", "family", 92, 404),
+          node("project-manager", "dhbfront-manager-mobile", "管理端移动 H5", "project", 322, 404),
+          node("skill-run", "run-projects", "联动启动与环境切换", "skill", 562, 404),
+          node("family-bff", "bff", "BFF 技术族", "family", 92, 584),
+          node("project-warehouse", "bff-warehouse", "仓库 BFF", "project", 322, 584)
+        ],
+        links: [["family-workflow", "project-ai-context"], ["project-ai-context", "skill-bootstrap"], ["project-ai-context", "skill-config-writer"], ["project-ai-context", "skill-task-flow"], ["family-frontend", "project-manager"], ["project-manager", "skill-run"], ["family-bff", "project-warehouse"]],
+        selectedId: "project-ai-context"
+      },
+      scene: {
+        nodes: [
+          node("scene-config", "ai-context-config-studio", "配置软件流程", "scene", 90, 170),
+          node("project-ai-context", "ai-context", "配置中心项目", "project", 350, 170),
+          node("scene-ios", "ios-h5-webview-bff", "联调场景示例", "scene", 90, 410),
+          node("project-manager", "dhbfront-manager-mobile", "管理端移动 H5", "project", 350, 300),
+          node("project-ios", "ios-dhb", "原生 WebView", "project", 350, 450),
+          node("project-warehouse", "bff-warehouse", "仓库 BFF", "project", 350, 600)
+        ],
+        links: [["scene-config", "project-ai-context"], ["scene-ios", "project-manager"], ["scene-ios", "project-ios"], ["scene-ios", "project-warehouse"]],
+        selectedId: "scene-config"
+      },
+      task: {
+        nodes: [
+          node("task-root", "2026-05-07-ai-context-config-studio", "ai-context 配置软件与 JSON 任务流程改造", "task", 42, 96),
+          node("g0", "G0-G3", "需求到技术方案", "gate", 250, 96),
+          node("g4", "G4 Development", "项目开发入口", "gate", 458, 96),
+          node("g5", "G5 Integration", "跨项目联调", "gate", 666, 96),
+          node("g6", "G6 Verification", "验收与回归", "gate", 874, 96),
+          node("g7", "G7 Run/Package", "运行调试与打包发布", "gate", 1082, 96),
+          node("project-ai-context", "ai-context", "JSON registry + validator", "project", 458, 252)
+        ],
+        links: [["task-root", "g0"], ["g0", "g4"], ["g4", "g5"], ["g5", "g6"], ["g6", "g7"], ["g4", "project-ai-context"], ["project-ai-context", "g5"]],
+        selectedId: "g4"
+      }
+    };
+
+    const canvas = document.getElementById("canvas");
+    const linksSvg = document.getElementById("links");
+    const palette = document.getElementById("palette");
+    const modal = document.getElementById("modal");
+    const modalTitle = document.getElementById("modalTitle");
+    const newName = document.getElementById("newName");
+    const newDesc = document.getElementById("newDesc");
+    const familyField = document.getElementById("familyField");
+    const techFamily = document.getElementById("techFamily");
+    const newFamilyName = document.getElementById("newFamilyName");
+    const toggleNewFamily = document.getElementById("toggleNewFamily");
+    const inspector = document.getElementById("inspector");
+    const inspectorTitle = document.getElementById("inspectorTitle");
+    const inspectorSubtitle = document.getElementById("inspectorSubtitle");
+    const inspectorBody = document.getElementById("inspectorBody");
+    const nodeWidth = 190;
+
+    function node(id, label, desc, type, x, y) {
+      return { id, label, desc, type, x, y };
+    }
+
+    function loadMode(mode) {
+      state.mode = mode;
+      state.nodes = seeds[mode].nodes.map(item => ({ ...item }));
+      state.links = seeds[mode].links.map(item => [...item]);
+      state.selectedId = seeds[mode].selectedId;
+      state.inspectorOpen = false;
+      if (mode === "task") applyActiveTaskToCanvas();
+      document.querySelectorAll(".mode-tab").forEach(tab => tab.classList.toggle("active", tab.dataset.mode === mode));
+      document.getElementById("canvasTitle").textContent = modeCopy[mode].title;
+      document.getElementById("canvasDesc").textContent = modeCopy[mode].desc;
+      document.getElementById("modeHint").textContent = modeCopy[mode].hint;
+      document.getElementById("sideNote").textContent = mode === "task"
+        ? "任务列表：点击任务查看完整 Gate 看板。列表最后的 + 用来新增真实任务。"
+        : "拖拽规则：左侧只放节点模板。拖进画布后，在节点里的下拉框选择具体配置项，再点父节点继续拖入子节点自动连线。";
+      renderActions();
+      renderPalette();
+      renderCanvas();
+      renderInspector();
+    }
+
+    function renderActions() {
+      const actions = document.getElementById("actions");
+      if (state.mode === "project") {
+        actions.innerHTML = '<button class="btn primary" data-add="project">新增项目</button><button class="btn" data-add="skill">新增 Skill</button>';
+      } else if (state.mode === "scene") {
+        actions.innerHTML = '<button class="btn primary" data-add="scene">新增场景</button>';
+      } else {
+        actions.innerHTML = "";
+      }
+      actions.querySelectorAll("[data-add]").forEach(button => {
+        button.addEventListener("click", () => openModal(button.dataset.add));
+      });
+    }
+
+    function renderPalette() {
+      palette.innerHTML = "";
+      if (state.mode === "task") {
+        renderTaskList();
+        return;
+      }
+      paletteData[state.mode].forEach(group => {
+        const details = document.createElement("details");
+        details.open = true;
+        details.innerHTML = `<summary>${group.title}</summary><div class="palette-list"></div>`;
+        const list = details.querySelector(".palette-list");
+        group.items.forEach(([label, desc, type]) => {
+          const item = document.createElement("div");
+          item.className = "palette-node";
+          item.draggable = true;
+          item.dataset.label = label;
+          item.dataset.desc = desc;
+          item.dataset.type = type;
+          item.innerHTML = `<i class="shape-mark ${type}" aria-hidden="true"></i><div><strong>${label}</strong><span>${desc}</span></div>`;
+          item.addEventListener("dragstart", event => {
+            event.dataTransfer.setData("application/json", JSON.stringify({ label, desc, type }));
+          });
+          list.appendChild(item);
+        });
+        palette.appendChild(details);
+      });
+    }
+
+    function renderTaskList() {
+      const list = document.createElement("div");
+      list.className = "task-list";
+      optionData.task.forEach(([label, desc]) => {
+        const item = document.createElement("button");
+        item.className = `task-item${label === state.activeTask ? " active" : ""}`;
+        item.type = "button";
+        item.innerHTML = `<strong>${escapeHtml(label)}</strong><span>${escapeHtml(desc)}</span>`;
+        item.addEventListener("click", () => selectTask(label));
+        list.appendChild(item);
+      });
+
+      const add = document.createElement("button");
+      add.className = "task-add";
+      add.type = "button";
+      add.setAttribute("aria-label", "新增任务");
+      add.textContent = "+";
+      add.addEventListener("click", () => openModal("task"));
+      list.appendChild(add);
+      palette.appendChild(list);
+    }
+
+    function selectTask(label) {
+      state.activeTask = label;
+      state.nodes = seeds.task.nodes.map(item => ({ ...item }));
+      state.links = seeds.task.links.map(item => [...item]);
+      applyActiveTaskToCanvas();
+      renderPalette();
+      renderCanvas();
+    }
+
+    function applyActiveTaskToCanvas() {
+      const choice = optionData.task.find(([taskLabel]) => taskLabel === state.activeTask);
+      const root = state.nodes.find(item => item.type === "task");
+      if (root && choice) {
+        root.label = choice[0];
+        root.desc = choice[1];
+      }
+      state.selectedId = root ? root.id : seeds.task.selectedId;
+    }
+
+    function renderCanvas(options = {}) {
+      canvas.querySelectorAll(".node").forEach(item => item.remove());
+      state.nodes.forEach(item => {
+        const el = document.createElement("div");
+        el.className = `node ${item.type}${item.id === state.selectedId ? " selected" : ""}`;
+        el.style.left = `${item.x}px`;
+        el.style.top = `${item.y}px`;
+        el.dataset.id = item.id;
+        el.innerHTML = `<small>${typeLabel(item.type)}</small>${nodeTitleMarkup(item)}<span>${item.desc}</span>`;
+        el.addEventListener("click", () => selectNode(item.id));
+        const select = el.querySelector("select");
+        if (select) {
+          select.addEventListener("pointerdown", event => event.stopPropagation());
+          select.addEventListener("click", event => event.stopPropagation());
+          select.addEventListener("change", event => {
+            updateNodeChoice(item.id, event.target.value);
+          });
+        }
+        makeDraggable(el, item);
+        canvas.appendChild(el);
+      });
+      drawLinks();
+      updateDropTip();
+      if (state.inspectorOpen && !options.skipInspector) renderInspector();
+    }
+
+    function nodeTitleMarkup(item) {
+      if (isTaskReadonlyNode(item)) return `<strong class="node-title">${escapeHtml(item.label)}</strong>`;
+      return selectMarkup(item);
+    }
+
+    function isTaskReadonlyNode(item) {
+      return state.mode === "task" && (item.type === "task" || item.type === "gate");
+    }
+
+    function selectMarkup(item) {
+      const options = choicesFor(item).map(([label]) => `<option value="${escapeHtml(label)}"${label === item.label ? " selected" : ""}>${escapeHtml(label)}</option>`).join("");
+      return `<select aria-label="${typeLabel(item.type)}选择">${options}</select>`;
+    }
+
+    function choicesFor(item) {
+      const choices = optionData[item.type] ? [...optionData[item.type]] : [[item.label, item.desc]];
+      if (!choices.some(([label]) => label === item.label)) choices.unshift([item.label, item.desc]);
+      return choices;
+    }
+
+    function updateNodeChoice(id, label) {
+      const item = state.nodes.find(nodeItem => nodeItem.id === id);
+      if (!item) return;
+      const choice = choicesFor(item).find(([choiceLabel]) => choiceLabel === label);
+      item.label = label;
+      item.desc = choice ? choice[1] : item.desc;
+      state.selectedId = id;
+      renderCanvas();
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;");
+    }
+
+    function typeLabel(type) {
+      return { family: "技术族", project: "项目", skill: "Skill", scene: "场景", gate: "Gate", task: "任务" }[type] || type;
+    }
+
+    function selectNode(id) {
+      state.selectedId = id;
+      state.inspectorOpen = true;
+      renderCanvas();
+    }
+
+    function renderInspector() {
+      const item = state.nodes.find(nodeItem => nodeItem.id === state.selectedId);
+      if (!state.inspectorOpen || !item) {
+        inspector.classList.remove("open");
+        inspectorBody.innerHTML = "";
+        return;
+      }
+
+      inspector.classList.add("open");
+      inspectorTitle.textContent = `${typeLabel(item.type)}详情`;
+      inspectorSubtitle.textContent = state.mode === "task" ? "看板节点自身状态" : "配置节点自身信息";
+      inspectorBody.innerHTML = inspectorContent(item);
+      bindInspectorControls(item);
+    }
+
+    function inspectorContent(item) {
+      return [
+        inspectSection("基础信息", baseFields(item)),
+        inspectSection(selfSectionTitle(item), selfFields(item)),
+        inspectSection("关系摘要，只读", relationFields(item))
+      ].join("");
+    }
+
+    function baseFields(item) {
+      const labelReadonly = state.mode === "task";
+      const descReadonly = state.mode === "task" && item.type === "gate";
+      const descLabel = state.mode === "task" && item.type === "task" ? "任务目标" : "说明";
+      return `
+        <div class="inspect-grid">
+          ${inspectInput("名称", item.label, { edit: labelReadonly ? "" : "label", readonly: labelReadonly })}
+          ${inspectInput("节点类型", typeLabel(item.type), { readonly: true })}
+          ${inspectTextarea(descLabel, item.desc, { edit: descReadonly ? "" : "desc", readonly: descReadonly })}
+        </div>
+      `;
+    }
+
+    function selfSectionTitle(item) {
+      if (state.mode === "task") return item.type === "project" ? "项目进度" : "看板状态";
+      return item.type === "skill" ? "Skill 自身属性" : "配置属性";
+    }
+
+    function selfFields(item) {
+      if (state.mode === "task") return taskNodeFields(item);
+      if (item.type === "family") {
+        return `
+          <div class="inspect-grid">
+            ${inspectInput("配置文件", getMeta(item, "path", "config/ai-context.json"), { meta: "path" })}
+            ${inspectInput("维护人", getMeta(item, "owner", "XUANJIAN"), { meta: "owner" })}
+          </div>
+        `;
+      }
+      if (item.type === "project") {
+        if (state.mode === "scene") {
+          return `
+            <div class="inspect-grid">
+              ${inspectInput("项目路径", getMeta(item, "path", `/Users/xj/Documents/${item.label}`), { meta: "path" })}
+              ${inspectInput("场景职责", getMeta(item, "sceneRole", "记录该项目在当前场景中的职责边界"), { meta: "sceneRole" })}
+              ${inspectTextarea("场景内上下文", getMeta(item, "sceneContext", "记录这个项目在当前场景中需要 AI 重点理解的上下文。"), { meta: "sceneContext" })}
+              ${inspectTextarea("场景内注意事项", getMeta(item, "sceneNotes", "记录该项目在这个场景下容易误判或需要特别确认的点。"), { meta: "sceneNotes" })}
+            </div>
+          `;
+        }
+        return `
+          <div class="inspect-grid">
+            ${inspectInput("项目路径", getMeta(item, "path", `/Users/xj/Documents/${item.label}`), { meta: "path" })}
+            ${inspectInput("项目别名", getMeta(item, "alias", item.label), { meta: "alias" })}
+            ${inspectSelect("是否启用", getMeta(item, "enabled", "启用"), "enabled", ["启用", "停用"])}
+            ${inspectInput("默认入口", getMeta(item, "entry", "ai-context/projects"), { meta: "entry" })}
+            ${inspectTextarea("单独运行方式", getMeta(item, "singleRun", "记录这个项目单独启动的命令、端口、环境文件和前置依赖。"), { meta: "singleRun" })}
+            ${inspectTextarea("单独调试入口", getMeta(item, "singleDebug", "记录本项目单独调试时进入哪个页面、接口、模拟器或脚本。"), { meta: "singleDebug" })}
+            ${inspectTextarea("本地环境变量", getMeta(item, "localEnv", "记录本地运行所需 env、配置文件、账号或环境切换方式。"), { meta: "localEnv" })}
+            ${inspectTextarea("单项目测试打包", getMeta(item, "testBuild", "记录测试环境打包命令、产物路径和注意事项。"), { meta: "testBuild" })}
+            ${inspectTextarea("单项目预发打包", getMeta(item, "stagingBuild", "记录预发环境打包命令、产物路径和注意事项。"), { meta: "stagingBuild" })}
+            ${inspectTextarea("单项目正式打包", getMeta(item, "prodBuild", "记录正式环境打包命令、发布入口、回滚口径和注意事项。"), { meta: "prodBuild" })}
+          </div>
+        `;
+      }
+      if (item.type === "skill") {
+        return `
+          <div class="inspect-grid">
+            ${inspectInput("Skill 路径", getMeta(item, "path", `/Users/xj/.codex/skills/${item.label}/SKILL.md`), { meta: "path" })}
+            ${inspectSelect("风险级别", getMeta(item, "risk", "低"), "risk", ["低", "中", "高"])}
+            ${inspectSelect("是否启用", getMeta(item, "enabled", "启用"), "enabled", ["启用", "停用"])}
+            ${inspectTextarea("触发条件", getMeta(item, "trigger", "用户请求匹配该能力时触发"), { meta: "trigger" })}
+          </div>
+        `;
+      }
+      if (item.type === "scene") {
+        return `
+          <div class="inspect-grid">
+            ${inspectTextarea("适用条件", getMeta(item, "condition", "当用户需求命中这个固定场景、操作方式或上下文组合时使用。"), { meta: "condition" })}
+            ${inspectTextarea("AI 理解重点", getMeta(item, "focus", "记录 AI 在这个场景下要优先理解什么：可能是项目边界、调用链、操作步骤、联调差异、环境要求或常见误判点。"), { meta: "focus" })}
+            ${inspectTextarea("操作方式/步骤", getMeta(item, "operationSteps", "如果这是操作型场景，记录推荐操作顺序、入口、确认点和不要做的动作。"), { meta: "operationSteps" })}
+            ${inspectTextarea("上下文注意事项", getMeta(item, "contextNotes", "记录这个场景长期稳定、需要反复提醒 AI 的注意事项。"), { meta: "contextNotes" })}
+          </div>
+        `;
+      }
+      return "";
+    }
+
+    function taskNodeFields(item) {
+      if (item.type === "project") {
+        return `
+          <div class="inspect-grid">
+            ${inspectSelect("开发状态", getMeta(item, "status", "进行中"), "status", ["未开始", "进行中", "阻塞", "已完成"])}
+            ${inspectInput("完成度", getMeta(item, "progress", "60%"), { meta: "progress" })}
+            ${inspectInput("负责人", getMeta(item, "owner", "待分配"), { meta: "owner" })}
+            ${inspectInput("分支名", getMeta(item, "branch", "codex/task-workbench"), { meta: "branch" })}
+            ${inspectInput("验证命令", getMeta(item, "verify", "npm run build"), { meta: "verify" })}
+            ${inspectTextarea("当前风险", getMeta(item, "risk", "暂无阻塞"), { meta: "risk" })}
+          </div>
+        `;
+      }
+      if (item.type === "gate") {
+        const doneFields = item.id === "g7" ? `
+            ${inspectTextarea("本次单独调试方式", getMeta(item, "taskSingleDebug", "记录这次任务里各项目单独跑时实际使用的命令、入口、账号和验证点。"), { meta: "taskSingleDebug" })}
+            ${inspectTextarea("本次联调方式", getMeta(item, "taskJointDebug", "记录这次任务最终采用的联调启动顺序、环境、代理、容器或跨项目连接方式。"), { meta: "taskJointDebug" })}
+            ${inspectTextarea("本次测试环境打包", getMeta(item, "taskTestBuild", "记录测试环境实际打包命令、产物、验证结果和注意事项。"), { meta: "taskTestBuild" })}
+            ${inspectTextarea("本次预发环境打包", getMeta(item, "taskStagingBuild", "记录预发环境实际打包命令、产物、验证结果和注意事项。"), { meta: "taskStagingBuild" })}
+            ${inspectTextarea("本次正式环境打包", getMeta(item, "taskProdBuild", "记录正式环境实际打包命令、发布入口、回滚口径和注意事项。"), { meta: "taskProdBuild" })}
+            ${inspectTextarea("本次验证结果", getMeta(item, "taskVerifyResult", "记录本次任务最终验证过的页面、接口、命令、设备和结论。"), { meta: "taskVerifyResult" })}
+            ${inspectTextarea("本次特殊注意事项", getMeta(item, "taskNotes", "记录这次任务与长期项目/场景口径不同的临时差异。"), { meta: "taskNotes" })}
+        ` : "";
+        return `
+          <div class="inspect-grid">
+            ${inspectSelect("Gate 状态", getMeta(item, "status", item.id === "g4" ? "进行中" : "未开始"), "status", ["未开始", "进行中", "阻塞", "已完成"])}
+            ${inspectInput("负责人", getMeta(item, "owner", "XUANJIAN"), { meta: "owner" })}
+            ${inspectTextarea("进入条件", getMeta(item, "entryRule", "上一 Gate 完成并确认产物"), { meta: "entryRule" })}
+            ${inspectTextarea("完成条件", getMeta(item, "doneRule", "本 Gate 产物完成并通过验证"), { meta: "doneRule" })}
+            ${inspectTextarea("当前阻塞", getMeta(item, "blocker", "无"), { meta: "blocker" })}
+            ${inspectTextarea("产物说明", getMeta(item, "artifact", "记录验证结果和交付物"), { meta: "artifact" })}
+            ${doneFields}
+          </div>
+        `;
+      }
+      return `
+        <div class="inspect-grid">
+          ${inspectSelect("任务状态", getMeta(item, "status", "进行中"), "status", ["未开始", "进行中", "阻塞", "已完成", "已归档"])}
+          ${inspectSelect("优先级", getMeta(item, "priority", "P1"), "priority", ["P0", "P1", "P2", "P3"])}
+          ${inspectInput("负责人", getMeta(item, "owner", "XUANJIAN"), { meta: "owner" })}
+          ${inspectInput("最近更新", getMeta(item, "updatedAt", "2026-05-07"), { meta: "updatedAt" })}
+        </div>
+      `;
+    }
+
+    function relationFields(item) {
+      const parents = state.links.filter(([, toId]) => toId === item.id).map(([fromId]) => nodeLabel(fromId));
+      const children = state.links.filter(([fromId]) => fromId === item.id).map(([, toId]) => nodeLabel(toId));
+      return `
+        <dl class="inspect-readonly">
+          <dt>父级节点</dt><dd>${escapeHtml(parents.join("、") || "无")}</dd>
+          <dt>子级节点</dt><dd>${escapeHtml(children.join("、") || "无")}</dd>
+          <dt>连接数量</dt><dd>${parents.length + children.length}</dd>
+          <dt>操作边界</dt><dd>只读展示。关系增删改在画布完成。</dd>
+        </dl>
+      `;
+    }
+
+    function inspectSection(title, content) {
+      return `<section class="inspect-section"><h4>${escapeHtml(title)}</h4>${content}</section>`;
+    }
+
+    function inspectInput(label, value, options = {}) {
+      const data = options.edit ? ` data-edit="${options.edit}"` : options.meta ? ` data-meta="${options.meta}"` : "";
+      const readonly = options.readonly ? " readonly" : "";
+      return `<div class="inspect-field${options.full ? " full" : ""}"><label>${escapeHtml(label)}</label><input value="${escapeHtml(value)}"${data}${readonly}></div>`;
+    }
+
+    function inspectTextarea(label, value, options = {}) {
+      const data = options.edit ? ` data-edit="${options.edit}"` : options.meta ? ` data-meta="${options.meta}"` : "";
+      const readonly = options.readonly ? " readonly" : "";
+      return `<div class="inspect-field full"><label>${escapeHtml(label)}</label><textarea${data}${readonly}>${escapeHtml(value)}</textarea></div>`;
+    }
+
+    function inspectSelect(label, value, key, choices) {
+      const options = choices.map(choice => `<option value="${escapeHtml(choice)}"${choice === value ? " selected" : ""}>${escapeHtml(choice)}</option>`).join("");
+      return `<div class="inspect-field"><label>${escapeHtml(label)}</label><select data-meta="${key}">${options}</select></div>`;
+    }
+
+    function bindInspectorControls(item) {
+      inspectorBody.querySelectorAll("[data-edit]").forEach(control => {
+        control.addEventListener("input", event => {
+          item[event.target.dataset.edit] = event.target.value;
+          renderCanvas({ skipInspector: true });
+          updateInspectorHeader(item);
+        });
+      });
+      inspectorBody.querySelectorAll("[data-meta]").forEach(control => {
+        control.addEventListener("input", event => {
+          item.meta = item.meta || {};
+          item.meta[event.target.dataset.meta] = event.target.value;
+        });
+      });
+    }
+
+    function updateInspectorHeader(item) {
+      inspectorTitle.textContent = `${typeLabel(item.type)}详情`;
+      inspectorSubtitle.textContent = state.mode === "task" ? "看板节点自身状态" : "配置节点自身信息";
+    }
+
+    function getMeta(item, key, fallback) {
+      item.meta = item.meta || {};
+      if (item.meta[key] === undefined) item.meta[key] = fallback;
+      return item.meta[key];
+    }
+
+    function nodeLabel(id) {
+      const item = state.nodes.find(nodeItem => nodeItem.id === id);
+      return item ? item.label : id;
+    }
+
+    function makeDraggable(el, item) {
+      let active = false;
+      let sx = 0;
+      let sy = 0;
+      let ox = 0;
+      let oy = 0;
+      el.addEventListener("pointerdown", event => {
+        active = true;
+        sx = event.clientX;
+        sy = event.clientY;
+        ox = item.x;
+        oy = item.y;
+        el.setPointerCapture(event.pointerId);
+      });
+      el.addEventListener("pointermove", event => {
+        if (!active) return;
+        item.x = Math.max(12, Math.min(canvas.clientWidth - nodeWidth - 12, ox + event.clientX - sx));
+        item.y = Math.max(12, Math.min(canvas.clientHeight - 100, oy + event.clientY - sy));
+        el.style.left = `${item.x}px`;
+        el.style.top = `${item.y}px`;
+        drawLinks();
+      });
+      el.addEventListener("pointerup", event => {
+        active = false;
+        el.releasePointerCapture(event.pointerId);
+      });
+    }
+
+    function drawLinks() {
+      linksSvg.innerHTML = "";
+      state.links.forEach(([fromId, toId]) => {
+        const from = state.nodes.find(item => item.id === fromId);
+        const to = state.nodes.find(item => item.id === toId);
+        if (!from || !to) return;
+        const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        line.setAttribute("class", "link");
+        line.setAttribute("x1", from.x + nodeWidth);
+        line.setAttribute("y1", from.y + 47);
+        line.setAttribute("x2", to.x);
+        line.setAttribute("y2", to.y + 47);
+        linksSvg.appendChild(line);
+      });
+    }
+
+    canvas.addEventListener("dragover", event => {
+      event.preventDefault();
+    });
+
+    canvas.addEventListener("drop", event => {
+      event.preventDefault();
+      const raw = event.dataTransfer.getData("application/json");
+      if (!raw) return;
+      const data = JSON.parse(raw);
+      const rect = canvas.getBoundingClientRect();
+      if (data.type === "skill") {
+        const choice = defaultChoice(data.type);
+        addSkill(choice[0], choice[1], event.clientX - rect.left, event.clientY - rect.top);
+      } else {
+        const choice = defaultChoice(data.type);
+        addNode(choice[0], choice[1], data.type, event.clientX - rect.left, event.clientY - rect.top);
+      }
+    });
+
+    function addNode(label, desc, type, x = 220, y = 220) {
+      const id = `${type}-${Date.now()}`;
+      const item = node(id, label, desc, type, Math.max(12, x), Math.max(12, y));
+      state.nodes.push(item);
+      if (state.selectedId) state.links.push([state.selectedId, id]);
+      state.selectedId = id;
+      renderCanvas();
+    }
+
+    function defaultChoice(type) {
+      return optionData[type] ? optionData[type][0] : [typeLabel(type), "待配置"];
+    }
+
+    function addProject(label, desc) {
+      const familyLabel = getSelectedFamilyLabel();
+      let family = state.nodes.find(item => item.type === "family" && item.label === familyLabel);
+      if (!family) {
+        family = node(`family-${Date.now()}`, familyLabel, "新增技术族", "family", 92, 94 + state.nodes.filter(item => item.type === "family").length * 200);
+        state.nodes.push(family);
+      }
+
+      const projectCount = state.links.filter(([fromId]) => fromId === family.id).length;
+      const id = `project-${Date.now() + 1}`;
+      const item = node(id, label, desc, "project", family.x + 230, family.y + projectCount * 112);
+      state.nodes.push(item);
+      state.links.push([family.id, id]);
+      state.selectedId = id;
+      renderCanvas();
+    }
+
+    function addSkill(label, desc, x, y) {
+      const selected = state.nodes.find(item => item.id === state.selectedId);
+      const parent = selected && selected.type === "project" ? selected : state.nodes.find(item => item.type === "project");
+      const id = `skill-${Date.now()}`;
+      const item = node(id, label, desc, "skill", x || (parent ? parent.x + 240 : 560), y || (parent ? parent.y : 120));
+      state.nodes.push(item);
+      if (parent) state.links.push([parent.id, id]);
+      state.selectedId = id;
+      renderCanvas();
+    }
+
+    function addTaskProject(label, desc) {
+      const parent = state.nodes.find(item => item.id === "g4") || state.nodes.find(item => item.type === "gate");
+      const projectCount = parent ? state.links.filter(([fromId]) => fromId === parent.id).length : 0;
+      const id = `project-${Date.now()}`;
+      const item = node(id, label, desc, "project", parent ? parent.x + 230 : 760, parent ? parent.y - 70 + projectCount * 140 : 180);
+      state.nodes.push(item);
+      if (parent) state.links.push([parent.id, id]);
+      state.selectedId = id;
+      renderCanvas();
+    }
+
+    function getSelectedFamilyLabel() {
+      const typed = newFamilyName.classList.contains("hidden") ? "" : newFamilyName.value.trim();
+      return typed || techFamily.value;
+    }
+
+    function updateDropTip() {
+      const selected = state.nodes.find(item => item.id === state.selectedId);
+      const label = selected ? selected.label : "无";
+      document.getElementById("dropTip").textContent = state.mode === "task"
+        ? `当前任务：${label}。主线展示 G0-G7，G4 下方展示各项目开发进度。`
+        : `当前选中：${label}。从左侧拖节点到画布，会自动连接到这个节点；也可以拖动画布中的节点整理布局。`;
+    }
+
+    function openModal(type) {
+      state.modalType = type;
+      modal.classList.add("open");
+      modalTitle.textContent = type === "project" ? "新增项目" : type === "skill" ? "新增 Skill" : type === "scene" ? "新增场景" : type === "task" ? "新增任务" : "新增 Node";
+      familyField.classList.toggle("hidden", type !== "project" || state.mode !== "project");
+      newFamilyName.classList.add("hidden");
+      newFamilyName.value = "";
+      newName.value = type === "project" ? "goods-initialization" : type === "skill" ? "stock-inventory-review" : type === "scene" ? "frontend-bff-debug" : type === "task" ? "AIAGENT-106" : "G4 Development";
+      newDesc.value = type === "project" ? "商品初始化工具项目" : type === "skill" ? "盘点单视觉 review 与字段口径核对" : type === "scene" ? "前端与 BFF 排障理解包" : type === "task" ? "新建真实任务流程" : "项目开发节点";
+    }
+
+    function addTask(label, desc) {
+      if (!optionData.task.some(([taskLabel]) => taskLabel === label)) optionData.task.push([label, desc]);
+      selectTask(label);
+    }
+
+    function closeModal() {
+      modal.classList.remove("open");
+    }
+
+    function closeInspector() {
+      state.inspectorOpen = false;
+      inspector.classList.remove("open");
+    }
+
+    document.querySelectorAll(".mode-tab").forEach(tab => {
+      tab.addEventListener("click", () => loadMode(tab.dataset.mode));
+    });
+
+    document.getElementById("closeModal").addEventListener("click", closeModal);
+    document.getElementById("cancelModal").addEventListener("click", closeModal);
+    document.getElementById("closeInspector").addEventListener("click", closeInspector);
+    toggleNewFamily.addEventListener("click", () => {
+      newFamilyName.classList.toggle("hidden");
+      if (!newFamilyName.classList.contains("hidden")) newFamilyName.focus();
+    });
+    document.getElementById("confirmAdd").addEventListener("click", () => {
+      const offset = 80 + state.nodes.length * 18;
+      if (state.modalType === "project") {
+        if (state.mode === "project") {
+          addProject(newName.value, newDesc.value);
+        } else {
+          addTaskProject(newName.value, newDesc.value);
+        }
+      } else if (state.modalType === "skill") {
+        addSkill(newName.value, newDesc.value);
+      } else if (state.modalType === "task") {
+        addTask(newName.value, newDesc.value);
+      } else {
+        addNode(newName.value, newDesc.value, state.modalType === "scene" ? "scene" : "gate", offset, offset);
+      }
+      closeModal();
+    });
+    modal.addEventListener("click", event => {
+      if (event.target === modal) closeModal();
+    });
+
+    loadMode("project");
+  </script>
+</body>
+</html>

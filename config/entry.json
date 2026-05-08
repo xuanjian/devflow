@@ -1,0 +1,65 @@
+{
+  "version": 1,
+  "name": "ai-context entry",
+  "purpose": "Stable AI entrypoint. Read JSON indexes first, then load source markdown/rules/skills only when selected by task context.",
+  "defaultReadOrder": [
+    "config/entry.json",
+    "config/profile.json",
+    "runtime/current.json",
+    "runtime/tasks/<activeTaskId>.json",
+    "config/projects/index.json or matched config/projects/<project>.json",
+    "config/scenes/index.json or matched config/scenes/<scene>.json",
+    "config/skills/skills.json only when skill selection is needed",
+    "config/rules/rules.json only when rule lookup is needed"
+  ],
+  "sourceReadPolicy": {
+    "projectDocs": "Read docs/repos/*.md only after a project JSON is selected and the summary is insufficient.",
+    "scenes": "Read docs/scenes/*.md only after a scene JSON is selected and detailed workflow text is needed.",
+    "rules": "Read bundles/rules/** only when a selected project JSON lists the rule and the task needs full rule details.",
+    "skills": "Read bundles/skills/** only when a selected project JSON or explicit user request triggers the skill.",
+    "profile": "Read docs/person/profile.md only when long-term preferences or project map details matter."
+  },
+  "installation": {
+    "script": "scripts/install-ai-context.mjs",
+    "commands": [
+      "install",
+      "check",
+      "uninstall",
+      "sync-projects",
+      "validate"
+    ],
+    "codexSkillLink": "~/.agents/skills/ai-context -> /Users/xj/Documents/ai-context/bundles/skills/ai-context",
+    "globalEntrypoints": [
+      "/Users/xj/AGENTS.md",
+      "/Users/xj/CLAUDE.md",
+      "/Users/xj/WORK_CONTEXT.md"
+    ],
+    "projectEntrypoints": [
+      "AGENTS.md",
+      "CLAUDE.md",
+      ".cursor/rules/00-ai-context.mdc"
+    ]
+  },
+  "taskFlow": {
+    "currentPointer": "runtime/current.json",
+    "activeTaskPattern": "runtime/tasks/<task-id>.json",
+    "gatesPath": "config/tasks/gates.json",
+    "gates": [
+      "G1",
+      "G2",
+      "G3",
+      "G4",
+      "G5",
+      "G6",
+      "G7"
+    ],
+    "currentWorkMarkdown": "deprecated; do not read or update runtime/current-work.md"
+  },
+  "indexes": {
+    "profile": "config/profile.json",
+    "projects": "config/projects/index.json",
+    "scenes": "config/scenes/index.json",
+    "skills": "config/skills/skills.json",
+    "rules": "config/rules/rules.json"
+  }
+}

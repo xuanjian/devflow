@@ -1,0 +1,57 @@
+{
+  "version": 1,
+  "id": "bff-hub",
+  "name": "bff-hub",
+  "technologyFamilyId": "bff",
+  "technologyFamilyName": "BFF / Node",
+  "repoType": "bff-service",
+  "summary": "Hub 类 Node 服务仓库。",
+  "path": "/Users/xj/Documents/node/bff-hub",
+  "tags": [
+    "node",
+    "bff"
+  ],
+  "doc": {
+    "path": "docs/repos/bff-hub.md",
+    "title": "bff-hub",
+    "summary": "Hub 类 Node 服务仓库。",
+    "whenToRead": "Read only after this project is selected for the task or the JSON summary is insufficient."
+  },
+  "scenes": [
+    {
+      "id": "single-repo-change",
+      "name": "single-repo-change",
+      "summary": "默认单仓修改场景",
+      "sourcePath": "docs/scenes/single-repo-change.md",
+      "reason": "Default scene for isolated work in this project."
+    },
+    {
+      "id": "frontend-bff-debug",
+      "name": "frontend-bff-debug",
+      "summary": "前端与部分 BFF 联调场景",
+      "sourcePath": "docs/scenes/frontend-bff-debug.md",
+      "reason": "bff-hub participates in 前端与部分 BFF 联调场景."
+    }
+  ],
+  "skills": [],
+  "rules": [],
+  "tools": {
+    "figma": false,
+    "notion": true,
+    "playwright": false,
+    "xcode": false,
+    "bffDebug": true,
+    "codex": true
+  },
+  "readPolicy": {
+    "defaultRead": [
+      "config/projects/bff-hub.json"
+    ],
+    "onDemandRead": [
+      "docs/repos/bff-hub.md",
+      "docs/scenes/single-repo-change.md",
+      "docs/scenes/frontend-bff-debug.md"
+    ],
+    "notes": "Start with this JSON. Load source Markdown, rules, or skills only when the task requires detailed instructions."
+  }
+}

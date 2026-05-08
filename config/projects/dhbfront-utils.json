@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "id": "dhbfront-utils",
+  "name": "dhbfront-utils",
+  "technologyFamilyId": "frontend",
+  "technologyFamilyName": "前端",
+  "repoType": "shared-library",
+  "summary": "DHB 前端公共工具库。",
+  "path": "/Users/xj/Documents/frontend/dhbfront-utils",
+  "tags": [
+    "dhb",
+    "frontend",
+    "shared-library"
+  ],
+  "doc": {
+    "path": "docs/repos/dhbfront-utils.md",
+    "title": "dhbfront-utils",
+    "summary": "DHB 前端公共工具库。",
+    "whenToRead": "Read only after this project is selected for the task or the JSON summary is insufficient."
+  },
+  "scenes": [
+    {
+      "id": "single-repo-change",
+      "name": "single-repo-change",
+      "summary": "默认单仓修改场景",
+      "sourcePath": "docs/scenes/single-repo-change.md",
+      "reason": "Default scene for isolated work in this project."
+    }
+  ],
+  "skills": [],
+  "rules": [],
+  "tools": {
+    "figma": true,
+    "notion": true,
+    "playwright": true,
+    "xcode": false,
+    "bffDebug": true,
+    "codex": true
+  },
+  "readPolicy": {
+    "defaultRead": [
+      "config/projects/dhbfront-utils.json"
+    ],
+    "onDemandRead": [
+      "docs/repos/dhbfront-utils.md",
+      "docs/scenes/single-repo-change.md"
+    ],
+    "notes": "Start with this JSON. Load source Markdown, rules, or skills only when the task requires detailed instructions."
+  }
+}

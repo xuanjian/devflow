@@ -1,0 +1,59 @@
+{
+  "version": 1,
+  "id": "dhb-international-mobile",
+  "name": "dhb-International-mobile",
+  "technologyFamilyId": "frontend",
+  "technologyFamilyName": "前端",
+  "repoType": "web-app",
+  "summary": "DHB 国际化移动端项目，强调老项目 UI 100% 还原和组件化开发。",
+  "path": "/Users/xj/Documents/frontend/dhb-International-mobile",
+  "tags": [
+    "dhb",
+    "frontend",
+    "international"
+  ],
+  "doc": {
+    "path": "docs/repos/dhb-international-mobile.md",
+    "title": "dhb-International-mobile",
+    "summary": "DHB 国际化移动端项目，强调老项目 UI 100% 还原和组件化开发。",
+    "whenToRead": "Read only after this project is selected for the task or the JSON summary is insufficient."
+  },
+  "scenes": [
+    {
+      "id": "single-repo-change",
+      "name": "single-repo-change",
+      "summary": "默认单仓修改场景",
+      "sourcePath": "docs/scenes/single-repo-change.md",
+      "reason": "Default scene for isolated work in this project."
+    }
+  ],
+  "skills": [],
+  "rules": [
+    {
+      "id": "dhb-international-mobile/dhb-international-mobile",
+      "name": "DHB 国际化移动端开发规范",
+      "purpose": "**技术栈**: React 19 + TypeScript + Vite + Styled-Components",
+      "sourcePath": "bundles/rules/dhb-international-mobile/dhb-international-mobile.mdc",
+      "whenToRead": "Read when working in dhb-international-mobile and this rule affects the requested change."
+    }
+  ],
+  "tools": {
+    "figma": true,
+    "notion": true,
+    "playwright": true,
+    "xcode": false,
+    "bffDebug": true,
+    "codex": true
+  },
+  "readPolicy": {
+    "defaultRead": [
+      "config/projects/dhb-international-mobile.json"
+    ],
+    "onDemandRead": [
+      "docs/repos/dhb-international-mobile.md",
+      "docs/scenes/single-repo-change.md",
+      "bundles/rules/dhb-international-mobile/dhb-international-mobile.mdc"
+    ],
+    "notes": "Start with this JSON. Load source Markdown, rules, or skills only when the task requires detailed instructions."
+  }
+}

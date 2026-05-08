@@ -104,7 +104,7 @@ every N seconds:
 
 7. WORKFLOW.md contract
    - 官方：用 repo 内 `WORKFLOW.md` 的 YAML front matter + prompt body 控制 tracker、polling、workspace、hooks、agent、codex。
-   - 我们：上层策略来自 `ai-context/scenes/xuanjian-symphony.md`；后续每个业务项目可以补自己的 `WORKFLOW.md` 或等价配置。
+   - 我们：上层策略来自 `ai-context/docs/scenes/xuanjian-symphony.md`；后续每个业务项目可以补自己的 `WORKFLOW.md` 或等价配置。
 
 8. Codex app-server protocol boundary
    - 官方：Codex app-server 是被 Orchestrator 启动的执行层，协议以当前 Codex schema 为准。

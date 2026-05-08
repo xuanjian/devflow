@@ -1,0 +1,49 @@
+{
+  "version": 1,
+  "id": "goods-initialization",
+  "name": "goods-initialization",
+  "technologyFamilyId": "frontend",
+  "technologyFamilyName": "前端",
+  "repoType": "plugin",
+  "summary": "偏插件或初始化能力的前端工具仓库。",
+  "path": "/Users/xj/Documents/frontend/goods-initialization",
+  "tags": [
+    "plugin",
+    "tool"
+  ],
+  "doc": {
+    "path": "docs/repos/goods-initialization.md",
+    "title": "goods-initialization",
+    "summary": "偏插件或初始化能力的前端工具仓库。",
+    "whenToRead": "Read only after this project is selected for the task or the JSON summary is insufficient."
+  },
+  "scenes": [
+    {
+      "id": "single-repo-change",
+      "name": "single-repo-change",
+      "summary": "默认单仓修改场景",
+      "sourcePath": "docs/scenes/single-repo-change.md",
+      "reason": "Default scene for isolated work in this project."
+    }
+  ],
+  "skills": [],
+  "rules": [],
+  "tools": {
+    "figma": true,
+    "notion": true,
+    "playwright": true,
+    "xcode": false,
+    "bffDebug": true,
+    "codex": true
+  },
+  "readPolicy": {
+    "defaultRead": [
+      "config/projects/goods-initialization.json"
+    ],
+    "onDemandRead": [
+      "docs/repos/goods-initialization.md",
+      "docs/scenes/single-repo-change.md"
+    ],
+    "notes": "Start with this JSON. Load source Markdown, rules, or skills only when the task requires detailed instructions."
+  }
+}

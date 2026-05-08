@@ -1,0 +1,49 @@
+{
+  "version": 1,
+  "id": "hxb-mobile",
+  "name": "hxb-mobile",
+  "technologyFamilyId": "frontend",
+  "technologyFamilyName": "前端",
+  "repoType": "web-app",
+  "summary": "货销宝移动端项目。",
+  "path": "/Users/xj/Documents/frontend/hxb-mobile",
+  "tags": [
+    "hxb",
+    "frontend"
+  ],
+  "doc": {
+    "path": "docs/repos/hxb-mobile.md",
+    "title": "hxb-mobile",
+    "summary": "货销宝移动端项目。",
+    "whenToRead": "Read only after this project is selected for the task or the JSON summary is insufficient."
+  },
+  "scenes": [
+    {
+      "id": "single-repo-change",
+      "name": "single-repo-change",
+      "summary": "默认单仓修改场景",
+      "sourcePath": "docs/scenes/single-repo-change.md",
+      "reason": "Default scene for isolated work in this project."
+    }
+  ],
+  "skills": [],
+  "rules": [],
+  "tools": {
+    "figma": true,
+    "notion": true,
+    "playwright": true,
+    "xcode": false,
+    "bffDebug": true,
+    "codex": true
+  },
+  "readPolicy": {
+    "defaultRead": [
+      "config/projects/hxb-mobile.json"
+    ],
+    "onDemandRead": [
+      "docs/repos/hxb-mobile.md",
+      "docs/scenes/single-repo-change.md"
+    ],
+    "notes": "Start with this JSON. Load source Markdown, rules, or skills only when the task requires detailed instructions."
+  }
+}

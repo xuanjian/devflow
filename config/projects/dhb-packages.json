@@ -1,0 +1,140 @@
+{
+  "version": 1,
+  "id": "dhb-packages",
+  "name": "DHB_PACKAGES",
+  "technologyFamilyId": "frontend",
+  "technologyFamilyName": "前端",
+  "repoType": "domain-packages",
+  "summary": "DHB 分包业务模块集合，常作为 cash-mini 上游联调仓库。",
+  "path": "/Users/xj/Documents/frontend/DHB_PACKAGES",
+  "tags": [
+    "dhb",
+    "frontend",
+    "packages"
+  ],
+  "doc": {
+    "path": "docs/repos/dhb-packages.md",
+    "title": "DHB_PACKAGES",
+    "summary": "DHB 分包业务模块集合，常作为 cash-mini 上游联调仓库。",
+    "whenToRead": "Read only after this project is selected for the task or the JSON summary is insufficient."
+  },
+  "scenes": [
+    {
+      "id": "single-repo-change",
+      "name": "single-repo-change",
+      "summary": "默认单仓修改场景",
+      "sourcePath": "docs/scenes/single-repo-change.md",
+      "reason": "Default scene for isolated work in this project."
+    },
+    {
+      "id": "packages-cash-index-h5-webview",
+      "name": "packages-cash-index-h5-webview",
+      "summary": "分包到 cash / index / h5 / webview 链路",
+      "sourcePath": "docs/scenes/packages-cash-index-h5-webview.md",
+      "reason": "DHB_PACKAGES participates in 分包到 cash / index / h5 / webview 链路."
+    },
+    {
+      "id": "frontend-bff-debug",
+      "name": "frontend-bff-debug",
+      "summary": "前端与部分 BFF 联调场景",
+      "sourcePath": "docs/scenes/frontend-bff-debug.md",
+      "reason": "DHB_PACKAGES participates in 前端与部分 BFF 联调场景."
+    }
+  ],
+  "skills": [
+    {
+      "id": "run-projects",
+      "name": "run-projects",
+      "description": "Use when running DHB local frontend projects across cash-mini, dhb-mobile-index, new_mobile_h5, customize-mini-program, or linked subpackages, especially when switching environments, linking local packages, or recovering from unstable startup flows.",
+      "sourcePath": "bundles/skills/run-projects/SKILL.md",
+      "whenToLoad": "Load when dhb-packages task matches this skill trigger."
+    },
+    {
+      "id": "restore-local-env",
+      "name": "restore-local-env",
+      "description": "恢复 DHB 本地联调环境。触发词：恢复环境、恢复配置、结束开发、还原配置。用于停止统一执行器启动的进程并恢复其备份的配置文件。",
+      "sourcePath": "bundles/skills/restore-local-env/SKILL.md",
+      "whenToLoad": "Load when dhb-packages task matches this skill trigger."
+    },
+    {
+      "id": "dhb-env-switch",
+      "name": "dhb-env-switch",
+      "description": "切换 DHB 本地开发环境（测试/预发/线上）。触发词：切环境、切线上、切测试、切预发。",
+      "sourcePath": "bundles/skills/dhb-env-switch/SKILL.md",
+      "whenToLoad": "Load when dhb-packages task matches this skill trigger."
+    },
+    {
+      "id": "dhb-packages/add-mobile-icon",
+      "name": "add-mobile-icon",
+      "description": "在 dhbfront-img 项目中新增图标。触发词：新增图标、添加图标、创建图标、添加 svg 图标。支持固定颜色图标和主题色图标，支持任意模块目录（goods、order、payment 等）。",
+      "sourcePath": "bundles/skills/dhb-packages/add-mobile-icon/SKILL.md",
+      "whenToLoad": "Load when dhb-packages task matches this skill trigger."
+    },
+    {
+      "id": "dhb-packages/add-taro-module",
+      "name": "Skill: 在 Taro 分包中新增业务模块",
+      "description": "使用以下提示词触发此工作流：",
+      "sourcePath": "bundles/skills/dhb-packages/add-taro-module.md",
+      "whenToLoad": "Load when dhb-packages task matches this skill trigger."
+    },
+    {
+      "id": "dhb-packages/create-api-request",
+      "name": "创建 API 请求 Skill",
+      "description": "- 创建请求",
+      "sourcePath": "bundles/skills/dhb-packages/create-api-request.md",
+      "whenToLoad": "Load when dhb-packages task matches this skill trigger."
+    },
+    {
+      "id": "dhb-packages/mock-api-from-curl",
+      "name": "Skill: 根据 curl 生成接口 Mock",
+      "description": "```",
+      "sourcePath": "bundles/skills/dhb-packages/mock-api-from-curl.md",
+      "whenToLoad": "Load when dhb-packages task matches this skill trigger."
+    }
+  ],
+  "rules": [
+    {
+      "id": "theme-config",
+      "name": "主题色配置规范",
+      "purpose": "在 Taro 组件中通过 `@dhbfront-utils/shell_env` 获取主题色配置。",
+      "sourcePath": "bundles/rules/theme-config.mdc",
+      "whenToRead": "Read when working in dhb-packages and this rule affects the requested change."
+    },
+    {
+      "id": "i18n-chinese-key",
+      "name": "Taro 项目国际化规范",
+      "purpose": "在 `DHB_PACKAGES` 相关分包项目中，所有用户可见文案都必须走国际化。",
+      "sourcePath": "bundles/rules/i18n-chinese-key.mdc",
+      "whenToRead": "Read when working in dhb-packages and this rule affects the requested change."
+    }
+  ],
+  "tools": {
+    "figma": true,
+    "notion": true,
+    "playwright": true,
+    "xcode": false,
+    "bffDebug": true,
+    "codex": true
+  },
+  "readPolicy": {
+    "defaultRead": [
+      "config/projects/dhb-packages.json"
+    ],
+    "onDemandRead": [
+      "docs/repos/dhb-packages.md",
+      "docs/scenes/single-repo-change.md",
+      "docs/scenes/packages-cash-index-h5-webview.md",
+      "docs/scenes/frontend-bff-debug.md",
+      "bundles/rules/theme-config.mdc",
+      "bundles/rules/i18n-chinese-key.mdc",
+      "bundles/skills/run-projects/SKILL.md",
+      "bundles/skills/restore-local-env/SKILL.md",
+      "bundles/skills/dhb-env-switch/SKILL.md",
+      "bundles/skills/dhb-packages/add-mobile-icon/SKILL.md",
+      "bundles/skills/dhb-packages/add-taro-module.md",
+      "bundles/skills/dhb-packages/create-api-request.md",
+      "bundles/skills/dhb-packages/mock-api-from-curl.md"
+    ],
+    "notes": "Start with this JSON. Load source Markdown, rules, or skills only when the task requires detailed instructions."
+  }
+}

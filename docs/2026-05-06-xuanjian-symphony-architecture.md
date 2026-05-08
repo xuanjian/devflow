@@ -40,11 +40,11 @@ OpenAI Symphony 的参考价值主要是调度模型，而不是直接复用 Eli
 
 OpenAI Symphony 用 `WORKFLOW.md` 承载项目内规则和 prompt。XJamesSymphony 应复用 `ai-context` 作为上层策略中心：
 
-- `scenes/xuanjian-symphony.md`：Gate 流程。
-- `scenes/ai-my-pm.md`：需求路由。
-- `person/profile.md`：长期画像。
+- `docs/scenes/xuanjian-symphony.md`：Gate 流程。
+- `docs/scenes/ai-my-pm.md`：需求路由。
+- `docs/person/profile.md`：长期画像。
 - `runtime/current-work.md`：当前上下文。
-- `templates/*`：任务产物模板。
+- `docs/templates/*`：任务产物模板。
 
 后续具体项目也可以拥有自己的 `WORKFLOW.md` 或等价配置。
 

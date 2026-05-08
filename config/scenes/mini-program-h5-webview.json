@@ -1,0 +1,54 @@
+{
+  "version": 1,
+  "id": "mini-program-h5-webview",
+  "name": "mini-program-h5-webview",
+  "summary": "小程序到 H5 容器链路",
+  "purpose": "`customize-mini-program -> new_mobile_h5 -> dhb-mobile-index`",
+  "source": {
+    "path": "docs/scenes/mini-program-h5-webview.md",
+    "whenToRead": "Read the full scene when this scene is selected or the task needs chain-specific execution details."
+  },
+  "whyThisComposition": "This scene groups 3 project(s) because they commonly participate in: 小程序到 H5 容器链路. Load individual project JSON first, then source markdown only for detailed execution rules.",
+  "projects": [
+    {
+      "id": "customize-mini-program",
+      "name": "customize-mini-program",
+      "role": "mini-program-app",
+      "projectIndexPath": "config/projects/customize-mini-program.json",
+      "reason": "customize-mini-program is part of 小程序到 H5 容器链路."
+    },
+    {
+      "id": "dhb-mobile-index",
+      "name": "dhb-mobile-index",
+      "role": "frontend-entry-or-page",
+      "projectIndexPath": "config/projects/dhb-mobile-index.json",
+      "reason": "dhb-mobile-index is part of 小程序到 H5 容器链路."
+    },
+    {
+      "id": "new-mobile-h5",
+      "name": "new_mobile_h5",
+      "role": "legacy-container",
+      "projectIndexPath": "config/projects/new-mobile-h5.json",
+      "reason": "new_mobile_h5 is part of 小程序到 H5 容器链路."
+    }
+  ],
+  "operationGuide": {
+    "environmentSwitching": "Use dhb-env-switch for test/pre/prod H5 settings and restore-local-env when ending local debugging.",
+    "startup": "Use run-projects for planning the H5/package/container startup order, then run commands manually per project when needed.",
+    "notes": [
+      "For package chains, start/build upstream package before downstream container."
+    ]
+  },
+  "readPolicy": {
+    "defaultRead": [
+      "config/scenes/mini-program-h5-webview.json"
+    ],
+    "onDemandRead": [
+      "docs/scenes/mini-program-h5-webview.md",
+      "config/projects/customize-mini-program.json",
+      "config/projects/dhb-mobile-index.json",
+      "config/projects/new-mobile-h5.json"
+    ],
+    "notes": "Do not load every project in the scene. Select projects based on the user request first."
+  }
+}

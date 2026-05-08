@@ -1,0 +1,126 @@
+{
+  "version": 1,
+  "id": "frontend-bff-debug",
+  "name": "frontend-bff-debug",
+  "summary": "前端与部分 BFF 联调场景",
+  "purpose": "- 前端页面、容器、小程序与部分 BFF 联调",
+  "source": {
+    "path": "docs/scenes/frontend-bff-debug.md",
+    "whenToRead": "Read the full scene when this scene is selected or the task needs chain-specific execution details."
+  },
+  "whyThisComposition": "This scene groups 12 project(s) because they commonly participate in: 前端与部分 BFF 联调场景. Load individual project JSON first, then source markdown only for detailed execution rules.",
+  "projects": [
+    {
+      "id": "bff-goods",
+      "name": "bff-goods",
+      "role": "api-or-business-service",
+      "projectIndexPath": "config/projects/bff-goods.json",
+      "reason": "bff-goods is part of 前端与部分 BFF 联调场景."
+    },
+    {
+      "id": "bff-hub",
+      "name": "bff-hub",
+      "role": "api-or-business-service",
+      "projectIndexPath": "config/projects/bff-hub.json",
+      "reason": "bff-hub is part of 前端与部分 BFF 联调场景."
+    },
+    {
+      "id": "bff-order",
+      "name": "bff-order",
+      "role": "api-or-business-service",
+      "projectIndexPath": "config/projects/bff-order.json",
+      "reason": "bff-order is part of 前端与部分 BFF 联调场景."
+    },
+    {
+      "id": "bff-payment",
+      "name": "bff-payment",
+      "role": "api-or-business-service",
+      "projectIndexPath": "config/projects/bff-payment.json",
+      "reason": "bff-payment is part of 前端与部分 BFF 联调场景."
+    },
+    {
+      "id": "bff-user",
+      "name": "bff-user",
+      "role": "api-or-business-service",
+      "projectIndexPath": "config/projects/bff-user.json",
+      "reason": "bff-user is part of 前端与部分 BFF 联调场景."
+    },
+    {
+      "id": "bff-warehouse",
+      "name": "bff-warehouse",
+      "role": "api-or-business-service",
+      "projectIndexPath": "config/projects/bff-warehouse.json",
+      "reason": "bff-warehouse is part of 前端与部分 BFF 联调场景."
+    },
+    {
+      "id": "dhb-mobile-index",
+      "name": "dhb-mobile-index",
+      "role": "frontend-entry-or-page",
+      "projectIndexPath": "config/projects/dhb-mobile-index.json",
+      "reason": "dhb-mobile-index is part of 前端与部分 BFF 联调场景."
+    },
+    {
+      "id": "dhb-packages",
+      "name": "DHB_PACKAGES",
+      "role": "subpackage-or-business-module",
+      "projectIndexPath": "config/projects/dhb-packages.json",
+      "reason": "DHB_PACKAGES is part of 前端与部分 BFF 联调场景."
+    },
+    {
+      "id": "dhbfront-cash-mini",
+      "name": "dhbfront-cash-mini",
+      "role": "shared-frontend-runtime",
+      "projectIndexPath": "config/projects/dhbfront-cash-mini.json",
+      "reason": "dhbfront-cash-mini is part of 前端与部分 BFF 联调场景."
+    },
+    {
+      "id": "egg-business",
+      "name": "egg-business",
+      "role": "api-or-business-service",
+      "projectIndexPath": "config/projects/egg-business.json",
+      "reason": "egg-business is part of 前端与部分 BFF 联调场景."
+    },
+    {
+      "id": "egg-dhb-framework",
+      "name": "egg-dhb-framework",
+      "role": "api-or-business-service",
+      "projectIndexPath": "config/projects/egg-dhb-framework.json",
+      "reason": "egg-dhb-framework is part of 前端与部分 BFF 联调场景."
+    },
+    {
+      "id": "egg-dhb-permission",
+      "name": "egg-dhb-permission",
+      "role": "api-or-business-service",
+      "projectIndexPath": "config/projects/egg-dhb-permission.json",
+      "reason": "egg-dhb-permission is part of 前端与部分 BFF 联调场景."
+    }
+  ],
+  "operationGuide": {
+    "environmentSwitching": "Use dhb-env-switch or project-specific BFF configuration only for selected projects.",
+    "startup": "Start the frontend entry and the exact BFF service involved. Use run-projects for frontend chain planning when applicable.",
+    "notes": [
+      "Keep BFF scope narrow; do not expand to every service by default."
+    ]
+  },
+  "readPolicy": {
+    "defaultRead": [
+      "config/scenes/frontend-bff-debug.json"
+    ],
+    "onDemandRead": [
+      "docs/scenes/frontend-bff-debug.md",
+      "config/projects/bff-goods.json",
+      "config/projects/bff-hub.json",
+      "config/projects/bff-order.json",
+      "config/projects/bff-payment.json",
+      "config/projects/bff-user.json",
+      "config/projects/bff-warehouse.json",
+      "config/projects/dhb-mobile-index.json",
+      "config/projects/dhb-packages.json",
+      "config/projects/dhbfront-cash-mini.json",
+      "config/projects/egg-business.json",
+      "config/projects/egg-dhb-framework.json",
+      "config/projects/egg-dhb-permission.json"
+    ],
+    "notes": "Do not load every project in the scene. Select projects based on the user request first."
+  }
+}

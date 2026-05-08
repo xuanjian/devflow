@@ -1,0 +1,78 @@
+{
+  "version": 1,
+  "id": "packages-cash-index-h5-webview",
+  "name": "packages-cash-index-h5-webview",
+  "summary": "分包到 cash / index / h5 / webview 链路",
+  "purpose": "`DHB_PACKAGES -> dhbfront-cash-mini -> dhb-mobile-index -> new_mobile_h5 -> iOS WebView`",
+  "source": {
+    "path": "docs/scenes/packages-cash-index-h5-webview.md",
+    "whenToRead": "Read the full scene when this scene is selected or the task needs chain-specific execution details."
+  },
+  "whyThisComposition": "This scene groups 6 project(s) because they commonly participate in: 分包到 cash / index / h5 / webview 链路. Load individual project JSON first, then source markdown only for detailed execution rules.",
+  "projects": [
+    {
+      "id": "customize-mini-program",
+      "name": "customize-mini-program",
+      "role": "mini-program-app",
+      "projectIndexPath": "config/projects/customize-mini-program.json",
+      "reason": "customize-mini-program is part of 分包到 cash / index / h5 / webview 链路."
+    },
+    {
+      "id": "dhb",
+      "name": "DHB",
+      "role": "native-container-or-app",
+      "projectIndexPath": "config/projects/dhb.json",
+      "reason": "DHB is part of 分包到 cash / index / h5 / webview 链路."
+    },
+    {
+      "id": "dhb-mobile-index",
+      "name": "dhb-mobile-index",
+      "role": "frontend-entry-or-page",
+      "projectIndexPath": "config/projects/dhb-mobile-index.json",
+      "reason": "dhb-mobile-index is part of 分包到 cash / index / h5 / webview 链路."
+    },
+    {
+      "id": "dhb-packages",
+      "name": "DHB_PACKAGES",
+      "role": "subpackage-or-business-module",
+      "projectIndexPath": "config/projects/dhb-packages.json",
+      "reason": "DHB_PACKAGES is part of 分包到 cash / index / h5 / webview 链路."
+    },
+    {
+      "id": "dhbfront-cash-mini",
+      "name": "dhbfront-cash-mini",
+      "role": "shared-frontend-runtime",
+      "projectIndexPath": "config/projects/dhbfront-cash-mini.json",
+      "reason": "dhbfront-cash-mini is part of 分包到 cash / index / h5 / webview 链路."
+    },
+    {
+      "id": "new-mobile-h5",
+      "name": "new_mobile_h5",
+      "role": "legacy-container",
+      "projectIndexPath": "config/projects/new-mobile-h5.json",
+      "reason": "new_mobile_h5 is part of 分包到 cash / index / h5 / webview 链路."
+    }
+  ],
+  "operationGuide": {
+    "environmentSwitching": "Use dhb-env-switch for test/pre/prod H5 settings and restore-local-env when ending local debugging.",
+    "startup": "Use run-projects for planning the H5/package/container startup order, then run commands manually per project when needed.",
+    "notes": [
+      "For package chains, start/build upstream package before downstream container."
+    ]
+  },
+  "readPolicy": {
+    "defaultRead": [
+      "config/scenes/packages-cash-index-h5-webview.json"
+    ],
+    "onDemandRead": [
+      "docs/scenes/packages-cash-index-h5-webview.md",
+      "config/projects/customize-mini-program.json",
+      "config/projects/dhb.json",
+      "config/projects/dhb-mobile-index.json",
+      "config/projects/dhb-packages.json",
+      "config/projects/dhbfront-cash-mini.json",
+      "config/projects/new-mobile-h5.json"
+    ],
+    "notes": "Do not load every project in the scene. Select projects based on the user request first."
+  }
+}

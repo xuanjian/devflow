@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "id": "im-h5",
+  "name": "im-H5",
+  "technologyFamilyId": "frontend",
+  "technologyFamilyName": "前端",
+  "repoType": "web-app",
+  "summary": "IM 相关 H5 项目。",
+  "path": "/Users/xj/Documents/frontend/im-H5",
+  "tags": [
+    "frontend"
+  ],
+  "doc": {
+    "path": "docs/repos/im-h5.md",
+    "title": "im-H5",
+    "summary": "IM 相关 H5 项目。",
+    "whenToRead": "Read only after this project is selected for the task or the JSON summary is insufficient."
+  },
+  "scenes": [
+    {
+      "id": "single-repo-change",
+      "name": "single-repo-change",
+      "summary": "默认单仓修改场景",
+      "sourcePath": "docs/scenes/single-repo-change.md",
+      "reason": "Default scene for isolated work in this project."
+    }
+  ],
+  "skills": [],
+  "rules": [],
+  "tools": {
+    "figma": true,
+    "notion": true,
+    "playwright": true,
+    "xcode": false,
+    "bffDebug": true,
+    "codex": true
+  },
+  "readPolicy": {
+    "defaultRead": [
+      "config/projects/im-h5.json"
+    ],
+    "onDemandRead": [
+      "docs/repos/im-h5.md",
+      "docs/scenes/single-repo-change.md"
+    ],
+    "notes": "Start with this JSON. Load source Markdown, rules, or skills only when the task requires detailed instructions."
+  }
+}

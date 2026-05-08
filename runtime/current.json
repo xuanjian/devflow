@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "activeTaskId": "2026-05-08-ai-context-json-index-redo",
+  "activeTaskPath": "runtime/tasks/2026-05-08-ai-context-json-index-redo.json",
+  "activeProjectIds": [
+    "ai-context"
+  ],
+  "activeSceneIds": [
+    "ai-context-config"
+  ],
+  "currentGate": "G7",
+  "recentTaskIds": [
+    "2026-05-08-ai-context-json-index-redo"
+  ],
+  "note": "Current work is stored in task JSON. runtime/current-work.md is deprecated."
+}

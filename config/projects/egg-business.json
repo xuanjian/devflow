@@ -1,0 +1,66 @@
+{
+  "version": 1,
+  "id": "egg-business",
+  "name": "egg-business",
+  "technologyFamilyId": "bff",
+  "technologyFamilyName": "BFF / Node",
+  "repoType": "shared-library",
+  "summary": "Egg 公共业务模块仓库。",
+  "path": "/Users/xj/Documents/node/egg-business",
+  "tags": [
+    "dhb",
+    "node",
+    "shared-library"
+  ],
+  "doc": {
+    "path": "docs/repos/egg-business.md",
+    "title": "egg-business",
+    "summary": "Egg 公共业务模块仓库。",
+    "whenToRead": "Read only after this project is selected for the task or the JSON summary is insufficient."
+  },
+  "scenes": [
+    {
+      "id": "single-repo-change",
+      "name": "single-repo-change",
+      "summary": "默认单仓修改场景",
+      "sourcePath": "docs/scenes/single-repo-change.md",
+      "reason": "Default scene for isolated work in this project."
+    },
+    {
+      "id": "frontend-bff-debug",
+      "name": "frontend-bff-debug",
+      "summary": "前端与部分 BFF 联调场景",
+      "sourcePath": "docs/scenes/frontend-bff-debug.md",
+      "reason": "egg-business participates in 前端与部分 BFF 联调场景."
+    },
+    {
+      "id": "ios-h5-webview-bff",
+      "name": "ios-h5-webview-bff",
+      "summary": "iOS + H5 + 容器 + BFF 全链路场景",
+      "sourcePath": "docs/scenes/ios-h5-webview-bff.md",
+      "reason": "egg-business participates in iOS + H5 + 容器 + BFF 全链路场景."
+    }
+  ],
+  "skills": [],
+  "rules": [],
+  "tools": {
+    "figma": false,
+    "notion": true,
+    "playwright": false,
+    "xcode": false,
+    "bffDebug": true,
+    "codex": true
+  },
+  "readPolicy": {
+    "defaultRead": [
+      "config/projects/egg-business.json"
+    ],
+    "onDemandRead": [
+      "docs/repos/egg-business.md",
+      "docs/scenes/single-repo-change.md",
+      "docs/scenes/frontend-bff-debug.md",
+      "docs/scenes/ios-h5-webview-bff.md"
+    ],
+    "notes": "Start with this JSON. Load source Markdown, rules, or skills only when the task requires detailed instructions."
+  }
+}

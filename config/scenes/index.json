@@ -1,0 +1,83 @@
+{
+  "version": 1,
+  "generatedAt": "2026-05-08T03:32:27.014Z",
+  "scenes": [
+    {
+      "id": "ai-context-config",
+      "name": "ai-context 配置索引流程",
+      "summary": "ai-context 自身的配置、安装、任务 Gate 和索引生成流程。",
+      "path": "config/scenes/ai-context-config.json",
+      "sourcePath": "config/entry.json"
+    },
+    {
+      "id": "ai-my-pm",
+      "name": "ai-my-pm",
+      "summary": "XUANJIAN 的个人 AI PM 总控、任务分级、工具选择与多角色执行规则",
+      "path": "config/scenes/ai-my-pm.json",
+      "sourcePath": "docs/scenes/ai-my-pm.md"
+    },
+    {
+      "id": "cash-index-h5-webview",
+      "name": "cash-index-h5-webview",
+      "summary": "cash 到 index / h5 / webview 链路",
+      "path": "config/scenes/cash-index-h5-webview.json",
+      "sourcePath": "docs/scenes/cash-index-h5-webview.md"
+    },
+    {
+      "id": "frontend-bff-debug",
+      "name": "frontend-bff-debug",
+      "summary": "前端与部分 BFF 联调场景",
+      "path": "config/scenes/frontend-bff-debug.json",
+      "sourcePath": "docs/scenes/frontend-bff-debug.md"
+    },
+    {
+      "id": "index-h5-webview",
+      "name": "index-h5-webview",
+      "summary": "index 到 h5 / webview 链路",
+      "path": "config/scenes/index-h5-webview.json",
+      "sourcePath": "docs/scenes/index-h5-webview.md"
+    },
+    {
+      "id": "ios-h5-webview-bff",
+      "name": "ios-h5-webview-bff",
+      "summary": "iOS + H5 + 容器 + BFF 全链路场景",
+      "path": "config/scenes/ios-h5-webview-bff.json",
+      "sourcePath": "docs/scenes/ios-h5-webview-bff.md"
+    },
+    {
+      "id": "mini-program-h5-webview",
+      "name": "mini-program-h5-webview",
+      "summary": "小程序到 H5 容器链路",
+      "path": "config/scenes/mini-program-h5-webview.json",
+      "sourcePath": "docs/scenes/mini-program-h5-webview.md"
+    },
+    {
+      "id": "packages-cash-index-h5-webview",
+      "name": "packages-cash-index-h5-webview",
+      "summary": "分包到 cash / index / h5 / webview 链路",
+      "path": "config/scenes/packages-cash-index-h5-webview.json",
+      "sourcePath": "docs/scenes/packages-cash-index-h5-webview.md"
+    },
+    {
+      "id": "profile-growth",
+      "name": "profile-growth",
+      "summary": "个人长期画像自动增长与晋升规则",
+      "path": "config/scenes/profile-growth.json",
+      "sourcePath": "docs/scenes/profile-growth.md"
+    },
+    {
+      "id": "single-repo-change",
+      "name": "single-repo-change",
+      "summary": "默认单仓修改场景",
+      "path": "config/scenes/single-repo-change.json",
+      "sourcePath": "docs/scenes/single-repo-change.md"
+    },
+    {
+      "id": "xuanjian-symphony",
+      "name": "xuanjian-symphony",
+      "summary": "Jira 一句话需求到调研、Figma、开发交接和 Design QA 的文件化工作流",
+      "path": "config/scenes/xuanjian-symphony.json",
+      "sourcePath": "docs/scenes/xuanjian-symphony.md"
+    }
+  ]
+}

@@ -1,0 +1,244 @@
+{
+  "version": 1,
+  "generatedAt": "2026-05-08T03:32:27.013Z",
+  "projects": [
+    {
+      "id": "ai-context",
+      "name": "ai-context",
+      "technologyFamilyId": "workflow",
+      "path": "config/projects/ai-context.json",
+      "summary": "本地 AI 上下文中心、JSON 索引、安装入口和任务 Gate 流程项目。"
+    },
+    {
+      "id": "apple-app-site-association",
+      "name": "apple-app-site-association",
+      "technologyFamilyId": "ios",
+      "path": "config/projects/apple-app-site-association.json",
+      "summary": "Apple app site association 配置仓库。"
+    },
+    {
+      "id": "bff-goods",
+      "name": "bff-goods",
+      "technologyFamilyId": "bff",
+      "path": "config/projects/bff-goods.json",
+      "summary": "商品 BFF，同时承接 AI 海报、ComfyUI 相关能力。"
+    },
+    {
+      "id": "bff-hub",
+      "name": "bff-hub",
+      "technologyFamilyId": "bff",
+      "path": "config/projects/bff-hub.json",
+      "summary": "Hub 类 Node 服务仓库。"
+    },
+    {
+      "id": "bff-order",
+      "name": "bff-order",
+      "technologyFamilyId": "bff",
+      "path": "config/projects/bff-order.json",
+      "summary": "订单 BFF 服务。"
+    },
+    {
+      "id": "bff-payment",
+      "name": "bff-payment",
+      "technologyFamilyId": "bff",
+      "path": "config/projects/bff-payment.json",
+      "summary": "支付 BFF 服务。"
+    },
+    {
+      "id": "bff-user",
+      "name": "bff-user",
+      "technologyFamilyId": "bff",
+      "path": "config/projects/bff-user.json",
+      "summary": "用户 BFF 服务。"
+    },
+    {
+      "id": "bff-warehouse",
+      "name": "bff-warehouse",
+      "technologyFamilyId": "bff",
+      "path": "config/projects/bff-warehouse.json",
+      "summary": "仓储 BFF 服务。"
+    },
+    {
+      "id": "brand-app",
+      "name": "BrandApp",
+      "technologyFamilyId": "ios",
+      "path": "config/projects/brand-app.json",
+      "summary": "iOS 原生应用仓库。"
+    },
+    {
+      "id": "comfyui-egg",
+      "name": "comfyuiEgg",
+      "technologyFamilyId": "bff",
+      "path": "config/projects/comfyui-egg.json",
+      "summary": "comfyuiEgg 项目。"
+    },
+    {
+      "id": "comfyui-root",
+      "name": "ComfyUI",
+      "technologyFamilyId": "ai-tools",
+      "path": "config/projects/comfyui-root.json",
+      "summary": "ComfyUI 工作目录根节点，用于工作流、custom_nodes 和模型管理。"
+    },
+    {
+      "id": "customize-mini-program",
+      "name": "customize-mini-program",
+      "technologyFamilyId": "frontend",
+      "path": "config/projects/customize-mini-program.json",
+      "summary": "订货宝原生微信小程序，通过 WebView 承接 H5 链路。"
+    },
+    {
+      "id": "dhb",
+      "name": "DHB",
+      "technologyFamilyId": "ios",
+      "path": "config/projects/dhb.json",
+      "summary": "订货宝 iOS 原生 App，常与 H5、WebView、BFF 联动。"
+    },
+    {
+      "id": "dhb-goods-image-tool",
+      "name": "dhb-goods-image-tool",
+      "technologyFamilyId": "frontend",
+      "path": "config/projects/dhb-goods-image-tool.json",
+      "summary": "图片或商品素材处理相关工具仓库。"
+    },
+    {
+      "id": "dhb-international-mobile",
+      "name": "dhb-International-mobile",
+      "technologyFamilyId": "frontend",
+      "path": "config/projects/dhb-international-mobile.json",
+      "summary": "DHB 国际化移动端项目，强调老项目 UI 100% 还原和组件化开发。"
+    },
+    {
+      "id": "dhb-manager",
+      "name": "dhb-manager",
+      "technologyFamilyId": "frontend",
+      "path": "config/projects/dhb-manager.json",
+      "summary": "DHB 管理端 PC React 项目。"
+    },
+    {
+      "id": "dhb-mobile-index",
+      "name": "dhb-mobile-index",
+      "technologyFamilyId": "frontend",
+      "path": "config/projects/dhb-mobile-index.json",
+      "summary": "订货端 React H5 主入口，常处在容器链路和跨端联调中心。"
+    },
+    {
+      "id": "dhb-packages",
+      "name": "DHB_PACKAGES",
+      "technologyFamilyId": "frontend",
+      "path": "config/projects/dhb-packages.json",
+      "summary": "DHB 分包业务模块集合，常作为 cash-mini 上游联调仓库。"
+    },
+    {
+      "id": "dhbfront-cash-mini",
+      "name": "dhbfront-cash-mini",
+      "technologyFamilyId": "frontend",
+      "path": "config/projects/dhbfront-cash-mini.json",
+      "summary": "Taro 跨平台组件库，作为 H5 与小程序的公共组件层。"
+    },
+    {
+      "id": "dhbfront-img",
+      "name": "dhbfront-img",
+      "technologyFamilyId": "frontend",
+      "path": "config/projects/dhbfront-img.json",
+      "summary": "前端图片资源服务仓库。"
+    },
+    {
+      "id": "dhbfront-manager-mobile",
+      "name": "dhbfront-manager-mobile",
+      "technologyFamilyId": "frontend",
+      "path": "config/projects/dhbfront-manager-mobile.json",
+      "summary": "DHB 管理端移动 H5 项目。"
+    },
+    {
+      "id": "dhbfront-utils",
+      "name": "dhbfront-utils",
+      "technologyFamilyId": "frontend",
+      "path": "config/projects/dhbfront-utils.json",
+      "summary": "DHB 前端公共工具库。"
+    },
+    {
+      "id": "docs",
+      "name": "docs",
+      "technologyFamilyId": "bff",
+      "path": "config/projects/docs.json",
+      "summary": "文档仓库。"
+    },
+    {
+      "id": "egg-business",
+      "name": "egg-business",
+      "technologyFamilyId": "bff",
+      "path": "config/projects/egg-business.json",
+      "summary": "Egg 公共业务模块仓库。"
+    },
+    {
+      "id": "egg-dhb-framework",
+      "name": "egg-dhb-framework",
+      "technologyFamilyId": "bff",
+      "path": "config/projects/egg-dhb-framework.json",
+      "summary": "DHB BFF 基础框架插件仓库，提供 Controller/Service 基类、权限中间件和请求封装。"
+    },
+    {
+      "id": "egg-dhb-permission",
+      "name": "egg-dhb-permission",
+      "technologyFamilyId": "bff",
+      "path": "config/projects/egg-dhb-permission.json",
+      "summary": "DHB 接口权限控制插件仓库。"
+    },
+    {
+      "id": "goods-initialization",
+      "name": "goods-initialization",
+      "technologyFamilyId": "frontend",
+      "path": "config/projects/goods-initialization.json",
+      "summary": "偏插件或初始化能力的前端工具仓库。"
+    },
+    {
+      "id": "hxb",
+      "name": "HXB",
+      "technologyFamilyId": "ios",
+      "path": "config/projects/hxb.json",
+      "summary": "货销宝 iOS 原生 App。"
+    },
+    {
+      "id": "hxb-mobile",
+      "name": "hxb-mobile",
+      "technologyFamilyId": "frontend",
+      "path": "config/projects/hxb-mobile.json",
+      "summary": "货销宝移动端项目。"
+    },
+    {
+      "id": "im-h5",
+      "name": "im-H5",
+      "technologyFamilyId": "frontend",
+      "path": "config/projects/im-h5.json",
+      "summary": "IM 相关 H5 项目。"
+    },
+    {
+      "id": "new-mobile-h5",
+      "name": "new_mobile_h5",
+      "technologyFamilyId": "frontend",
+      "path": "config/projects/new-mobile-h5.json",
+      "summary": "订货端老 H5 容器，承接 iframe 与 WebView 容器链路。"
+    },
+    {
+      "id": "open-auto-glm",
+      "name": "Open-AutoGLM",
+      "technologyFamilyId": "ios",
+      "path": "config/projects/open-auto-glm.json",
+      "summary": "实验性质的 iOS / AI 项目。"
+    },
+    {
+      "id": "print",
+      "name": "print",
+      "technologyFamilyId": "bff",
+      "path": "config/projects/print.json",
+      "summary": "打印或输出相关工具仓库。"
+    },
+    {
+      "id": "yxt-mobile",
+      "name": "yxt-mobile",
+      "technologyFamilyId": "frontend",
+      "path": "config/projects/yxt-mobile.json",
+      "summary": "其它移动端前端项目。"
+    }
+  ]
+}

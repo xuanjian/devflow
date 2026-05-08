@@ -1,0 +1,230 @@
+{
+  "version": 1,
+  "generatedAt": "2026-05-08T03:32:27.014Z",
+  "note": "Skill catalog describes skills only. Project bindings live in config/projects/<project>.json.",
+  "skills": [
+    {
+      "id": "ai-context",
+      "name": "ai-context",
+      "description": "统一读取 ai-context JSON 索引、安装入口、配置写入和 G1-G7 任务流转。",
+      "trigger": "Use when installing ai-context, checking configuration, routing a new task, or updating project/scene/skill indexes.",
+      "sourcePath": "bundles/skills/ai-context/SKILL.md",
+      "sourceExists": true,
+      "sourceType": "directory",
+      "tags": [
+        "ai-context",
+        "workflow"
+      ],
+      "defaultSceneIds": [
+        "ai-context-config"
+      ],
+      "whenToLoad": "Load at the start of ai-context setup or when a task modifies this repository."
+    },
+    {
+      "id": "dhb-env-switch",
+      "name": "dhb-env-switch",
+      "description": "切换 DHB 本地开发环境（测试/预发/线上）。触发词：切环境、切线上、切测试、切预发。",
+      "trigger": "切换 DHB 本地开发环境（测试/预发/线上）。触发词：切环境、切线上、切测试、切预发。",
+      "sourcePath": "bundles/skills/dhb-env-switch/SKILL.md",
+      "sourceExists": true,
+      "sourceType": "directory",
+      "tags": [
+        "cash-mini",
+        "container",
+        "dhb",
+        "frontend",
+        "h5",
+        "mini-program",
+        "packages"
+      ],
+      "defaultSceneIds": [
+        "cash-index-h5-webview",
+        "frontend-bff-debug",
+        "index-h5-webview",
+        "ios-h5-webview-bff",
+        "mini-program-h5-webview",
+        "packages-cash-index-h5-webview",
+        "single-repo-change"
+      ],
+      "whenToLoad": "切换 DHB 本地开发环境（测试/预发/线上）。触发词：切环境、切线上、切测试、切预发。"
+    },
+    {
+      "id": "dhb-packages/add-mobile-icon",
+      "name": "add-mobile-icon",
+      "description": "在 dhbfront-img 项目中新增图标。触发词：新增图标、添加图标、创建图标、添加 svg 图标。支持固定颜色图标和主题色图标，支持任意模块目录（goods、order、payment 等）。",
+      "trigger": "在 dhbfront-img 项目中新增图标。触发词：新增图标、添加图标、创建图标、添加 svg 图标。支持固定颜色图标和主题色图标，支持任意模块目录（goods、order、payment 等）。",
+      "sourcePath": "bundles/skills/dhb-packages/add-mobile-icon/SKILL.md",
+      "sourceExists": true,
+      "sourceType": "directory",
+      "tags": [
+        "dhb",
+        "frontend",
+        "packages"
+      ],
+      "defaultSceneIds": [
+        "frontend-bff-debug",
+        "packages-cash-index-h5-webview",
+        "single-repo-change"
+      ],
+      "whenToLoad": "在 dhbfront-img 项目中新增图标。触发词：新增图标、添加图标、创建图标、添加 svg 图标。支持固定颜色图标和主题色图标，支持任意模块目录（goods、order、payment 等）。"
+    },
+    {
+      "id": "dhb-packages/add-taro-module",
+      "name": "Skill: 在 Taro 分包中新增业务模块",
+      "description": "使用以下提示词触发此工作流：",
+      "trigger": "使用以下提示词触发此工作流：",
+      "sourcePath": "bundles/skills/dhb-packages/add-taro-module.md",
+      "sourceExists": true,
+      "sourceType": "file",
+      "tags": [
+        "dhb",
+        "frontend",
+        "packages"
+      ],
+      "defaultSceneIds": [
+        "frontend-bff-debug",
+        "packages-cash-index-h5-webview",
+        "single-repo-change"
+      ],
+      "whenToLoad": "使用以下提示词触发此工作流："
+    },
+    {
+      "id": "dhb-packages/create-api-request",
+      "name": "创建 API 请求 Skill",
+      "description": "- 创建请求",
+      "trigger": "- 创建请求",
+      "sourcePath": "bundles/skills/dhb-packages/create-api-request.md",
+      "sourceExists": true,
+      "sourceType": "file",
+      "tags": [
+        "dhb",
+        "frontend",
+        "packages"
+      ],
+      "defaultSceneIds": [
+        "frontend-bff-debug",
+        "packages-cash-index-h5-webview",
+        "single-repo-change"
+      ],
+      "whenToLoad": "- 创建请求"
+    },
+    {
+      "id": "dhb-packages/mock-api-from-curl",
+      "name": "Skill: 根据 curl 生成接口 Mock",
+      "description": "```",
+      "trigger": "```",
+      "sourcePath": "bundles/skills/dhb-packages/mock-api-from-curl.md",
+      "sourceExists": true,
+      "sourceType": "file",
+      "tags": [
+        "dhb",
+        "frontend",
+        "packages"
+      ],
+      "defaultSceneIds": [
+        "frontend-bff-debug",
+        "packages-cash-index-h5-webview",
+        "single-repo-change"
+      ],
+      "whenToLoad": "```"
+    },
+    {
+      "id": "dhbfront-cash-mini/add-subpackage-module",
+      "name": "add-subpackage-module",
+      "description": "为 dhbfront-cash-mini 项目新增分包业务模块。触发词：新增模块、添加模块、创建分包组件。用于从 npm 包引入业务组件，创建本地包装组件，并配置分包导出。",
+      "trigger": "为 dhbfront-cash-mini 项目新增分包业务模块。触发词：新增模块、添加模块、创建分包组件。用于从 npm 包引入业务组件，创建本地包装组件，并配置分包导出。",
+      "sourcePath": "bundles/skills/dhbfront-cash-mini/add-subpackage-module/SKILL.md",
+      "sourceExists": true,
+      "sourceType": "directory",
+      "tags": [
+        "cash-mini",
+        "dhb",
+        "frontend"
+      ],
+      "defaultSceneIds": [
+        "cash-index-h5-webview",
+        "frontend-bff-debug",
+        "packages-cash-index-h5-webview",
+        "single-repo-change"
+      ],
+      "whenToLoad": "为 dhbfront-cash-mini 项目新增分包业务模块。触发词：新增模块、添加模块、创建分包组件。用于从 npm 包引入业务组件，创建本地包装组件，并配置分包导出。"
+    },
+    {
+      "id": "dhbfront-cash-mini/update-subpackage-module",
+      "name": "update-subpackage-module",
+      "description": "更新已有的分包业务模块。触发词：更新模块、更新分包、发布更新、模块升级。用于修改分包组件代码后，发布新版本并更新主包依赖。",
+      "trigger": "更新已有的分包业务模块。触发词：更新模块、更新分包、发布更新、模块升级。用于修改分包组件代码后，发布新版本并更新主包依赖。",
+      "sourcePath": "bundles/skills/dhbfront-cash-mini/update-subpackage-module/SKILL.md",
+      "sourceExists": true,
+      "sourceType": "directory",
+      "tags": [
+        "cash-mini",
+        "dhb",
+        "frontend"
+      ],
+      "defaultSceneIds": [
+        "cash-index-h5-webview",
+        "frontend-bff-debug",
+        "packages-cash-index-h5-webview",
+        "single-repo-change"
+      ],
+      "whenToLoad": "更新已有的分包业务模块。触发词：更新模块、更新分包、发布更新、模块升级。用于修改分包组件代码后，发布新版本并更新主包依赖。"
+    },
+    {
+      "id": "restore-local-env",
+      "name": "restore-local-env",
+      "description": "恢复 DHB 本地联调环境。触发词：恢复环境、恢复配置、结束开发、还原配置。用于停止统一执行器启动的进程并恢复其备份的配置文件。",
+      "trigger": "恢复 DHB 本地联调环境。触发词：恢复环境、恢复配置、结束开发、还原配置。用于停止统一执行器启动的进程并恢复其备份的配置文件。",
+      "sourcePath": "bundles/skills/restore-local-env/SKILL.md",
+      "sourceExists": true,
+      "sourceType": "directory",
+      "tags": [
+        "cash-mini",
+        "container",
+        "dhb",
+        "frontend",
+        "h5",
+        "mini-program",
+        "packages"
+      ],
+      "defaultSceneIds": [
+        "cash-index-h5-webview",
+        "frontend-bff-debug",
+        "index-h5-webview",
+        "ios-h5-webview-bff",
+        "mini-program-h5-webview",
+        "packages-cash-index-h5-webview",
+        "single-repo-change"
+      ],
+      "whenToLoad": "恢复 DHB 本地联调环境。触发词：恢复环境、恢复配置、结束开发、还原配置。用于停止统一执行器启动的进程并恢复其备份的配置文件。"
+    },
+    {
+      "id": "run-projects",
+      "name": "run-projects",
+      "description": "Use when running DHB local frontend projects across cash-mini, dhb-mobile-index, new_mobile_h5, customize-mini-program, or linked subpackages, especially when switching environments, linking local packages, or recovering from unstable startup flows.",
+      "trigger": "Use when running DHB local frontend projects across cash-mini, dhb-mobile-index, new_mobile_h5, customize-mini-program, or linked subpackages, especially when switching environments, linking local packages, or recovering from unstable startup flows.",
+      "sourcePath": "bundles/skills/run-projects/SKILL.md",
+      "sourceExists": true,
+      "sourceType": "directory",
+      "tags": [
+        "cash-mini",
+        "container",
+        "dhb",
+        "frontend",
+        "h5",
+        "mini-program",
+        "packages"
+      ],
+      "defaultSceneIds": [
+        "cash-index-h5-webview",
+        "frontend-bff-debug",
+        "index-h5-webview",
+        "ios-h5-webview-bff",
+        "mini-program-h5-webview",
+        "packages-cash-index-h5-webview",
+        "single-repo-change"
+      ],
+      "whenToLoad": "Use when running DHB local frontend projects across cash-mini, dhb-mobile-index, new_mobile_h5, customize-mini-program, or linked subpackages, especially when switching environments, linking local packages, or recovering from unstable startup flows."
+    }
+  ]
+}

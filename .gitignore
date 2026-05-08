@@ -5,6 +5,7 @@
 # or environment-specific evidence. Track the protocol README, not ticket data.
 runtime/tasks/*
 !runtime/tasks/README.md
+!runtime/tasks/*.json
 
 # Skill runtime outputs. Keep source scripts/templates, ignore local backups/logs.
 bundles/skills/run-projects/runtime/backups/*

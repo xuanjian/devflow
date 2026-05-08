@@ -1,0 +1,38 @@
+{
+  "version": 1,
+  "id": "ai-context-config",
+  "name": "ai-context 配置索引流程",
+  "summary": "ai-context 自身的配置、安装、任务 Gate 和索引生成流程。",
+  "purpose": "让 AI 先读 JSON 索引，再按需加载项目、场景、规则和 skill 原文。",
+  "source": {
+    "path": "config/entry.json",
+    "whenToRead": "Read when installing or modifying ai-context itself."
+  },
+  "whyThisComposition": "This scene groups 1 project(s) because they commonly participate in: ai-context 自身的配置、安装、任务 Gate 和索引生成流程。. Load individual project JSON first, then source markdown only for detailed execution rules.",
+  "projects": [
+    {
+      "id": "ai-context",
+      "name": "ai-context",
+      "role": "configuration-center",
+      "projectIndexPath": "config/projects/ai-context.json",
+      "reason": "ai-context is part of ai-context 自身的配置、安装、任务 Gate 和索引生成流程。."
+    }
+  ],
+  "operationGuide": {
+    "environmentSwitching": "No business environment switch. Use scripts/install-ai-context.mjs check/validate/install.",
+    "startup": "Open config JSON or docs/prototypes/context-studio.html for the product prototype.",
+    "notes": [
+      "Future real app code should live under src/."
+    ]
+  },
+  "readPolicy": {
+    "defaultRead": [
+      "config/scenes/ai-context-config.json"
+    ],
+    "onDemandRead": [
+      "config/entry.json",
+      "config/projects/ai-context.json"
+    ],
+    "notes": "Do not load every project in the scene. Select projects based on the user request first."
+  }
+}

@@ -1,0 +1,132 @@
+{
+  "version": 1,
+  "id": "new-mobile-h5",
+  "name": "new_mobile_h5",
+  "technologyFamilyId": "frontend",
+  "technologyFamilyName": "前端",
+  "repoType": "legacy-container",
+  "summary": "订货端老 H5 容器，承接 iframe 与 WebView 容器链路。",
+  "path": "/Users/xj/Documents/frontend/new_mobile_h5",
+  "tags": [
+    "dhb",
+    "frontend",
+    "container"
+  ],
+  "doc": {
+    "path": "docs/repos/new-mobile-h5.md",
+    "title": "new_mobile_h5",
+    "summary": "订货端老 H5 容器，承接 iframe 与 WebView 容器链路。",
+    "whenToRead": "Read only after this project is selected for the task or the JSON summary is insufficient."
+  },
+  "scenes": [
+    {
+      "id": "single-repo-change",
+      "name": "single-repo-change",
+      "summary": "默认单仓修改场景",
+      "sourcePath": "docs/scenes/single-repo-change.md",
+      "reason": "Default scene for isolated work in this project."
+    },
+    {
+      "id": "index-h5-webview",
+      "name": "index-h5-webview",
+      "summary": "index 到 h5 / webview 链路",
+      "sourcePath": "docs/scenes/index-h5-webview.md",
+      "reason": "new_mobile_h5 participates in index 到 h5 / webview 链路."
+    },
+    {
+      "id": "cash-index-h5-webview",
+      "name": "cash-index-h5-webview",
+      "summary": "cash 到 index / h5 / webview 链路",
+      "sourcePath": "docs/scenes/cash-index-h5-webview.md",
+      "reason": "new_mobile_h5 participates in cash 到 index / h5 / webview 链路."
+    },
+    {
+      "id": "packages-cash-index-h5-webview",
+      "name": "packages-cash-index-h5-webview",
+      "summary": "分包到 cash / index / h5 / webview 链路",
+      "sourcePath": "docs/scenes/packages-cash-index-h5-webview.md",
+      "reason": "new_mobile_h5 participates in 分包到 cash / index / h5 / webview 链路."
+    },
+    {
+      "id": "mini-program-h5-webview",
+      "name": "mini-program-h5-webview",
+      "summary": "小程序到 H5 容器链路",
+      "sourcePath": "docs/scenes/mini-program-h5-webview.md",
+      "reason": "new_mobile_h5 participates in 小程序到 H5 容器链路."
+    },
+    {
+      "id": "ios-h5-webview-bff",
+      "name": "ios-h5-webview-bff",
+      "summary": "iOS + H5 + 容器 + BFF 全链路场景",
+      "sourcePath": "docs/scenes/ios-h5-webview-bff.md",
+      "reason": "new_mobile_h5 participates in iOS + H5 + 容器 + BFF 全链路场景."
+    }
+  ],
+  "skills": [
+    {
+      "id": "run-projects",
+      "name": "run-projects",
+      "description": "Use when running DHB local frontend projects across cash-mini, dhb-mobile-index, new_mobile_h5, customize-mini-program, or linked subpackages, especially when switching environments, linking local packages, or recovering from unstable startup flows.",
+      "sourcePath": "bundles/skills/run-projects/SKILL.md",
+      "whenToLoad": "Load when new-mobile-h5 task matches this skill trigger."
+    },
+    {
+      "id": "restore-local-env",
+      "name": "restore-local-env",
+      "description": "恢复 DHB 本地联调环境。触发词：恢复环境、恢复配置、结束开发、还原配置。用于停止统一执行器启动的进程并恢复其备份的配置文件。",
+      "sourcePath": "bundles/skills/restore-local-env/SKILL.md",
+      "whenToLoad": "Load when new-mobile-h5 task matches this skill trigger."
+    },
+    {
+      "id": "dhb-env-switch",
+      "name": "dhb-env-switch",
+      "description": "切换 DHB 本地开发环境（测试/预发/线上）。触发词：切环境、切线上、切测试、切预发。",
+      "sourcePath": "bundles/skills/dhb-env-switch/SKILL.md",
+      "whenToLoad": "Load when new-mobile-h5 task matches this skill trigger."
+    }
+  ],
+  "rules": [
+    {
+      "id": "shared-context",
+      "name": "统一共享上下文入口",
+      "purpose": "请优先阅读：",
+      "sourcePath": "bundles/rules/shared-context.mdc",
+      "whenToRead": "Read when working in new-mobile-h5 and this rule affects the requested change."
+    },
+    {
+      "id": "new-mobile-h5/new-mobile-h5",
+      "name": "new_mobile_h5 开发规范",
+      "purpose": "**技术栈**: 原生 JavaScript + Zepto + Gulp",
+      "sourcePath": "bundles/rules/new-mobile-h5/new-mobile-h5.mdc",
+      "whenToRead": "Read when working in new-mobile-h5 and this rule affects the requested change."
+    }
+  ],
+  "tools": {
+    "figma": true,
+    "notion": true,
+    "playwright": true,
+    "xcode": false,
+    "bffDebug": true,
+    "codex": true
+  },
+  "readPolicy": {
+    "defaultRead": [
+      "config/projects/new-mobile-h5.json"
+    ],
+    "onDemandRead": [
+      "docs/repos/new-mobile-h5.md",
+      "docs/scenes/single-repo-change.md",
+      "docs/scenes/index-h5-webview.md",
+      "docs/scenes/cash-index-h5-webview.md",
+      "docs/scenes/packages-cash-index-h5-webview.md",
+      "docs/scenes/mini-program-h5-webview.md",
+      "docs/scenes/ios-h5-webview-bff.md",
+      "bundles/rules/shared-context.mdc",
+      "bundles/rules/new-mobile-h5/new-mobile-h5.mdc",
+      "bundles/skills/run-projects/SKILL.md",
+      "bundles/skills/restore-local-env/SKILL.md",
+      "bundles/skills/dhb-env-switch/SKILL.md"
+    ],
+    "notes": "Start with this JSON. Load source Markdown, rules, or skills only when the task requires detailed instructions."
+  }
+}

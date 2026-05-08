@@ -1,147 +1,112 @@
 # ai-context
 
-> XUANJIAN 的统一 AI 上下文中心仓库。这里存放跨工具、跨项目复用的上下文源文件、场景定义、注册表和入口生成脚本。
+> XUANJIAN 的本地 AI 上下文中心。现在采用“JSON 索引层 + 原始 Markdown / rules / skills 按需加载”的结构，减少默认上下文消耗，同时保留完整说明文件。
 
-## 设计目标
+## 核心原则
 
-- 长期画像、当前工作、项目说明、链路场景只维护少量源文件
-- Codex、Cursor、Claude Code 等工具只维护薄入口，不再各自维护大段正文
-- 允许一个项目属于多个链路场景，也允许一次任务横跨前端、iOS、BFF、ComfyUI
-- 允许插件项目、工具项目、实验项目与业务项目共存，但默认加载不同的上下文深度
+- 先读 JSON 索引，不默认读完整 Markdown。
+- 项目、场景、规则、Skill 的关系用 JSON 描述。
+- `docs/repos/*.md`、`docs/scenes/*.md`、`bundles/rules/**`、`bundles/skills/**` 继续保留，只有命中任务时再读。
+- Skill 不反向列项目；项目 JSON 负责声明自己挂载哪些 Skill。
+- 当前工作状态来自 `runtime/current.json` 和 `runtime/tasks/<task-id>.json`，不再维护 `runtime/current-work.md`。
 
-## 目录结构
+## 默认读取顺序
 
-- `person/`
-  - 个人长期画像入口、学习记录和画像候选
-- `runtime/`
-  - 当前工作上下文入口
-- `runtime/tasks/`
-  - XUANJIAN Symphony 第一阶段任务交接包目录，每个 Jira 或临时需求一个文件夹
-- `repos/`
-  - 单仓库上下文说明
-- `scenes/`
-  - 高频工作链路 / 工作场景
-- `templates/`
-  - Jira intake、需求调研、开发交接、Design QA 等可复用模板
-- `registry/`
-  - 仓库、场景、bundle 的注册表
-- `bundles/`
-  - 规则包与技能包的源文件
-  - 其中既可以有全局共享内容，也可以有项目专属但集中维护的内容
-- `scripts/`
-  - 生成与同步脚本
-- `docs/`
-  - 方案、迁移计划、设计说明
+新会话或项目入口先读：
 
-## 读取顺序
+1. `config/entry.json`
+2. `config/profile.json`
+3. `runtime/current.json`
+4. `runtime/tasks/<activeTaskId>.json`
+5. 命中的 `config/projects/<project-id>.json`
+6. 命中的 `config/scenes/<scene-id>.json`
+7. 需要选 Skill 时读 `config/skills/skills.json`
+8. 需要规则细节时读 `config/rules/rules.json`
 
-新会话进入任一项目时，推荐按以下顺序恢复上下文：
+只有当 JSON 索引说明需要更详细上下文时，再读对应源文件。
 
-1. 项目根目录的入口文件，例如 `AGENTS.md` / `CLAUDE.md` / Cursor rule
-2. `ai-context/person/profile.md`
-3. `ai-context/runtime/current-work.md`
-4. `ai-context/repos/<repo>.md`
-5. 必要时再加载 `ai-context/scenes/<scene>.md`
-6. 需要精确定位规则或技能时，再查询 `ai-context/registry/bundles.json`
-7. 如果任务涉及个人能力成长、学习沉淀或“同步长期画像”，再读取 `ai-context/scenes/profile-growth.md`
-8. 如果用户只描述开发需求，或任务涉及 AI PM 调度、任务轻重判断、多角色分工、跨仓大任务或“ai-my-pm / ai-dev-team”，再读取 `ai-context/scenes/ai-my-pm.md`
-9. 如果 DHB/HXB 项目路由不清楚，再读取 `ai-context/registry/notion-sources.json` 中登记的 Notion `DHB 项目地图`
-10. 如果任务涉及 Jira 一句话需求、需求调研、PC/参考 App 反推需求、Figma 原型、跨聊天框交接或 Design QA 验收，再读取 `ai-context/scenes/xuanjian-symphony.md`
+## 目录分工
 
-兼容入口仍保留：
+```text
+config/
+  entry.json                 # 总入口：读取顺序、安装方式、G1-G7 流程
+  profile.json               # 长期画像摘要，指向 docs/person/profile.md
+  projects/*.json            # 每个项目一个索引：doc、scene、skill、rule
+  scenes/*.json              # 每个场景一个索引：作用、组合原因、项目、运行/联调方式
+  skills/skills.json         # Skill catalog，不反向列项目
+  rules/rules.json           # Rule catalog
+  tasks/gates.json           # G1-G7 定义
 
-- `/Users/xj/AGENTS.md`
-- `/Users/xj/WORK_CONTEXT.md`
+docs/person/profile.md            # 长期画像正文，按需读取
+docs/repos/*.md                   # 项目介绍正文，按需读取
+docs/scenes/*.md                  # 场景正文，按需读取
+docs/templates/*.md               # G1-G7 任务产物模板
+docs/prototypes/                  # 配置软件原型
+bundles/rules/**             # 规则正文，按需读取
+bundles/skills/**            # Skill 正文和脚本，按需读取
+runtime/current.json         # 当前任务指针
+runtime/tasks/               # 任务状态与产物
+scripts/install-ai-context.mjs
+```
 
-这两个文件只作为跨目录、跨工具的稳定跳板；权威正文以 `person/profile.md` 和 `runtime/current-work.md` 为准。
+## 安装与检查
 
-常见链路的可视化总览见：
+检查：
 
-- `docs/scene-repo-bundle-overview.md`
+```bash
+node scripts/install-ai-context.mjs check
+```
 
-## 当前状态
+校验 JSON 索引：
 
-- 新入口和注册表统一迁移到 `/Users/xj/Documents/ai-context`
-- 旧目录 `_dhb-ai-context` 已退役并移除
-- 各仓库的桥接文件由 `scripts/generate-adapters.mjs` 批量生成
-- 项目目录中的 rules / skills 正文已全部收拢到 `ai-context`，项目侧保留的是入口文件或 symlink
-- 所有 git 仓库都会由生成器自动写入本地 `.git/info/exclude`，并对已跟踪的 AI 配置文件设置 `skip-worktree`
-- `registry/bundles.json` 会记录每个 rule/skill bundle 的路径、类型、作用范围和绑定仓库
-- `registry/clients.json` 记录 Codex / Cursor / Claude Code 等 AI client 的入口能力
-- `registry/repo-tools.json` 记录不同 family 和关键 repo 可使用的 Figma、Notion、Xcode、Playwright、BFF 调试等工具能力
-- `registry/notion-sources.json` 记录 Notion 中的 DHB 项目地图、项目总览、核心项目详情和术语约定入口
+```bash
+node scripts/install-ai-context.mjs validate
+```
 
-## 本地 git 忽略策略
+安装 Codex Skill 和全局入口：
 
-- 目标：不把个人 AI 协作配置提交到远程仓库
-- 作用范围：仅本地生效，不修改项目的 `.gitignore`
-- 当前忽略模式：
-  - `AGENTS.md`
-  - `CLAUDE.md`
-  - `.cursor/`
-  - `.trae/`
-  - `.codex/`
-  - `.ai-configs/`
-  - `.agents/`
-- 对已经被 git 跟踪过的上述文件，生成器会额外设置本地 `skip-worktree`
+```bash
+node scripts/install-ai-context.mjs install
+```
 
-## 当前已收拢的规则来源
+卸载 Skill 软链接：
 
-- 前端共享规则：
-  - `bundles/rules/shared-context.mdc`
-  - `bundles/rules/dhbfront-cash-mini.mdc`
-  - `bundles/rules/dhb-mobile-index.mdc`
-  - `bundles/rules/theme-config.mdc`
-  - `bundles/rules/i18n-chinese-key.mdc`
-- 项目专属但集中维护：
-  - `bundles/rules/customize-mini-program/*`
-  - `bundles/rules/new-mobile-h5/*`
-  - `bundles/rules/dhb-international-mobile/*`
-  - `bundles/rules/ios-dhb/*`
+```bash
+node scripts/install-ai-context.mjs uninstall
+```
 
-## 当前已收拢的技能来源
+同步项目入口文件：
 
-- 前端共享技能：
-  - `bundles/skills/run-projects`
-  - `bundles/skills/restore-local-env`
-  - `bundles/skills/dhb-env-switch`
-- 项目专属但集中维护：
-  - `bundles/skills/dhb-packages/*`
-  - `bundles/skills/dhbfront-cash-mini/add-subpackage-module`
-  - `bundles/skills/dhbfront-cash-mini/update-subpackage-module`
-  - `bundles/skills/dhbfront-manager-mobile/add-bff-service`
-- 个人 AI PM 与多角色协作技能：
-  - `bundles/skills/ai-my-pm`
+```bash
+node scripts/install-ai-context.mjs sync-projects
+```
 
-## 当前已新增的 AI PM 规则
+安装脚本管理的 Codex Skill 软链接：
 
-- `scenes/ai-my-pm.md`
-  - 定义任务分级、上下文读取、工具选择、多角色执行模式、写入规则
-- `scenes/xuanjian-symphony.md`
-  - 定义 Jira 到需求采集、Figma、开发文档、分项目开发和 Design QA 的 G0-G5 Gate 工作流
-- `bundles/skills/ai-my-pm/SKILL.md`
-  - 定义 Codex 中如何执行 ai-my-pm 流程
+```text
+~/.agents/skills/ai-context -> /Users/xj/Documents/ai-context/bundles/skills/ai-context
+```
 
-当前策略：
+## G1-G7
 
-- 默认不安装、不依赖 `oh-my-codex`、`oh-my-openagent`、AgentsRoom 或其它外部 harness
-- 优先使用 Codex 原生能力
-- 用户只需要描述需求；`ai-my-pm` 默认自动判断怎么实施、用哪些项目、哪些工具、哪些流程、哪些技术和哪些角色
-- DHB/HXB 相关需求如果项目归属不清楚，优先参考 Notion `DHB 项目地图`
-- `ai-my-pm` 自动判断是否需要 superpowers：需求不清用 brainstorming，多步任务用 writing-plans，失败排查用 systematic-debugging，完成前用 verification-before-completion，大改用 requesting-code-review
-- `ai-my-pm` 是总控入口，先判断任务轻重、上下文、工具和执行模式
-- `ai-dev-team mode` 只是 `ai-my-pm` 里的大任务多角色执行模式
-- 没有用户明确授权时，`ai-dev-team mode` 只作为角色化思考框架
-- 如果用户明确授权多 agent / subagent / 并行，才使用 Codex subagent
-- `xuanjian-symphony` 是当前新增的第一阶段交接协议：主 PM Chat 维护 `runtime/tasks/<ticket-key>/00-07` Gate 文件，项目执行 Chat 只读取 `04-<project>-handoff.md` 和指定资料，避免单聊天框上下文过重
+任务流程定义在 `config/tasks/gates.json`：
 
-## 长期画像自动增长
+- G1 Intent / Intake
+- G2 Discovery
+- G3 Plan / Product UI
+- G4 Development
+- G5 Integration
+- G6 Acceptance
+- G7 Run / Package Archive
 
-长期画像采用分层增长机制：
+G7 需要记录如何调试运行、如何联调、测试/预发/正式如何打包、验证结果和归档注意事项。
 
-- `runtime/current-work.md` 记录当前阶段和临时工作状态
-- `person/learning-log.md` 记录项目中学到的新知识、工具经验和可复用排查方法
-- `person/profile-candidates.md` 记录可能晋升到长期画像的能力变化
-- `person/profile.md` 只保留稳定、通用、有用的长期信息
+## 配置软件原型
 
-当用户明确说“同步长期画像”“把这个记到长期画像”“以后都按这个来”，或候选已满足稳定、通用、有用三项标准时，AI 可以自动更新 `person/profile.md`，并说明晋升原因和证据来源。`/Users/xj/AGENTS.md` 仅保留兼容入口。
+当前 HTML 只是产品原型：
+
+```text
+docs/prototypes/context-studio.html
+```
+
+后续真正的软件代码放到 `src/`。

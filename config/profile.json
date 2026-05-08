@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "sourcePath": "docs/person/profile.md",
+  "currentTaskSource": "runtime/current.json",
+  "role": "以业务落地为导向的全栈开发工程师，成长路径是 iOS 原生开发 -> 前端开发 -> 全栈开发。",
+  "products": [
+    "DHB 订货宝",
+    "HXB 货销宝"
+  ],
+  "strengths": [
+    "iOS Objective-C",
+    "React/Taro/H5",
+    "Node Egg BFF",
+    "H5 + WebView + JSBridge",
+    "B2B 电商业务链路"
+  ],
+  "collaborationPreferences": [
+    "用户只说需求时，AI 应自动判断项目、场景、工具和流程，不要让用户先选执行细节。",
+    "复杂 bug 先查根因和链路，再改代码。",
+    "跨端需求要同时考虑 H5、BFF、iOS、小程序和 PC 参考。",
+    "长文本画像按需读取，默认先读本 JSON 摘要。"
+  ],
+  "whenToReadFullProfile": "Read docs/person/profile.md when the task depends on long-term habits, project map, collaboration rules, or cross-session context.",
+  "whenToReadCurrentTask": "Read runtime/current.json and the active task JSON for current work. Do not use runtime/current-work.md."
+}
