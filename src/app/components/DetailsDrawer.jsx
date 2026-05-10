@@ -29,6 +29,9 @@ export default function DetailsDrawer({ details, onRunAction }) {
       <RelationshipList title="关联场景" items={related?.scenes} />
       <RelationshipList title="关联技能" items={related?.skills} />
       <RelationshipList title="关联规则" items={related?.rules} />
+      <RelationshipList title="关联步骤" items={related?.gates} />
+      <RelationshipList title="关联项目" items={related?.projects} />
+      <RelationshipList title="关联任务" items={related?.tasks} />
       {warnings?.length ? (
         <section>
           <h3>预警</h3>

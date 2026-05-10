@@ -10,11 +10,11 @@
       "sourcePath": "config/entry.json"
     },
     {
-      "id": "ai-my-pm",
-      "name": "ai-my-pm",
-      "summary": "XUANJIAN 的个人 AI PM 总控，统一需求路由、任务分级、多角色执行和 G1-G7 Gate 流程。",
-      "path": "config/scenes/ai-my-pm.json",
-      "sourcePath": "docs/scenes/ai-my-pm.md"
+      "id": "ai-task-board",
+      "name": "ai-task-board",
+      "summary": "XUANJIAN 的任务状态层，展示任务分级、项目范围、角色分工和 G1-G7 Gate 进度。",
+      "path": "config/scenes/ai-task-board.json",
+      "sourcePath": "docs/scenes/ai-task-board.md"
     },
     {
       "id": "cash-index-h5-webview",

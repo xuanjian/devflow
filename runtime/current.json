@@ -1,15 +1,17 @@
 {
   "version": 1,
-  "activeTaskId": "2026-05-08-ai-context-json-index-redo",
-  "activeTaskPath": "runtime/tasks/2026-05-08-ai-context-json-index-redo.json",
+  "activeTaskId": "2026-05-10-ai-context-default-task-creation-policy",
+  "activeTaskPath": "runtime/tasks/2026-05-10-ai-context-default-task-creation-policy.json",
   "activeProjectIds": [
     "ai-context"
   ],
   "activeSceneIds": [
-    "ai-context-config"
+    "ai-task-board"
   ],
-  "currentGate": "G7",
+  "currentGate": "G6",
   "recentTaskIds": [
+    "2026-05-10-ai-context-default-task-creation-policy",
+    "2026-05-10-brandapp-xcode-cloud-build-route",
     "2026-05-08-ai-context-json-index-redo"
   ],
   "note": "Current work is stored in task JSON. runtime/current-work.md is deprecated."

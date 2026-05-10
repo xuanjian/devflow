@@ -209,8 +209,6 @@ function isManagedProjectEntryContent(content) {
   const managedMarkers = [
     path.join(root, 'config', 'entry.json'),
     path.join(root, 'runtime', 'current.json'),
-    '/Users/xj/AGENTS.md',
-    '/Users/xj/WORK_CONTEXT.md',
     'ai-context/repos/',
     'registry/scenes.json',
   ];

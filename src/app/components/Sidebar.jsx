@@ -9,17 +9,13 @@ import {
   FolderKanban,
   LayoutDashboard,
   Route,
-  Search,
-  ShieldCheck,
-  Sparkles
+  Search
 } from "lucide-react";
 
 const VIEW_ICONS = {
   overview: LayoutDashboard,
-  projects: FolderKanban,
-  scenes: Route,
-  skills: Sparkles,
-  rules: ShieldCheck,
+  relations: Route,
+  tasks: FolderKanban,
   persona: CircleUserRound,
   checks: BadgeCheck
 };

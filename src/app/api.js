@@ -18,6 +18,10 @@ export function fetchChecks() {
   return requestJson("/api/checks");
 }
 
+export function fetchProfileDocument() {
+  return requestJson("/api/profile-document");
+}
+
 export function runAction(actionId, body = {}) {
   return requestJson(`/api/actions/${encodeURIComponent(actionId)}`, {
     method: "POST",

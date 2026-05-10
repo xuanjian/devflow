@@ -6,7 +6,8 @@ import { renderBootstrapPage } from "./bootstrap/page.mjs";
 import { runAction } from "./core/actions.mjs";
 import { runChecks } from "./core/checks.mjs";
 import { buildContextGraph, getNodeDetails } from "./core/graph.mjs";
-import { toPath } from "./core/paths.mjs";
+import { readJsonFile } from "./core/json-loader.mjs";
+import { resolveInside, toPath } from "./core/paths.mjs";
 
 const DEFAULT_HOST = "127.0.0.1";
 const MIME_TYPES = {
@@ -76,6 +77,10 @@ async function handleApiRoute({ request, response, rootPath, url }) {
     return sendJson(response, 200, await runChecks({ rootDir: rootPath, runCommands: false }));
   }
 
+  if (url.pathname === "/api/profile-document" && request.method === "GET") {
+    return sendJson(response, 200, await readProfileDocument(rootPath));
+  }
+
   if (url.pathname.startsWith("/api/actions/")) {
     if (request.method !== "POST") {
       return sendJson(response, 405, { error: { code: "method_not_allowed", message: "Use POST for actions." } });
@@ -91,6 +96,23 @@ async function handleApiRoute({ request, response, rootPath, url }) {
   }
 
   return sendJson(response, 404, { error: { code: "unknown_api_route", message: `Unknown API route: ${url.pathname}` } });
+}
+
+async function readProfileDocument(rootPath) {
+  const profile = await readJsonFile(resolveInside(rootPath, "config/profile.json"));
+  const sourcePath = profile.data?.sourcePath || "docs/person/profile.md";
+  try {
+    return {
+      sourcePath,
+      markdown: await fs.readFile(resolveInside(rootPath, sourcePath), "utf8")
+    };
+  } catch (error) {
+    return {
+      sourcePath,
+      markdown: "",
+      error: { code: error?.code || "read_profile_document_failed", message: error.message }
+    };
+  }
 }
 
 async function serveAppOrBootstrap(response, rootPath, requestPath) {

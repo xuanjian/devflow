@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>ai-context 拖拽配置工作台</title>
+  <title>ai-context 面板</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%232563eb'/%3E%3Cpath d='M8 10h9v9H8zM18 14h6v8h-6z' fill='white'/%3E%3C/svg%3E" />
   <style>
     :root {
@@ -93,7 +93,7 @@
 
     .mode-tabs {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(4, 1fr);
       gap: 6px;
     }
 
@@ -180,6 +180,7 @@
     .shape-mark.family { border-radius: 4px; }
     .shape-mark.project { border-radius: 999px; }
     .shape-mark.skill { transform: rotate(45deg) scale(.78); border-radius: 5px; }
+    .shape-mark.rule { border-radius: 5px; clip-path: polygon(50% 0, 100% 38%, 82% 100%, 18% 100%, 0 38%); }
     .shape-mark.scene { clip-path: polygon(18% 0, 82% 0, 100% 50%, 82% 100%, 18% 100%, 0 50%); }
     .shape-mark.gate { clip-path: polygon(0 0, 88% 0, 100% 50%, 88% 100%, 0 100%); }
     .shape-mark.task { border-radius: 5px 14px 5px 14px; }
@@ -333,8 +334,124 @@
     .canvas {
       position: absolute;
       inset: 0;
-      min-width: 1288px;
+      min-width: 1728px;
       overflow: hidden;
+    }
+
+    .overview {
+      position: relative;
+      z-index: 2;
+      display: grid;
+      gap: 16px;
+      min-width: 1040px;
+      padding: 18px;
+    }
+
+    .overview-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .overview-card {
+      display: grid;
+      align-content: start;
+      gap: 11px;
+      min-height: 184px;
+      padding: 14px;
+      border-radius: 8px;
+      background: #fff;
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+    }
+
+    .overview-card h3 {
+      font-size: 14px;
+      line-height: 1.25;
+    }
+
+    .overview-card p {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .metric-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 8px;
+      align-items: center;
+      min-height: 29px;
+      padding: 6px 0;
+      border-top: 1px solid var(--soft);
+      font-size: 12px;
+    }
+
+    .metric-row:first-of-type { border-top: 0; }
+
+    .metric-row span {
+      color: var(--muted);
+      line-height: 1.35;
+      overflow-wrap: anywhere;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      min-height: 24px;
+      padding: 0 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 850;
+      white-space: nowrap;
+    }
+
+    .badge.ok { color: #075b40; background: #dff7ed; }
+    .badge.warn { color: #7a4700; background: #fff0d5; }
+    .badge.info { color: #164ba7; background: #e1ecff; }
+
+    .overview-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .overview-link {
+      min-height: 32px;
+      padding: 0 10px;
+      border-radius: 8px;
+      color: var(--blue);
+      background: #eef4ff;
+      border: 1px solid #cfddff;
+      font-size: 12px;
+      font-weight: 820;
+    }
+
+    .detail-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .detail-item {
+      display: grid;
+      grid-template-columns: 92px minmax(0, 1fr);
+      gap: 8px;
+      padding: 9px 10px;
+      border-radius: 8px;
+      background: var(--soft);
+      border: 1px solid var(--line);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .detail-item strong {
+      color: #354153;
+      font-size: 12px;
+    }
+
+    .detail-item span {
+      color: var(--muted);
+      overflow-wrap: anywhere;
     }
 
     .links {
@@ -385,6 +502,12 @@
       padding-right: 18px;
     }
 
+    .node.rule {
+      border-radius: 8px;
+      clip-path: polygon(50% 0, 100% 38%, 82% 100%, 18% 100%, 0 38%);
+      padding: 18px;
+    }
+
     .node.scene {
       clip-path: polygon(10% 0, 90% 0, 100% 50%, 90% 100%, 10% 100%, 0 50%);
       padding-left: 18px;
@@ -410,6 +533,7 @@
     .node.family { border-left-color: var(--blue); }
     .node.project { border-left-color: var(--green); }
     .node.skill { border-left-color: var(--amber); }
+    .node.rule { border-left-color: #c026d3; }
     .node.scene { border-left-color: #6d4aff; }
     .node.gate { border-left-color: var(--red); }
 
@@ -729,6 +853,14 @@
       .inspector {
         width: min(360px, calc(100vw - 20px));
       }
+
+      .overview {
+        min-width: 0;
+      }
+
+      .overview-grid {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
@@ -745,33 +877,34 @@
           </svg>
         </div>
         <div>
-          <h1>ai-context 工作台</h1>
-          <p>拖拽节点配置关系</p>
+          <h1>ai-context 面板</h1>
+          <p>安装、关系、任务和画像</p>
         </div>
       </div>
 
       <div class="mode-tabs" aria-label="工作台模式">
-        <button class="mode-tab active" data-mode="project">项目</button>
+        <button class="mode-tab active" data-mode="overview">总览</button>
+        <button class="mode-tab" data-mode="project">项目</button>
         <button class="mode-tab" data-mode="scene">场景</button>
         <button class="mode-tab" data-mode="task">任务</button>
       </div>
 
-      <div class="hint" id="modeHint">项目视图：技术族是根节点，项目挂在技术族下，Skill 直接挂到项目下。</div>
+      <div class="hint" id="modeHint">总览视图：启动后先确认安装状态、关系索引、任务进度和个人画像。</div>
 
       <div class="palette" id="palette"></div>
 
-      <div class="side-note" id="sideNote">拖拽规则：左侧只放节点模板。拖进画布后，在节点里的下拉框选择具体配置项，再点父节点继续拖入子节点自动连线。</div>
+      <div class="side-note" id="sideNote">先看总览；需要整理关系时进入项目/场景画布，需要看任务进度时进入任务视图。</div>
     </aside>
 
     <main class="workspace">
       <header class="topbar">
         <div>
-          <h2 id="canvasTitle">项目配置画布</h2>
-          <p id="canvasDesc">技术族为根节点，项目挂在技术族下，Skill 直接挂到项目下。</p>
+          <h2 id="canvasTitle">ai-context 总览</h2>
+          <p id="canvasDesc">确认安装状态、配置关系、任务进度和个人画像。</p>
         </div>
         <div class="actions" id="actions">
-          <button class="btn primary" data-add="project">新增项目</button>
-          <button class="btn" data-add="skill">新增 Skill</button>
+          <button class="btn primary" data-jump="project">查看关系</button>
+          <button class="btn" data-jump="task">查看任务</button>
         </div>
       </header>
 
@@ -833,35 +966,50 @@
 
   <script>
     const modeCopy = {
+      overview: {
+        title: "ai-context 总览",
+        desc: "确认安装状态、配置关系、任务进度和个人画像。",
+        hint: "总览视图：启动后先确认安装状态、关系索引、任务进度和个人画像。"
+      },
       project: {
-        title: "项目配置画布",
-        desc: "技术族为根节点，项目挂在技术族下，Skill 直接挂到项目下。",
-        hint: "项目视图：技术族是根节点，项目挂在技术族下，Skill 直接挂到项目下。"
+        title: "项目关系画布",
+        desc: "技术族为根节点，项目挂在技术族下，Skill 和 Rule 直接挂到项目下。",
+        hint: "项目视图：技术族是根节点，项目挂在技术族下，Skill 和 Rule 直接挂到项目下。点击节点查看 md/sourcePath 详情。"
       },
       scene: {
         title: "场景理解画布",
-        desc: "场景名称为根节点，可连接相关对象；场景本身可以是项目组合，也可以是操作流程。",
-        hint: "场景视图：场景是 AI 理解包，可以描述项目组合、操作方式或固定流程；Skill 不在场景中出现。"
+        desc: "场景名称为根节点，可连接项目和 Rule；场景本身可以是项目组合，也可以是操作流程。",
+        hint: "场景视图：场景是 AI 理解包，可以描述项目组合、操作方式或固定流程；点击节点查看描述详情。"
       },
       task: {
         title: "任务 Gate 画布",
-        desc: "根为任务节点，横向展示 G0-G7 全流程，项目进度挂在 G4 开发阶段下。",
+        desc: "根为任务节点，横向展示 G1-G7 全流程，项目进度挂在 G4 开发阶段下。",
         hint: "任务视图：左侧是任务列表，点击任务查看完整 Gate 进度；G4 后继续展示联调、验证、完成。"
       }
     };
 
     const paletteData = {
+      overview: [
+        { title: "总览入口", items: [
+          ["安装状态", "ai-context 安装与工具链接检查", "overview"],
+          ["关系索引", "项目 / Skill / Rule / Scene 关系", "overview"],
+          ["任务看板", "tasks 与 G1-G7 进度", "overview"],
+          ["个人画像", "profile 摘要与协作偏好", "overview"]
+        ]}
+      ],
       project: [
         { title: "节点模板", items: [
           ["技术族 Node", "拖入后选择具体技术族", "family"],
           ["项目 Node", "拖入后选择具体项目", "project"],
-          ["Skill Node", "拖入后选择具体 Skill", "skill"]
+          ["Skill Node", "拖入后选择具体 Skill", "skill"],
+          ["Rule Node", "拖入后选择具体 Rule", "rule"]
         ]}
       ],
       scene: [
         { title: "节点模板", items: [
           ["场景 Node", "拖入后选择具体场景", "scene"],
-          ["项目 Node", "拖入后选择具体项目", "project"]
+          ["项目 Node", "拖入后选择具体项目", "project"],
+          ["Rule Node", "拖入后选择具体 Rule", "rule"]
         ]}
       ],
       task: [
@@ -874,6 +1022,36 @@
     };
 
     const registryData = {
+      install: {
+        status: "已安装",
+        checks: [
+          ["entry.json", "config/entry.json", "ok"],
+          ["profile.json", "config/profile.json", "ok"],
+          ["current.json", "runtime/current.json", "ok"],
+          ["ai-context skill source", "bundles/skills/ai-context", "ok"],
+          ["Codex skill link", "~/.codex/skills/ai-context", "ok"],
+          ["Claude Code skill link", "~/.claude/skills/ai-context", "ok"],
+          ["Agents skill link", "~/.agents/skills/ai-context", "ok"],
+          ["project entry", "AGENTS.md managed entry", "ok"]
+        ],
+        commands: [
+          "node scripts/install-ai-context.mjs check",
+          "node scripts/install-ai-context.mjs validate",
+          "node scripts/contextctl.mjs doctor"
+        ]
+      },
+      profile: {
+        role: "以业务落地为导向的全栈开发工程师，成长路径是 iOS 原生开发 -> 前端开发 -> 全栈开发。",
+        products: ["DHB 订货宝", "HXB 货销宝"],
+        strengths: ["iOS Objective-C", "React/Taro/H5", "Node Egg BFF", "H5 + WebView + JSBridge", "B2B 电商业务链路"],
+        preferences: [
+          "用户只说需求时，AI 应自动判断项目、场景、工具和流程。",
+          "复杂 bug 先查根因和链路，再改代码。",
+          "跨端需求要同时考虑 H5、BFF、iOS、小程序和 PC 参考。",
+          "长文本画像按需读取，默认先读 JSON 摘要。"
+        ],
+        sourcePath: "docs/person/profile.md"
+      },
       technologies: [
         { id: "workflow", name: "工作流", description: "AI 协作、任务流程和配置中心项目" },
         { id: "frontend", name: "前端", description: "React / Taro / H5 / 小程序等前端项目" },
@@ -881,44 +1059,61 @@
         { id: "ios", name: "iOS", description: "Objective-C / Swift 原生 App、WebView 和桥接项目" }
       ],
       projects: [
-        { id: "ai-context", name: "ai-context", technologyFamilyId: "workflow", path: "<ai-context 仓库>", summary: "AI 上下文中心、配置软件、JSON 权威层和任务 Gate 流程仓库。" },
-        { id: "dhbfront-manager-mobile", name: "管理端移动 H5", technologyFamilyId: "frontend", path: "frontend/dhbfront-manager-mobile", summary: "管理端移动 H5 项目示例。" },
-        { id: "bff-warehouse", name: "仓库 BFF", technologyFamilyId: "bff", path: "node/bff-warehouse", summary: "仓库相关 BFF 项目示例。" },
-        { id: "ios-dhb", name: "DHB iOS", technologyFamilyId: "ios", path: "ios/DHB", summary: "iOS 原生容器和 WebView 项目示例。" }
+        { id: "ai-context", name: "ai-context", technologyFamilyId: "workflow", path: "config/projects/ai-context.json", docPath: "README.md", summary: "AI 上下文中心、配置软件、JSON 权威层和任务 Gate 流程仓库。" },
+        { id: "dhbfront-manager-mobile", name: "管理端移动 H5", technologyFamilyId: "frontend", path: "config/projects/dhbfront-manager-mobile.json", docPath: "docs/repos/dhbfront-manager-mobile.md", summary: "DHB 管理端移动 H5 项目。" },
+        { id: "bff-warehouse", name: "仓库 BFF", technologyFamilyId: "bff", path: "config/projects/bff-warehouse.json", docPath: "docs/repos/bff-warehouse.md", summary: "仓储 BFF 服务。" },
+        { id: "ios-dhb", name: "DHB iOS", technologyFamilyId: "ios", path: "config/projects/dhb.json", docPath: "docs/repos/dhb.md", summary: "iOS 原生容器和 WebView 项目。" }
       ],
       skills: [
-        { id: "ai-context-bootstrap", name: "ai-context-bootstrap", description: "安装、初始化、新电脑或缺失入口检查。" },
-        { id: "ai-context-config-writer", name: "ai-context-config-writer", description: "新增/删除/修改技术族、项目、Skill、场景和关系。" },
-        { id: "ai-context-task-flow", name: "ai-context-task-flow", description: "创建任务、选择当前任务、推进 G0-G7。" },
-        { id: "ai-my-pm", name: "ai-my-pm", description: "需求路由、项目判断、工具和流程选择。" },
-        { id: "run-projects", name: "run-projects", description: "联动启动与环境切换。" }
+        { id: "ai-context", name: "ai-context", sourcePath: "bundles/skills/ai-context/SKILL.md", description: "进入、安装、验证或修改 ai-context；通过 JSON 索引进入项目/场景/rule/skill。" },
+        { id: "ai-task-board", name: "ai-task-board", sourcePath: "docs/reference/skills/ai-task-board/SKILL.md", description: "任务分级、项目范围、Gate 进度、阻塞恢复点和面板状态。" },
+        { id: "dhb-local-env", name: "dhb-local-env", sourcePath: "bundles/skills/dhb-local-env/SKILL.md", description: "DHB 前端本地联调、环境切换和多项目启动。" },
+        { id: "run-projects", name: "run-projects", sourcePath: "bundles/skills/dhb-local-env/scripts/run-projects.js", description: "联动启动与环境切换脚本。" }
+      ],
+      rules: [
+        { id: "bff/egg-service", name: "BFF Egg 服务通用规范", sourcePath: "bundles/rules/bff/egg-service.md", description: "BFF Controller/Service 边界、字段语义、上游调用、缓存和错误日志底线。" },
+        { id: "frontend/core", name: "前端通用实现规范", sourcePath: "bundles/rules/frontend/core.md", description: "前端 loading、empty、error、disabled、permission 等基础实现规则。" },
+        { id: "ios-dhb/core", name: "DHB iOS 通用规范", sourcePath: "bundles/rules/ios-dhb/core.md", description: "Objective-C / Swift、WebView、delegate 和容器边界规则。" },
+        { id: "scenes/ios-h5-webview-bff", name: "iOS + H5 + BFF 场景规则", sourcePath: "bundles/rules/scenes/ios-h5-webview-bff.md", description: "跨端 WebView/BFF 联调、bridge handoff 和验收归档规则。" }
       ],
       projectSkills: [
-        { projectId: "ai-context", skillIds: ["ai-context-bootstrap", "ai-context-config-writer", "ai-context-task-flow", "ai-my-pm"] },
-        { projectId: "dhbfront-manager-mobile", skillIds: ["run-projects"] }
+        { projectId: "ai-context", skillIds: ["ai-context", "ai-task-board"] },
+        { projectId: "dhbfront-manager-mobile", skillIds: ["dhb-local-env", "run-projects"] }
+      ],
+      projectRules: [
+        { projectId: "ai-context", ruleIds: ["frontend/core"] },
+        { projectId: "dhbfront-manager-mobile", ruleIds: ["frontend/core", "scenes/ios-h5-webview-bff"] },
+        { projectId: "bff-warehouse", ruleIds: ["bff/egg-service", "scenes/ios-h5-webview-bff"] },
+        { projectId: "ios-dhb", ruleIds: ["ios-dhb/core", "scenes/ios-h5-webview-bff"] }
       ],
       scenes: [
-        { id: "ai-context-config-studio", name: "ai-context 配置软件流程", description: "配置软件、JSON 权威层和任务 Gate 自动流转流程。" },
-        { id: "ios-h5-webview-bff", name: "iOS + H5 + BFF 联调", description: "H5 + 原生 + BFF 理解包。" },
-        { id: "frontend-bff-debug", name: "前端 + BFF 排障", description: "前端与 BFF 排障理解包。" }
+        { id: "ai-task-board", name: "ai-task-board", sourcePath: "docs/scenes/ai-task-board.md", description: "任务状态层：展示任务分级、项目范围、角色分工和 G1-G7 Gate 进度。" },
+        { id: "ai-context-config", name: "ai-context 配置索引流程", sourcePath: "config/entry.json", description: "ai-context 自身的配置、安装、任务 Gate 和索引生成流程。" },
+        { id: "ios-h5-webview-bff", name: "iOS + H5 + BFF 联调", sourcePath: "docs/scenes/ios-h5-webview-bff.md", description: "H5 + 原生 + BFF 理解包。" },
+        { id: "frontend-bff-debug", name: "前端 + BFF 排障", sourcePath: "docs/scenes/frontend-bff-debug.md", description: "前端与 BFF 排障理解包。" }
       ],
       sceneProjects: [
-        { sceneId: "ai-context-config-studio", projectIds: ["ai-context"] },
+        { sceneId: "ai-task-board", projectIds: ["ai-context"] },
+        { sceneId: "ai-context-config", projectIds: ["ai-context"] },
         { sceneId: "ios-h5-webview-bff", projectIds: ["dhbfront-manager-mobile", "ios-dhb", "bff-warehouse"] },
         { sceneId: "frontend-bff-debug", projectIds: ["dhbfront-manager-mobile", "bff-warehouse"] }
       ],
+      sceneRules: [
+        { sceneId: "ai-task-board", ruleIds: ["frontend/core"] },
+        { sceneId: "ios-h5-webview-bff", ruleIds: ["scenes/ios-h5-webview-bff", "frontend/core", "bff/egg-service", "ios-dhb/core"] },
+        { sceneId: "frontend-bff-debug", ruleIds: ["frontend/core", "bff/egg-service"] }
+      ],
       tasks: [
-        { id: "2026-05-07-ai-context-config-studio", title: "ai-context 配置软件与 JSON 任务流程改造", status: "G4 准备开发", projectIds: ["ai-context"] }
+        { id: "2026-05-08-ai-context-json-index-redo", title: "ai-context JSON 索引层重做", status: "ready_for_user_test", gate: "G7", level: "L3", activeSuperpower: "verification-before-completion", projectIds: ["ai-context"], summary: "JSON 索引、安装脚本、ai-context skill、task board 状态和配置面板原型。" }
       ],
       gates: [
-        { id: "G0 Intake", description: "需求入口" },
-        { id: "G1 Discovery", description: "需求调研" },
-        { id: "G2 Product/UI", description: "产品 UI" },
-        { id: "G3 Tech Plan", description: "技术方案" },
-        { id: "G4 Development", description: "项目开发" },
-        { id: "G5 Integration", description: "跨项目联调" },
-        { id: "G6 Verification", description: "验收与回归" },
-        { id: "G7 Run/Package", description: "运行调试与打包发布归档" }
+        { id: "G1 Intent / Intake", description: "记录目标、任务类型、任务等级和是否需要完整看板。" },
+        { id: "G2 Discovery", description: "记录调研证据、项目/场景/rule/skill 和未知项。" },
+        { id: "G3 Plan / Product UI", description: "记录方案、原型、确认点和进入开发的条件。" },
+        { id: "G4 Development", description: "记录开发项目、写入范围、superpower 和恢复位置。" },
+        { id: "G5 Integration", description: "记录联调方式、环境切换、阻塞项和恢复步骤。" },
+        { id: "G6 Acceptance", description: "记录需求、UI、接口、diff 和测试验收状态。" },
+        { id: "G7 Run / Package Archive", description: "记录运行、打包、验证、缺口和交接说明。" }
       ]
     };
 
@@ -926,6 +1121,7 @@
       family: registryData.technologies.map(item => [item.id, item.description]),
       project: registryData.projects.map(item => [item.id, item.name]),
       skill: registryData.skills.map(item => [item.id, item.description]),
+      rule: registryData.rules.map(item => [item.id, item.description]),
       scene: registryData.scenes.map(item => [item.id, item.description]),
       gate: registryData.gates.map(item => [item.id, item.description]),
       task: registryData.tasks.map(item => [item.id, item.title])
@@ -942,46 +1138,59 @@
     };
 
     const seeds = {
+      overview: {
+        nodes: [],
+        links: [],
+        selectedId: null
+      },
       project: {
         nodes: [
           node("family-workflow", "workflow", "工作流技术族", "family", 92, 94),
           node("project-ai-context", "ai-context", "配置中心项目", "project", 322, 70),
-          node("skill-bootstrap", "ai-context-bootstrap", "安装与初始化", "skill", 562, 8),
-          node("skill-config-writer", "ai-context-config-writer", "配置写入", "skill", 562, 118),
-          node("skill-task-flow", "ai-context-task-flow", "任务 Gate 流转", "skill", 562, 228),
+          node("skill-ai-context", "ai-context", "索引入口 Skill", "skill", 562, 8),
+          node("skill-task-board", "ai-task-board", "任务状态 Skill", "skill", 562, 118),
+          node("rule-frontend-core", "frontend/core", "前端通用规则", "rule", 790, 88),
           node("family-frontend", "frontend", "前端技术族", "family", 92, 404),
           node("project-manager", "dhbfront-manager-mobile", "管理端移动 H5", "project", 322, 404),
-          node("skill-run", "run-projects", "联动启动与环境切换", "skill", 562, 404),
+          node("skill-local-env", "dhb-local-env", "DHB 本地联调", "skill", 562, 350),
+          node("skill-run", "run-projects", "联动启动与环境切换", "skill", 562, 460),
+          node("rule-ios-webview", "scenes/ios-h5-webview-bff", "跨端场景规则", "rule", 790, 404),
           node("family-bff", "bff", "BFF 技术族", "family", 92, 584),
-          node("project-warehouse", "bff-warehouse", "仓库 BFF", "project", 322, 584)
+          node("project-warehouse", "bff-warehouse", "仓库 BFF", "project", 322, 584),
+          node("rule-egg-service", "bff/egg-service", "BFF 服务规则", "rule", 562, 620)
         ],
-        links: [["family-workflow", "project-ai-context"], ["project-ai-context", "skill-bootstrap"], ["project-ai-context", "skill-config-writer"], ["project-ai-context", "skill-task-flow"], ["family-frontend", "project-manager"], ["project-manager", "skill-run"], ["family-bff", "project-warehouse"]],
+        links: [["family-workflow", "project-ai-context"], ["project-ai-context", "skill-ai-context"], ["project-ai-context", "skill-task-board"], ["project-ai-context", "rule-frontend-core"], ["family-frontend", "project-manager"], ["project-manager", "skill-local-env"], ["project-manager", "skill-run"], ["project-manager", "rule-ios-webview"], ["family-bff", "project-warehouse"], ["project-warehouse", "rule-egg-service"], ["project-warehouse", "rule-ios-webview"]],
         selectedId: "project-ai-context"
       },
       scene: {
         nodes: [
-          node("scene-config", "ai-context-config-studio", "配置软件流程", "scene", 90, 170),
+          node("scene-task-board", "ai-task-board", "任务看板状态层", "scene", 90, 90),
+          node("scene-config", "ai-context-config", "配置索引流程", "scene", 90, 250),
           node("project-ai-context", "ai-context", "配置中心项目", "project", 350, 170),
+          node("rule-frontend-core", "frontend/core", "前端通用规则", "rule", 610, 170),
           node("scene-ios", "ios-h5-webview-bff", "联调场景示例", "scene", 90, 410),
           node("project-manager", "dhbfront-manager-mobile", "管理端移动 H5", "project", 350, 300),
           node("project-ios", "ios-dhb", "原生 WebView", "project", 350, 450),
-          node("project-warehouse", "bff-warehouse", "仓库 BFF", "project", 350, 600)
+          node("project-warehouse", "bff-warehouse", "仓库 BFF", "project", 350, 600),
+          node("rule-ios-webview", "scenes/ios-h5-webview-bff", "跨端场景规则", "rule", 610, 440)
         ],
-        links: [["scene-config", "project-ai-context"], ["scene-ios", "project-manager"], ["scene-ios", "project-ios"], ["scene-ios", "project-warehouse"]],
-        selectedId: "scene-config"
+        links: [["scene-task-board", "project-ai-context"], ["scene-config", "project-ai-context"], ["project-ai-context", "rule-frontend-core"], ["scene-ios", "project-manager"], ["scene-ios", "project-ios"], ["scene-ios", "project-warehouse"], ["scene-ios", "rule-ios-webview"]],
+        selectedId: "scene-task-board"
       },
       task: {
         nodes: [
-          node("task-root", "2026-05-07-ai-context-config-studio", "ai-context 配置软件与 JSON 任务流程改造", "task", 42, 96),
-          node("g0", "G0-G3", "需求到技术方案", "gate", 250, 96),
-          node("g4", "G4 Development", "项目开发入口", "gate", 458, 96),
-          node("g5", "G5 Integration", "跨项目联调", "gate", 666, 96),
-          node("g6", "G6 Verification", "验收与回归", "gate", 874, 96),
-          node("g7", "G7 Run/Package", "运行调试与打包发布", "gate", 1082, 96),
-          node("project-ai-context", "ai-context", "JSON registry + validator", "project", 458, 252)
+          node("task-root", "2026-05-08-ai-context-json-index-redo", "ai-context JSON 索引层重做", "task", 42, 96),
+          node("g1", "G1 Intent / Intake", "需求入口与任务等级", "gate", 250, 96),
+          node("g2", "G2 Discovery", "调研和索引选择", "gate", 458, 96),
+          node("g3", "G3 Plan / Product UI", "方案与原型", "gate", 666, 96),
+          node("g4", "G4 Development", "项目开发", "gate", 874, 96),
+          node("g5", "G5 Integration", "联调和阻塞恢复", "gate", 1082, 96),
+          node("g6", "G6 Acceptance", "验收与回归", "gate", 1290, 96),
+          node("g7", "G7 Run / Package Archive", "运行打包归档", "gate", 1498, 96),
+          node("project-ai-context", "ai-context", "JSON registry + validator + panel", "project", 874, 252)
         ],
-        links: [["task-root", "g0"], ["g0", "g4"], ["g4", "g5"], ["g5", "g6"], ["g6", "g7"], ["g4", "project-ai-context"], ["project-ai-context", "g5"]],
-        selectedId: "g4"
+        links: [["task-root", "g1"], ["g1", "g2"], ["g2", "g3"], ["g3", "g4"], ["g4", "g5"], ["g5", "g6"], ["g6", "g7"], ["g4", "project-ai-context"], ["project-ai-context", "g5"]],
+        selectedId: "g7"
       }
     };
 
@@ -1017,9 +1226,11 @@
       document.getElementById("canvasTitle").textContent = modeCopy[mode].title;
       document.getElementById("canvasDesc").textContent = modeCopy[mode].desc;
       document.getElementById("modeHint").textContent = modeCopy[mode].hint;
-      document.getElementById("sideNote").textContent = mode === "task"
-        ? "任务列表：点击任务查看完整 Gate 看板。列表最后的 + 用来新增真实任务。"
-        : "拖拽规则：左侧只放节点模板。拖进画布后，在节点里的下拉框选择具体配置项，再点父节点继续拖入子节点自动连线。";
+      document.getElementById("sideNote").textContent = mode === "overview"
+        ? "先看总览；需要整理关系时进入项目/场景画布，需要看任务进度时进入任务视图。"
+        : mode === "task"
+          ? "任务列表：点击任务查看完整 Gate 看板。列表最后的 + 用来新增真实任务。"
+          : "拖拽规则：左侧只放节点模板。拖进画布后，在节点里的下拉框选择具体配置项，再点父节点继续拖入子节点自动连线。";
       renderActions();
       renderPalette();
       renderCanvas();
@@ -1028,20 +1239,29 @@
 
     function renderActions() {
       const actions = document.getElementById("actions");
-      if (state.mode === "project") {
-        actions.innerHTML = '<button class="btn primary" data-add="project">新增项目</button><button class="btn" data-add="skill">新增 Skill</button>';
+      if (state.mode === "overview") {
+        actions.innerHTML = '<button class="btn primary" data-jump="project">查看关系</button><button class="btn" data-jump="task">查看任务</button>';
+      } else if (state.mode === "project") {
+        actions.innerHTML = '<button class="btn primary" data-add="project">新增项目</button><button class="btn" data-add="skill">新增 Skill</button><button class="btn" data-add="rule">新增 Rule</button>';
       } else if (state.mode === "scene") {
-        actions.innerHTML = '<button class="btn primary" data-add="scene">新增场景</button>';
+        actions.innerHTML = '<button class="btn primary" data-add="scene">新增场景</button><button class="btn" data-add="rule">新增 Rule</button>';
       } else {
         actions.innerHTML = "";
       }
       actions.querySelectorAll("[data-add]").forEach(button => {
         button.addEventListener("click", () => openModal(button.dataset.add));
       });
+      actions.querySelectorAll("[data-jump]").forEach(button => {
+        button.addEventListener("click", () => loadMode(button.dataset.jump));
+      });
     }
 
     function renderPalette() {
       palette.innerHTML = "";
+      if (state.mode === "overview") {
+        renderOverviewNav();
+        return;
+      }
       if (state.mode === "task") {
         renderTaskList();
         return;
@@ -1066,6 +1286,28 @@
         });
         palette.appendChild(details);
       });
+    }
+
+    function renderOverviewNav() {
+      const list = document.createElement("div");
+      list.className = "task-list";
+      [
+        ["安装状态", "查看 ai-context、Codex、Claude Code 链接"],
+        ["关系索引", "项目 / Skill / Rule / Scene 关系"],
+        ["任务看板", "tasks 与 G1-G7 进度"],
+        ["个人画像", "profile 摘要与协作偏好"]
+      ].forEach(([label, desc]) => {
+        const item = document.createElement("button");
+        item.className = "task-item";
+        item.type = "button";
+        item.innerHTML = `<strong>${escapeHtml(label)}</strong><span>${escapeHtml(desc)}</span>`;
+        item.addEventListener("click", () => {
+          const target = label === "关系索引" ? "project" : label === "任务看板" ? "task" : "overview";
+          loadMode(target);
+        });
+        list.appendChild(item);
+      });
+      palette.appendChild(list);
     }
 
     function renderTaskList() {
@@ -1111,6 +1353,14 @@
 
     function renderCanvas(options = {}) {
       canvas.querySelectorAll(".node").forEach(item => item.remove());
+      const overview = canvas.querySelector(".overview");
+      if (overview) overview.remove();
+      if (state.mode === "overview") {
+        renderOverview();
+        drawLinks();
+        updateDropTip();
+        return;
+      }
       state.nodes.forEach(item => {
         const el = document.createElement("div");
         el.className = `node ${item.type}${item.id === state.selectedId ? " selected" : ""}`;
@@ -1133,6 +1383,101 @@
       drawLinks();
       updateDropTip();
       if (state.inspectorOpen && !options.skipInspector) renderInspector();
+    }
+
+    function renderOverview() {
+      const panel = document.createElement("div");
+      panel.className = "overview";
+      panel.innerHTML = `
+        <div class="overview-grid">
+          ${overviewCard("安装与工具配置", installOverview(), [
+            ["运行 check", "overview"],
+            ["运行 doctor", "overview"]
+          ])}
+          ${overviewCard("项目 / Skill / Rule / Scene", relationsOverview(), [
+            ["打开项目关系", "project"],
+            ["打开场景关系", "scene"]
+          ])}
+          ${overviewCard("工作流与 tasks", tasksOverview(), [
+            ["打开任务看板", "task"]
+          ])}
+          ${overviewCard("个人画像", profileOverview(), [])}
+        </div>
+        <section class="overview-card">
+          <h3>当前任务详情</h3>
+          <div class="detail-list">
+            ${detailItem("任务", `${currentTask().id} · ${currentTask().title}`)}
+            ${detailItem("当前步骤", `${currentTask().gate} · ${gateDescription(currentTask().gate)}`)}
+            ${detailItem("superpower", currentTask().activeSuperpower)}
+            ${detailItem("恢复位置", "处理完用户补充、权限确认或阻塞后，回到原 superpower 流程的下一步。")}
+            ${detailItem("状态源", "runtime/current.json + runtime/tasks/<task-id>.json")}
+          </div>
+        </section>
+      `;
+      panel.querySelectorAll("[data-overview-jump]").forEach(button => {
+        button.addEventListener("click", () => loadMode(button.dataset.overviewJump));
+      });
+      canvas.appendChild(panel);
+    }
+
+    function overviewCard(title, content, actions) {
+      return `
+        <section class="overview-card">
+          <h3>${escapeHtml(title)}</h3>
+          <div>${content}</div>
+          ${actions.length ? `<div class="overview-actions">${actions.map(([label, mode]) => `<button class="overview-link" data-overview-jump="${mode}" type="button">${escapeHtml(label)}</button>`).join("")}</div>` : ""}
+        </section>
+      `;
+    }
+
+    function installOverview() {
+      return registryData.install.checks.map(([name, pathValue, status]) => `
+        <div class="metric-row"><span>${escapeHtml(name)}<br>${escapeHtml(pathValue)}</span><b class="badge ${status}">${status === "ok" ? "OK" : "检查"}</b></div>
+      `).join("");
+    }
+
+    function relationsOverview() {
+      return [
+        ["Projects", registryData.projects.length],
+        ["Skills", registryData.skills.length],
+        ["Rules", registryData.rules.length],
+        ["Scenes", registryData.scenes.length],
+        ["Project links", registryData.projectSkills.length + registryData.projectRules.length],
+        ["Scene links", registryData.sceneProjects.length + registryData.sceneRules.length]
+      ].map(([label, count]) => `<div class="metric-row"><span>${escapeHtml(label)}</span><b class="badge info">${count}</b></div>`).join("");
+    }
+
+    function tasksOverview() {
+      const task = currentTask();
+      return [
+        ["当前任务", task.id],
+        ["任务等级", task.level],
+        ["当前 Gate", task.gate],
+        ["状态", task.status],
+        ["项目", task.projectIds.join("、")]
+      ].map(([label, value]) => `<div class="metric-row"><span>${escapeHtml(label)}</span><b class="badge ${label === "当前 Gate" ? "warn" : "info"}">${escapeHtml(value)}</b></div>`).join("");
+    }
+
+    function profileOverview() {
+      return [
+        ["角色", registryData.profile.role],
+        ["业务", registryData.profile.products.join("、")],
+        ["技术", registryData.profile.strengths.slice(0, 3).join("、")],
+        ["来源", registryData.profile.sourcePath]
+      ].map(([label, value]) => `<div class="metric-row"><span>${escapeHtml(label)}</span><b class="badge info">${escapeHtml(value)}</b></div>`).join("");
+    }
+
+    function detailItem(label, value) {
+      return `<div class="detail-item"><strong>${escapeHtml(label)}</strong><span>${escapeHtml(value)}</span></div>`;
+    }
+
+    function currentTask() {
+      return registryData.tasks[0];
+    }
+
+    function gateDescription(gateId) {
+      const gate = registryData.gates.find(item => item.id.startsWith(gateId));
+      return gate ? gate.description : "待记录";
     }
 
     function nodeTitleMarkup(item) {
@@ -1174,7 +1519,7 @@
     }
 
     function typeLabel(type) {
-      return { family: "技术族", project: "项目", skill: "Skill", scene: "场景", gate: "Gate", task: "任务" }[type] || type;
+      return { family: "技术族", project: "项目", skill: "Skill", rule: "Rule", scene: "场景", gate: "Gate", task: "任务", overview: "总览" }[type] || type;
     }
 
     function selectNode(id) {
@@ -1235,11 +1580,14 @@
         `;
       }
       if (item.type === "project") {
+        const project = registryItem("projects", item.label);
         if (state.mode === "scene") {
           return `
             <div class="inspect-grid">
-              ${inspectInput("项目路径", getMeta(item, "path", `/Users/xj/Documents/${item.label}`), { meta: "path" })}
+              ${inspectInput("项目 JSON", getMeta(item, "path", project?.path || `/Users/xj/Documents/${item.label}`), { meta: "path" })}
+              ${inspectInput("MD 描述", getMeta(item, "docPath", project?.docPath || "docs/repos/<project>.md"), { meta: "docPath" })}
               ${inspectInput("场景职责", getMeta(item, "sceneRole", "记录该项目在当前场景中的职责边界"), { meta: "sceneRole" })}
+              ${inspectTextarea("项目摘要", getMeta(item, "summary", project?.summary || "项目摘要待补充。"), { meta: "summary" })}
               ${inspectTextarea("场景内上下文", getMeta(item, "sceneContext", "记录这个项目在当前场景中需要 AI 重点理解的上下文。"), { meta: "sceneContext" })}
               ${inspectTextarea("场景内注意事项", getMeta(item, "sceneNotes", "记录该项目在这个场景下容易误判或需要特别确认的点。"), { meta: "sceneNotes" })}
             </div>
@@ -1247,10 +1595,12 @@
         }
         return `
           <div class="inspect-grid">
-            ${inspectInput("项目路径", getMeta(item, "path", `/Users/xj/Documents/${item.label}`), { meta: "path" })}
+            ${inspectInput("项目 JSON", getMeta(item, "path", project?.path || `/Users/xj/Documents/${item.label}`), { meta: "path" })}
+            ${inspectInput("MD 描述", getMeta(item, "docPath", project?.docPath || "docs/repos/<project>.md"), { meta: "docPath" })}
             ${inspectInput("项目别名", getMeta(item, "alias", item.label), { meta: "alias" })}
             ${inspectSelect("是否启用", getMeta(item, "enabled", "启用"), "enabled", ["启用", "停用"])}
-            ${inspectInput("默认入口", getMeta(item, "entry", "ai-context/projects"), { meta: "entry" })}
+            ${inspectInput("默认入口", getMeta(item, "entry", project?.path || "config/projects/<project>.json"), { meta: "entry" })}
+            ${inspectTextarea("项目摘要", getMeta(item, "summary", project?.summary || "项目摘要待补充。"), { meta: "summary" })}
             ${inspectTextarea("单独运行方式", getMeta(item, "singleRun", "记录这个项目单独启动的命令、端口、环境文件和前置依赖。"), { meta: "singleRun" })}
             ${inspectTextarea("单独调试入口", getMeta(item, "singleDebug", "记录本项目单独调试时进入哪个页面、接口、模拟器或脚本。"), { meta: "singleDebug" })}
             ${inspectTextarea("本地环境变量", getMeta(item, "localEnv", "记录本地运行所需 env、配置文件、账号或环境切换方式。"), { meta: "localEnv" })}
@@ -1261,19 +1611,35 @@
         `;
       }
       if (item.type === "skill") {
+        const skill = registryItem("skills", item.label);
         return `
           <div class="inspect-grid">
-            ${inspectInput("Skill 路径", getMeta(item, "path", `/Users/xj/.codex/skills/${item.label}/SKILL.md`), { meta: "path" })}
+            ${inspectInput("Skill 路径", getMeta(item, "path", skill?.sourcePath || `/Users/xj/.codex/skills/${item.label}/SKILL.md`), { meta: "path" })}
             ${inspectSelect("风险级别", getMeta(item, "risk", "低"), "risk", ["低", "中", "高"])}
             ${inspectSelect("是否启用", getMeta(item, "enabled", "启用"), "enabled", ["启用", "停用"])}
-            ${inspectTextarea("触发条件", getMeta(item, "trigger", "用户请求匹配该能力时触发"), { meta: "trigger" })}
+            ${inspectTextarea("描述详情", getMeta(item, "description", skill?.description || "Skill 描述待补充。"), { meta: "description" })}
+            ${inspectTextarea("触发条件", getMeta(item, "trigger", skill?.description || "用户请求匹配该能力时触发"), { meta: "trigger" })}
+          </div>
+        `;
+      }
+      if (item.type === "rule") {
+        const rule = registryItem("rules", item.label);
+        return `
+          <div class="inspect-grid">
+            ${inspectInput("Rule 路径", getMeta(item, "path", rule?.sourcePath || "bundles/rules/<rule>.md"), { meta: "path" })}
+            ${inspectSelect("是否启用", getMeta(item, "enabled", "启用"), "enabled", ["启用", "停用"])}
+            ${inspectTextarea("规则摘要", getMeta(item, "description", rule?.description || "记录该 rule 的适用边界。"), { meta: "description" })}
+            ${inspectTextarea("适用条件", getMeta(item, "whenToRead", "命中项目、场景或 Gate 时读取。"), { meta: "whenToRead" })}
           </div>
         `;
       }
       if (item.type === "scene") {
+        const scene = registryItem("scenes", item.label);
         return `
           <div class="inspect-grid">
-            ${inspectTextarea("适用条件", getMeta(item, "condition", "当用户需求命中这个固定场景、操作方式或上下文组合时使用。"), { meta: "condition" })}
+            ${inspectInput("场景源文件", getMeta(item, "sourcePath", scene?.sourcePath || "docs/scenes/<scene>.md"), { meta: "sourcePath" })}
+            ${inspectTextarea("场景摘要", getMeta(item, "description", scene?.description || "场景摘要待补充。"), { meta: "description" })}
+            ${inspectTextarea("适用条件", getMeta(item, "condition", scene?.description || "当用户需求命中这个固定场景、操作方式或上下文组合时使用。"), { meta: "condition" })}
             ${inspectTextarea("AI 理解重点", getMeta(item, "focus", "记录 AI 在这个场景下要优先理解什么：可能是项目边界、调用链、操作步骤、联调差异、环境要求或常见误判点。"), { meta: "focus" })}
             ${inspectTextarea("操作方式/步骤", getMeta(item, "operationSteps", "如果这是操作型场景，记录推荐操作顺序、入口、确认点和不要做的动作。"), { meta: "operationSteps" })}
             ${inspectTextarea("上下文注意事项", getMeta(item, "contextNotes", "记录这个场景长期稳定、需要反复提醒 AI 的注意事项。"), { meta: "contextNotes" })}
@@ -1392,6 +1758,10 @@
     function nodeLabel(id) {
       const item = state.nodes.find(nodeItem => nodeItem.id === id);
       return item ? item.label : id;
+    }
+
+    function registryItem(collection, label) {
+      return (registryData[collection] || []).find(item => item.id === label || item.name === label);
     }
 
     function makeDraggable(el, item) {
@@ -1517,8 +1887,10 @@
     function updateDropTip() {
       const selected = state.nodes.find(item => item.id === state.selectedId);
       const label = selected ? selected.label : "无";
-      document.getElementById("dropTip").textContent = state.mode === "task"
-        ? `当前任务：${label}。主线展示 G0-G7，G4 下方展示各项目开发进度。`
+      document.getElementById("dropTip").textContent = state.mode === "overview"
+        ? "总览展示安装状态、关系索引、任务进度和个人画像；进入项目/场景/任务视图可继续查看详情。"
+        : state.mode === "task"
+        ? `当前任务：${label}。主线展示 G1-G7，G4 下方展示各项目开发进度。`
         : `当前选中：${label}。从左侧拖节点到画布，会自动连接到这个节点；也可以拖动画布中的节点整理布局。`;
     }
 
@@ -1529,8 +1901,8 @@
       familyField.classList.toggle("hidden", type !== "project" || state.mode !== "project");
       newFamilyName.classList.add("hidden");
       newFamilyName.value = "";
-      newName.value = type === "project" ? "goods-initialization" : type === "skill" ? "stock-inventory-review" : type === "scene" ? "frontend-bff-debug" : type === "task" ? "AIAGENT-106" : "G4 Development";
-      newDesc.value = type === "project" ? "商品初始化工具项目" : type === "skill" ? "盘点单视觉 review 与字段口径核对" : type === "scene" ? "前端与 BFF 排障理解包" : type === "task" ? "新建真实任务流程" : "项目开发节点";
+      newName.value = type === "project" ? "goods-initialization" : type === "skill" ? "stock-inventory-review" : type === "rule" ? "frontend/core" : type === "scene" ? "frontend-bff-debug" : type === "task" ? "AIAGENT-106" : "G4 Development";
+      newDesc.value = type === "project" ? "商品初始化工具项目" : type === "skill" ? "盘点单视觉 review 与字段口径核对" : type === "rule" ? "前端通用实现规范" : type === "scene" ? "前端与 BFF 排障理解包" : type === "task" ? "新建真实任务流程" : "项目开发节点";
     }
 
     function addTask(label, desc) {
@@ -1571,7 +1943,8 @@
       } else if (state.modalType === "task") {
         addTask(newName.value, newDesc.value);
       } else {
-        addNode(newName.value, newDesc.value, state.modalType === "scene" ? "scene" : "gate", offset, offset);
+        const type = state.modalType === "scene" ? "scene" : state.modalType === "rule" ? "rule" : "gate";
+        addNode(newName.value, newDesc.value, type, offset, offset);
       }
       closeModal();
     });
@@ -1579,7 +1952,7 @@
       if (event.target === modal) closeModal();
     });
 
-    loadMode("project");
+    loadMode("overview");
   </script>
 </body>
 </html>

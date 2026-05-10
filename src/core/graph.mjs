@@ -8,9 +8,7 @@ const GROUPS = [
   { id: "group:projects", type: "group", title: "Projects", summary: "Configured projects" },
   { id: "group:scenes", type: "group", title: "Scenes", summary: "Workflow scenes" },
   { id: "group:skills", type: "group", title: "Skills", summary: "Mounted skills" },
-  { id: "group:rules", type: "group", title: "Rules", summary: "Active rules" },
-  { id: "group:persona", type: "group", title: "Persona", summary: "Profile and persona context" },
-  { id: "group:current-work", type: "group", title: "Current Work", summary: "Runtime current task" }
+  { id: "group:rules", type: "group", title: "Rules", summary: "Active rules" }
 ];
 
 export async function buildContextGraph({ rootDir = process.cwd() } = {}) {
@@ -24,15 +22,15 @@ export async function buildContextGraph({ rootDir = process.cwd() } = {}) {
   };
 
   addNode(graph, {
-    id: "root:ai-context",
+    id: "root:context-index",
     type: "root",
-    title: "ai-context",
-    summary: "Local AI context center",
+    title: "上下文索引",
+    summary: "Project, scene, skill, rule, profile, and task index",
     status: "ok"
   });
   for (const group of GROUPS) {
     addNode(graph, { ...group, status: "ok" });
-    addEdge(graph, "root:ai-context", group.id, "contains", "system");
+    addEdge(graph, "root:context-index", group.id, "contains", "system");
   }
 
   const [projectsIndex, scenesIndex, skillsCatalog, rulesCatalog, profileJson, currentJson] = await Promise.all([
@@ -167,21 +165,33 @@ export async function buildContextGraph({ rootDir = process.cwd() } = {}) {
     status: profileJson.ok && profileDoc.exists ? "ok" : "warning",
     raw: profileJson.data
   });
-  addEdge(graph, "group:persona", "profile:main", "contains", "config/profile.json");
 
   if (currentJson.data?.activeTaskId) {
     const taskId = `task:${currentJson.data.activeTaskId}`;
     const task = await readJsonFile(resolveInside(rootPath, currentJson.data.activeTaskPath || ""));
+    const taskData = task.ok ? task.data : currentJson.data;
     addNode(graph, {
       id: taskId,
       type: "task",
-      title: task.data?.title || currentJson.data.activeTaskId,
+      title: taskData?.title || currentJson.data.activeTaskId,
       summary: currentJson.data.note || "",
       sourcePath: currentJson.data.activeTaskPath,
       status: task.ok ? "ok" : "warning",
-      raw: task.ok ? task.data : currentJson.data
+      raw: taskData
     });
-    addEdge(graph, "group:current-work", taskId, "contains", "runtime/current.json");
+    for (const gate of taskData?.gates || []) {
+      const gateNodeId = `gate:${currentJson.data.activeTaskId}:${gate.id}`;
+      addNode(graph, {
+        id: gateNodeId,
+        type: "gate",
+        title: `${gate.id} ${gate.name || ""}`.trim(),
+        summary: gate.purpose || "",
+        sourcePath: currentJson.data.activeTaskPath,
+        status: statusForGate(gate.status),
+        raw: gate
+      });
+      addEdge(graph, taskId, gateNodeId, "has-gate", currentJson.data.activeTaskPath);
+    }
     for (const projectId of currentJson.data.activeProjectIds || []) {
       addEdge(graph, taskId, `project:${projectId}`, "active-project", "runtime/current.json");
     }
@@ -272,6 +282,7 @@ function buildDetails(graph) {
         scenes: relatedNodes.filter((item) => item.type === "scene"),
         skills: relatedNodes.filter((item) => item.type === "skill"),
         rules: relatedNodes.filter((item) => item.type === "rule"),
+        gates: relatedNodes.filter((item) => item.type === "gate"),
         profiles: relatedNodes.filter((item) => item.type === "profile"),
         tasks: relatedNodes.filter((item) => item.type === "task")
       },
@@ -288,17 +299,24 @@ function addMissingReferenceWarnings(graph, ids) {
     ...[...ids.skillIds].map((id) => `skill:${id}`),
     ...[...ids.ruleIds].map((id) => `rule:${id}`),
     ...GROUPS.map((group) => group.id),
-    "root:ai-context",
+    "root:context-index",
     "profile:main"
   ]);
   for (const edge of graph.edges) {
-    if (!known.has(edge.from) && !edge.from.startsWith("task:")) {
+    if (!known.has(edge.from) && !edge.from.startsWith("task:") && !edge.from.startsWith("gate:")) {
       addWarning(graph, "missing_graph_reference", `Missing graph node referenced by edge: ${edge.from}`, edge.source);
     }
-    if (!known.has(edge.to) && !edge.to.startsWith("task:")) {
+    if (!known.has(edge.to) && !edge.to.startsWith("task:") && !edge.to.startsWith("gate:")) {
       addWarning(graph, "missing_graph_reference", `Missing graph node referenced by edge: ${edge.to}`, edge.source);
     }
   }
+}
+
+function statusForGate(status) {
+  if (status === "done") return "ok";
+  if (status === "blocked") return "warning";
+  if (status === "failed") return "missing";
+  return status ? "warning" : "unknown";
 }
 
 function mergeStatus(left, right) {

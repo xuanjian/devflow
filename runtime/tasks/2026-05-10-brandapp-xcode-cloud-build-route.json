@@ -1,0 +1,148 @@
+{
+  "version": 1,
+  "id": "2026-05-10-brandapp-xcode-cloud-build-route",
+  "title": "BrandApp Xcode Cloud 云打包路线",
+  "status": "active",
+  "taskLevel": "L3",
+  "currentGate": "G5",
+  "projectIds": [
+    "brand-app",
+    "dhb",
+    "ai-context"
+  ],
+  "sceneIds": [
+    "ai-task-board"
+  ],
+  "summary": "BrandApp 为 DHB 定制品牌新增 Xcode Cloud 云打包路线：从本地配置生成 cloud-build 分支，镜像到 GitHub，Xcode Cloud 从 GitHub 分支构建；Pods 已纳入镜像，云端不再跑 pod install。",
+  "gates": [
+    {
+      "id": "G1",
+      "name": "Intent / Intake",
+      "purpose": "记录用户目标、任务类型、任务等级和是否需要在 task board 展示完整流程。",
+      "defaultArtifacts": [
+        "runtime/tasks/<task-id>.json"
+      ],
+      "status": "done",
+      "artifacts": []
+    },
+    {
+      "id": "G2",
+      "name": "Discovery",
+      "purpose": "记录 superpowers 调研过程中选中的项目、场景、规则、skill、证据来源和未知项。",
+      "defaultArtifacts": [
+        "discovery notes in task JSON"
+      ],
+      "status": "done",
+      "artifacts": []
+    },
+    {
+      "id": "G3",
+      "name": "Plan / Product UI",
+      "purpose": "记录 superpowers 输出的产品、UI、技术方案或交互原型，以及用户确认点。",
+      "defaultArtifacts": [
+        "plan or prototype references"
+      ],
+      "status": "done",
+      "artifacts": []
+    },
+    {
+      "id": "G4",
+      "name": "Development",
+      "purpose": "记录当前开发项目、写入范围、使用的 superpower、验证预期和恢复位置。",
+      "defaultArtifacts": [
+        "project progress entries"
+      ],
+      "status": "done",
+      "artifacts": []
+    },
+    {
+      "id": "G5",
+      "name": "Integration",
+      "purpose": "记录单项目运行、跨项目联调、环境切换、阻塞项和处理后恢复步骤。",
+      "defaultArtifacts": [
+        "integration notes"
+      ],
+      "status": "in_progress",
+      "artifacts": []
+    },
+    {
+      "id": "G6",
+      "name": "Acceptance",
+      "purpose": "记录对照需求、UI、接口、diff 和测试结果的验收状态。",
+      "defaultArtifacts": [
+        "acceptance result"
+      ],
+      "status": "pending",
+      "artifacts": []
+    },
+    {
+      "id": "G7",
+      "name": "Run / Package Archive",
+      "purpose": "记录调试运行、测试/预发/正式打包、最终验证、已知缺口和交接说明。",
+      "defaultArtifacts": [
+        "run/package archive"
+      ],
+      "status": "pending",
+      "artifacts": []
+    }
+  ],
+  "projectProgress": [
+    {
+      "projectId": "brand-app",
+      "status": "pending",
+      "summary": ""
+    },
+    {
+      "projectId": "dhb",
+      "status": "pending",
+      "summary": ""
+    },
+    {
+      "projectId": "ai-context",
+      "status": "pending",
+      "summary": ""
+    }
+  ],
+  "notes": [
+    {
+      "at": "2026-05-10T06:49:55.303Z",
+      "gate": "G5",
+      "text": "补记本次漏写的任务状态，并验证 contextctl task start/update/finish 以后可作为自动写 task 的固定入口。"
+    },
+    {
+      "at": "2026-05-10T06:56:35.271Z",
+      "gate": "G5",
+      "text": "根据用户纠正，把 task 自动创建规则从 BrandApp/Xcode Cloud 示例泛化为任意窗口、任意项目的默认需求入口：Jira/issue 编码、新模块、大需求、多文件能力、跨会话工作默认开 task。"
+    }
+  ],
+  "blockers": [],
+  "artifacts": [
+    {
+      "at": "2026-05-10T06:49:55.303Z",
+      "value": "PackageTool/CloudBuildManager.swift"
+    },
+    {
+      "at": "2026-05-10T06:49:55.303Z",
+      "value": "PackageTool/CloudBuildGitSpec.swift"
+    },
+    {
+      "at": "2026-05-10T06:49:55.303Z",
+      "value": "bundles/skills/ai-context/SKILL.md"
+    },
+    {
+      "at": "2026-05-10T06:49:55.303Z",
+      "value": "scripts/contextctl.mjs"
+    },
+    {
+      "at": "2026-05-10T06:56:35.271Z",
+      "value": "bundles/skills/ai-context/SKILL.md"
+    },
+    {
+      "at": "2026-05-10T06:56:35.271Z",
+      "value": "config/entry.json"
+    }
+  ],
+  "recoveryPoint": "回到 BrandApp/Xcode Cloud 时，先确认 workflow 分支条件匹配 cloud-build/ 前缀，再从 GitHub 最新 cloud-build 分支启动新构建。",
+  "createdAt": "2026-05-10T06:49:55.303Z",
+  "updatedAt": "2026-05-10T06:56:35.271Z"
+}

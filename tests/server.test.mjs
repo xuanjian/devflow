@@ -29,6 +29,18 @@ test("server exposes graph and checks APIs", async () => {
   }
 });
 
+test("server exposes the configured profile markdown document", async () => {
+  const server = await startServer({ rootDir: new URL("./core/fixtures/basic-ai-context/", import.meta.url), port: 0 });
+  try {
+    const profileDocument = await fetch(`${server.url}/api/profile-document`).then((res) => res.json());
+
+    assert.equal(profileDocument.sourcePath, "docs/person/profile.md");
+    assert.match(profileDocument.markdown, /fixture collaboration preferences/i);
+  } finally {
+    await server.close();
+  }
+});
+
 test("server rejects unknown actions", async () => {
   const server = await startServer({ rootDir: new URL("./core/fixtures/basic-ai-context/", import.meta.url), port: 0 });
   try {

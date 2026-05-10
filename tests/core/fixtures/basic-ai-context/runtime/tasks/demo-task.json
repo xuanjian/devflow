@@ -7,5 +7,21 @@
   ],
   "sceneIds": [
     "demo-scene"
+  ],
+  "currentGate": "G1",
+  "status": "in_progress",
+  "gates": [
+    {
+      "id": "G1",
+      "name": "Intent / Intake",
+      "purpose": "Understand demo task.",
+      "status": "done"
+    },
+    {
+      "id": "G4",
+      "name": "Development",
+      "purpose": "Implement demo task.",
+      "status": "in_progress"
+    }
   ]
 }

@@ -3,11 +3,12 @@ alwaysApply: true
 ---
 # 统一共享上下文入口
 
-请优先阅读：
+> Archived legacy rule. Do not use this as the active entrypoint.
 
-1. `/Users/xj/AGENTS.md`
-2. `/Users/xj/WORK_CONTEXT.md`
-3. 当前仓库对应的 `ai-context/repos/*.md`
-4. `/Users/xj/Documents/ai-context/registry/scenes.json`
+当前有效入口以 JSON 索引为准：
 
-默认先使用 `single-repo-change`，只有当用户明确提到跨项目链路时，再扩展 scene。
+1. `/Users/xj/Documents/ai-context/config/entry.json`
+2. `/Users/xj/Documents/ai-context/config/profile.json`
+3. `/Users/xj/Documents/ai-context/runtime/current.json`
+
+不要再默认读取 `/Users/xj/AGENTS.md` 或 `/Users/xj/WORK_CONTEXT.md`。

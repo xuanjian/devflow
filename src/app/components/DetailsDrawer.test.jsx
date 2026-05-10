@@ -8,7 +8,7 @@ test("DetailsDrawer renders metadata, relationships, warnings, and actions", asy
   const details = {
     node: { id: "project:demo", title: "Demo", type: "project", status: "warning", sourcePath: "config/projects/demo.json", docPath: "docs/repos/demo.md", raw: { id: "demo" } },
     documentationSummary: "Demo docs",
-    related: { projects: [], scenes: [{ id: "scene:demo", title: "Scene" }], skills: [], rules: [], profiles: [], tasks: [] },
+    related: { projects: [], scenes: [{ id: "scene:demo", title: "Scene" }], skills: [], rules: [], gates: [{ id: "gate:demo:G4", title: "G4 Development" }], profiles: [], tasks: [] },
     warnings: [{ code: "missing_project_doc", message: "Missing doc" }],
     actions: [{ actionId: "sync_project_entry", label: "Sync project", body: { projectId: "demo" } }]
   };
@@ -18,6 +18,7 @@ test("DetailsDrawer renders metadata, relationships, warnings, and actions", asy
   expect(screen.getByText("Demo docs")).toBeInTheDocument();
   expect(screen.getByText("来源")).toBeInTheDocument();
   expect(screen.getByText("关联场景")).toBeInTheDocument();
+  expect(screen.getByText("关联步骤")).toBeInTheDocument();
   expect(screen.getByText("Missing doc")).toBeInTheDocument();
   await userEvent.click(screen.getByRole("button", { name: "Sync project" }));
   expect(onRunAction).toHaveBeenCalledWith("sync_project_entry", { projectId: "demo" });

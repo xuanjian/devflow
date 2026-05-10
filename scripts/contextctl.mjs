@@ -52,8 +52,26 @@ function resolveSkillsHomes() {
 function usage() {
   console.log(`Usage:
   node scripts/contextctl.mjs doctor
+  node scripts/contextctl.mjs task start <title> [options]
+  node scripts/contextctl.mjs task update [task-id] [options]
+  node scripts/contextctl.mjs task finish [task-id] [options]
   node scripts/contextctl.mjs add project <repo-path> [options]
   node scripts/contextctl.mjs add skill <skill-dir> [options]
+
+Task options:
+  --id <id>                 Task id. Defaults to YYYY-MM-DD + title slug.
+  --projects <a,b,c>        Active project ids.
+  --scenes <a,b,c>          Active scene ids. Use ai-task-board for visible task state.
+  --gate <G1-G7>            Current gate. Defaults to G1 for start.
+  --status <status>         Task status. Defaults to active for start, done for finish.
+  --level <L1-L4>           Task size/risk level.
+  --summary <summary>       Task summary.
+  --note <text>             Append a timestamped note.
+  --artifact <path-or-text>  Append an artifact entry. Can be repeated via comma list.
+  --blocker <text>          Append a blocker entry.
+  --recovery <text>         Set recovery point.
+  --dry-run                 Print the task payload without writing files.
+  --force                   Allow task start to overwrite an existing task file.
 
 Add project options:
   --id <id>                 Project id. Defaults to repo folder name in kebab-case.
@@ -147,6 +165,10 @@ function uniqueSorted(values) {
   return [...new Set(values.filter(Boolean))].sort((a, b) => a.localeCompare(b));
 }
 
+function uniqueStable(values) {
+  return [...new Set(values.filter(Boolean))];
+}
+
 function normalizeProjectId(value) {
   return String(value || '')
     .trim()
@@ -154,6 +176,250 @@ function normalizeProjectId(value) {
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '');
+}
+
+function normalizeTaskId(value) {
+  return normalizeProjectId(value).slice(0, 80);
+}
+
+function todayString() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function nowIso() {
+  return new Date().toISOString();
+}
+
+function ensureGateId(gateId) {
+  const value = gateId || 'G1';
+  if (!/^G[1-7]$/.test(value)) throw new Error(`invalid gate id: ${value}`);
+  return value;
+}
+
+function ensureTaskLevel(level) {
+  if (!level) return undefined;
+  if (!/^L[1-4]$/.test(level)) throw new Error(`invalid task level: ${level}`);
+  return level;
+}
+
+function taskPath(taskId) {
+  return `runtime/tasks/${taskId}.json`;
+}
+
+function taskTitleFromPositionals(positionals, flags) {
+  const title = flags.title || positionals.join(' ').trim();
+  if (!title) throw new Error('task title is required');
+  return title;
+}
+
+function inferTaskId(title, flags) {
+  const id = normalizeTaskId(flags.id || `${todayString()}-${title}`);
+  if (!id) throw new Error('task id is required');
+  return id;
+}
+
+function readKnownIdSets() {
+  const projectIndex = readJson('config/projects/index.json');
+  const sceneIndex = readJson('config/scenes/index.json');
+  return {
+    projectIds: new Set((projectIndex.projects || []).map(item => item.id)),
+    sceneIds: new Set((sceneIndex.scenes || []).map(item => item.id)),
+  };
+}
+
+function ensureKnownTaskScope(projectIds, sceneIds) {
+  const known = readKnownIdSets();
+  for (const projectId of projectIds) {
+    if (!known.projectIds.has(projectId)) throw new Error(`unknown project: ${projectId}`);
+  }
+  for (const sceneId of sceneIds) {
+    if (!known.sceneIds.has(sceneId)) throw new Error(`unknown scene: ${sceneId}`);
+  }
+}
+
+function gateStatus(gateId, currentGateId) {
+  const gateNumber = Number(gateId.slice(1));
+  const currentGateNumber = Number(currentGateId.slice(1));
+  if (gateNumber < currentGateNumber) return 'done';
+  if (gateNumber === currentGateNumber) return 'in_progress';
+  return 'pending';
+}
+
+function buildTaskGates(currentGateId) {
+  const gates = readJson('config/tasks/gates.json').gates || [];
+  return gates.map(gate => ({
+    ...gate,
+    status: gateStatus(gate.id, currentGateId),
+    artifacts: [],
+  }));
+}
+
+function updateTaskGateStatuses(task, currentGateId) {
+  const gateCatalog = readJson('config/tasks/gates.json').gates || [];
+  const existingById = new Map((task.gates || []).map(gate => [gate.id, gate]));
+  task.gates = gateCatalog.map(gate => ({
+    ...gate,
+    ...(existingById.get(gate.id) || {}),
+    status: gateStatus(gate.id, currentGateId),
+    artifacts: existingById.get(gate.id)?.artifacts || [],
+  }));
+}
+
+function appendFlagEntries(target, flagValue, makeEntry) {
+  for (const value of listFromFlag(flagValue)) {
+    target.push(makeEntry(value));
+  }
+}
+
+function readTask(taskId) {
+  const relativePath = taskPath(taskId);
+  const absolutePath = path.join(root, relativePath);
+  if (!fs.existsSync(absolutePath)) throw new Error(`task not found: ${relativePath}`);
+  return { relativePath, task: readJson(relativePath) };
+}
+
+function resolveTaskId(positionals) {
+  if (positionals[0]) return positionals[0];
+  const current = readJson('runtime/current.json');
+  if (!current.activeTaskId) throw new Error('task id is required and no active task is set');
+  return current.activeTaskId;
+}
+
+function writeCurrentForTask(task) {
+  const current = readJson('runtime/current.json');
+  current.activeTaskId = task.id;
+  current.activeTaskPath = taskPath(task.id);
+  current.activeProjectIds = task.projectIds || [];
+  current.activeSceneIds = task.sceneIds || [];
+  current.currentGate = task.currentGate;
+  current.recentTaskIds = uniqueStable([task.id, ...(current.recentTaskIds || [])]).slice(0, 20);
+  current.note = 'Current work is stored in task JSON. runtime/current-work.md is deprecated.';
+  writeJson('runtime/current.json', current);
+}
+
+function printTaskSummary(task, dryRun) {
+  console.log(`${dryRun ? 'dry-run task' : 'task'}: ${task.id}`);
+  console.log(`  title: ${task.title}`);
+  console.log(`  status: ${task.status}`);
+  console.log(`  gate: ${task.currentGate}`);
+  console.log(`  projects: ${(task.projectIds || []).join(', ') || 'none'}`);
+  console.log(`  scenes: ${(task.sceneIds || []).join(', ') || 'none'}`);
+  if (task.recoveryPoint) console.log(`  recovery: ${task.recoveryPoint}`);
+}
+
+async function taskStart(positionals, flags) {
+  const title = taskTitleFromPositionals(positionals, flags);
+  const id = inferTaskId(title, flags);
+  const currentGate = ensureGateId(flags.gate || 'G1');
+  const projectIds = listFromFlag(flags.projects);
+  const sceneIds = uniqueStable(listFromFlag(flags.scenes));
+  const level = ensureTaskLevel(flags.level);
+  ensureKnownTaskScope(projectIds, sceneIds);
+
+  const relativePath = taskPath(id);
+  if (fs.existsSync(path.join(root, relativePath)) && !flags.force) {
+    throw new Error(`task already exists without --force: ${relativePath}`);
+  }
+
+  const timestamp = nowIso();
+  const task = {
+    version: 1,
+    id,
+    title,
+    status: flags.status || 'active',
+    taskLevel: level,
+    currentGate,
+    projectIds,
+    sceneIds,
+    summary: flags.summary || '',
+    gates: buildTaskGates(currentGate),
+    projectProgress: projectIds.map(projectId => ({
+      projectId,
+      status: 'pending',
+      summary: '',
+    })),
+    notes: [],
+    blockers: [],
+    artifacts: [],
+    recoveryPoint: flags.recovery || '',
+    createdAt: timestamp,
+    updatedAt: timestamp,
+  };
+  if (flags.note) task.notes.push({ at: timestamp, gate: currentGate, text: String(flags.note) });
+  appendFlagEntries(task.artifacts, flags.artifact, value => ({ at: timestamp, value }));
+  appendFlagEntries(task.blockers, flags.blocker, value => ({ at: timestamp, status: 'open', text: value }));
+
+  if (flags['dry-run']) {
+    printTaskSummary(task, true);
+    console.log(JSON.stringify(task, null, 2));
+    return;
+  }
+
+  writeJson(relativePath, task);
+  writeCurrentForTask(task);
+  printTaskSummary(task, false);
+}
+
+async function taskUpdate(positionals, flags) {
+  const taskId = resolveTaskId(positionals);
+  const { relativePath, task } = readTask(taskId);
+  const timestamp = nowIso();
+  if (flags.status) task.status = flags.status;
+  if (flags.gate) {
+    task.currentGate = ensureGateId(flags.gate);
+    updateTaskGateStatuses(task, task.currentGate);
+  }
+  if (flags.level) task.taskLevel = ensureTaskLevel(flags.level);
+  if (flags.summary) task.summary = flags.summary;
+  if (flags.projects) task.projectIds = listFromFlag(flags.projects);
+  if (flags.scenes) task.sceneIds = uniqueStable(listFromFlag(flags.scenes));
+  ensureKnownTaskScope(task.projectIds || [], task.sceneIds || []);
+  if (flags.recovery) task.recoveryPoint = flags.recovery;
+  if (flags.note) {
+    task.notes = task.notes || [];
+    task.notes.push({ at: timestamp, gate: task.currentGate, text: String(flags.note) });
+  }
+  task.artifacts = task.artifacts || [];
+  task.blockers = task.blockers || [];
+  appendFlagEntries(task.artifacts, flags.artifact, value => ({ at: timestamp, value }));
+  appendFlagEntries(task.blockers, flags.blocker, value => ({ at: timestamp, status: 'open', text: value }));
+  task.updatedAt = timestamp;
+
+  if (flags['dry-run']) {
+    printTaskSummary(task, true);
+    console.log(JSON.stringify(task, null, 2));
+    return;
+  }
+
+  writeJson(relativePath, task);
+  writeCurrentForTask(task);
+  printTaskSummary(task, false);
+}
+
+async function taskFinish(positionals, flags) {
+  const taskId = resolveTaskId(positionals);
+  const { relativePath, task } = readTask(taskId);
+  const timestamp = nowIso();
+  task.status = flags.status || 'done';
+  task.currentGate = ensureGateId(flags.gate || 'G7');
+  updateTaskGateStatuses(task, task.currentGate);
+  if (flags.summary) task.summary = flags.summary;
+  if (flags.recovery) task.recoveryPoint = flags.recovery;
+  task.notes = task.notes || [];
+  if (flags.note) task.notes.push({ at: timestamp, gate: task.currentGate, text: String(flags.note) });
+  task.artifacts = task.artifacts || [];
+  appendFlagEntries(task.artifacts, flags.artifact, value => ({ at: timestamp, value }));
+  task.updatedAt = timestamp;
+
+  if (flags['dry-run']) {
+    printTaskSummary(task, true);
+    console.log(JSON.stringify(task, null, 2));
+    return;
+  }
+
+  writeJson(relativePath, task);
+  writeCurrentForTask(task);
+  printTaskSummary(task, false);
 }
 
 function readPackage(projectPath) {
@@ -384,7 +650,7 @@ ${project.summary}
 ## 与其他项目关系
 
 - 先由 \`config/projects/${project.id}.json\` 和命中的 scene JSON 判断关系。
-- 不确定链路时，进入 \`ai-my-pm\` 做项目、场景和规则分流。
+- 不确定链路时，使用 superpowers 推进澄清，并用 \`ai-task-board\` 记录项目、场景、Gate 和恢复位置。
 
 ## 读取建议
 
@@ -838,6 +1104,18 @@ async function main() {
   }
   if (command === 'doctor') {
     doctor();
+    return;
+  }
+  if (command === 'task' && type === 'start') {
+    await taskStart(rest, flags);
+    return;
+  }
+  if (command === 'task' && type === 'update') {
+    await taskUpdate(rest, flags);
+    return;
+  }
+  if (command === 'task' && type === 'finish') {
+    await taskFinish(rest, flags);
     return;
   }
   if (command === 'add' && type === 'project') {

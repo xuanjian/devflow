@@ -69,7 +69,7 @@ export default function GraphView({ graph, selectedNodeId, onSelectNode }) {
     >
       <div className="graph-toolbar">
         <strong>{selectedNodeId ? "聚焦关系" : "全局关系"}</strong>
-        <span>{selectedNodeId ? "正在显示当前节点的直接关联" : "仅显示主结构线，可拖动画布查看全图"}</span>
+        <span>{selectedNodeId ? "正在显示当前节点的直接业务关联" : "选择一个节点后显示业务关联线；分组归属线已隐藏"}</span>
       </div>
       <svg
         height={viewport.height}
@@ -97,14 +97,17 @@ export default function GraphView({ graph, selectedNodeId, onSelectNode }) {
         {nodes.map((node) => {
           const point = positions.get(node.id);
           return (
-            <foreignObject height="58" key={node.id} width="150" x={point.x - 75} y={point.y - 29}>
+            <foreignObject height="76" key={node.id} width="190" x={point.x - 95} y={point.y - 38}>
               <button
                 className={`graph-node node-${node.type} status-${node.status} ${selectedNodeId === node.id ? "selected" : ""} ${highlightedNodeIds.has(node.id) ? "highlighted" : ""}`}
                 onClick={() => onSelectNode(node.id)}
                 type="button"
               >
-                <strong>{titleForNode(node)}</strong>
-                <span>{labelForType(node.type)}</span>
+                <span className="node-type-mark" aria-hidden="true">{shortTypeLabel(node.type)}</span>
+                <span className="node-copy">
+                  <strong>{titleForNode(node)}</strong>
+                  <span>{labelForType(node.type)}</span>
+                </span>
               </button>
             </foreignObject>
           );
@@ -117,7 +120,7 @@ export default function GraphView({ graph, selectedNodeId, onSelectNode }) {
 function selectVisibleEdges(edges, selectedNodeId) {
   return edges.filter((edge) => {
     if (edge.relation === "contains") {
-      return true;
+      return false;
     }
     return selectedNodeId && (edge.from === selectedNodeId || edge.to === selectedNodeId);
   });
@@ -137,8 +140,8 @@ function getHighlightedNodeIds(edges, selectedNodeId) {
 
 function getGraphViewport(positions) {
   const points = [...positions.values()];
-  const maxX = Math.max(1100, ...points.map((point) => point.x + 120));
-  const maxY = Math.max(720, ...points.map((point) => point.y + 120));
+  const maxX = Math.max(1280, ...points.map((point) => point.x + 160));
+  const maxY = Math.max(760, ...points.map((point) => point.y + 140));
   return {
     width: maxX,
     height: maxY
@@ -149,10 +152,12 @@ function layoutNodes(nodes) {
   const positions = new Map();
   const groups = nodes.filter((node) => node.type === "group");
   const root = nodes.find((node) => node.type === "root");
-  if (root) positions.set(root.id, { x: 550, y: 96 });
+  if (root) positions.set(root.id, { x: 620, y: 110 });
 
+  const groupY = root ? 250 : 120;
+  const itemY = root ? 380 : 245;
   groups.forEach((node, index) => {
-    positions.set(node.id, { x: 140 + index * 165, y: 220 });
+    positions.set(node.id, { x: 170 + index * 215, y: groupY });
   });
 
   const byType = new Map();
@@ -161,12 +166,27 @@ function layoutNodes(nodes) {
     list.push(node);
     byType.set(node.type, list);
   });
-  const typeOrder = ["project", "scene", "skill", "rule", "profile", "task"];
+  const typeOrder = ["project", "scene", "skill", "rule", "profile", "task", "gate"];
   typeOrder.forEach((type, typeIndex) => {
     const list = byType.get(type) || [];
     list.forEach((node, index) => {
-      positions.set(node.id, { x: 120 + typeIndex * 175, y: 340 + index * 86 });
+      positions.set(node.id, { x: 160 + typeIndex * 220, y: itemY + index * 104 });
     });
   });
   return positions;
+}
+
+function shortTypeLabel(type) {
+  const labels = {
+    root: "根",
+    group: "组",
+    project: "项",
+    scene: "景",
+    skill: "技",
+    rule: "规",
+    profile: "像",
+    task: "任",
+    gate: "步"
+  };
+  return labels[type] || "点";
 }

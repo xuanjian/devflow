@@ -12,7 +12,8 @@ This skill is the single AI entrypoint for the local `ai-context` repository.
 It keeps AI context loading small and stable:
 
 - Read JSON indexes first.
-- For development, debugging, documentation, integration, research, and context-maintenance tasks, route through `ai-my-pm` before choosing superpowers.
+- For development, debugging, documentation, integration, research, and context-maintenance tasks, use superpowers as the process driver; begin with `superpowers:brainstorming` unless the current continuation clearly requires a more specific superpower.
+- Use `ai-task-board` as the task-state and project-scope layer, not as the workflow driver.
 - Select the project and scene from JSON.
 - Load Markdown, rules, or other skills only when the selected JSON says they are needed.
 - Store active work in `runtime/current.json` and `runtime/tasks/<task-id>.json`.
@@ -39,13 +40,13 @@ Do not read every file under `docs/repos/`, `docs/scenes/`, `bundles/rules/`, or
 Routing order:
 
 1. Read entry/profile/current JSON.
-2. If the task is development, debugging, documentation, integration, research, or context maintenance, select `ai-my-pm` as the workflow router.
-3. Let `ai-my-pm` classify the task, project set, scene set, tool needs, verification path, and whether G1-G7 is needed.
+2. If the task is development, debugging, documentation, integration, research, or context maintenance, enter the superpower-driven flow first, normally starting from `superpowers:brainstorming`.
+3. Use `ai-task-board` to classify task size, affected projects/scenes, current G1-G7 gate, roles, verification path, blockers, recovery point, and dashboard-visible state.
 4. Read project and scene indexes as candidate lists, then read only selected detail JSON files.
-5. Load source Markdown, rules, project skills, or superpowers only when `ai-my-pm` or the selected detail JSON requires them.
+5. Load source Markdown, rules, project skills, or additional superpowers only when the active superpower flow, `ai-task-board` task state, or selected detail JSON requires them.
 6. When a selected scene has `rules`, resolve those ids through `config/rules/rules.json` and load only the matching `scene-on-demand` rule sources when the task needs scene-level guidance.
 
-Superpowers are execution discipline. Do not treat `~/.codex/superpowers` as the first routing layer for ai-context work; use it after `ai-my-pm` decides which discipline applies.
+Superpowers drive the workflow. `ai-task-board` makes that workflow visible by recording size, scope, gate, roles, blockers, recovery point, and progress; it does not replace or outrank superpower process rules.
 
 Project JSON owns project relationships:
 
@@ -89,8 +90,44 @@ multiple indexes for routine additions when a `contextctl` command can do it.
 
 ```bash
 node scripts/contextctl.mjs doctor
+node scripts/contextctl.mjs task start "<title>" --projects <ids> --scenes ai-task-board --gate G1 --level <L1-L4>
+node scripts/contextctl.mjs task update [task-id] --gate <G1-G7> --note "<progress or decision>"
+node scripts/contextctl.mjs task finish [task-id] --note "<verification and handoff>"
 node scripts/contextctl.mjs add project <repo-path>
 ```
+
+## Default Task Creation Triggers
+
+In any project window that can read this ai-context entry, default to creating
+or updating a task JSON through `contextctl task ...` whenever the request looks
+like real work that should survive the current chat. This is not tied to a
+specific project, product, or active task.
+
+Do this before implementation for:
+
+- Any Jira, issue, ticket, Notion task, Figma task, PRD, spec, or external task
+  identifier/link provided by the user.
+- Requests to add a module, page, feature, workflow, API, integration, build
+  route, release route, or other multi-file/multi-step capability.
+- "改一个需求" / "新增需求" / "这个需求" when the change is not obviously a
+  one-line fix, especially if discovery, plan, implementation, acceptance, or
+  handoff may be needed.
+- Cross-project, cross-device, CI/CD, release, packaging, App Store, GitHub,
+  GitLab, Xcode Cloud, signing, credentials, migration, data, permission, money,
+  inventory, or other high-risk workflow work.
+- Any L3/L4 task, any work expected to continue across sessions or days, or any
+  task where future windows should know the current gate and recovery point.
+- Any user wording like "建 task", "走 ai-context task", "同步到 task",
+  "按 G1-G7", "后面继续", "记录这个流程", "自动去写", or "任务看板".
+
+If unsure whether a development request is L1 or L2+, bias toward starting a
+light task and set the level honestly. Ask only when the target project cannot
+be inferred from the current workspace, Jira/source text, or project index.
+
+For small L1/L2 edits, update the active task only when the user asks to track
+it, the task already belongs to an active tracked flow, or the edit changes
+release/build/deployment behavior. Do not store throwaway chat or one-line
+answers as tasks.
 
 Use the install script for installation, validation, and project entry syncing:
 

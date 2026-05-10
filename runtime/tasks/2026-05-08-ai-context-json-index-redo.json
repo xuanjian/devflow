@@ -70,10 +70,7 @@
       ],
       "status": "done",
       "artifacts": [
-        "runtime/current.json",
-        "/Users/xj/AGENTS.md",
-        "/Users/xj/WORK_CONTEXT.md",
-        "/Users/xj/CLAUDE.md"
+        "runtime/current.json"
       ]
     },
     {

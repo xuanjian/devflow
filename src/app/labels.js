@@ -1,9 +1,7 @@
 export const VIEW_LABELS = [
   { key: "overview", label: "总览" },
-  { key: "projects", label: "项目" },
-  { key: "scenes", label: "场景" },
-  { key: "skills", label: "技能" },
-  { key: "rules", label: "规则" },
+  { key: "relations", label: "关系" },
+  { key: "tasks", label: "任务" },
   { key: "persona", label: "画像" },
   { key: "checks", label: "检查" }
 ];
@@ -16,6 +14,7 @@ export const TYPE_LABELS = {
   scene: "场景",
   skill: "技能",
   rule: "规则",
+  gate: "步骤",
   profile: "画像",
   task: "任务"
 };
@@ -47,9 +46,7 @@ export const GROUP_TITLE_LABELS = {
   "group:projects": "项目",
   "group:scenes": "场景",
   "group:skills": "技能",
-  "group:rules": "规则",
-  "group:persona": "协作画像",
-  "group:current-work": "当前工作"
+  "group:rules": "规则"
 };
 
 export function labelForType(type) {
