@@ -4,7 +4,7 @@
   "title": "BrandApp Xcode Cloud 云打包路线",
   "status": "active",
   "taskLevel": "L3",
-  "currentGate": "G5",
+  "currentGate": "G6",
   "projectIds": [
     "brand-app",
     "dhb",
@@ -62,7 +62,7 @@
       "defaultArtifacts": [
         "integration notes"
       ],
-      "status": "in_progress",
+      "status": "done",
       "artifacts": []
     },
     {
@@ -72,7 +72,7 @@
       "defaultArtifacts": [
         "acceptance result"
       ],
-      "status": "pending",
+      "status": "in_progress",
       "artifacts": []
     },
     {
@@ -89,18 +89,18 @@
   "projectProgress": [
     {
       "projectId": "brand-app",
-      "status": "pending",
-      "summary": ""
+      "status": "in_progress",
+      "summary": "CloudBuildGitSpec 已保留 Xcode 工程引用的 README 资源，并在 snapshot 生成后自动修补 YYText 链式比较、AFNetworking netinet6 私有头、Xcode Cloud archive 阶段签名配置以及 MsePaySDK Swift compatibility force-load 链接配置；单测和 PackageTool macOS build 通过。"
     },
     {
       "projectId": "dhb",
-      "status": "pending",
-      "summary": ""
+      "status": "in_progress",
+      "summary": "已用完整 cloud-build/brandapp 基线重建 cloud-build/com.rsung.songguowulian 品牌镜像，补回 README 资源并修复 YYText 链式比较、AFNetworking netinet6 私有头 import、Release entitlements/signing 配置和 MsePaySDK Swift compatibility force-load 链接配置；本地按 Xcode Cloud 参数 archive 通过，并推送到 GitHub commit 05cc020。"
     },
     {
       "projectId": "ai-context",
-      "status": "pending",
-      "summary": ""
+      "status": "done",
+      "summary": "已记录 Xcode Cloud exit 65 根因、修复动作、验证命令和 GitHub 推送结果。"
     }
   ],
   "notes": [
@@ -113,9 +113,55 @@
       "at": "2026-05-10T06:56:35.271Z",
       "gate": "G5",
       "text": "根据用户纠正，把 task 自动创建规则从 BrandApp/Xcode Cloud 示例泛化为任意窗口、任意项目的默认需求入口：Jira/issue 编码、新模块、大需求、多文件能力、跨会话工作默认开 task。"
+    },
+    {
+      "at": "2026-05-11T01:38:36.378Z",
+      "gate": "G5",
+      "text": "Xcode Cloud 构建版本 5 进入 xcodebuild archive 后失败，截图只显示 Command exited with non-zero exit-code: 65；post-clone 脚本不存在、package dependencies 和 project/workflow configuration 均已通过。下一步需要展开 archive 子日志或下载 xcresult 定位真实编译/签名错误。"
+    },
+    {
+      "at": "2026-05-11T01:46:53.960Z",
+      "gate": "G6",
+      "text": "定位 Xcode Cloud exit 65 根因：GitHub cloud-build/com.rsung.songguowulian 旧分支是缺文件 snapshot，且 BrandApp 过滤 *.md 时漏掉了 Xcode 工程引用的 README 资源。本地在 DHB-XcodeCloud-Mirror 以 cloud-build/brandapp 完整基线重建品牌差异，补回 README，DHB Release 真机 build 通过；已提交 14c4d66 并 force-with-lease 推到 GitHub cloud-build/com.rsung.songguowulian。BrandApp 已调整 CloudBuildGitSpec 保留必要 README 资源，CloudBuildGitSpecTests 和 PackageTool macOS build 通过。"
+    },
+    {
+      "at": "2026-05-11T01:53:01.858Z",
+      "gate": "G6",
+      "text": "Xcode Cloud 构建版本 6 失败在 YYText 第三方库：YYTextLayout.m 1508/1510/1516/1518 使用链式比较，被云端新 Clang 报 Chained comparison 错误。查公开源确认 CocoaPods YYText 最新仍为 1.0.7 且最后发布于 2016，无官方新版可直接升级解决；当前采用最小兼容补丁，将四处表达式改为三目选择。DHB-XcodeCloud-Mirror 本地 Release 真机 build 通过，GitHub cloud-build/com.rsung.songguowulian 已推送 49869c5。BrandApp snapshot 生成流程也加入 YYText 兼容 patch，避免以后重新生成 cloud-build 分支复发。"
+    },
+    {
+      "at": "2026-05-11T02:00:04.188Z",
+      "gate": "G6",
+      "text": "Xcode Cloud 构建版本 7 继续失败在 AFNetworking 4.0.1：AFNetworkReachabilityManager.m:26 和 AFHTTPSessionManager.m:32 直接 import <netinet6/in6.h>，新 SDK 模块检查报 Use of private header from outside its module。Xcode 26.2 iPhoneOS SDK 的 netinet6/in6.h 明确提示不要直接 include，应 include <netinet/in.h>；AFNetworking 源码本来已经有 <netinet/in.h>。已在 DHB-XcodeCloud-Mirror 删除两处私有头 import，本地 Release 真机 build 通过；BrandApp snapshot 生成流程也加入 AFNetworking 兼容 patch。GitHub cloud-build/com.rsung.songguowulian 已推送 5e448eb。"
+    },
+    {
+      "at": "2026-05-11T02:26:10.965Z",
+      "gate": "G6",
+      "text": "Xcode Cloud build 8 moved past third-party compile errors and failed at archive exit 65. Local reproduction with the same cloud archive arguments failed because CODE_SIGN_IDENTITY=- cannot archive DHB entitlements. Verified compile/archive succeeds when archive-stage signing is disabled. Pushed GitHub mirror commit ced459d to cloud-build/com.rsung.songguowulian: Release DHB.entitlements aps-environment=production, Release CODE_SIGN_IDENTITY=Apple Distribution, CODE_SIGNING_ALLOWED=NO. BrandApp snapshot patch rules updated and CloudBuildGitSpecTests passed."
+    },
+    {
+      "at": "2026-05-11T02:57:04.333Z",
+      "gate": "G6",
+      "text": "Xcode Cloud build 9 failed at DHB link phase with undefined __swift_FORCE_LOAD_$_swiftCompatibility50/51/56/Concurrency/DynamicReplacements symbols. Root cause evidence: MsePaySDK.xcframework is a Swift binary framework and contains swiftCompatibility force-load symbols. Added Release LIBRARY_SEARCH_PATHS \"$(TOOLCHAIN_DIR)/usr/lib/swift/$(PLATFORM_NAME)\" and explicit -lswiftCompatibility50/-lswiftCompatibility51/-lswiftCompatibility56/-lswiftCompatibilityConcurrency/-lswiftCompatibilityDynamicReplacements to DHB mirror. Local archive with same Xcode Cloud arguments succeeded. Pushed GitHub cloud-build/com.rsung.songguowulian commit 0f26bd0. BrandApp snapshot patch rules updated and CloudBuildGitSpecTests + PackageTool macOS build passed."
+    },
+    {
+      "at": "2026-05-11T03:21:39.187Z",
+      "gate": "G6",
+      "text": "Xcode Cloud build 10 still failed with undefined __swift_FORCE_LOAD_$_swiftCompatibility50/51/56/Concurrency/DynamicReplacements. Follow-up root cause: the previous -lswiftCompatibility* flags were order-sensitive and did not force archive members into the final link on Xcode Cloud. Replaced those Release OTHER_LDFLAGS entries with -force_load full paths to $(TOOLCHAIN_DIR)/usr/lib/swift/$(PLATFORM_NAME)/libswiftCompatibility*.a. Local archive with the same Xcode Cloud arguments succeeded, CloudBuildGitSpecTests passed, PackageTool macOS build passed, and GitHub cloud-build/com.rsung.songguowulian was pushed to commit 05cc020."
+    },
+    {
+      "at": "2026-05-11T03:42:53.538Z",
+      "gate": "G6",
+      "text": "Xcode Cloud build 11 still failed with the same swiftCompatibility undefined symbols. Root cause of previous failed fix: commit 05cc020 inserted force_load into the DHB target Debug build configuration, while Xcode Cloud archive uses the Release configuration, so Release OTHER_LDFLAGS did not contain force_load. Patched the Release DHB target configuration and verified with xcodebuild -showBuildSettings that Release OTHER_LDFLAGS now contains -force_load full paths for libswiftCompatibility50/51/56/Concurrency/DynamicReplacements. Local archive with Xcode Cloud-style arguments succeeded. Pushed GitHub cloud-build/com.rsung.songguowulian commit f979f01."
     }
   ],
-  "blockers": [],
+  "blockers": [
+    {
+      "at": "2026-05-11T01:38:36.378Z",
+      "status": "resolved",
+      "text": "Xcode Cloud archive exit 65，当前截图未暴露底层错误行。"
+    }
+  ],
   "artifacts": [
     {
       "at": "2026-05-10T06:49:55.303Z",
@@ -142,7 +188,7 @@
       "value": "config/entry.json"
     }
   ],
-  "recoveryPoint": "回到 BrandApp/Xcode Cloud 时，先确认 workflow 分支条件匹配 cloud-build/ 前缀，再从 GitHub 最新 cloud-build 分支启动新构建。",
+  "recoveryPoint": "GitHub cloud-build/com.rsung.songguowulian 已更新到 f979f01；下一步在 App Store Connect 对 cloud-build/com.rsung.songguowulian 从最新分支 HEAD 启动新构建。注意不要只重建旧构建记录。当前已用 showBuildSettings 验证 Release OTHER_LDFLAGS 包含 Swift compatibility force_load，并用 Xcode Cloud 同款 archive 参数验证通过。如果云端仍失败，优先展开 Fetch source code 确认 commit 是否为 f979f01，再展开 Run xcodebuild archive 子日志。",
   "createdAt": "2026-05-10T06:49:55.303Z",
-  "updatedAt": "2026-05-10T06:56:35.271Z"
+  "updatedAt": "2026-05-11T03:42:53.538Z"
 }
