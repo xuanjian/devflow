@@ -1,0 +1,188 @@
+{
+  "version": 1,
+  "id": "2026-05-11-dhb-xcode-modernization",
+  "title": "DHB 老项目 Xcode 新版兼容与第三方库升级整改",
+  "status": "active",
+  "taskLevel": "L4",
+  "currentGate": "G2",
+  "projectIds": [
+    "dhb",
+    "brand-app",
+    "ai-context"
+  ],
+  "sceneIds": [
+    "ai-task-board"
+  ],
+  "summary": "DHB 是老 iOS 工程，Xcode Cloud / 新版 Xcode 暴露出 YYText、AFNetworking、MsePaySDK、签名配置、Release 链接配置等兼容问题。本任务用于从临时 cloud-build 镜像修复升级为正式 DHB 项目整改：先保证云打包可过，再评估将兼容补丁、SDK 升级、第三方库治理迁回真实 DHB GitLab 主项目。",
+  "gates": [
+    {
+      "id": "G1",
+      "name": "Intent / Intake",
+      "purpose": "记录用户目标、任务类型、任务等级和是否需要在 task board 展示完整流程。",
+      "defaultArtifacts": [
+        "runtime/tasks/<task-id>.json"
+      ],
+      "status": "done",
+      "artifacts": []
+    },
+    {
+      "id": "G2",
+      "name": "Discovery",
+      "purpose": "记录 superpowers 调研过程中选中的项目、场景、规则、skill、证据来源和未知项。",
+      "defaultArtifacts": [
+        "discovery notes in task JSON"
+      ],
+      "status": "in_progress",
+      "artifacts": []
+    },
+    {
+      "id": "G3",
+      "name": "Plan / Product UI",
+      "purpose": "记录 superpowers 输出的产品、UI、技术方案或交互原型，以及用户确认点。",
+      "defaultArtifacts": [
+        "plan or prototype references"
+      ],
+      "status": "pending",
+      "artifacts": []
+    },
+    {
+      "id": "G4",
+      "name": "Development",
+      "purpose": "记录当前开发项目、写入范围、使用的 superpower、验证预期和恢复位置。",
+      "defaultArtifacts": [
+        "project progress entries"
+      ],
+      "status": "pending",
+      "artifacts": []
+    },
+    {
+      "id": "G5",
+      "name": "Integration",
+      "purpose": "记录单项目运行、跨项目联调、环境切换、阻塞项和处理后恢复步骤。",
+      "defaultArtifacts": [
+        "integration notes"
+      ],
+      "status": "pending",
+      "artifacts": []
+    },
+    {
+      "id": "G6",
+      "name": "Acceptance",
+      "purpose": "记录对照需求、UI、接口、diff 和测试结果的验收状态。",
+      "defaultArtifacts": [
+        "acceptance result"
+      ],
+      "status": "pending",
+      "artifacts": []
+    },
+    {
+      "id": "G7",
+      "name": "Run / Package Archive",
+      "purpose": "记录调试运行、测试/预发/正式打包、最终验证、已知缺口和交接说明。",
+      "defaultArtifacts": [
+        "run/package archive"
+      ],
+      "status": "pending",
+      "artifacts": []
+    }
+  ],
+  "projectProgress": [
+    {
+      "projectId": "dhb",
+      "status": "in_progress",
+      "summary": "正式整改目标项目。当前真实 DHB GitLab 主项目尚未合入 mirror 里的兼容补丁；需要评估 YYText、AFNetworking、MsePaySDK、Release 签名/链接配置、最低系统版本和 Pods 依赖治理，再决定哪些补丁迁回主项目。"
+    },
+    {
+      "projectId": "brand-app",
+      "status": "in_progress",
+      "summary": "临时云打包工具链。BrandApp 已在 GitHub mirror/cloud-build 分支生成过程中做兼容补丁，适合短期保证 Xcode Cloud 打包，但不能替代 DHB 主项目的长期升级。"
+    },
+    {
+      "projectId": "ai-context",
+      "status": "done",
+      "summary": "已新建独立整改 task，避免继续把 DHB 老项目升级治理混在 BrandApp 云打包 task 或旧 YYText 口径里。"
+    }
+  ],
+  "discovery": {
+    "whyLocalXcodeCanRunButCloudFails": [
+      "本地旧 Xcode/旧 SDK 对部分老代码和旧二进制库更宽松，或还没触发新版编译器/链接器检查。",
+      "Xcode Cloud 使用新版 Xcode 和新版 iOS SDK，先暴露了 YYText 链式比较、AFNetworking 私有头、MsePaySDK Swift compatibility 链接、Release archive 签名配置等问题。",
+      "如果本机后续升级到同等或更高版本 Xcode，真实 DHB 主项目大概率也会遇到同类问题，所以需要正式整改。"
+    ],
+    "currentMirrorOnlyChanges": [
+      "YYText: 修复 YYTextLayout.m 的 chained comparison 编译错误。",
+      "AFNetworking: 删除 <netinet6/in6.h> 私有头直接 import，保留 <netinet/in.h>。",
+      "Signing/archive: 调整 Release archive 阶段签名/entitlements 配置以适配 Xcode Cloud。",
+      "MsePaySDK: 为 Release 配置补 Swift compatibility force_load 链接，解决 __swift_FORCE_LOAD_$_swiftCompatibility* 未定义符号。",
+      "这些目前主要存在于 GitHub mirror/cloud-build 路线，不等于真实 DHB GitLab 主项目已经完成整改。"
+    ],
+    "msePaySDKFindings": {
+      "officialDoc": "https://businesspay.qq.com/docs/mse/api/client.html#ios-sdk",
+      "officialDownload": "https://mqq-imgcache.gtimg.cn/ccm/msepay/sdk/MsePaySDK.xcframework-v0.0.7.zip",
+      "officialPackage": "MsePaySDK.xcframework-v0.0.7.zip",
+      "officialMetadata": "下载包响应 Last-Modified 为 2025-11-05；包内 iOS device framework 使用 Xcode 15.2 / iPhoneOS SDK 17.2 / Swift 5.9.2 / MinimumOSVersion 12.0；CFBundleShortVersionString 仍为 1.0。",
+      "currentDHBMetadata": "DHB 当前 MsePaySDK.xcframework 使用 Xcode 13.4.1 / iPhoneOS SDK 15.5 / Swift 5.6.1 / MinimumOSVersion 10.0；CFBundleShortVersionString 为 1.0。",
+      "risk": "官方 v0.0.7 比当前 DHB 内置包新，但包内仍可看到 swiftCompatibility force-load 符号；升级 SDK 可能降低旧 Swift 编译器风险，但仍需验证 Xcode Cloud archive 和真机运行。"
+    }
+  },
+  "upgradePlan": {
+    "shortTerm": [
+      "继续用 BrandApp 生成 GitHub cloud-build 分支，作为 Xcode Cloud 云打包止血路线。",
+      "确认云端 Fetch source code 使用最新 commit；不要只重建旧构建记录。",
+      "在 mirror 中保持 YYText、AFNetworking、MsePaySDK、Release signing 的兼容补丁，直到云打包能稳定出包。"
+    ],
+    "midTerm": [
+      "在真实 DHB GitLab 主项目建立升级分支，逐项迁移 mirror 中验证过的兼容补丁。",
+      "优先评估 MsePaySDK 官方 v0.0.7 替换当前内置包，验证 API 是否兼容、最低系统版本从 iOS 10 到 iOS 12 的影响、App Store/TestFlight/真机支付流程。",
+      "对 YYText、AFNetworking 做最小升级或本地补丁固化，避免每次云打包临时 patch。"
+    ],
+    "longTerm": [
+      "整理 DHB 第三方库台账：版本、来源、最后更新、是否有源码、是否支持新版 Xcode/iOS SDK、替代方案。",
+      "逐步替换多年不维护或不支持新版 SDK 的库；YYText 可列入替换/封装评估，AFNetworking 可评估升级或迁移网络层。",
+      "把 Xcode Cloud / 新版 Xcode archive 纳入常规验证，避免只依赖开发机旧 Xcode。"
+    ]
+  },
+  "vendorQuestions": [
+    "我们当前接入的 MsePaySDK.xcframework 包内 Info.plist 显示 CFBundleShortVersionString = 1.0、DTXcode = 1341、DTXcodeBuild = 13F100、DTSDKName = iphoneos15.5，Swift interface 显示 Apple Swift 5.6.1，MinimumOSVersion = 10.0。",
+    "我们在新版 Xcode / Xcode Cloud 构建时遇到 __swift_FORCE_LOAD_$_swiftCompatibility50/51/56/Concurrency/DynamicReplacements 未定义符号的链接错误。",
+    "官网 iOS SDK 页面当前提供的下载包是 MsePaySDK.xcframework-v0.0.7.zip，包内显示 Xcode 15.2、iPhoneOS SDK 17.2、Swift 5.9.2、MinimumOSVersion 12.0，但 CFBundleShortVersionString 仍为 1.0。",
+    "请确认 MsePaySDK.xcframework-v0.0.7.zip 是否为当前最新生产版本，是否支持 Xcode Cloud / Xcode 16 / Xcode 17 构建。",
+    "如果仍会产生 swiftCompatibility force-load 符号，官方推荐宿主 App 如何配置 OTHER_LDFLAGS、LIBRARY_SEARCH_PATHS、ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES 和 Embed & Sign？",
+    "从我们当前旧包升级到 v0.0.7 是否有 API 变更、行为变更、最低 iOS 版本变化、支付/微信拉起流程注意事项或 release notes？"
+  ],
+  "notes": [
+    {
+      "at": "2026-05-11T04:04:07.352Z",
+      "gate": "G2",
+      "text": "任务从 BrandApp Xcode Cloud 云打包排障拆出。当前已确认 Xcode Cloud 只是把问题提前暴露：本地旧 Xcode 能跑不代表升级本机 Xcode 后不会遇到同类编译/链接问题；DHB 需要做正式升级治理，而不是只依赖 GitHub mirror 临时补丁。"
+    },
+    {
+      "at": "2026-05-11T04:19:16.379Z",
+      "gate": "G2",
+      "text": "2026-05-11 live discovery: in /Users/xj/Documents/ios/DHB on branch xuanjian/yytext替换, Xcode 26.2 (17C52) succeeded for Debug simulator build, Release iphoneos build, and Release iphoneos archive with CODE_SIGNING_ALLOWED=NO. Main repo still differs from XcodeCloud mirror: AFNetworking netinet6 imports remain, YYText chained-comparison lines remain, and mirror-only Release swiftCompatibility force_load/link flags are not migrated. Remaining remediation should distinguish compile/archive pass from formal dependency governance, cloud signing/export, and whether to intentionally migrate mirror patches into DHB main."
+    },
+    {
+      "at": "2026-05-11T04:52:53.249Z",
+      "gate": "G2",
+      "text": "2026-05-11 resource setup: cloned GitLab custombrandresource master into /Volumes/T7/DHBBrandApp/DHBCompanyConfig at commit 90be73a; existing non-git directory was preserved as /Volumes/T7/DHBBrandApp/DHBCompanyConfig.backup-20260511122116; cleaned macOS AppleDouble ._* sidecar files generated on external disk and verified git status clean plus git fsck --connectivity-only exit 0."
+    }
+  ],
+  "blockers": [],
+  "artifacts": [
+    {
+      "at": "2026-05-11T04:04:07.352Z",
+      "value": "https://businesspay.qq.com/docs/mse/api/client.html#ios-sdk"
+    },
+    {
+      "at": "2026-05-11T04:04:07.352Z",
+      "value": "https://mqq-imgcache.gtimg.cn/ccm/msepay/sdk/MsePaySDK.xcframework-v0.0.7.zip"
+    },
+    {
+      "at": "2026-05-11T04:04:07.352Z",
+      "value": "/Users/xj/Documents/ios/DHB-XcodeCloud-Mirror"
+    }
+  ],
+  "recoveryPoint": "新窗口进入该任务时，先看本 task 的 upgradePlan 和 vendorQuestions；如果继续云打包，先确认 GitHub cloud-build/com.rsung.songguowulian 是否已从最新 HEAD 触发构建；如果进入正式整改，目标应切到真实 DHB GitLab 主项目而不是只改镜像。",
+  "createdAt": "2026-05-11T04:04:07.352Z",
+  "updatedAt": "2026-05-11T04:52:53.249Z"
+}

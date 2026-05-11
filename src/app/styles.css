@@ -461,6 +461,34 @@ summary:focus-visible {
   text-align: left;
 }
 
+.task-title-row {
+  align-items: center;
+  color: var(--text);
+  display: flex;
+  gap: 8px;
+  min-width: 0;
+  width: 100%;
+}
+
+.task-title-row strong {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.task-title-row em {
+  background: rgba(52, 199, 89, 0.14);
+  border: 1px solid rgba(52, 199, 89, 0.28);
+  border-radius: 999px;
+  color: var(--green);
+  flex: 0 0 auto;
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 800;
+  padding: 2px 7px;
+}
+
 .task-list-panel button.active,
 .gate-card.active {
   box-shadow: 0 0 0 4px rgba(10, 132, 255, 0.16);
@@ -478,6 +506,59 @@ summary:focus-visible {
   gap: 10px;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   margin-top: 14px;
+}
+
+.task-flow-header {
+  align-items: start;
+  display: grid;
+  gap: 14px;
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 0.36fr);
+}
+
+.task-flow-header p {
+  color: var(--muted);
+  line-height: 1.5;
+  margin: 8px 0 0;
+}
+
+.task-flow-summary {
+  background: rgba(10, 132, 255, 0.08);
+  border: 1px solid rgba(10, 132, 255, 0.22);
+  border-radius: 16px;
+  display: grid;
+  gap: 7px;
+  padding: 12px;
+}
+
+.task-flow-summary span,
+.task-flow-summary small {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.task-flow-summary strong {
+  color: var(--text);
+  line-height: 1.25;
+}
+
+.task-progress-bar {
+  background: rgba(115, 132, 154, 0.18);
+  border-radius: 999px;
+  height: 6px;
+  overflow: hidden;
+}
+
+.task-progress-bar i {
+  background: linear-gradient(90deg, var(--blue), var(--green));
+  border-radius: inherit;
+  display: block;
+  height: 100%;
+}
+
+.empty-state {
+  color: var(--muted);
+  line-height: 1.5;
+  margin: 0;
 }
 
 .gate-card {
@@ -947,7 +1028,8 @@ pre {
 
   .overview-view,
   .task-board-view,
-  .overview-wide {
+  .overview-wide,
+  .task-flow-header {
     grid-template-columns: 1fr;
   }
 }

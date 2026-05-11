@@ -166,37 +166,56 @@ export async function buildContextGraph({ rootDir = process.cwd() } = {}) {
     raw: profileJson.data
   });
 
-  if (currentJson.data?.activeTaskId) {
-    const taskId = `task:${currentJson.data.activeTaskId}`;
-    const task = await readJsonFile(resolveInside(rootPath, currentJson.data.activeTaskPath || ""));
-    const taskData = task.ok ? task.data : currentJson.data;
+  const taskPaths = await discoverTaskPaths(rootPath, currentJson.data);
+  for (const taskPath of taskPaths) {
+    const task = await readJsonFile(resolveInside(rootPath, taskPath));
+    const taskData = task.ok ? task.data : taskPath === currentJson.data?.activeTaskPath ? currentJson.data : null;
+    const taskIdValue = taskData?.id || path.basename(taskPath, ".json");
+    if (!taskData || !taskIdValue) {
+      addWarning(graph, "missing_task_detail", `Task detail missing for ${taskPath}`, taskPath);
+      continue;
+    }
+
+    const isActive = taskIdValue === currentJson.data?.activeTaskId;
+    const nodeId = `task:${taskIdValue}`;
+    const taskRaw = {
+      ...taskData,
+      currentGate: taskData.currentGate || (isActive ? currentJson.data?.currentGate : undefined),
+      isActive,
+      taskPath
+    };
+
     addNode(graph, {
-      id: taskId,
+      id: nodeId,
       type: "task",
-      title: taskData?.title || currentJson.data.activeTaskId,
-      summary: currentJson.data.note || "",
-      sourcePath: currentJson.data.activeTaskPath,
+      title: taskData.title || taskIdValue,
+      summary: taskData.summary || (isActive ? currentJson.data?.note : "") || "",
+      sourcePath: taskPath,
       status: task.ok ? "ok" : "warning",
-      raw: taskData
+      raw: taskRaw
     });
-    for (const gate of taskData?.gates || []) {
-      const gateNodeId = `gate:${currentJson.data.activeTaskId}:${gate.id}`;
+
+    for (const gate of taskData.gates || []) {
+      const gateNodeId = `gate:${taskIdValue}:${gate.id}`;
       addNode(graph, {
         id: gateNodeId,
         type: "gate",
         title: `${gate.id} ${gate.name || ""}`.trim(),
         summary: gate.purpose || "",
-        sourcePath: currentJson.data.activeTaskPath,
+        sourcePath: taskPath,
         status: statusForGate(gate.status),
-        raw: gate
+        raw: { ...gate, taskId: taskIdValue }
       });
-      addEdge(graph, taskId, gateNodeId, "has-gate", currentJson.data.activeTaskPath);
+      addEdge(graph, nodeId, gateNodeId, "has-gate", taskPath);
     }
-    for (const projectId of currentJson.data.activeProjectIds || []) {
-      addEdge(graph, taskId, `project:${projectId}`, "active-project", "runtime/current.json");
+
+    const projectRefs = taskData.projectIds || (isActive ? currentJson.data?.activeProjectIds : []) || [];
+    const sceneRefs = taskData.sceneIds || (isActive ? currentJson.data?.activeSceneIds : []) || [];
+    for (const projectId of projectRefs) {
+      addEdge(graph, nodeId, `project:${projectId}`, isActive ? "active-project" : "task-project", taskPath);
     }
-    for (const sceneId of currentJson.data.activeSceneIds || []) {
-      addEdge(graph, taskId, `scene:${sceneId}`, "active-scene", "runtime/current.json");
+    for (const sceneId of sceneRefs) {
+      addEdge(graph, nodeId, `scene:${sceneId}`, isActive ? "active-scene" : "task-scene", taskPath);
     }
   }
 
@@ -263,6 +282,35 @@ async function existsAt(rootPath, relativePath) {
   } catch {
     return false;
   }
+}
+
+async function discoverTaskPaths(rootPath, currentData = {}) {
+  const paths = [];
+  const addPath = (relativePath) => {
+    if (relativePath && !paths.includes(relativePath)) {
+      paths.push(relativePath);
+    }
+  };
+
+  addPath(currentData?.activeTaskPath);
+  for (const taskId of currentData?.recentTaskIds || []) {
+    addPath(`runtime/tasks/${taskId}.json`);
+  }
+
+  try {
+    const entries = await fs.readdir(resolveInside(rootPath, "runtime/tasks"), { withFileTypes: true });
+    for (const entry of entries) {
+      if (entry.isFile() && entry.name.endsWith(".json")) {
+        addPath(`runtime/tasks/${entry.name}`);
+      }
+    }
+  } catch (error) {
+    if (error?.code !== "ENOENT") {
+      throw error;
+    }
+  }
+
+  return paths;
 }
 
 function buildDetails(graph) {

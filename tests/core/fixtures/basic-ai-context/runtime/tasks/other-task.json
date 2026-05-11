@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "id": "other-task",
+  "title": "Other Task",
+  "projectIds": [
+    "demo-project"
+  ],
+  "sceneIds": [
+    "demo-scene"
+  ],
+  "currentGate": "G2",
+  "status": "active",
+  "gates": [
+    {
+      "id": "G1",
+      "name": "Intent / Intake",
+      "purpose": "Understand other task.",
+      "status": "done"
+    },
+    {
+      "id": "G2",
+      "name": "Discovery",
+      "purpose": "Research other task.",
+      "status": "in_progress"
+    }
+  ]
+}

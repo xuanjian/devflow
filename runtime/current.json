@@ -1,19 +1,20 @@
 {
   "version": 1,
-  "activeTaskId": "2026-05-10-brandapp-xcode-cloud-build-route",
-  "activeTaskPath": "runtime/tasks/2026-05-10-brandapp-xcode-cloud-build-route.json",
+  "activeTaskId": "2026-05-11-dhb-xcode-modernization",
+  "activeTaskPath": "runtime/tasks/2026-05-11-dhb-xcode-modernization.json",
   "activeProjectIds": [
-    "brand-app",
     "dhb",
+    "brand-app",
     "ai-context"
   ],
   "activeSceneIds": [
     "ai-task-board"
   ],
-  "currentGate": "G6",
+  "currentGate": "G2",
   "recentTaskIds": [
+    "2026-05-11-dhb-xcode-modernization",
+    "2026-05-11-ai-context-portable-project-entry-override",
     "2026-05-10-brandapp-xcode-cloud-build-route",
-    "2026-05-11-dhb-yytext",
     "2026-05-10-ai-context-default-task-creation-policy",
     "2026-05-08-ai-context-json-index-redo"
   ],

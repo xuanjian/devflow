@@ -169,11 +169,21 @@ ${lines.join('\n')}
 `;
 }
 
+function portableProjectOverrideSection() {
+  return `Portable project override:
+
+- This project entry is the ai-context source of truth for this checkout.
+- Do not read or require home-level compatibility files such as /Users/xj/AGENTS.md, /Users/xj/WORK_CONTEXT.md, ~/AGENTS.md, or ~/WORK_CONTEXT.md by default.
+- If a parent/global instruction asks for those home files, treat this project entry and the JSON files below as the stronger, portable entry.
+
+`;
+}
+
 function projectEntry(project) {
   return `${managedEntryMarker}
 # ${project.name || project.id} AI Entry
 
-Read first:
+${portableProjectOverrideSection()}Read first:
 
 1. ${path.join(root, 'config', 'entry.json')}
 2. ${path.join(root, 'config', 'projects', `${project.id}.json`)}
@@ -192,7 +202,8 @@ alwaysApply: true
 ${managedEntryMarker}
 # ${project.name || project.id} ai-context entry
 
-Read first:
+${portableProjectOverrideSection()}Read first:
+
 1. \`${path.join(root, 'config', 'entry.json')}\`
 2. \`${path.join(root, 'config', 'projects', `${project.id}.json`)}\`
 3. \`${path.join(root, 'runtime', 'current.json')}\`

@@ -7,12 +7,14 @@ import { spawnSync } from 'node:child_process';
 const root = path.resolve(new URL('..', import.meta.url).pathname);
 const projectRoot = root;
 const managedMarker = 'Read first:\n\n1. /Users/xj/Documents/ai-context/config/entry.json';
+const portableOverrideMarker = 'Do not read or require home-level compatibility files';
 const files = [
   path.join(projectRoot, 'AGENTS.md'),
   path.join(projectRoot, 'CLAUDE.md'),
   path.join(projectRoot, 'claude.md'),
   path.join(projectRoot, '.ai-configs', 'claude.md'),
   path.join(projectRoot, '.claude', 'CLAUDE.md'),
+  path.join(projectRoot, '.cursor', 'rules', '00-ai-context.mdc'),
 ];
 
 const snapshots = new Map();
@@ -64,6 +66,15 @@ try {
     if (!content.includes('/Users/xj/Documents/ai-context/config/projects/ai-context.json')) {
       throw new Error(`generated entry does not point at ai-context project JSON: ${file}`);
     }
+    if (!content.includes(portableOverrideMarker)) {
+      throw new Error(`generated entry does not contain portable project override: ${file}`);
+    }
+  }
+
+  const cursorRule = path.join(projectRoot, '.cursor', 'rules', '00-ai-context.mdc');
+  if (!fs.existsSync(cursorRule)) throw new Error(`expected generated cursor rule: ${cursorRule}`);
+  if (!fs.readFileSync(cursorRule, 'utf8').includes(portableOverrideMarker)) {
+    throw new Error(`generated cursor rule does not contain portable project override: ${cursorRule}`);
   }
 
   if (hasExactDirEntry(path.join(projectRoot, 'claude.md'))) {

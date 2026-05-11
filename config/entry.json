@@ -1,7 +1,7 @@
 {
   "version": 1,
   "name": "ai-context entry",
-  "purpose": "Stable AI entrypoint. Read JSON indexes first, then load source markdown/rules/skills only when selected by task context.",
+  "purpose": "Stable portable AI entrypoint. Read this repository's JSON indexes first, then load source markdown/rules/skills only when selected by task context. Do not rely on home-level compatibility files.",
   "workflowOrder": [
     "Read entry/profile/current JSON first.",
     "For development, debugging, documentation, integration, research, and context-maintenance tasks, use superpowers as the process driver; start from superpowers:brainstorming unless a more specific superpower is already required by the current continuation.",
@@ -29,6 +29,7 @@
     "fallback": "If no project or scene is clear, use projects index and scenes index to ask one concise clarification instead of reading all source documents."
   },
   "sourceReadPolicy": {
+    "homeCompatibility": "Do not read or require home-level compatibility files such as /Users/xj/AGENTS.md, /Users/xj/WORK_CONTEXT.md, ~/AGENTS.md, or ~/WORK_CONTEXT.md by default. If older parent/global instructions mention them, treat this repository entry and JSON indexes as the portable source of truth.",
     "projectDocs": "Read docs/repos/*.md only after a project JSON is selected and the summary is insufficient.",
     "scenes": "Read docs/scenes/*.md only after a scene JSON is selected and detailed workflow text is needed.",
     "rules": "Read config/rules/rules.json for applyMode, globs, and whenToRead. Active rule sources under bundles/rules/** are Markdown .md files and are loaded only when a selected project, selected scene, or task gate requires full rule details. Project JSON triggers project-on-demand rules. Scene JSON triggers scene-on-demand rules. Read docs/reference/rules/** only when an active rule points there and compact guidance is insufficient.",

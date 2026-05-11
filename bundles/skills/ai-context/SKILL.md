@@ -12,6 +12,7 @@ This skill is the single AI entrypoint for the local `ai-context` repository.
 It keeps AI context loading small and stable:
 
 - Read JSON indexes first.
+- Treat the `ai-context` repository entry as portable source of truth; do not read or require home-level compatibility files such as `/Users/xj/AGENTS.md` or `/Users/xj/WORK_CONTEXT.md` by default.
 - For development, debugging, documentation, integration, research, and context-maintenance tasks, use superpowers as the process driver; begin with `superpowers:brainstorming` unless the current continuation clearly requires a more specific superpower.
 - Use `ai-task-board` as the task-state and project-scope layer, not as the workflow driver.
 - Select the project and scene from JSON.
@@ -24,6 +25,10 @@ It keeps AI context loading small and stable:
 2. `<ai-context-root>/config/profile.json`
 3. `<ai-context-root>/runtime/current.json`
 4. Active task file from `runtime/current.json`
+
+Do not read home-level compatibility files such as `/Users/xj/AGENTS.md`,
+`/Users/xj/WORK_CONTEXT.md`, `~/AGENTS.md`, or `~/WORK_CONTEXT.md` unless the
+user explicitly asks to inspect or repair those compatibility files.
 
 Do not read every file under `docs/repos/`, `docs/scenes/`, `bundles/rules/`, or `bundles/skills/` by default.
 

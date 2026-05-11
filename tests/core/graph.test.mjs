@@ -40,9 +40,16 @@ test("getNodeDetails returns reverse relationships and documentation summary", a
 test("buildContextGraph exposes active task gates for task-board views", async () => {
   const graph = await buildContextGraph({ rootDir: new URL("./fixtures/basic-ai-context/", import.meta.url) });
 
-  assert.ok(graph.nodes.find((node) => node.id === "task:demo-task"));
+  const activeTask = graph.nodes.find((node) => node.id === "task:demo-task");
+  const otherTask = graph.nodes.find((node) => node.id === "task:other-task");
+  assert.ok(activeTask);
+  assert.equal(activeTask.raw.isActive, true);
+  assert.ok(otherTask);
+  assert.equal(otherTask.raw.isActive, false);
   assert.ok(graph.nodes.find((node) => node.id === "gate:demo-task:G1"));
+  assert.ok(graph.nodes.find((node) => node.id === "gate:other-task:G2"));
   assert.ok(graph.edges.find((edge) => edge.from === "task:demo-task" && edge.to === "gate:demo-task:G1" && edge.relation === "has-gate"));
+  assert.ok(graph.edges.find((edge) => edge.from === "task:other-task" && edge.to === "gate:other-task:G2" && edge.relation === "has-gate"));
 
   const details = getNodeDetails(graph, "task:demo-task");
   assert.ok(details.related.gates.some((node) => node.id === "gate:demo-task:G1"));
