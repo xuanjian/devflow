@@ -1,22 +1,10 @@
 {
   "version": 1,
-  "activeTaskId": "2026-05-11-dhb-17763-ios",
-  "activeTaskPath": "runtime/tasks/2026-05-11-dhb-17763-ios.json",
-  "activeProjectIds": [
-    "dhb"
-  ],
-  "activeSceneIds": [
-    "ai-task-board"
-  ],
-  "currentGate": "G7",
-  "recentTaskIds": [
-    "2026-05-11-dhb-17763-ios",
-    "2026-05-11-xcode-cloud-webhook-node-agent",
-    "2026-05-11-dhb-xcode-modernization",
-    "2026-05-11-ai-context-portable-project-entry-override",
-    "2026-05-10-brandapp-xcode-cloud-build-route",
-    "2026-05-10-ai-context-default-task-creation-policy",
-    "2026-05-08-ai-context-json-index-redo"
-  ],
-  "note": "Current work is stored in task JSON. runtime/current-work.md is deprecated."
+  "activeTaskId": null,
+  "activeTaskPath": null,
+  "activeProjectIds": [],
+  "activeSceneIds": [],
+  "currentGate": null,
+  "recentTaskIds": [],
+  "note": "Fresh install state. No active task. Run ai-context-init to configure local context."
 }

@@ -76,7 +76,7 @@ export default function OverviewView({ graph, checks, onSelectNode, onViewChange
       <section className="overview-wide">
         <div>
           <h2>当前执行状态</h2>
-          <p>superpowers 推进流程，ai-task-board 记录任务走到哪一步。中途补充引导或处理权限后，继续回到原任务恢复点。</p>
+          <p>superpowers 推进流程，runtime task state 记录任务走到哪一步。中途补充引导或处理权限后，继续回到原任务恢复点。</p>
         </div>
         <div className="overview-summary-list">
           <SummaryPill label="节点总数" value={nodes.length} />

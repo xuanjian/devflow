@@ -1,28 +1,30 @@
 {
   "version": 1,
   "id": "ai-context-config",
-  "name": "ai-context 配置索引流程",
-  "summary": "ai-context 自身的配置、安装、任务 Gate 和索引生成流程。",
-  "purpose": "让 AI 先读 JSON 索引，再按需加载项目、场景、规则和 skill 原文。",
+  "name": "ai-context configuration",
+  "summary": "Install, validate, and initialize ai-context.",
+  "purpose": "Keep a fresh ai-context checkout usable before any personal projects, scenes, skills, or rules have been imported.",
   "source": {
     "path": "config/entry.json",
-    "whenToRead": "Read when installing or modifying ai-context itself."
+    "whenToRead": "Read when installing, validating, or initializing ai-context."
   },
-  "whyThisComposition": "This scene groups 1 project(s) because they commonly participate in: ai-context 自身的配置、安装、任务 Gate 和索引生成流程。. Load individual project JSON first, then source markdown only for detailed execution rules.",
+  "whyThisComposition": "Fresh install state contains only the ai-context project. Run ai-context-init to add local projects and relationships.",
   "projects": [
     {
       "id": "ai-context",
       "name": "ai-context",
       "role": "configuration-center",
       "projectIndexPath": "config/projects/ai-context.json",
-      "reason": "ai-context is part of ai-context 自身的配置、安装、任务 Gate 和索引生成流程。."
+      "reason": "Core project required for installation and onboarding."
     }
   ],
+  "rules": [],
   "operationGuide": {
-    "environmentSwitching": "No business environment switch. Use scripts/install-ai-context.mjs check/validate/install.",
-    "startup": "Open config JSON or docs/prototypes/context-studio.html for the product prototype.",
+    "installation": "Run node scripts/install-ai-context.mjs install.",
+    "onboarding": "Ask the AI tool to run the ai-context-init skill after install.",
+    "validation": "Run node scripts/install-ai-context.mjs validate and npm test.",
     "notes": [
-      "Future real app code should live under src/."
+      "No personal projects, rules, skills, or tasks are configured in the fresh state."
     ]
   },
   "readPolicy": {
@@ -33,6 +35,6 @@
       "config/entry.json",
       "config/projects/ai-context.json"
     ],
-    "notes": "Do not load every project in the scene. Select projects based on the user request first."
+    "notes": "Do not load optional source files until the user starts initialization."
   }
 }

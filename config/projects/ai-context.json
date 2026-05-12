@@ -3,27 +3,28 @@
   "id": "ai-context",
   "name": "ai-context",
   "technologyFamilyId": "workflow",
-  "technologyFamilyName": "工作流",
+  "technologyFamilyName": "Workflow",
   "repoType": "context-config-center",
-  "summary": "本地 AI 上下文中心、JSON 索引、安装入口和任务 Gate 流程项目。",
-  "path": "/Users/xj/Documents/ai-context",
+  "summary": "AI context configuration center, installer, onboarding skill, and task-flow skeleton.",
+  "path": ".",
   "tags": [
     "ai-context",
-    "workflow"
+    "workflow",
+    "starter"
   ],
   "doc": {
     "path": "README.md",
     "title": "ai-context",
-    "summary": "本地 AI 上下文中心、JSON 索引、安装入口和任务 Gate 流程项目。",
-    "whenToRead": "Read only after this project is selected for the task or the JSON summary is insufficient."
+    "summary": "Install ai-context, then run ai-context-init to configure local profile, projects, scenes, skills, and rules.",
+    "whenToRead": "Read after selecting the ai-context project or when installing/configuring this repository."
   },
   "scenes": [
     {
       "id": "ai-context-config",
-      "name": "ai-context 配置索引流程",
-      "summary": "ai-context 自身的配置、安装、任务 Gate 和索引生成流程。",
+      "name": "ai-context configuration",
+      "summary": "Install, validate, and initialize ai-context.",
       "sourcePath": "config/entry.json",
-      "reason": "ai-context participates in ai-context 自身的配置、安装、任务 Gate 和索引生成流程。."
+      "reason": "Core setup scene for a fresh ai-context installation."
     }
   ],
   "skills": [
@@ -32,14 +33,7 @@
       "name": "ai-context",
       "description": "Use when entering, installing, validating, or modifying ai-context, or when routing tasks through project/scene/rule/skill JSON indexes.",
       "sourcePath": "bundles/skills/ai-context/SKILL.md",
-      "whenToLoad": "Load when ai-context task needs ai-context."
-    },
-    {
-      "id": "ui-ux-pro-max",
-      "name": "ui-ux-pro-max",
-      "description": "UI/UX design intelligence for web and mobile. Includes 50+ styles, 161 color palettes, 57 font pairings, 161 product types, 99 UX guidelines, and 25 chart types across 10 stacks (React, Next.js, Vue, Svelte, SwiftUI, React Native, Flutter, Tailwind, shadcn/ui, and HTML/CSS). Actions: plan, build, create, design, implement, review, fix, improve, optimize, enhance, refactor, and check UI/UX code. Projects: website, landing page, dashboard, admin panel, e-commerce, SaaS, portfolio, blog, and mobile app. Elements: button, modal, navbar, sidebar, card, table, form, and chart. Styles: glassmorphism, claymorphism, minimalism, brutalism, neumorphism, bento grid, dark mode, responsive, skeuomorphism, and flat design. Topics: color systems, accessibility, animation, layout, typography, font pairing, spacing, interaction states, shadow, and gradient. Integrations: shadcn/ui MCP for component search and examples.",
-      "sourcePath": "bundles/skills/ui-ux-pro-max/SKILL.md",
-      "whenToLoad": "Load when ui-ux-pro-max task needs ui-ux-pro-max."
+      "whenToLoad": "Load when installing, validating, or modifying ai-context."
     },
     {
       "id": "ai-context-init",

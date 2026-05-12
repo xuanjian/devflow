@@ -230,11 +230,11 @@ function fieldsForModal(type) {
   const commonProjectMount = {
     name: "projectIds",
     label: "挂载项目 ID",
-    placeholder: "多个用逗号分隔，例如 bff-payment,demo-project"
+    placeholder: "多个用逗号分隔，例如 api-service,demo-project"
   };
   if (type === "project") {
     return [
-      { name: "projectPath", label: "项目路径", required: true, placeholder: "/Users/xj/Documents/node/bff-payment" },
+      { name: "projectPath", label: "项目路径", required: true, placeholder: "/path/to/project" },
       { name: "projectId", label: "项目 ID", placeholder: "不填则用目录名生成" },
       { name: "name", label: "项目名称", placeholder: "不填则用 package/name 或目录名" },
       { name: "technologyFamilyId", label: "技术族", placeholder: "frontend / bff / ios / workflow / unknown" }
@@ -262,7 +262,7 @@ function fieldsForModal(type) {
     { name: "purpose", label: "规则用途", type: "textarea", placeholder: "没有现成规则文件时，这里用于生成配套 rule 文件" },
     { name: "sourcePath", label: "现有规则文件路径", placeholder: "可选，支持 .md / .mdc" },
     commonProjectMount,
-    { name: "sceneIds", label: "挂载场景 ID", placeholder: "多个用逗号分隔，例如 ai-task-board,payment-debug" },
+    { name: "sceneIds", label: "挂载场景 ID", placeholder: "多个用逗号分隔，例如 ai-context-config,payment-debug" },
     {
       name: "applyMode",
       label: "触发方式",

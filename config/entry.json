@@ -1,19 +1,17 @@
 {
   "version": 1,
   "name": "ai-context entry",
-  "purpose": "Stable portable AI entrypoint. Read this repository's JSON indexes first, then load source markdown/rules/skills only when selected by task context. Do not rely on home-level compatibility files.",
+  "purpose": "Stable portable AI entrypoint. Read this repository JSON indexes first, then load source markdown/rules/skills only when selected by task context. Do not rely on home-level compatibility files.",
   "workflowOrder": [
     "Read entry/profile/current JSON first.",
-    "For development, debugging, documentation, integration, research, and context-maintenance tasks, use superpowers as the process driver; start from superpowers:brainstorming unless a more specific superpower is already required by the current continuation.",
-    "Use ai-task-board as the task-state and project-scope layer: classify task size, affected projects/scenes, current G1-G7 gate, roles, verification path, blockers, recovery point, and dashboard-visible progress.",
-    "When the work should survive the chat, create or update runtime task state with contextctl task start/update/finish before implementation.",
-    "After the superpower-driven step and ai-task-board state classification are clear, load only the selected project JSON, scene JSON, rules, and project skills."
+    "Use ai-context-init after install to collect local profile, projects, scenes, skills, and rules.",
+    "Use project and scene indexes to select only the context needed for the current task.",
+    "When work should survive the chat, create or update runtime task state with contextctl task start/update/finish before implementation."
   ],
   "defaultReadOrder": [
     "config/entry.json",
     "config/profile.json",
     "runtime/current.json",
-    "runtime/tasks/<activeTaskId>.json",
     "config/projects/index.json",
     "matched config/projects/<project-id>.json",
     "config/scenes/index.json",
@@ -26,16 +24,16 @@
     "projectsIndex": "Read config/projects/index.json first as the candidate list. Use id, name, technologyFamilyId, path, and summary to choose matched project JSON files.",
     "projectDetail": "After selecting a project, read config/projects/<project-id>.json for doc path, mounted skills, scenes, rules, and source read policy.",
     "scenesIndex": "Read config/scenes/index.json as the candidate list when the task may involve a workflow scene or multiple projects.",
-    "sceneDetail": "After selecting a scene, read config/scenes/<scene-id>.json for included projects, mounted scene rules, composition reason, environment switching, run/debug, and source scene doc path.",
-    "fallback": "If no project or scene is clear, use projects index and scenes index to ask one concise clarification instead of reading all source documents."
+    "sceneDetail": "After selecting a scene, read config/scenes/<scene-id>.json for included projects, mounted scene rules, composition reason, run/debug notes, and source scene doc path.",
+    "fallback": "If no project or scene is clear, ask one concise clarification instead of reading all source documents."
   },
   "sourceReadPolicy": {
-    "homeCompatibility": "Do not read or require home-level compatibility files such as /Users/xj/AGENTS.md, /Users/xj/WORK_CONTEXT.md, ~/AGENTS.md, or ~/WORK_CONTEXT.md by default. If older parent/global instructions mention them, treat this repository entry and JSON indexes as the portable source of truth.",
+    "homeCompatibility": "Do not read or require home-level compatibility files by default. Treat this repository entry and JSON indexes as the portable source of truth.",
     "projectDocs": "Read docs/repos/*.md only after a project JSON is selected and the summary is insufficient.",
     "scenes": "Read docs/scenes/*.md only after a scene JSON is selected and detailed workflow text is needed.",
-    "rules": "Read config/rules/rules.json for applyMode, globs, and whenToRead. Active rule sources under bundles/rules/** are Markdown .md files and are loaded only when a selected project, selected scene, or task gate requires full rule details. Project JSON triggers project-on-demand rules. Scene JSON triggers scene-on-demand rules. Read docs/reference/rules/** only when an active rule points there and compact guidance is insufficient.",
-    "skills": "Read active bundles/skills/** only when the superpower-driven process, ai-task-board task state, a selected project JSON, or an explicit user request triggers the skill. Read docs/reference/skills/** only for archived detail when the active skill is insufficient. Superpowers drive the workflow; ai-task-board records task scale, gate, scope, blockers, recovery point, and dashboard state.",
-    "profile": "Read docs/person/profile.md only when long-term preferences or project map details matter."
+    "rules": "Read config/rules/rules.json first. Active rule sources under bundles/rules/** are loaded only when selected by project, scene, or task gate.",
+    "skills": "Read active bundles/skills/** only when task state, project JSON, or an explicit user request triggers the skill.",
+    "profile": "A fresh install has no long profile. Run ai-context-init to create local profile details."
   },
   "installation": {
     "script": "scripts/install-ai-context.mjs",
@@ -76,25 +74,11 @@
     "currentPointer": "runtime/current.json",
     "activeTaskPattern": "runtime/tasks/<task-id>.json",
     "gatesPath": "config/tasks/gates.json",
-    "defaultBehavior": "In any project window that can read the ai-context entry, start or update a runtime task for real development work that should survive the chat. This is not tied to a specific product, repository, or active task.",
+    "defaultBehavior": "Fresh install has no active task. Create task JSON only when the user starts work that should survive the chat.",
     "commands": [
-      "node scripts/contextctl.mjs task start \"<title>\" --projects <ids> --scenes ai-task-board --gate G1 --level <L1-L4>",
+      "node scripts/contextctl.mjs task start \"<title>\" --projects <ids> --scenes <ids> --gate G1 --level <L1-L4>",
       "node scripts/contextctl.mjs task update [task-id] --gate <G1-G7> --note \"<progress or decision>\"",
       "node scripts/contextctl.mjs task finish [task-id] --note \"<verification and handoff>\""
-    ],
-    "autoCreateTriggers": [
-      "Any Jira, issue, ticket, Notion task, Figma task, PRD, spec, or external task identifier/link provided by the user.",
-      "Requests to add a module, page, feature, workflow, API, integration, build route, release route, or other multi-file/multi-step capability.",
-      "User wording such as 改一个需求, 新增需求, or 这个需求 when the change is not obviously a one-line fix.",
-      "Cross-project, cross-device, CI/CD, release, packaging, App Store, GitHub, GitLab, Xcode Cloud, signing, credentials, migration, data, permission, money, inventory, or high-risk workflow work.",
-      "L3/L4 tasks, multi-session work, cross-day work, or tasks with explicit discovery, plan, development, acceptance, handoff, current gate, or recovery-point needs.",
-      "User wording such as 建 task, 走 ai-context task, 同步到 task, 按 G1-G7, 后面继续, 记录这个流程, 自动去写, or 任务看板."
-    ],
-    "bias": "When unsure whether a development request is L1 or L2+, bias toward starting a light task and set the level honestly. Ask only when the target project cannot be inferred from the workspace, Jira/source text, or project index.",
-    "skipTaskFor": [
-      "Throwaway chat.",
-      "One-line answers.",
-      "Small L1/L2 edits that are not part of an active tracked flow and do not affect release/build/deployment behavior."
     ],
     "gates": [
       "G1",
@@ -104,8 +88,7 @@
       "G5",
       "G6",
       "G7"
-    ],
-    "currentWorkMarkdown": "deprecated; do not read or update runtime/current-work.md"
+    ]
   },
   "indexes": {
     "profile": "config/profile.json",

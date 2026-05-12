@@ -12,7 +12,7 @@ test("App renders loading state then main regions", async () => {
     .mockResolvedValueOnce({ ok: true, json: async () => ({
       nodes: [
         { id: "task:demo", type: "task", title: "Demo Task", status: "ok", raw: { currentGate: "G4", status: "doing", projectIds: ["demo"] } },
-        { id: "profile:main", type: "profile", title: "Persona Profile", status: "ok", raw: { role: "Developer", products: ["DHB"], strengths: ["React"] }, docPath: "docs/person/profile.md" }
+        { id: "profile:main", type: "profile", title: "Persona Profile", status: "ok", raw: { role: "Developer", products: ["DemoProduct"], strengths: ["React"] }, docPath: "docs/person/profile.md" }
       ],
       edges: [],
       groups: [],

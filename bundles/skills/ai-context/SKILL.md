@@ -12,9 +12,9 @@ This skill is the single AI entrypoint for the local `ai-context` repository.
 It keeps AI context loading small and stable:
 
 - Read JSON indexes first.
-- Treat the `ai-context` repository entry as portable source of truth; do not read or require home-level compatibility files such as `/Users/xj/AGENTS.md` or `/Users/xj/WORK_CONTEXT.md` by default.
+- Treat the `ai-context` repository entry as portable source of truth; do not read or require home-level compatibility files by default.
 - For development, debugging, documentation, integration, research, and context-maintenance tasks, use superpowers as the process driver; begin with `superpowers:brainstorming` unless the current continuation clearly requires a more specific superpower.
-- Use `ai-task-board` as the task-state and project-scope layer, not as the workflow driver.
+- Use `runtime/current.json` and task JSON as the task-state layer, not as the workflow driver.
 - Select the project and scene from JSON.
 - Load Markdown, rules, or other skills only when the selected JSON says they are needed.
 - Store active work in `runtime/current.json` and `runtime/tasks/<task-id>.json`.
@@ -26,9 +26,8 @@ It keeps AI context loading small and stable:
 3. `<ai-context-root>/runtime/current.json`
 4. Active task file from `runtime/current.json`
 
-Do not read home-level compatibility files such as `/Users/xj/AGENTS.md`,
-`/Users/xj/WORK_CONTEXT.md`, `~/AGENTS.md`, or `~/WORK_CONTEXT.md` unless the
-user explicitly asks to inspect or repair those compatibility files.
+Do not read home-level compatibility files unless the user explicitly asks to
+inspect or repair those compatibility files.
 
 Do not read every file under `docs/repos/`, `docs/scenes/`, `bundles/rules/`, or `bundles/skills/` by default.
 
@@ -46,12 +45,12 @@ Routing order:
 
 1. Read entry/profile/current JSON.
 2. If the task is development, debugging, documentation, integration, research, or context maintenance, enter the superpower-driven flow first, normally starting from `superpowers:brainstorming`.
-3. Use `ai-task-board` to classify task size, affected projects/scenes, current G1-G7 gate, roles, verification path, blockers, recovery point, and dashboard-visible state.
+3. Use runtime task state to classify task size, affected projects/scenes, current G1-G7 gate, roles, verification path, blockers, recovery point, and dashboard-visible state.
 4. Read project and scene indexes as candidate lists, then read only selected detail JSON files.
-5. Load source Markdown, rules, project skills, or additional superpowers only when the active superpower flow, `ai-task-board` task state, or selected detail JSON requires them.
+5. Load source Markdown, rules, project skills, or additional superpowers only when the active superpower flow, runtime task state, or selected detail JSON requires them.
 6. When a selected scene has `rules`, resolve those ids through `config/rules/rules.json` and load only the matching `scene-on-demand` rule sources when the task needs scene-level guidance.
 
-Superpowers drive the workflow. `ai-task-board` makes that workflow visible by recording size, scope, gate, roles, blockers, recovery point, and progress; it does not replace or outrank superpower process rules.
+Superpowers drive the workflow. Runtime task state makes that workflow visible by recording size, scope, gate, roles, blockers, recovery point, and progress; it does not replace or outrank superpower process rules.
 
 Project JSON owns project relationships:
 
@@ -95,7 +94,7 @@ multiple indexes for routine additions when a `contextctl` command can do it.
 
 ```bash
 node scripts/contextctl.mjs doctor
-node scripts/contextctl.mjs task start "<title>" --projects <ids> --scenes ai-task-board --gate G1 --level <L1-L4>
+node scripts/contextctl.mjs task start "<title>" --projects <ids> --scenes <ids> --gate G1 --level <L1-L4>
 node scripts/contextctl.mjs task update [task-id] --gate <G1-G7> --note "<progress or decision>"
 node scripts/contextctl.mjs task finish [task-id] --note "<verification and handoff>"
 node scripts/contextctl.mjs add project <repo-path>

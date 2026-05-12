@@ -6,7 +6,7 @@ import { spawnSync } from 'node:child_process';
 
 const root = path.resolve(new URL('..', import.meta.url).pathname);
 const projectRoot = root;
-const managedMarker = 'Read first:\n\n1. /Users/xj/Documents/ai-context/config/entry.json';
+const managedMarker = 'Read first:\n\n1. config/entry.json';
 const portableOverrideMarker = 'Do not read or require home-level compatibility files';
 const files = [
   path.join(projectRoot, 'AGENTS.md'),
@@ -63,7 +63,7 @@ try {
   ]) {
     if (!fs.existsSync(file)) throw new Error(`expected generated entry file: ${file}`);
     const content = fs.readFileSync(file, 'utf8');
-    if (!content.includes('/Users/xj/Documents/ai-context/config/projects/ai-context.json')) {
+    if (!content.includes('config/projects/ai-context.json')) {
       throw new Error(`generated entry does not point at ai-context project JSON: ${file}`);
     }
     if (!content.includes(portableOverrideMarker)) {

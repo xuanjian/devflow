@@ -23,7 +23,19 @@ export async function runChecks({ rootDir = process.cwd(), runCommands = true } 
   checks.push(await viteAppCheck(rootPath));
   checks.push(jsonCheck("entry_json", "Entry JSON", "config", entry));
   checks.push(jsonCheck("profile_json", "Profile JSON", "profile", profile, "create_minimal_profile_json"));
-  checks.push(await fileCheck(rootPath, "person_profile_doc", "Persona profile document", "profile", profile.data?.sourcePath || "docs/person/profile.md", "create_minimal_person_profile"));
+  if (!profile.ok) {
+    checks.push(await fileCheck(rootPath, "person_profile_doc", "Persona profile document", "profile", "docs/person/profile.md", "create_minimal_person_profile"));
+  } else if (profile.data?.sourcePath) {
+    checks.push(await fileCheck(rootPath, "person_profile_doc", "Persona profile document", "profile", profile.data.sourcePath, "create_minimal_person_profile"));
+  } else {
+    checks.push({
+      id: "person_profile_doc",
+      title: "Persona profile document",
+      area: "profile",
+      status: "pass",
+      message: "Fresh install has no profile document yet. Run ai-context-init to create one."
+    });
+  }
   checks.push(jsonCheck("projects_index", "Projects index", "config", projects));
   checks.push(jsonCheck("scenes_index", "Scenes index", "config", scenes));
   checks.push(jsonCheck("skills_catalog", "Skills catalog", "config", skills));

@@ -5,15 +5,13 @@
 # or environment-specific evidence. Track the protocol README, not ticket data.
 runtime/tasks/*
 !runtime/tasks/README.md
-!runtime/tasks/*.json
+!runtime/tasks/.gitkeep
 
-# Skill runtime outputs. Keep source scripts/templates, ignore local backups/logs.
-bundles/skills/dhb-local-env/runtime/backups/*
-bundles/skills/dhb-local-env/runtime/logs/*
-bundles/skills/dhb-local-env/runtime/pids/*
-
-# Local editor and tool noise.
+# Local editor, generated skill links, and tool noise.
+.codex/skills/
+.claude/skills/
 node_modules/
+.playwright-mcp/
 .superpowers/
 .idea/
 .vscode/

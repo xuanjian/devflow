@@ -68,7 +68,7 @@ function usage() {
 Task options:
   --id <id>                 Task id. Defaults to YYYY-MM-DD + title slug.
   --projects <a,b,c>        Active project ids.
-  --scenes <a,b,c>          Active scene ids. Use ai-task-board for visible task state.
+  --scenes <a,b,c>          Active scene ids.
   --gate <G1-G7>            Current gate. Defaults to G1 for start.
   --status <status>         Task status. Defaults to active for start, done for finish.
   --level <L1-L4>           Task size/risk level.
@@ -88,7 +88,7 @@ Add project options:
   --repo-type <type>        Defaults from family.
   --summary <summary>       Project summary.
   --tags <a,b,c>            Tags.
-  --scenes <a,b,c>          Scene ids to mount. Defaults to single-repo-change.
+  --scenes <a,b,c>          Scene ids to mount. Defaults to the first configured scene.
   --rules <a,b,c>           Project rule ids to mount.
   --skills <a,b,c>          Skill ids to mount.
   --yes                     Use inferred/default values without prompts.
@@ -470,9 +470,6 @@ function inferRepoType(family, pkg) {
 function inferTags(id, projectPath, family) {
   const normalized = projectPath.toLowerCase();
   const tags = [family];
-  if (normalized.includes('dhb')) tags.push('dhb');
-  if (normalized.includes('hxb')) tags.push('hxb');
-  if (normalized.includes('yxt')) tags.push('yxt');
   if (id.includes('mobile') || normalized.includes('/h5') || normalized.includes('h5')) tags.push('mobile');
   if (id.includes('mini')) tags.push('mini-program');
   if (id.includes('bff')) tags.push('bff');
@@ -493,9 +490,6 @@ function inferRole(project) {
 }
 
 function inferDefaultScenes(sceneIndex) {
-  if ((sceneIndex.scenes || []).some(scene => scene.id === 'single-repo-change')) {
-    return ['single-repo-change'];
-  }
   return sceneIndex.scenes?.[0]?.id ? [sceneIndex.scenes[0].id] : [];
 }
 
@@ -504,9 +498,6 @@ function inferDefaultRules(project, ruleCatalog) {
   const candidates = [];
   if (project.technologyFamilyId === 'frontend') candidates.push('frontend/core');
   if (project.technologyFamilyId === 'bff') candidates.push('bff/egg-service');
-  if (project.technologyFamilyId === 'ios' && /dhb/i.test(`${project.id} ${project.path}`)) {
-    candidates.push('ios-dhb/core');
-  }
   return candidates.filter(id => ruleIds.has(id));
 }
 
@@ -514,12 +505,6 @@ function inferDefaultSkills(project, skillCatalog) {
   if (project.id === 'ai-context') return ['ai-context'];
   const skillIds = new Set((skillCatalog.skills || []).map(skill => skill.id));
   const candidates = [];
-  if (project.technologyFamilyId === 'frontend') {
-    candidates.push('ui-ux-pro-max');
-  }
-  if (project.technologyFamilyId === 'frontend' && /dhb/i.test(`${project.id} ${project.path}`)) {
-    candidates.push('dhb-local-env');
-  }
   return candidates.filter(id => skillIds.has(id));
 }
 
@@ -657,7 +642,7 @@ ${project.summary}
 ## 与其他项目关系
 
 - 先由 \`config/projects/${project.id}.json\` 和命中的 scene JSON 判断关系。
-- 不确定链路时，使用 superpowers 推进澄清，并用 \`ai-task-board\` 记录项目、场景、Gate 和恢复位置。
+- 不确定链路时，使用 superpowers 推进澄清，并用 runtime task state 记录项目、场景、Gate 和恢复位置。
 
 ## 读取建议
 

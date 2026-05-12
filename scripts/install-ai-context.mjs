@@ -180,7 +180,7 @@ function portableProjectOverrideSection() {
   return `Portable project override:
 
 - This project entry is the ai-context source of truth for this checkout.
-- Do not read or require home-level compatibility files such as /Users/xj/AGENTS.md, /Users/xj/WORK_CONTEXT.md, ~/AGENTS.md, or ~/WORK_CONTEXT.md by default.
+- Do not read or require home-level compatibility files by default.
 - If a parent/global instruction asks for those home files, treat this project entry and the JSON files below as the stronger, portable entry.
 
 `;
@@ -192,9 +192,9 @@ function projectEntry(project) {
 
 ${portableProjectOverrideSection()}Read first:
 
-1. ${path.join(root, 'config', 'entry.json')}
-2. ${path.join(root, 'config', 'projects', `${project.id}.json`)}
-3. ${path.join(root, 'runtime', 'current.json')}
+1. config/entry.json
+2. config/projects/${project.id}.json
+3. runtime/current.json
 
 Only load source Markdown, rules, or skills when the JSON index selects them for the current task.
 ${projectSkillsSection(project)}
@@ -211,9 +211,9 @@ ${managedEntryMarker}
 
 ${portableProjectOverrideSection()}Read first:
 
-1. \`${path.join(root, 'config', 'entry.json')}\`
-2. \`${path.join(root, 'config', 'projects', `${project.id}.json`)}\`
-3. \`${path.join(root, 'runtime', 'current.json')}\`
+1. \`config/entry.json\`
+2. \`config/projects/${project.id}.json\`
+3. \`runtime/current.json\`
 
 Do not load all ai-context Markdown by default. Follow the selected JSON indexes.
 ${projectSkillsSection(project)}
@@ -289,13 +289,7 @@ function linkNameForSkill(skill) {
 }
 
 function aliasNamesForSkill(skill) {
-  const aliasesById = {
-    'dhb-local-env': ['run-projects', 'run_project', 'dhb-env-switch', 'restore-local-env'],
-    'dhb-subpackage-release': ['add-subpackage-module', 'update-subpackage-module', 'add-subpackage-module.md', 'update-subpackage-module.md'],
-    'dhb-api-from-curl': ['create-api-request', 'mock-api-from-curl', 'create-api-request.md', 'mock-api-from-curl.md'],
-    'dhb-taro-module': ['add-taro-module', 'add-taro-module.md'],
-    'dhb-packages/add-mobile-icon': ['add-mobile-icon.md'],
-  };
+  const aliasesById = {};
   return aliasesById[skill.id] || [];
 }
 
