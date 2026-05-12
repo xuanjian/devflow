@@ -1,0 +1,127 @@
+{
+  "version": 1,
+  "id": "2026-05-12-dhb-17771-disabled-coupon-revoke",
+  "title": "DHB-17771 已停用的优惠券支持撤销",
+  "status": "active",
+  "taskLevel": "L2",
+  "currentGate": "G4",
+  "projectIds": [
+    "dhb-manager"
+  ],
+  "sceneIds": [
+    "ai-task-board",
+    "single-repo-change"
+  ],
+  "summary": "DHB-17771：管理端营销优惠券中，已停用的优惠券也需要支持撤销操作。当前先在 dhb-manager 单仓定位优惠券列表、权限、操作按钮和接口链路。",
+  "gates": [
+    {
+      "id": "G1",
+      "name": "Intent / Intake",
+      "purpose": "记录用户目标、任务类型、任务等级和是否需要在 task board 展示完整流程。",
+      "defaultArtifacts": [
+        "runtime/tasks/<task-id>.json"
+      ],
+      "status": "done",
+      "artifacts": []
+    },
+    {
+      "id": "G2",
+      "name": "Discovery",
+      "purpose": "记录 superpowers 调研过程中选中的项目、场景、规则、skill、证据来源和未知项。",
+      "defaultArtifacts": [
+        "discovery notes in task JSON"
+      ],
+      "status": "done",
+      "artifacts": []
+    },
+    {
+      "id": "G3",
+      "name": "Plan / Product UI",
+      "purpose": "记录 superpowers 输出的产品、UI、技术方案或交互原型，以及用户确认点。",
+      "defaultArtifacts": [
+        "plan or prototype references"
+      ],
+      "status": "done",
+      "artifacts": []
+    },
+    {
+      "id": "G4",
+      "name": "Development",
+      "purpose": "记录当前开发项目、写入范围、使用的 superpower、验证预期和恢复位置。",
+      "defaultArtifacts": [
+        "project progress entries"
+      ],
+      "status": "in_progress",
+      "artifacts": []
+    },
+    {
+      "id": "G5",
+      "name": "Integration",
+      "purpose": "记录单项目运行、跨项目联调、环境切换、阻塞项和处理后恢复步骤。",
+      "defaultArtifacts": [
+        "integration notes"
+      ],
+      "status": "pending",
+      "artifacts": []
+    },
+    {
+      "id": "G6",
+      "name": "Acceptance",
+      "purpose": "记录对照需求、UI、接口、diff 和测试结果的验收状态。",
+      "defaultArtifacts": [
+        "acceptance result"
+      ],
+      "status": "pending",
+      "artifacts": []
+    },
+    {
+      "id": "G7",
+      "name": "Run / Package Archive",
+      "purpose": "记录调试运行、测试/预发/正式打包、最终验证、已知缺口和交接说明。",
+      "defaultArtifacts": [
+        "run/package archive"
+      ],
+      "status": "pending",
+      "artifacts": []
+    }
+  ],
+  "projectProgress": [
+    {
+      "projectId": "dhb-manager",
+      "status": "pending",
+      "summary": ""
+    }
+  ],
+  "notes": [
+    {
+      "at": "2026-05-12T07:32:10.361Z",
+      "gate": "G1",
+      "text": "用户新建任务：DHB-17771 已停用的优惠券支持撤销。当前工作目录为 /Users/xj/Documents/frontend/dhb-manager；项目指向 dhb-manager，场景 single-repo-change。约束：项目 AGENTS.md 要求不要执行 npm run build，开发自己调试。"
+    },
+    {
+      "at": "2026-05-12T07:36:12.133Z",
+      "gate": "G2",
+      "text": "需求范围确认：仅 dhb-manager 新优惠券列表页生效。目标是在停用状态的优惠券行显示撤销按钮，并通过现有 BaseCoupon/revokeCoupon 接口完成撤销。当前已定位到 src/components/Coupon/couponList.jsx 中 showRevoke 条件排除了停用状态。"
+    },
+    {
+      "at": "2026-05-12T07:37:08.577Z",
+      "gate": "G4",
+      "text": "已在 dhb-manager/src/components/Coupon/couponList.jsx 调整 showRevoke 条件：停用状态 disable 也显示撤销按钮；保持现有 revokeCoupon 接口、权限检查和撤销确认弹窗不变。当前未运行自动化测试：仓库 package.json 的 test 仍是占位脚本，且项目 AGENTS.md 明确不要执行 npm run build。"
+    },
+    {
+      "at": "2026-05-12T07:51:49.948Z",
+      "gate": "G4",
+      "text": "新增范围：前端操作日志页 /RestfulApi/Accounts/operationLog 需要补 actionid=51 的优惠券撤销日志类型，展示口径为 数据=PC管理端、操作类型=撤销。"
+    },
+    {
+      "at": "2026-05-12T07:52:43.277Z",
+      "gate": "G4",
+      "text": "补充操作日志页配置：在 src/components/login/operationLog/selectOptions.js 中新增 action_options { label: '撤销', value: 51 }。这样 /RestfulApi/Accounts/operationLog 页面可正确展示并筛选优惠券撤销日志；PC管理端 source=1 既有映射保持不变。"
+    }
+  ],
+  "blockers": [],
+  "artifacts": [],
+  "recoveryPoint": "从 dhb-manager 的 src/pages/Coupon/couponList 与 src/services/adminHost.js 开始恢复；重点核对已停用状态是否隐藏/禁用撤销按钮，以及 revokeCoupon 接口和权限 checkActionAuth 是否已覆盖。",
+  "createdAt": "2026-05-12T07:32:10.361Z",
+  "updatedAt": "2026-05-12T07:52:43.277Z"
+}

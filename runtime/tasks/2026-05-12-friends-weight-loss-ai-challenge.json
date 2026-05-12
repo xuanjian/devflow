@@ -1,0 +1,115 @@
+{
+  "version": 1,
+  "id": "2026-05-12-friends-weight-loss-ai-challenge",
+  "title": "朋友减肥 AI 比赛软件",
+  "status": "active",
+  "taskLevel": "L3",
+  "currentGate": "G3",
+  "projectIds": [],
+  "sceneIds": [
+    "ai-task-board"
+  ],
+  "summary": "朋友小圈子减肥AI比赛：飞书机器人+Egg.js+MySQL+Redis+DeepSeek，本地Mac+ngrok开发。6个Phase，4项前置待确认。开发方案已完成，待用户审阅。",
+  "gates": [
+    {
+      "id": "G1",
+      "name": "Intent / Intake",
+      "purpose": "记录用户目标、任务类型、任务等级和是否需要在 task board 展示完整流程。",
+      "defaultArtifacts": [
+        "runtime/tasks/<task-id>.json"
+      ],
+      "status": "done",
+      "artifacts": []
+    },
+    {
+      "id": "G2",
+      "name": "Discovery",
+      "purpose": "记录 superpowers 调研过程中选中的项目、场景、规则、skill、证据来源和未知项。",
+      "defaultArtifacts": [
+        "discovery notes in task JSON"
+      ],
+      "status": "done",
+      "artifacts": []
+    },
+    {
+      "id": "G3",
+      "name": "Plan / Product UI",
+      "purpose": "记录 superpowers 输出的产品、UI、技术方案或交互原型，以及用户确认点。",
+      "defaultArtifacts": [
+        "plan or prototype references"
+      ],
+      "status": "in_progress",
+      "artifacts": [
+        "/Users/xj/Documents/减肥/开发方案.md"
+      ]
+    },
+    {
+      "id": "G4",
+      "name": "Development",
+      "purpose": "记录当前开发项目、写入范围、使用的 superpower、验证预期和恢复位置。",
+      "defaultArtifacts": [
+        "project progress entries"
+      ],
+      "status": "pending",
+      "artifacts": []
+    },
+    {
+      "id": "G5",
+      "name": "Integration",
+      "purpose": "记录单项目运行、跨项目联调、环境切换、阻塞项和处理后恢复步骤。",
+      "defaultArtifacts": [
+        "integration notes"
+      ],
+      "status": "pending",
+      "artifacts": []
+    },
+    {
+      "id": "G6",
+      "name": "Acceptance",
+      "purpose": "记录对照需求、UI、接口、diff 和测试结果的验收状态。",
+      "defaultArtifacts": [
+        "acceptance result"
+      ],
+      "status": "pending",
+      "artifacts": []
+    },
+    {
+      "id": "G7",
+      "name": "Run / Package Archive",
+      "purpose": "记录调试运行、测试/预发/正式打包、最终验证、已知缺口和交接说明。",
+      "defaultArtifacts": [
+        "run/package archive"
+      ],
+      "status": "pending",
+      "artifacts": []
+    }
+  ],
+  "projectProgress": [],
+  "notes": [
+    {
+      "at": "2026-05-12T08:42:06.782Z",
+      "gate": "G1",
+      "text": "用户要求：开一个任务，做朋友减肥ai比赛软件。当前只完成 G1 Intake 建档，尚未确定项目仓库或实现技术栈。"
+    },
+    {
+      "at": "2026-05-12T09:06:22.354Z",
+      "gate": "G2",
+      "text": "已确认：朋友小圈子使用、飞书机器人（未申请，需创建）、本地 Mac + ngrok 开发、MySQL复用xj_dhb库。技术栈 Egg.js+TS+Sequelize+Redis+DeepSeek。开发方案已写至 /Users/xj/Documents/减肥/开发方案.md。6个Phase、前置准备(飞书应用/ngrok/Redis/DeepSeek Key)4项待确认。"
+    },
+    {
+      "at": "2026-05-12T09:06:31.447Z",
+      "gate": "G3",
+      "text": "G2 完成：用户范围(朋友小圈)、交互(飞书机器人)、环境(本地Mac+ngrok)、技术栈(Egg.js+TS+MySQL+Redis+DeepSeek)。G3 完成：开发方案已输出，含架构图、数据库设计、交互流程、6个Phase、技术决策记录、待确认事项。"
+    },
+    {
+      "at": "2026-05-12T09:09:24.439Z",
+      "gate": "G3",
+      "text": "用户暂时离开处理其他事。G3 方案待审阅，4项前置待确认：①飞书应用 ②Redis ③DeepSeek Key ④ngrok。恢复时从 /Users/xj/Documents/减肥/开发方案.md 开始，确认方案后进 G4 编码。"
+    }
+  ],
+  "blockers": [],
+  "artifacts": [],
+  "recoveryPoint": "G3·计划已写：/Users/xj/Documents/减肥/开发方案.md。下一步：①用户审阅确认方案 ②完成4项前置准备(飞书应用/Redis/DeepSeek Key/ngrok) ③进入G4按Phase1-6编码",
+  "createdAt": "2026-05-12T08:42:06.782Z",
+  "updatedAt": "2026-05-12T09:09:24.439Z"
+}

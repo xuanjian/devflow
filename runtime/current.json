@@ -1,15 +1,15 @@
 {
   "version": 1,
-  "activeTaskId": "2026-05-11-dhb-17763-ios",
-  "activeTaskPath": "runtime/tasks/2026-05-11-dhb-17763-ios.json",
-  "activeProjectIds": [
-    "dhb"
-  ],
+  "activeTaskId": "2026-05-12-friends-weight-loss-ai-challenge",
+  "activeTaskPath": "runtime/tasks/2026-05-12-friends-weight-loss-ai-challenge.json",
+  "activeProjectIds": [],
   "activeSceneIds": [
     "ai-task-board"
   ],
-  "currentGate": "G7",
+  "currentGate": "G3",
   "recentTaskIds": [
+    "2026-05-12-friends-weight-loss-ai-challenge",
+    "2026-05-12-dhb-17771-disabled-coupon-revoke",
     "2026-05-11-dhb-17763-ios",
     "2026-05-11-xcode-cloud-webhook-node-agent",
     "2026-05-11-dhb-xcode-modernization",
