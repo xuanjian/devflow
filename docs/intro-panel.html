@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>ai-context-lite intro panel</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --ink: #172033;
+        --muted: #5b6472;
+        --line: #d7dce5;
+        --paper: #f6f7f9;
+        --panel: #ffffff;
+        --accent: #2367d1;
+        --accent-soft: #e7f0ff;
+        --green: #177a52;
+        --green-soft: #e8f6ef;
+        --orange: #a45b14;
+        --orange-soft: #fff1df;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background: var(--paper);
+        color: var(--ink);
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        letter-spacing: 0;
+      }
+
+      main {
+        width: min(1120px, calc(100vw - 48px));
+        margin: 0 auto;
+        padding: 48px 0;
+      }
+
+      .top {
+        display: grid;
+        grid-template-columns: 1.08fr 0.92fr;
+        gap: 28px;
+        align-items: stretch;
+      }
+
+      .hero,
+      .terminal,
+      .lane {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+      }
+
+      .hero {
+        padding: 34px;
+      }
+
+      .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 20px;
+        color: var(--accent);
+        font-size: 13px;
+        font-weight: 700;
+        text-transform: uppercase;
+      }
+
+      .dot {
+        width: 9px;
+        height: 9px;
+        border-radius: 999px;
+        background: var(--accent);
+      }
+
+      h1 {
+        margin: 0;
+        max-width: 700px;
+        font-size: 52px;
+        line-height: 1.02;
+        font-weight: 760;
+      }
+
+      .lead {
+        margin: 22px 0 0;
+        max-width: 680px;
+        color: var(--muted);
+        font-size: 19px;
+        line-height: 1.55;
+      }
+
+      .chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 28px;
+      }
+
+      .chip {
+        padding: 8px 11px;
+        border-radius: 999px;
+        background: var(--accent-soft);
+        color: #164a98;
+        font-size: 13px;
+        font-weight: 650;
+      }
+
+      .terminal {
+        overflow: hidden;
+      }
+
+      .terminal-bar {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        height: 40px;
+        padding: 0 16px;
+        border-bottom: 1px solid var(--line);
+        background: #eef1f5;
+      }
+
+      .light {
+        width: 10px;
+        height: 10px;
+        border-radius: 999px;
+        background: #b7bfca;
+      }
+
+      pre {
+        margin: 0;
+        padding: 24px;
+        min-height: 286px;
+        overflow: hidden;
+        background: #101724;
+        color: #eef4ff;
+        font-size: 15px;
+        line-height: 1.7;
+        white-space: pre-wrap;
+      }
+
+      .cmd {
+        color: #8fc7ff;
+      }
+
+      .ok {
+        color: #7ee0a8;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 18px;
+        margin-top: 18px;
+      }
+
+      .lane {
+        padding: 22px;
+      }
+
+      .lane h2 {
+        margin: 0 0 14px;
+        font-size: 18px;
+      }
+
+      .lane p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 15px;
+        line-height: 1.55;
+      }
+
+      .badge {
+        display: inline-flex;
+        margin-bottom: 16px;
+        padding: 6px 9px;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 760;
+      }
+
+      .blue {
+        background: var(--accent-soft);
+        color: var(--accent);
+      }
+
+      .green {
+        background: var(--green-soft);
+        color: var(--green);
+      }
+
+      .orange {
+        background: var(--orange-soft);
+        color: var(--orange);
+      }
+
+      @media (max-width: 820px) {
+        main {
+          width: min(100% - 28px, 720px);
+          padding: 28px 0;
+        }
+
+        .top,
+        .grid {
+          grid-template-columns: 1fr;
+        }
+
+        h1 {
+          font-size: 38px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <section class="top" aria-label="Introduction">
+        <div class="hero">
+          <div class="eyebrow"><span class="dot"></span>AI agent context starter</div>
+          <h1>Small context first. Private details later.</h1>
+          <p class="lead">
+            ai-context-lite gives coding agents a compact, portable entrypoint:
+            read JSON indexes first, install one shared skill, and load detailed
+            project context only when the current task needs it.
+          </p>
+          <div class="chips">
+            <span class="chip">Zero dependencies</span>
+            <span class="chip">Portable skill links</span>
+            <span class="chip">Privacy-first starter</span>
+          </div>
+        </div>
+        <div class="terminal" aria-label="Install commands">
+          <div class="terminal-bar">
+            <span class="light"></span>
+            <span class="light"></span>
+            <span class="light"></span>
+          </div>
+          <pre><span class="cmd">$ git clone https://github.com/&lt;owner&gt;/ai-context-lite.git</span>
+<span class="cmd">$ cd ai-context-lite</span>
+<span class="cmd">$ npm run doctor</span>
+<span class="ok">doctor: ok</span>
+
+<span class="cmd">$ node bin/ai-context-lite.mjs install</span>
+<span class="ok">Codex: linked ~/.codex/skills/ai-context</span>
+<span class="ok">Claude: linked ~/.claude/skills/ai-context</span>
+<span class="ok">Agents: linked ~/.agents/skills/ai-context</span></pre>
+        </div>
+      </section>
+      <section class="grid" aria-label="Core benefits">
+        <article class="lane">
+          <span class="badge blue">Read order</span>
+          <h2>Predictable startup</h2>
+          <p>Agents begin with `config/entry.json`, `runtime/current.json`, and a small project index before reading anything larger.</p>
+        </article>
+        <article class="lane">
+          <span class="badge green">Install</span>
+          <h2>One skill, many tools</h2>
+          <p>The installer links the same `ai-context` skill into common local agent skill folders without copying files.</p>
+        </article>
+        <article class="lane">
+          <span class="badge orange">Privacy</span>
+          <h2>Generic by default</h2>
+          <p>The starter ships empty. Keep real project maps, task state, and private links in a separate local or private checkout.</p>
+        </article>
+      </section>
+    </main>
+  </body>
+</html>

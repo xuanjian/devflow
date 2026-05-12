@@ -1,0 +1,24 @@
+{
+  "version": 1,
+  "name": "ai-context-lite",
+  "purpose": "Give AI coding agents one small, portable entrypoint before loading larger project context.",
+  "defaultReadOrder": [
+    "config/entry.json",
+    "runtime/current.json",
+    "config/projects/index.json",
+    "matched config/projects/<project-id>.json",
+    "skill/ai-context/SKILL.md when the task involves context routing or installation"
+  ],
+  "privacy": {
+    "default": "Do not include personal identity, local machine paths, private project names, credentials, tickets, or workspace-specific links in this repository.",
+    "projectData": "Keep real project data in a private repository or local-only files."
+  },
+  "installation": {
+    "skillSource": "skill/ai-context",
+    "skillLinks": [
+      "~/.codex/skills/ai-context",
+      "~/.claude/skills/ai-context",
+      "~/.agents/skills/ai-context"
+    ]
+  }
+}
