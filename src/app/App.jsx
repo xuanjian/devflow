@@ -148,7 +148,12 @@ export default function App() {
           <ChecksView checks={checks} onRunAction={handleRunAction} />
         ) : null}
         {!loading && !["overview", "tasks", "persona", "checks"].includes(activeView) ? (
-          <GraphView graph={scopedGraph} selectedNodeId={selectedNodeId} onSelectNode={setSelectedNodeId} />
+          <GraphView
+            graph={scopedGraph}
+            selectedNodeId={selectedNodeId}
+            onRunAction={handleRunAction}
+            onSelectNode={setSelectedNodeId}
+          />
         ) : null}
       </section>
       <DetailsDrawer details={selectedNodeDetails} onRunAction={handleRunAction} />

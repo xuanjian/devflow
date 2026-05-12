@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { expect, test, vi } from "vitest";
 import GraphView from "./GraphView.jsx";
@@ -47,6 +47,42 @@ test("GraphView hides cross links until a related node is selected", () => {
   expect(screen.getByTestId("edge-project:demo-scene:demo-uses-scene")).toBeInTheDocument();
   expect(screen.queryByTestId("edge-group:projects-project:demo-contains")).not.toBeInTheDocument();
   expect(screen.getByText("G4 Development")).toBeInTheDocument();
+});
+
+test("GraphView shows add buttons and submits rule form", async () => {
+  const user = userEvent.setup();
+  const onRunAction = vi.fn().mockResolvedValue(undefined);
+  const graph = {
+    nodes: [
+      { id: "group:projects", type: "group", title: "项目", status: "ok" },
+      { id: "group:scenes", type: "group", title: "场景", status: "ok" },
+      { id: "group:skills", type: "group", title: "技能", status: "ok" },
+      { id: "group:rules", type: "group", title: "规则", status: "ok" }
+    ],
+    edges: []
+  };
+
+  render(<GraphView graph={graph} selectedNodeId="" onRunAction={onRunAction} onSelectNode={() => {}} />);
+
+  expect(screen.getByRole("button", { name: /新增项目/ })).toBeInTheDocument();
+  expect(screen.getByRole("button", { name: /新增场景/ })).toBeInTheDocument();
+  expect(screen.getByRole("button", { name: /新增技能/ })).toBeInTheDocument();
+  await user.click(screen.getByRole("button", { name: /新增规则/ }));
+  await user.type(screen.getByLabelText(/Rule ID/), "payment/safe-callback");
+  await user.type(screen.getByLabelText(/规则用途/), "Validate payment callbacks.");
+  await user.type(screen.getByLabelText(/挂载项目 ID/), "demo-project");
+  await user.type(screen.getByLabelText(/挂载场景 ID/), "demo-scene");
+  await user.click(screen.getByRole("button", { name: "生成并关联" }));
+
+  await waitFor(() => {
+    expect(onRunAction).toHaveBeenCalledWith("add_rule", {
+      ruleId: "payment/safe-callback",
+      purpose: "Validate payment callbacks.",
+      projectIds: ["demo-project"],
+      sceneIds: ["demo-scene"],
+      applyMode: "project-on-demand"
+    });
+  });
 });
 
 test("GraphView expands the canvas height to include long node columns", () => {

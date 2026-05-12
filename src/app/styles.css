@@ -675,6 +675,195 @@ summary:focus-visible {
   min-width: 1100px;
 }
 
+.graph-add-actions {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  height: 54px;
+  pointer-events: auto;
+}
+
+.graph-add-actions button {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid rgba(37, 99, 235, 0.22);
+  border-radius: 14px;
+  box-shadow: 0 10px 24px rgba(40, 56, 82, 0.10);
+  color: var(--text);
+  cursor: pointer;
+  display: inline-flex;
+  font-size: 14px;
+  font-weight: 760;
+  gap: 8px;
+  height: 42px;
+  justify-content: center;
+  min-width: 122px;
+  padding: 0 16px;
+}
+
+.graph-add-actions button:hover {
+  border-color: rgba(37, 99, 235, 0.42);
+  box-shadow: 0 14px 30px rgba(40, 56, 82, 0.15);
+  transform: translateY(-1px);
+}
+
+.graph-add-actions span {
+  align-items: center;
+  background: rgba(37, 99, 235, 0.10);
+  border-radius: 999px;
+  color: var(--blue-deep);
+  display: inline-flex;
+  font-size: 17px;
+  font-weight: 800;
+  height: 22px;
+  justify-content: center;
+  line-height: 1;
+  width: 22px;
+}
+
+.graph-modal-backdrop {
+  align-items: center;
+  background: rgba(18, 29, 45, 0.24);
+  display: flex;
+  inset: 0;
+  justify-content: center;
+  padding: 28px;
+  position: fixed;
+  z-index: 20;
+}
+
+.graph-config-modal {
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid rgba(126, 145, 170, 0.28);
+  border-radius: 18px;
+  box-shadow: 0 24px 80px rgba(24, 40, 66, 0.22);
+  color: var(--text);
+  display: grid;
+  gap: 18px;
+  max-height: calc(100vh - 80px);
+  max-width: 620px;
+  overflow: auto;
+  padding: 20px;
+  width: min(620px, 100%);
+}
+
+.graph-config-modal header,
+.graph-config-modal footer {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+}
+
+.graph-config-modal header div {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+}
+
+.graph-config-modal header strong {
+  font-size: 19px;
+}
+
+.graph-config-modal header span {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.graph-config-modal header button {
+  align-items: center;
+  background: rgba(100, 116, 139, 0.08);
+  border: 1px solid rgba(100, 116, 139, 0.16);
+  border-radius: 999px;
+  color: var(--muted-strong);
+  cursor: pointer;
+  display: inline-flex;
+  font-size: 22px;
+  height: 34px;
+  justify-content: center;
+  width: 34px;
+}
+
+.graph-config-fields {
+  display: grid;
+  gap: 12px;
+}
+
+.graph-config-fields label {
+  display: grid;
+  gap: 7px;
+}
+
+.graph-config-fields label span {
+  color: var(--muted-strong);
+  font-size: 13px;
+  font-weight: 720;
+}
+
+.graph-config-fields input,
+.graph-config-fields select,
+.graph-config-fields textarea {
+  background: rgba(248, 251, 253, 0.92);
+  border: 1px solid rgba(126, 145, 170, 0.28);
+  border-radius: 12px;
+  color: var(--text);
+  min-width: 0;
+  outline: none;
+  padding: 10px 12px;
+  width: 100%;
+}
+
+.graph-config-fields textarea {
+  resize: vertical;
+}
+
+.graph-config-fields input:focus,
+.graph-config-fields select:focus,
+.graph-config-fields textarea:focus {
+  border-color: rgba(10, 132, 255, 0.56);
+  box-shadow: 0 0 0 3px rgba(10, 132, 255, 0.14);
+}
+
+.graph-config-modal footer {
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.graph-config-modal footer button {
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 760;
+  min-width: 88px;
+  padding: 10px 14px;
+}
+
+.secondary-button {
+  background: rgba(100, 116, 139, 0.08);
+  border: 1px solid rgba(100, 116, 139, 0.20);
+  color: var(--muted-strong);
+}
+
+.primary-button {
+  background: var(--blue);
+  border: 1px solid var(--blue);
+  color: #fff;
+}
+
+.primary-button:disabled {
+  cursor: wait;
+  opacity: 0.62;
+}
+
+.graph-submit-error {
+  background: rgba(255, 59, 48, 0.10);
+  border: 1px solid rgba(255, 59, 48, 0.20);
+  border-radius: 12px;
+  color: #b42318;
+  font-size: 13px;
+  margin: 0;
+  padding: 10px 12px;
+}
+
 .graph-edge {
   stroke: rgba(76, 98, 130, 0.24);
   stroke-linecap: round;
