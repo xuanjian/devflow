@@ -1,17 +1,18 @@
 export default function PersonaView({ document, loading, error }) {
   const markdown = document?.markdown || "";
+  const sourcePath = document?.sourcePath || "未创建";
 
   return (
     <section className="persona-view" aria-label="画像文档">
       <div className="persona-header">
         <div>
           <h2>画像文档</h2>
-          <p>{document?.sourcePath || "docs/person/profile.md"}</p>
+          <p>{sourcePath}</p>
         </div>
       </div>
       {loading ? <p className="state-message">正在读取画像文档...</p> : null}
       {error ? <p className="state-message error-message" role="alert">{error}</p> : null}
-      {!loading && !markdown ? <p className="muted">画像文档为空。</p> : null}
+      {!loading && !markdown ? <p className="muted">{document?.message || "画像文档为空。"}</p> : null}
       {markdown ? <MarkdownDocument markdown={markdown} /> : null}
     </section>
   );

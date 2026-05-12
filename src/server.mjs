@@ -100,7 +100,15 @@ async function handleApiRoute({ request, response, rootPath, url }) {
 
 async function readProfileDocument(rootPath) {
   const profile = await readJsonFile(resolveInside(rootPath, "config/profile.json"));
-  const sourcePath = profile.data?.sourcePath || "docs/person/profile.md";
+  const sourcePath = profile.data?.sourcePath || "";
+  if (!sourcePath) {
+    return {
+      sourcePath: "",
+      markdown: "",
+      empty: true,
+      message: "No profile document is configured yet. Run ai-context-init to create one."
+    };
+  }
   try {
     return {
       sourcePath,

@@ -1,5 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import fs from "node:fs/promises";
+import os from "node:os";
+import path from "node:path";
 import { handleApiRequest, startServer } from "../src/server.mjs";
 
 test("server serves bootstrap HTML without frontend build", async () => {
@@ -38,6 +41,24 @@ test("server exposes the configured profile markdown document", async () => {
     assert.match(profileDocument.markdown, /fixture collaboration preferences/i);
   } finally {
     await server.close();
+  }
+});
+
+test("server returns an empty profile document when fresh install has no source path", async () => {
+  const rootDir = await fs.mkdtemp(path.join(os.tmpdir(), "ai-context-fresh-profile-"));
+  await fs.mkdir(path.join(rootDir, "config"), { recursive: true });
+  await fs.writeFile(path.join(rootDir, "config/profile.json"), JSON.stringify({ version: 1 }, null, 2));
+  const server = await startServer({ rootDir, port: 0 });
+  try {
+    const profileDocument = await fetch(`${server.url}/api/profile-document`).then((res) => res.json());
+
+    assert.equal(profileDocument.sourcePath, "");
+    assert.equal(profileDocument.markdown, "");
+    assert.equal(profileDocument.empty, true);
+    assert.match(profileDocument.message, /ai-context-init/);
+  } finally {
+    await server.close();
+    await fs.rm(rootDir, { recursive: true, force: true });
   }
 });
 
