@@ -4,7 +4,7 @@
   "title": "DHB 老项目 Xcode 新版兼容与第三方库升级整改",
   "status": "active",
   "taskLevel": "L4",
-  "currentGate": "G2",
+  "currentGate": "G4",
   "projectIds": [
     "dhb",
     "brand-app",
@@ -32,7 +32,7 @@
       "defaultArtifacts": [
         "discovery notes in task JSON"
       ],
-      "status": "in_progress",
+      "status": "done",
       "artifacts": []
     },
     {
@@ -42,7 +42,7 @@
       "defaultArtifacts": [
         "plan or prototype references"
       ],
-      "status": "pending",
+      "status": "done",
       "artifacts": []
     },
     {
@@ -52,7 +52,7 @@
       "defaultArtifacts": [
         "project progress entries"
       ],
-      "status": "pending",
+      "status": "in_progress",
       "artifacts": []
     },
     {
@@ -95,7 +95,7 @@
     {
       "projectId": "brand-app",
       "status": "in_progress",
-      "summary": "临时云打包工具链。BrandApp 已在 GitHub mirror/cloud-build 分支生成过程中做兼容补丁，适合短期保证 Xcode Cloud 打包，但不能替代 DHB 主项目的长期升级。"
+      "summary": "临时云打包工具链。BrandApp 已在 GitHub mirror/cloud-build 分支生成过程中做兼容补丁，适合短期保证 Xcode Cloud 打包；当前 PackageTool 已清理第三方库临时 patch，并新增 GitHub mirror 配置切换、cloud-build 分支查看和删除能力。"
     },
     {
       "projectId": "ai-context",
@@ -165,6 +165,61 @@
       "at": "2026-05-11T04:52:53.249Z",
       "gate": "G2",
       "text": "2026-05-11 resource setup: cloned GitLab custombrandresource master into /Volumes/T7/DHBBrandApp/DHBCompanyConfig at commit 90be73a; existing non-git directory was preserved as /Volumes/T7/DHBBrandApp/DHBCompanyConfig.backup-20260511122116; cleaned macOS AppleDouble ._* sidecar files generated on external disk and verified git status clean plus git fsck --connectivity-only exit 0."
+    },
+    {
+      "at": "2026-05-11T05:32:39.359Z",
+      "gate": "G4",
+      "text": "User confirmed do not migrate Pod source patches for YYText/AFNetworking yet because pod install can regenerate Pods and drop manual edits. Proceeding only with Release link configuration migration in DHB main project."
+    },
+    {
+      "at": "2026-05-11T05:37:06.825Z",
+      "gate": "G4",
+      "text": "Migrated only DHB Release target swift compatibility link settings into /Users/xj/Documents/ios/DHB/DHB.xcodeproj/project.pbxproj. Did not edit Pods/YYText or Pods/AFNetworking because pod install can regenerate Pods and drop manual patches. Verified with xcodebuild Release iphoneos archive CODE_SIGNING_ALLOWED=NO: ARCHIVE SUCCEEDED; existing Pods deployment target warnings remain."
+    },
+    {
+      "at": "2026-05-11T05:45:48.245Z",
+      "gate": "G4",
+      "text": "Implemented Pod patch layer for YYText 1.0.7 and AFNetworking 4.0.1 without tracking Pods source: added PodPatches files, scripts/apply-pod-patches.sh, and Podfile post_install hook. Pods directory is ignored, which is acceptable because pod install will regenerate Pods and post_install will reapply patches. Verified patch red/green check, idempotent script, Podfile ruby syntax, script sh syntax, and Release iphoneos archive CODE_SIGNING_ALLOWED=NO succeeded. Could not run pod install locally because /usr/local/bin/pod cannot find cocoapods gem in system Ruby."
+    },
+    {
+      "at": "2026-05-11T05:48:11.129Z",
+      "gate": "G4",
+      "text": "Corrected CocoaPods verification: /usr/local/bin/pod is broken in Codex PATH, but /opt/homebrew/bin/pod works. Ran /opt/homebrew/bin/pod install --no-repo-update in DHB successfully; post_install invoked patch script and reported Already applied for AFNetworking and YYText patches. Follow-up rg check found no netinet6 import or YYText chained-comparison patterns."
+    },
+    {
+      "at": "2026-05-11T05:52:00.065Z",
+      "gate": "G4",
+      "text": "In BrandApp PackageTool, removed cloud snapshot patches for third-party library compatibility now owned by DHB main: no more YYText, AFNetworking, or Swift compatibility link mutation in CloudBuildGitSpec. Kept cloud-build signing/entitlements snapshot patches. Verified CloudBuildGitSpecTests with swiftc standalone."
+    },
+    {
+      "at": "2026-05-11T06:04:13Z",
+      "gate": "G4",
+      "text": "Implemented BrandApp PackageTool GitHub mirror branch management: repository profiles persisted in UserDefaults, current mirror/source branch can be saved and switched, remote cloud-build branches are listed via git ls-remote, and only cloud-build/* branches can be deleted with confirmation via git push delete refspec. Verified CloudBuildGitSpecTests, PackageTool xcodebuild Debug CODE_SIGNING_ALLOWED=NO build, and read-only ls-remote against git@github.com:xuanjian/DHB-IOS-XcodeCloud-Mirror.git showing cloud-build/brandapp and cloud-build/com.rsung.songguowulian."
+    },
+    {
+      "at": "2026-05-11T06:16:05.862Z",
+      "gate": "G4",
+      "text": "MsePaySDK decision guidance: fixing Swift compatibility link settings in DHB main can be accepted as short-term build remediation if archive and runtime payment flow pass, but it does not remove vendor/version risk. Still keep vendor confirmation or SDK upgrade evaluation because current package was built with older Xcode/Swift/iOS SDK, official v0.0.7 exists, and future Xcode/iOS changes may surface new binary compatibility or behavior issues."
+    },
+    {
+      "at": "2026-05-11T06:29:03Z",
+      "gate": "G4",
+      "text": "After inspecting Xcode Signing & Capabilities warning, removed PackageTool cloud snapshot patch that forced DHB.xcodeproj CODE_SIGN_IDENTITY from Apple Development to Apple Distribution and stopped injecting CODE_SIGNING_ALLOWED=NO. Cloud snapshot patching now leaves project signing settings unchanged and only keeps Release entitlements aps-environment production adjustment. Verified CloudBuildGitSpecTests and PackageTool Debug xcodebuild CODE_SIGNING_ALLOWED=NO build."
+    },
+    {
+      "at": "2026-05-11T06:40:01Z",
+      "gate": "G4",
+      "text": "Fixed PackageTool remote cloud-build branch deletion failure: git ls-remote works outside a repo, but git push <remote> :refs/heads/<branch> requires a git repository current directory. CloudBuildManager.deleteRemoteBranch now validates and runs git push from the configured DHB projectPath, and the UI disables/guards deletion when DHB project path is empty. Added CloudBuildManagerTests using a local bare remote and non-git current directory to reproduce the failure. Verified CloudBuildGitSpecTests, CloudBuildManagerTests, and PackageTool Debug xcodebuild CODE_SIGNING_ALLOWED=NO build."
+    },
+    {
+      "at": "2026-05-11T06:47:36Z",
+      "gate": "G4",
+      "text": "Investigated Xcode Cloud failure for Longjingwang app on branch cloud-build/rsung.brandapp.longjingwang: ReactiveCocoa target referenced RACCompoundDisposableProvider.d and RACSignalProvider.d in Pods.xcodeproj, but those files were missing from the mirror branch. Local DHB had the .d files, while DHB .gitignore ignored Pods. User confirmed DHB .gitignore should no longer ignore Pods. Removed both /DHB/Pods/* and top-level Pods ignore entries, verified ReactiveCocoa files are no longer git-ignored. Updated PackageTool git clean calls in PackageManager.recoveryProject and CloudBuildManager.cleanupLocalBranch to preserve Pods/ so untracked Pods are not deleted before they are committed/tracked. Verified CloudBuildGitSpecTests, CloudBuildManagerTests, and PackageTool Debug xcodebuild CODE_SIGNING_ALLOWED=NO build."
+    },
+    {
+      "at": "2026-05-11T07:16:45Z",
+      "gate": "G4",
+      "text": "Revised Longjingwang ReactiveCocoa Pods strategy after user clarified DHB main should keep ignoring Pods. DHB .gitignore remains with Pods and Podfile.lock ignored. Added executable ci_scripts/ci_post_clone.sh to DHB so Xcode Cloud runs pod install --repo-update after checkout; local script execution succeeded, installed 33 pods, and Podfile post_install applied AFNetworking/YYText patches. PackageTool CloudBuildGitSpec snapshot filtering now excludes top-level Pods/ and DHB/Pods/ while keeping Podfile.lock, Podfiles, PodPatches, scripts/apply-pod-patches.sh, and ci_scripts/ci_post_clone.sh. PackageTool git clean still preserves Pods/ locally. Verified CloudBuildGitSpecTests and PackageTool Debug xcodebuild CODE_SIGNING_ALLOWED=NO build."
     }
   ],
   "blockers": [],
@@ -184,5 +239,5 @@
   ],
   "recoveryPoint": "新窗口进入该任务时，先看本 task 的 upgradePlan 和 vendorQuestions；如果继续云打包，先确认 GitHub cloud-build/com.rsung.songguowulian 是否已从最新 HEAD 触发构建；如果进入正式整改，目标应切到真实 DHB GitLab 主项目而不是只改镜像。",
   "createdAt": "2026-05-11T04:04:07.352Z",
-  "updatedAt": "2026-05-11T04:52:53.249Z"
+  "updatedAt": "2026-05-11T07:16:45Z"
 }

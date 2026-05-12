@@ -1,0 +1,153 @@
+{
+  "version": 1,
+  "id": "2026-05-11-xcode-cloud-webhook-node-agent",
+  "title": "Xcode Cloud Webhook 自动提审 Node Agent",
+  "status": "active",
+  "taskLevel": "L3",
+  "currentGate": "G2",
+  "projectIds": [
+    "brand-app",
+    "dhb",
+    "ai-context"
+  ],
+  "sceneIds": [
+    "ai-task-board"
+  ],
+  "summary": "新建独立 Node 服务接收 Xcode Cloud webhook，基于构建完成成功事件自动触发 App Store Connect 后续流程：查找 processed build、绑定到当前 App Store version、创建审核草稿并提交审核。服务不依赖打开 PackageTool；PackageTool 后续只作为配置和日志入口。状态存储先使用 Redis/BullMQ，不引入数据库。",
+  "gates": [
+    {
+      "id": "G1",
+      "name": "Intent / Intake",
+      "purpose": "记录用户目标、任务类型、任务等级和是否需要在 task board 展示完整流程。",
+      "defaultArtifacts": [
+        "runtime/tasks/<task-id>.json"
+      ],
+      "status": "done",
+      "artifacts": []
+    },
+    {
+      "id": "G2",
+      "name": "Discovery",
+      "purpose": "记录 superpowers 调研过程中选中的项目、场景、规则、skill、证据来源和未知项。",
+      "defaultArtifacts": [
+        "discovery notes in task JSON"
+      ],
+      "status": "in_progress",
+      "artifacts": []
+    },
+    {
+      "id": "G3",
+      "name": "Plan / Product UI",
+      "purpose": "记录 superpowers 输出的产品、UI、技术方案或交互原型，以及用户确认点。",
+      "defaultArtifacts": [
+        "plan or prototype references"
+      ],
+      "status": "pending",
+      "artifacts": []
+    },
+    {
+      "id": "G4",
+      "name": "Development",
+      "purpose": "记录当前开发项目、写入范围、使用的 superpower、验证预期和恢复位置。",
+      "defaultArtifacts": [
+        "project progress entries"
+      ],
+      "status": "pending",
+      "artifacts": []
+    },
+    {
+      "id": "G5",
+      "name": "Integration",
+      "purpose": "记录单项目运行、跨项目联调、环境切换、阻塞项和处理后恢复步骤。",
+      "defaultArtifacts": [
+        "integration notes"
+      ],
+      "status": "pending",
+      "artifacts": []
+    },
+    {
+      "id": "G6",
+      "name": "Acceptance",
+      "purpose": "记录对照需求、UI、接口、diff 和测试结果的验收状态。",
+      "defaultArtifacts": [
+        "acceptance result"
+      ],
+      "status": "pending",
+      "artifacts": []
+    },
+    {
+      "id": "G7",
+      "name": "Run / Package Archive",
+      "purpose": "记录调试运行、测试/预发/正式打包、最终验证、已知缺口和交接说明。",
+      "defaultArtifacts": [
+        "run/package archive"
+      ],
+      "status": "pending",
+      "artifacts": []
+    }
+  ],
+  "projectProgress": [
+    {
+      "projectId": "brand-app",
+      "status": "planned",
+      "summary": "PackageTool 可复用现有 App Store Connect API 配置、品牌 bundleId 映射和日志展示思路，但自动提审主流程不放在 macOS App 常驻运行。"
+    },
+    {
+      "projectId": "dhb",
+      "status": "reference",
+      "summary": "DHB/Xcode Cloud 是当前验证来源。DHB 老项目 Xcode Cloud 构建已跑通；MsePaySDK 升级明确不纳入本任务，后续另开任务。"
+    },
+    {
+      "projectId": "ai-context",
+      "status": "done",
+      "summary": "已创建独立 task，避免和 DHB Xcode 现代化收尾任务混在一起。后续若 Node 仓库落地，应把新仓库注册成独立项目并更新本 task 的 projectIds。"
+    }
+  ],
+  "notes": [
+    {
+      "at": "2026-05-11T10:05:03.154Z",
+      "gate": "G1",
+      "text": "任务目标：新建独立 Node 服务接收 Xcode Cloud webhook，在构建成功后自动完成 App Store Connect 构建绑定、审核草稿创建和提交审核；PackageTool 后续只作为配置/日志查看入口，不要求用户打开 App 才触发。"
+    },
+    {
+      "at": "2026-05-11T10:05:03.200Z",
+      "gate": "G1",
+      "text": "触发事实：Apple Xcode Cloud webhook 正常会在 build created、started、finished 三个时机发送请求；服务必须按 metadata.attributes.eventType、ciBuildRun.attributes.executionProgress、completionStatus 判断，只在 COMPLETE + SUCCEEDED 时进入提审流程。Xcode Cloud webhook 失败或超时会重试，所以实现必须幂等。"
+    },
+    {
+      "at": "2026-05-11T10:05:03.246Z",
+      "gate": "G1",
+      "text": "状态存储决策：不使用数据库，先用 Redis/BullMQ 即可。Redis 负责 webhook 事件去重、buildRun 短期状态、submit lock、防重复提审和有限延迟重试；TTL 到期即可清理，因为这些不是长期业务数据。"
+    },
+    {
+      "at": "2026-05-11T10:05:16.311Z",
+      "gate": "G2",
+      "text": "初始方案边界：第一阶段先做最小可用服务：Fastify/Express 接 /webhooks/xcode-cloud，URL token 或签名校验，记录原始 payload 摘要，企业微信通知构建开始/成功/失败；确认真实 payload 字段后再接 App Store Connect API 自动提审。"
+    },
+    {
+      "at": "2026-05-11T10:05:16.359Z",
+      "gate": "G2",
+      "text": "自动提审流程：收到完成成功事件后，从 payload 提取 appId、ciWorkflow、ciBuildRun.id、branch/commit、build action 关联的 builds；如果 ASC build 未 processed，则用 BullMQ 做有限延迟重试，不做全局定时轮询；processed 后绑定到当前 App Store version，创建 reviewSubmissions/reviewSubmissionItems 并 submit for review。"
+    },
+    {
+      "at": "2026-05-11T10:05:16.409Z",
+      "gate": "G2",
+      "text": "风险与拦截：提交前检查 version/build 匹配、metadata/截图/审核信息/隐私/出口合规、是否已有审核中 submission；失败时停止自动提交并发企业微信/邮件通知。MsePaySDK 升级不放入本任务，另起任务处理。"
+    },
+    {
+      "at": "2026-05-11T10:13:57.944Z",
+      "gate": "G2",
+      "text": "恢复任务并补充本地证据：BrandApp 当前仓库 clean，未发现现成 Node webhook agent；PackageTool 已有 Swift AppStoreConnectAPI、P8 key 路径约定和审核/提交相关 API 调用逻辑，可作为 Node agent 的接口口径参考，但主流程仍应落到独立 Node 服务。"
+    }
+  ],
+  "blockers": [],
+  "artifacts": [
+    {
+      "at": "2026-05-11T10:05:16.409Z",
+      "value": "https://developer.apple.com/documentation/xcode/configuring-webhooks-in-xcode-cloud"
+    }
+  ],
+  "recoveryPoint": "新对话框继续时，先读取 runtime/tasks/2026-05-11-xcode-cloud-webhook-node-agent.json。下一步建议进入 G3：确定 Node 项目目录、部署方式、Redis 地址、企业微信机器人、App Store Connect API key 配置来源，以及首版最小功能是否只做 webhook 接收+企业微信通知，确认真实 payload 后再接自动提审。",
+  "createdAt": "2026-05-11T10:04:52.236Z",
+  "updatedAt": "2026-05-11T10:13:57.944Z"
+}
