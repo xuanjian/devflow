@@ -64,6 +64,8 @@ test("public files do not contain private placeholders", () => {
     "config/projects/index.json",
     "docs/intro-panel.html",
     "docs/intro-panel.zh-CN.html",
+    "docs/task-flow-panel.zh-CN.html",
+    "docs/relationship-panel.zh-CN.html",
     "runtime/current.json",
     "skill/ai-context/SKILL.md"
   ];

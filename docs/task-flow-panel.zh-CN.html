@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>ai-context-lite 任务面板</title>
+    <style>
+      :root {
+        --ink: #172033;
+        --muted: #5c6675;
+        --line: #d9dee7;
+        --paper: #f6f7f9;
+        --panel: #ffffff;
+        --blue: #2367d1;
+        --blue-soft: #e7f0ff;
+        --green: #16734f;
+        --green-soft: #e6f5ee;
+        --yellow: #9a640f;
+        --yellow-soft: #fff2d8;
+        --red: #b33b3b;
+        --red-soft: #ffe8e8;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background: var(--paper);
+        color: var(--ink);
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        letter-spacing: 0;
+      }
+
+      main {
+        width: min(1120px, calc(100vw - 48px));
+        margin: 0 auto;
+        padding: 44px 0;
+      }
+
+      .header {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 24px;
+        margin-bottom: 22px;
+      }
+
+      .eyebrow {
+        color: var(--blue);
+        font-size: 13px;
+        font-weight: 760;
+        text-transform: uppercase;
+      }
+
+      h1 {
+        margin: 10px 0 0;
+        font-size: 44px;
+        line-height: 1.08;
+      }
+
+      .sub {
+        max-width: 440px;
+        margin: 0;
+        color: var(--muted);
+        font-size: 17px;
+        line-height: 1.6;
+      }
+
+      .board {
+        display: grid;
+        grid-template-columns: 0.9fr 1.1fr;
+        gap: 20px;
+      }
+
+      .panel,
+      .card,
+      .gate {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+      }
+
+      .panel {
+        padding: 22px;
+      }
+
+      .panel h2 {
+        margin: 0 0 16px;
+        font-size: 19px;
+      }
+
+      .pointer {
+        display: grid;
+        gap: 12px;
+      }
+
+      .row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 14px 15px;
+        border-radius: 7px;
+        background: #f8fafc;
+        border: 1px solid #e6eaf0;
+      }
+
+      .row strong {
+        font-size: 15px;
+      }
+
+      .row span {
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      .tag {
+        display: inline-flex;
+        align-items: center;
+        min-height: 28px;
+        padding: 5px 9px;
+        border-radius: 999px;
+        background: var(--blue-soft);
+        color: #174b98;
+        font-size: 12px;
+        font-weight: 760;
+        white-space: nowrap;
+      }
+
+      .tag.green {
+        background: var(--green-soft);
+        color: var(--green);
+      }
+
+      .tag.yellow {
+        background: var(--yellow-soft);
+        color: var(--yellow);
+      }
+
+      .flow {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 10px;
+        margin-top: 14px;
+      }
+
+      .gate {
+        min-height: 112px;
+        padding: 13px 12px;
+      }
+
+      .gate b {
+        display: block;
+        margin-bottom: 10px;
+        color: var(--blue);
+        font-size: 14px;
+      }
+
+      .gate strong {
+        display: block;
+        font-size: 15px;
+        line-height: 1.35;
+      }
+
+      .gate span {
+        display: block;
+        margin-top: 10px;
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.45;
+      }
+
+      .cards {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 14px;
+        margin-top: 18px;
+      }
+
+      .card {
+        padding: 18px;
+      }
+
+      .card h3 {
+        margin: 12px 0 8px;
+        font-size: 17px;
+      }
+
+      .card p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1.55;
+      }
+
+      @media (max-width: 900px) {
+        main {
+          width: min(100% - 28px, 720px);
+          padding: 28px 0;
+        }
+
+        .header,
+        .board {
+          display: block;
+        }
+
+        .sub,
+        .panel {
+          margin-top: 18px;
+        }
+
+        .flow,
+        .cards {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <section class="header">
+        <div>
+          <div class="eyebrow">Task board preview</div>
+          <h1>任务从想法，到交付，有状态可追踪。</h1>
+        </div>
+        <p class="sub">最小版只保留通用任务指针和阶段模型。进度写在任务状态里，不必把全部背景塞进聊天窗口。</p>
+      </section>
+
+      <section class="board" aria-label="任务面板">
+        <div class="panel">
+          <h2>当前任务指针</h2>
+          <div class="pointer">
+            <div class="row">
+              <div>
+                <strong>runtime/current.json</strong><br>
+                <span>记录当前任务入口</span>
+              </div>
+              <span class="tag">first read</span>
+            </div>
+            <div class="row">
+              <div>
+                <strong>runtime/tasks/*.json</strong><br>
+                <span>按任务保存进度和决策</span>
+              </div>
+              <span class="tag green">private ready</span>
+            </div>
+            <div class="row">
+              <div>
+                <strong>config/tasks/gates.json</strong><br>
+                <span>定义 G1 到 G7 阶段</span>
+              </div>
+              <span class="tag yellow">workflow</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h2>G1-G7 任务阶段</h2>
+          <div class="flow">
+            <div class="gate"><b>G1</b><strong>意图确认</strong><span>先判断目标、边界和是否需要记录任务。</span></div>
+            <div class="gate"><b>G2</b><strong>发现问题</strong><span>查资料、读代码、确认现状和约束。</span></div>
+            <div class="gate"><b>G3</b><strong>方案设计</strong><span>形成可执行方案和验收口径。</span></div>
+            <div class="gate"><b>G4</b><strong>实现修改</strong><span>按计划改代码、配置或文档。</span></div>
+            <div class="gate"><b>G5</b><strong>集成联调</strong><span>连接相关模块，处理接口和运行差异。</span></div>
+            <div class="gate"><b>G6</b><strong>验收验证</strong><span>跑测试、检查输出、确认风险。</span></div>
+            <div class="gate"><b>G7</b><strong>交付归档</strong><span>记录运行方式、验证结果和后续事项。</span></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="cards" aria-label="任务价值">
+        <article class="card">
+          <span class="tag">减少上下文</span>
+          <h3>聊天窗口更轻</h3>
+          <p>背景资料留在文件中，AI 只在任务命中时按需读取，不把所有信息塞进对话。</p>
+        </article>
+        <article class="card">
+          <span class="tag green">减少口头同步</span>
+          <h3>进度直观看到</h3>
+          <p>当前阶段、结论和下一步写进任务 JSON，换窗口也能知道做到哪一步。</p>
+        </article>
+        <article class="card">
+          <span class="tag yellow">保护公开模板</span>
+          <h3>多 AI 可协同</h3>
+          <p>不同 AI 工具读取同一个任务指针和 skill 约定，可以围绕同一个任务继续工作。</p>
+        </article>
+      </section>
+    </main>
+  </body>
+</html>

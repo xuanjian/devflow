@@ -34,6 +34,23 @@ too many Markdown files, old notes, or unrelated project documents.
 This makes agent behavior easier to understand, easier to move between
 machines, and safer to share as a starter template.
 
+It also helps keep chat windows smaller: large background files can stay outside
+the conversation until the selected task actually needs them. Task state can be
+tracked in visible JSON files, and multiple AI tools can work from the same
+shared task pointer instead of each keeping a separate private memory.
+
+## Panel Previews
+
+The task panel shows how a request moves from intent to delivery, and where the
+current task pointer belongs.
+
+![ai-context-lite task panel](docs/task-flow-panel.zh-CN.png)
+
+The relationship panel shows how entry, runtime state, project indexes, selected
+details, and the shared skill fit together.
+
+![ai-context-lite relationship panel](docs/relationship-panel.zh-CN.png)
+
 ## Privacy Boundary
 
 This repository is intentionally generic. Do not put personal identity,
@@ -95,6 +112,10 @@ config/entry.json             Portable read order and privacy boundary
 config/projects/index.json    Empty project index for users to extend
 docs/intro-panel.html         Static introduction panel used for screenshots
 docs/intro-panel.png          Screenshot for README and repo previews
+docs/task-flow-panel.zh-CN.html Chinese task panel source
+docs/task-flow-panel.zh-CN.png  Chinese task panel screenshot
+docs/relationship-panel.zh-CN.html Chinese relationship panel source
+docs/relationship-panel.zh-CN.png  Chinese relationship panel screenshot
 runtime/current.json          Empty current task pointer
 skill/ai-context/SKILL.md     Minimal skill loaded by AI coding agents
 test/cli.test.mjs             Node test coverage for the CLI and privacy scan

@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>ai-context-lite 关系面板</title>
+    <style>
+      :root {
+        --ink: #172033;
+        --muted: #5c6675;
+        --line: #d9dee7;
+        --paper: #f6f7f9;
+        --panel: #ffffff;
+        --blue: #2367d1;
+        --blue-soft: #e7f0ff;
+        --green: #177a52;
+        --green-soft: #e8f6ef;
+        --orange: #a45b14;
+        --orange-soft: #fff1df;
+        --violet: #6a4bd1;
+        --violet-soft: #efeaff;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background: var(--paper);
+        color: var(--ink);
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        letter-spacing: 0;
+      }
+
+      main {
+        width: min(1120px, calc(100vw - 48px));
+        margin: 0 auto;
+        padding: 44px 0;
+      }
+
+      .header {
+        display: grid;
+        grid-template-columns: 1fr 430px;
+        gap: 28px;
+        align-items: end;
+        margin-bottom: 24px;
+      }
+
+      .eyebrow {
+        color: var(--blue);
+        font-size: 13px;
+        font-weight: 760;
+        text-transform: uppercase;
+      }
+
+      h1 {
+        margin: 10px 0 0;
+        max-width: 700px;
+        font-size: 44px;
+        line-height: 1.08;
+      }
+
+      .sub {
+        margin: 0;
+        color: var(--muted);
+        font-size: 17px;
+        line-height: 1.6;
+      }
+
+      .map {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 18px;
+      }
+
+      .node,
+      .summary {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+      }
+
+      .node {
+        min-height: 156px;
+        padding: 20px;
+        position: relative;
+      }
+
+      .node h2 {
+        margin: 12px 0 10px;
+        font-size: 19px;
+      }
+
+      .node p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1.58;
+      }
+
+      .badge {
+        display: inline-flex;
+        padding: 6px 9px;
+        border-radius: 6px;
+        background: var(--blue-soft);
+        color: var(--blue);
+        font-size: 12px;
+        font-weight: 760;
+      }
+
+      .green {
+        background: var(--green-soft);
+        color: var(--green);
+      }
+
+      .orange {
+        background: var(--orange-soft);
+        color: var(--orange);
+      }
+
+      .violet {
+        background: var(--violet-soft);
+        color: var(--violet);
+      }
+
+      .wide {
+        grid-column: span 2;
+      }
+
+      .summary {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 0;
+        margin-top: 18px;
+        overflow: hidden;
+      }
+
+      .step {
+        min-height: 126px;
+        padding: 20px;
+        border-right: 1px solid var(--line);
+      }
+
+      .step:last-child {
+        border-right: 0;
+      }
+
+      .step b {
+        color: var(--blue);
+        font-size: 13px;
+      }
+
+      .step strong {
+        display: block;
+        margin: 10px 0 8px;
+        font-size: 17px;
+      }
+
+      .step span {
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1.5;
+      }
+
+      .arrow {
+        color: var(--blue);
+        font-weight: 760;
+      }
+
+      @media (max-width: 900px) {
+        main {
+          width: min(100% - 28px, 720px);
+          padding: 28px 0;
+        }
+
+        .header,
+        .map,
+        .summary {
+          grid-template-columns: 1fr;
+        }
+
+        .wide {
+          grid-column: auto;
+        }
+
+        .step {
+          border-right: 0;
+          border-bottom: 1px solid var(--line);
+        }
+
+        .step:last-child {
+          border-bottom: 0;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <section class="header">
+        <div>
+          <div class="eyebrow">Relationship map preview</div>
+          <h1>入口、项目、场景、规则和 skill，各自有清晰边界。</h1>
+        </div>
+        <p class="sub">最小版用 JSON 描述关系，用 skill 承接读取方式。AI 先看索引，按需加载上下文，并把任务状态留给多个工具共享。</p>
+      </section>
+
+      <section class="map" aria-label="关系图">
+        <article class="node">
+          <span class="badge">Entry</span>
+          <h2>config/entry.json</h2>
+          <p>定义默认读取顺序、隐私边界和安装位置，是 AI 进入仓库后的第一个小入口。</p>
+        </article>
+        <article class="node">
+          <span class="badge green">Current</span>
+          <h2>runtime/current.json</h2>
+          <p>记录当前任务或项目指针，让新会话可以从一个轻量状态开始恢复。</p>
+        </article>
+        <article class="node">
+          <span class="badge orange">Project index</span>
+          <h2>config/projects/index.json</h2>
+          <p>只保存候选列表。真实项目详情可以按需放进私有项目 JSON。</p>
+        </article>
+        <article class="node wide">
+          <span class="badge violet">Selected detail</span>
+          <h2>matched project / task / rule</h2>
+          <p>只有当前请求需要时，AI 才继续加载选中的项目详情、任务状态、规则说明或更长文档。这样能减少噪音，也更容易解释为什么读了某个文件。</p>
+        </article>
+        <article class="node">
+          <span class="badge">Skill</span>
+          <h2>skill/ai-context</h2>
+          <p>把这套读取习惯安装到本地 AI 工具里，让不同工具共用同一个入口约定和任务指针。</p>
+        </article>
+      </section>
+
+      <section class="summary" aria-label="读取链路">
+        <div class="step">
+          <b>01</b>
+          <strong>小入口</strong>
+          <span>先读 entry，知道应该怎么进入。</span>
+        </div>
+        <div class="step">
+          <b>02</b>
+          <strong>状态指针</strong>
+          <span>再读 current，恢复当前任务位置。</span>
+        </div>
+        <div class="step">
+          <b>03</b>
+          <strong>关系索引</strong>
+          <span>用项目索引选择候选上下文。</span>
+        </div>
+        <div class="step">
+          <b>04</b>
+          <strong>按需加载</strong>
+          <span>只打开本次请求需要的资料，减少聊天窗口上下文。</span>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>
