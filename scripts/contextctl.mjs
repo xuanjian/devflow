@@ -8,10 +8,17 @@ import { stdin as input, stdout as output } from 'node:process';
 
 const root = path.resolve(new URL('..', import.meta.url).pathname);
 const userHome = process.env.HOME || path.resolve(root, '..', '..');
-const skillSource = path.join(root, 'bundles', 'skills', 'ai-context');
+const coreSkills = [
+  { id: 'ai-context', sourcePath: path.join(root, 'bundles', 'skills', 'ai-context') },
+  { id: 'ai-context-init', sourcePath: path.join(root, 'bundles', 'skills', 'ai-context-init') },
+];
 const superpowersDir = path.join(userHome, '.codex', 'superpowers');
 const skillsHomes = resolveSkillsHomes();
-const skillLinks = skillsHomes.map(skillsHome => path.join(skillsHome, 'ai-context'));
+const skillLinks = skillsHomes.flatMap(skillsHome => coreSkills.map(skill => ({
+  id: skill.id,
+  linkPath: path.join(skillsHome, skill.id),
+  sourcePath: skill.sourcePath,
+})));
 
 const familyNames = {
   frontend: '前端',
@@ -743,17 +750,19 @@ function doctor() {
   add('entry.json', fs.existsSync(path.join(root, 'config', 'entry.json')), 'config/entry.json');
   add('profile.json', fs.existsSync(path.join(root, 'config', 'profile.json')), 'config/profile.json');
   add('current.json', fs.existsSync(path.join(root, 'runtime', 'current.json')), 'runtime/current.json');
-  add('ai-context skill source', fs.existsSync(path.join(skillSource, 'SKILL.md')), skillSource);
+  for (const skill of coreSkills) {
+    add(`${skill.id} skill source`, fs.existsSync(path.join(skill.sourcePath, 'SKILL.md')), skill.sourcePath);
+  }
 
   for (const skillLink of skillLinks) {
     let skillInstalled = false;
-    let skillDetail = skillLink;
-    if (fs.existsSync(skillLink)) {
-      const stat = fs.lstatSync(skillLink);
-      skillInstalled = stat.isSymbolicLink() && fs.readlinkSync(skillLink) === skillSource;
-      skillDetail = stat.isSymbolicLink() ? `${skillLink} -> ${fs.readlinkSync(skillLink)}` : `${skillLink} is not a symlink`;
+    let skillDetail = skillLink.linkPath;
+    if (fs.existsSync(skillLink.linkPath)) {
+      const stat = fs.lstatSync(skillLink.linkPath);
+      skillInstalled = stat.isSymbolicLink() && fs.readlinkSync(skillLink.linkPath) === skillLink.sourcePath;
+      skillDetail = stat.isSymbolicLink() ? `${skillLink.linkPath} -> ${fs.readlinkSync(skillLink.linkPath)}` : `${skillLink.linkPath} is not a symlink`;
     }
-    add(`ai-context skill link ${path.dirname(skillLink)}`, skillInstalled, skillDetail);
+    add(`${skillLink.id} skill link ${path.dirname(skillLink.linkPath)}`, skillInstalled, skillDetail);
   }
 
   try {

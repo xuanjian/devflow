@@ -6,8 +6,11 @@ import process from 'node:process';
 const root = path.resolve(new URL('..', import.meta.url).pathname);
 const entryPath = path.join(root, 'config', 'entry.json');
 const currentPath = path.join(root, 'runtime', 'current.json');
-const skillSource = path.join(root, 'bundles', 'skills', 'ai-context');
 const managedSkillsRoot = path.join(root, 'bundles', 'skills');
+const coreSkills = [
+  { id: 'ai-context', sourcePath: path.join(managedSkillsRoot, 'ai-context') },
+  { id: 'ai-context-init', sourcePath: path.join(managedSkillsRoot, 'ai-context-init') },
+];
 const managedEntryMarker = '<!-- ai-context:managed-entry:start -->';
 const managedEntryEndMarker = '<!-- ai-context:managed-entry:end -->';
 const userHome = process.env.HOME || path.resolve(root, '..', '..');
@@ -15,7 +18,11 @@ const projectPathOverrides = resolveProjectPathOverrides();
 const projectSearchRoots = resolveProjectSearchRoots();
 const allowedRuleApplyModes = new Set(['global', 'project-on-demand', 'scene-on-demand', 'task-gate', 'manual']);
 const skillsHomes = resolveSkillsHomes();
-const skillLinks = skillsHomes.map(skillsHome => path.join(skillsHome, 'ai-context'));
+const skillLinks = skillsHomes.flatMap(skillsHome => coreSkills.map(skill => ({
+  id: skill.id,
+  linkPath: path.join(skillsHome, skill.id),
+  sourcePath: skill.sourcePath,
+})));
 
 function resolveSkillsHomes() {
   const explicitHomes = process.env.AI_CONTEXT_SKILLS_HOMES || process.env.AI_CONTEXT_SKILLS_HOME;
@@ -337,55 +344,62 @@ function projectSkillPruneTargets(project, desiredTargets) {
   return existingManagedProjectSkillLinks(project).filter(([linkPath]) => !desiredLinkPaths.has(linkPath));
 }
 
-function ensureSkill() {
-  const skillFile = path.join(skillSource, 'SKILL.md');
+function ensureSkill(skill) {
+  const skillFile = path.join(skill.sourcePath, 'SKILL.md');
   if (!fs.existsSync(skillFile)) {
     throw new Error(`missing skill source: ${skillFile}`);
   }
 }
 
 function ensureSkillLink(skillLink) {
-  ensureSymlink(skillLink, skillSource);
+  ensureSymlink(skillLink.linkPath, skillLink.sourcePath);
 }
 
 function install(options = {}) {
-  ensureSkill();
+  for (const skill of coreSkills) ensureSkill(skill);
   validate();
   for (const skillLink of skillLinks) ensureSkillLink(skillLink);
 
-  for (const skillLink of skillLinks) console.log(`installed skill: ${skillLink} -> ${skillSource}`);
+  for (const skillLink of skillLinks) console.log(`installed skill: ${skillLink.linkPath} -> ${skillLink.sourcePath}`);
+  console.log('next: ask your AI tool to run the ai-context-init skill to initialize profile, projects, scenes, skills, and rules.');
   if (options.projectSkills) syncProjects({ write: true, skillsOnly: true });
 }
 
 function uninstall() {
   for (const skillLink of skillLinks) {
-    if (!fs.existsSync(skillLink)) {
-      console.log(`skill link not installed: ${skillLink}`);
+    if (!fs.existsSync(skillLink.linkPath)) {
+      console.log(`skill link not installed: ${skillLink.linkPath}`);
       continue;
     }
-    const stat = fs.lstatSync(skillLink);
-    if (!stat.isSymbolicLink()) throw new Error(`refusing to remove non-symlink: ${skillLink}`);
-    const target = fs.readlinkSync(skillLink);
-    if (target !== skillSource) throw new Error(`refusing to remove symlink with unexpected target: ${skillLink} -> ${target}`);
-    fs.unlinkSync(skillLink);
-    console.log(`removed skill link: ${skillLink}`);
+    const stat = fs.lstatSync(skillLink.linkPath);
+    if (!stat.isSymbolicLink()) throw new Error(`refusing to remove non-symlink: ${skillLink.linkPath}`);
+    const target = fs.readlinkSync(skillLink.linkPath);
+    if (path.resolve(path.dirname(skillLink.linkPath), target) !== skillLink.sourcePath && path.resolve(target) !== skillLink.sourcePath) {
+      throw new Error(`refusing to remove symlink with unexpected target: ${skillLink.linkPath} -> ${target}`);
+    }
+    fs.unlinkSync(skillLink.linkPath);
+    console.log(`removed skill link: ${skillLink.linkPath}`);
   }
 }
 
 function check() {
-  const installedLinks = skillLinks.filter(skillLink => fs.existsSync(skillLink)
-    && fs.lstatSync(skillLink).isSymbolicLink()
-    && fs.readlinkSync(skillLink) === skillSource);
+  const installedLinks = skillLinks.filter(skillLink => fs.existsSync(skillLink.linkPath)
+    && fs.lstatSync(skillLink.linkPath).isSymbolicLink()
+    && (path.resolve(path.dirname(skillLink.linkPath), fs.readlinkSync(skillLink.linkPath)) === skillLink.sourcePath
+      || path.resolve(fs.readlinkSync(skillLink.linkPath)) === skillLink.sourcePath));
   console.log(`entry: ${exists('config/entry.json') ? 'ok' : 'missing'}`);
   console.log(`profile: ${exists('config/profile.json') ? 'ok' : 'missing'}`);
   console.log(`current: ${exists('runtime/current.json') ? 'ok' : 'missing'}`);
-  console.log(`skill source: ${exists('bundles/skills/ai-context/SKILL.md') ? 'ok' : 'missing'}`);
+  for (const skill of coreSkills) {
+    console.log(`skill source ${skill.id}: ${fs.existsSync(path.join(skill.sourcePath, 'SKILL.md')) ? 'ok' : 'missing'}`);
+  }
   console.log(`skill installed: ${installedLinks.length === skillLinks.length ? 'yes' : installedLinks.length ? 'partial' : 'no'}`);
   for (const skillLink of skillLinks) {
-    const installed = fs.existsSync(skillLink)
-      && fs.lstatSync(skillLink).isSymbolicLink()
-      && fs.readlinkSync(skillLink) === skillSource;
-    console.log(`skill link ${skillLink}: ${installed ? 'ok' : 'missing'}`);
+    const installed = fs.existsSync(skillLink.linkPath)
+      && fs.lstatSync(skillLink.linkPath).isSymbolicLink()
+      && (path.resolve(path.dirname(skillLink.linkPath), fs.readlinkSync(skillLink.linkPath)) === skillLink.sourcePath
+        || path.resolve(fs.readlinkSync(skillLink.linkPath)) === skillLink.sourcePath);
+    console.log(`skill link ${skillLink.linkPath}: ${installed ? 'ok' : 'missing'}`);
   }
 }
 
@@ -566,6 +580,7 @@ function validate() {
     'config/tasks/gates.json',
     'runtime/current.json',
     'bundles/skills/ai-context/SKILL.md',
+    'bundles/skills/ai-context-init/SKILL.md',
   ]) {
     if (!exists(file)) pushUniqueError(errors, `missing required file: ${file}`);
   }

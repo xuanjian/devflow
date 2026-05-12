@@ -155,6 +155,24 @@
       "whenToLoad": "UI/UX design intelligence for web and mobile. Includes 50+ styles, 161 color palettes, 57 font pairings, 161 product types, 99 UX guidelines, and 25 chart types across 10 stacks (React, Next.js, Vue, Svelte, SwiftUI, React Native, Flutter, Tailwind, shadcn/ui, and HTML/CSS). Actions: plan, build, create, design, implement, review, fix, improve, optimize, enhance, refactor, and check UI/UX code. Projects: website, landing page, dashboard, admin panel, e-commerce, SaaS, portfolio, blog, and mobile app. Elements: button, modal, navbar, sidebar, card, table, form, and chart. Styles: glassmorphism, claymorphism, minimalism, brutalism, neumorphism, bento grid, dark mode, responsive, skeuomorphism, and flat design. Topics: color systems, accessibility, animation, layout, typography, font pairing, spacing, interaction states, shadow, and gradient. Integrations: shadcn/ui MCP for component search and examples.",
       "sourceExists": true,
       "sourceType": "file"
+    },
+    {
+      "id": "ai-context-init",
+      "name": "ai-context-init",
+      "description": "Use after installing ai-context when the user needs first-time onboarding, personal AI preferences, project inventory, scene creation, skill/rule mounting, or migration from scattered notes into ai-context JSON.",
+      "trigger": "Use after install, first-time setup, onboarding, importing project inventory, creating profile, creating scenes, or turning messy notes into ai-context configuration.",
+      "sourcePath": "bundles/skills/ai-context-init/SKILL.md",
+      "tags": [
+        "ai-context",
+        "onboarding",
+        "workflow"
+      ],
+      "defaultSceneIds": [
+        "ai-context-config"
+      ],
+      "whenToLoad": "Load after install or when initializing profile, projects, scenes, skills, and rules from user-provided notes.",
+      "sourceExists": true,
+      "sourceType": "file"
     }
   ]
 }

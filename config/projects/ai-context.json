@@ -40,6 +40,13 @@
       "description": "UI/UX design intelligence for web and mobile. Includes 50+ styles, 161 color palettes, 57 font pairings, 161 product types, 99 UX guidelines, and 25 chart types across 10 stacks (React, Next.js, Vue, Svelte, SwiftUI, React Native, Flutter, Tailwind, shadcn/ui, and HTML/CSS). Actions: plan, build, create, design, implement, review, fix, improve, optimize, enhance, refactor, and check UI/UX code. Projects: website, landing page, dashboard, admin panel, e-commerce, SaaS, portfolio, blog, and mobile app. Elements: button, modal, navbar, sidebar, card, table, form, and chart. Styles: glassmorphism, claymorphism, minimalism, brutalism, neumorphism, bento grid, dark mode, responsive, skeuomorphism, and flat design. Topics: color systems, accessibility, animation, layout, typography, font pairing, spacing, interaction states, shadow, and gradient. Integrations: shadcn/ui MCP for component search and examples.",
       "sourcePath": "bundles/skills/ui-ux-pro-max/SKILL.md",
       "whenToLoad": "Load when ui-ux-pro-max task needs ui-ux-pro-max."
+    },
+    {
+      "id": "ai-context-init",
+      "name": "ai-context-init",
+      "description": "Use after installing ai-context when the user needs first-time onboarding, personal AI preferences, project inventory, scene creation, skill/rule mounting, or migration from scattered notes into ai-context JSON.",
+      "sourcePath": "bundles/skills/ai-context-init/SKILL.md",
+      "whenToLoad": "Load after install or when initializing profile, projects, scenes, skills, and rules from user-provided notes."
     }
   ],
   "rules": [],
@@ -51,7 +58,8 @@
     "onDemandRead": [
       "README.md",
       "config/entry.json",
-      "bundles/skills/ai-context/SKILL.md"
+      "bundles/skills/ai-context/SKILL.md",
+      "bundles/skills/ai-context-init/SKILL.md"
     ],
     "notes": "Start with this JSON. Load source Markdown, rules, or skills only when the task requires detailed instructions."
   }

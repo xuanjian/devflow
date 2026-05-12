@@ -19,7 +19,8 @@
     "config/scenes/index.json",
     "matched config/scenes/<scene-id>.json",
     "config/skills/skills.json only when skill selection is needed",
-    "config/rules/rules.json only when rule lookup is needed"
+    "config/rules/rules.json only when rule lookup is needed",
+    "bundles/skills/ai-context-init/SKILL.md when the user is onboarding or initializing ai-context"
   ],
   "routingDecision": {
     "projectsIndex": "Read config/projects/index.json first as the candidate list. Use id, name, technologyFamilyId, path, and summary to choose matched project JSON files.",
@@ -51,8 +52,11 @@
     ],
     "skillLinks": [
       "~/.agents/skills/ai-context -> <ai-context-root>/bundles/skills/ai-context",
+      "~/.agents/skills/ai-context-init -> <ai-context-root>/bundles/skills/ai-context-init",
       "~/.codex/skills/ai-context -> <ai-context-root>/bundles/skills/ai-context",
-      "~/.claude/skills/ai-context -> <ai-context-root>/bundles/skills/ai-context"
+      "~/.codex/skills/ai-context-init -> <ai-context-root>/bundles/skills/ai-context-init",
+      "~/.claude/skills/ai-context -> <ai-context-root>/bundles/skills/ai-context",
+      "~/.claude/skills/ai-context-init -> <ai-context-root>/bundles/skills/ai-context-init"
     ],
     "globalEntrypoints": [],
     "globalEntrypointsStatus": "deprecated; do not create home-level AGENTS.md, CLAUDE.md, or WORK_CONTEXT.md by default",
@@ -65,7 +69,8 @@
     ],
     "legacyProjectEntrypointsToPrune": [
       "claude.md"
-    ]
+    ],
+    "afterInstall": "Ask the AI tool to run the ai-context-init skill to initialize profile, projects, scenes, skills, and rules."
   },
   "taskFlow": {
     "currentPointer": "runtime/current.json",

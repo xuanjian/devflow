@@ -146,7 +146,7 @@ node scripts/install-ai-context.mjs sync-projects
 node scripts/install-ai-context.mjs sync-projects --project <project-id> --skills-only --write
 ```
 
-`install` only installs ai-context skill links by default. Use `install --project-skills` on a local development machine to also reconcile mounted project skills into `.agents/.codex/.claude` directories. Reconcile means adding links for skills currently listed in `config/projects/<project-id>.json` and pruning managed links that no longer appear there. `sync-projects` previews project entry changes by default; use `--write` only when intentionally updating local project entry files.
+`install` installs the core `ai-context` and `ai-context-init` skill links by default. After install, ask the AI tool to run `ai-context-init` for first-time onboarding: it should collect the user's profile, projects, scenes, skills, and rules from rough input, then write normalized docs and JSON that the panel can display. Use `install --project-skills` on a local development machine to also reconcile mounted project skills into `.agents/.codex/.claude` directories. Reconcile means adding links for skills currently listed in `config/projects/<project-id>.json` and pruning managed links that no longer appear there. `sync-projects` previews project entry changes by default; use `--write` only when intentionally updating local project entry files.
 
 When local project paths differ from the absolute paths in JSON, set `AI_CONTEXT_PROJECT_ROOTS` to one or more local search roots, or set `AI_CONTEXT_PROJECT_PATH_OVERRIDES` as `project-id=/local/path;project-id-2=/local/path`.
 
