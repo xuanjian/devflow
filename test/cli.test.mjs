@@ -58,10 +58,12 @@ test("public files do not contain private placeholders", () => {
 
   const files = [
     "README.md",
+    "README.zh-CN.md",
     "package.json",
     "config/entry.json",
     "config/projects/index.json",
     "docs/intro-panel.html",
+    "docs/intro-panel.zh-CN.html",
     "runtime/current.json",
     "skill/ai-context/SKILL.md"
   ];

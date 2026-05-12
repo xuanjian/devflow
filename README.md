@@ -1,5 +1,7 @@
 # ai-context-lite
 
+[English](README.md) | [简体中文](README.zh-CN.md)
+
 `ai-context-lite` is a minimal, portable context entry for AI coding agents.
 
 ![ai-context-lite intro panel](docs/intro-panel.png)
