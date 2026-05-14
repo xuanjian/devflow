@@ -204,6 +204,11 @@
       "at": "2026-05-14T10:31:00.000Z",
       "gate": "G4",
       "text": "并行 Agent 执行并完成整合：一名 Agent 添加 CompetitionRepository.updateConfig 与 repository 测试；另一名 Agent 添加配置命令路由测试。主流程完成整合：新增 competitions.settlement_day_of_week 到 Prisma schema 和初始 migration；CommandRouter 将 SET_PRIZE_POOL、SET_DURATION、SET_WEEKLY_WEIGH_IN、SET_WEEKLY_SETTLEMENT、SET_FAMILY_MODE、SET_FIXED_COOK 接入 CompetitionFlowService；CompetitionFlowService 将奖金池、周期、称重时间、结算时间、家庭模式、固定做饭人落库。固定做饭人通过 Feishu mention 解析后 upsert user，再写 fixedCookUserId；缺少 mention 时返回提示。验证已通过：40 tests；Prisma validate；tsc；npm run dev 后 /health 正常。下一步：真实服务器 migration/env/飞书群联调，或继续做 profile collection。"
+    },
+    {
+      "at": "2026-05-14T11:05:00.000Z",
+      "gate": "G4",
+      "text": "进入服务器联调准备：本地自动 SSH root@8.140.196.216 因未配置可用 key/password 自动登录失败，改为 GitHub 私有仓库 + ECS deploy key 的部署路径。已补 dotenv/config，确保服务器 .env 会被 Egg 配置读取；新增 docs/deploy-runbook.md，记录私有 GitHub repo、deploy key、服务器 clone、.env、Prisma migrate、PM2 启动和健康检查步骤；README 和 deployment-progress 已更新。验证已通过：npm run tsc；npm test（40 passing）。下一步：创建/推送 GitHub 仓库，然后在 ECS 上生成 deploy key 并添加到 GitHub。"
     }
   ],
   "blockers": [],
@@ -283,9 +288,17 @@
     {
       "at": "2026-05-14T10:23:00.000Z",
       "value": "/Users/xj/Documents/减肥/app/repository/FeishuEventLogRepository.ts"
+    },
+    {
+      "at": "2026-05-14T11:05:00.000Z",
+      "value": "/Users/xj/Documents/减肥/docs/deploy-runbook.md"
+    },
+    {
+      "at": "2026-05-14T11:05:00.000Z",
+      "value": "/Users/xj/Documents/减肥/config/config.default.ts"
     }
   ],
-  "recoveryPoint": "G4·Backend/Data/Feishu/Command foundation 已开始：/Users/xj/Documents/减肥 已有 Egg.js + TypeScript 骨架、/health、/health/database、Prisma schema、初始 MySQL migration SQL、第一批 User/Competition/Participant/WeighIn repository、FeishuEventLogRepository、Feishu SDK 长连接启动守卫、飞书消息归一化、文本回复 helper、首批命令解析、CREATE_COMPETITION/SIGN_UP/SUBMIT_WEEKLY_WEIGHT 真实 flow、feishu_event_logs 幂等，以及奖金池/周期/称重时间/结算时间/家庭模式/固定做饭人配置落库。下一步可做服务器 migration/env/飞书群联调，或继续做 profile collection。执行真实迁移和真实飞书群测试前需要 deployment .env 就绪。生产前仍应轮换 MySQL 密码。Feishu App Secret、百炼 key、MySQL 密码不写聊天或仓库。",
+  "recoveryPoint": "G4·Backend/Data/Feishu/Command foundation 已开始：/Users/xj/Documents/减肥 已有 Egg.js + TypeScript 骨架、/health、/health/database、Prisma schema、初始 MySQL migration SQL、第一批 User/Competition/Participant/WeighIn repository、FeishuEventLogRepository、Feishu SDK 长连接启动守卫、飞书归一化/回复、首批命令解析、CREATE_COMPETITION/SIGN_UP/SUBMIT_WEEKLY_WEIGHT 真实 flow、feishu_event_logs 幂等，以及奖金池/周期/称重时间/结算时间/家庭模式/固定做饭人配置落库。服务器联调准备已转为 GitHub 私有仓库 + ECS deploy key 路径；已补 dotenv/config 并新增 docs/deploy-runbook.md。下一步：创建/推送 GitHub 仓库，在 ECS 上生成 deploy key，配置服务器 .env，执行 Prisma migration，PM2 启动，并进飞书群实测。生产前仍应轮换 MySQL 密码。Feishu App Secret、百炼 key、MySQL 密码不写聊天或仓库。",
   "createdAt": "2026-05-12T08:42:06.782Z",
-  "updatedAt": "2026-05-14T10:31:00.000Z"
+  "updatedAt": "2026-05-14T11:05:00.000Z"
 }
