@@ -199,6 +199,11 @@
       "at": "2026-05-14T10:23:00.000Z",
       "gate": "G4",
       "text": "完成 Feishu event idempotency：新增 FeishuEventLogRepository；飞书文本事件进入 handleReceiveMessage 后先插入 feishu_event_logs RECEIVED，重复 event_id 在命令解析前跳过；处理成功标记 HANDLED，异常标记 FAILED 并继续抛出。测试覆盖 received log、mark handled、正常事件处理链、重复事件跳过。验证已通过：30 tests；Prisma validate；tsc；npm run dev 后 /health 正常且 Feishu WS 未配密钥时不启动。下一步建议补比赛配置命令落库：奖金池、比赛周期、称重时间、结算时间、家庭模式、固定做饭人。"
+    },
+    {
+      "at": "2026-05-14T10:31:00.000Z",
+      "gate": "G4",
+      "text": "并行 Agent 执行并完成整合：一名 Agent 添加 CompetitionRepository.updateConfig 与 repository 测试；另一名 Agent 添加配置命令路由测试。主流程完成整合：新增 competitions.settlement_day_of_week 到 Prisma schema 和初始 migration；CommandRouter 将 SET_PRIZE_POOL、SET_DURATION、SET_WEEKLY_WEIGH_IN、SET_WEEKLY_SETTLEMENT、SET_FAMILY_MODE、SET_FIXED_COOK 接入 CompetitionFlowService；CompetitionFlowService 将奖金池、周期、称重时间、结算时间、家庭模式、固定做饭人落库。固定做饭人通过 Feishu mention 解析后 upsert user，再写 fixedCookUserId；缺少 mention 时返回提示。验证已通过：40 tests；Prisma validate；tsc；npm run dev 后 /health 正常。下一步：真实服务器 migration/env/飞书群联调，或继续做 profile collection。"
     }
   ],
   "blockers": [],
@@ -280,7 +285,7 @@
       "value": "/Users/xj/Documents/减肥/app/repository/FeishuEventLogRepository.ts"
     }
   ],
-  "recoveryPoint": "G4·Backend/Data/Feishu/Command foundation 已开始：/Users/xj/Documents/减肥 已有 Egg.js + TypeScript 骨架、/health、/health/database、Prisma schema、初始 MySQL migration SQL、第一批 User/Competition/Participant/WeighIn repository、FeishuEventLogRepository、Feishu SDK 长连接启动守卫、飞书消息归一化、文本回复 helper、首批命令解析、CREATE_COMPETITION/SIGN_UP/SUBMIT_WEEKLY_WEIGHT 真实 flow，以及 feishu_event_logs 幂等。下一步补比赛配置命令落库：奖金池、比赛周期、称重时间、结算时间、家庭模式、固定做饭人。执行真实迁移和真实飞书群测试前需要 deployment .env 就绪。生产前仍应轮换 MySQL 密码。Feishu App Secret、百炼 key、MySQL 密码不写聊天或仓库。",
+  "recoveryPoint": "G4·Backend/Data/Feishu/Command foundation 已开始：/Users/xj/Documents/减肥 已有 Egg.js + TypeScript 骨架、/health、/health/database、Prisma schema、初始 MySQL migration SQL、第一批 User/Competition/Participant/WeighIn repository、FeishuEventLogRepository、Feishu SDK 长连接启动守卫、飞书消息归一化、文本回复 helper、首批命令解析、CREATE_COMPETITION/SIGN_UP/SUBMIT_WEEKLY_WEIGHT 真实 flow、feishu_event_logs 幂等，以及奖金池/周期/称重时间/结算时间/家庭模式/固定做饭人配置落库。下一步可做服务器 migration/env/飞书群联调，或继续做 profile collection。执行真实迁移和真实飞书群测试前需要 deployment .env 就绪。生产前仍应轮换 MySQL 密码。Feishu App Secret、百炼 key、MySQL 密码不写聊天或仓库。",
   "createdAt": "2026-05-12T08:42:06.782Z",
-  "updatedAt": "2026-05-14T10:23:00.000Z"
+  "updatedAt": "2026-05-14T10:31:00.000Z"
 }
