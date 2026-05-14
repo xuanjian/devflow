@@ -214,6 +214,11 @@
       "at": "2026-05-14T11:32:00.000Z",
       "gate": "G4",
       "text": "GitHub 私有仓库 xuanjian/weight-loss-ai-competition 已创建并推送 main；ECS 生成的公钥 ssh-ed25519 ... weight-app-ecs 已作为只读 Deploy Key 添加到 GitHub 仓库。下一步在 ECS 写入 ~/.ssh/config，测试 ssh -T git@github.com，然后 clone 到 /opt/weight-app/current，安装依赖，配置 .env，执行 Prisma migration 并用 PM2 启动。"
+    },
+    {
+      "at": "2026-05-14T11:59:00.000Z",
+      "gate": "G4",
+      "text": "服务器部署联调进展：ECS 已成功 clone 私有 GitHub 仓库、npm ci、prisma generate、配置 .env、修正 DATABASE_URL 密码 URL 编码问题并成功执行 Prisma migration。PM2 启动后 /health 先出现 500，日志根因是 Please set config.keys first；补 COOKIE_KEYS 后继续定位发现 Egg 生产环境读取的是编译后的 JS runtime，而仓库此前只有 TS 源文件，导致 config/router/controller 等生产加载不完整。已在本地修复：新增 tsconfig.build.json，package 增加 clean:build/build/pretest/prestart，start 保持 workers=1 + typescript；本地生产模式已验证 /health 返回 200。下一步：推送修复，ECS git pull 后重启 PM2，再验证 /health、/health/database 和飞书群命令。"
     }
   ],
   "blockers": [],
@@ -301,9 +306,17 @@
     {
       "at": "2026-05-14T11:05:00.000Z",
       "value": "/Users/xj/Documents/减肥/config/config.default.ts"
+    },
+    {
+      "at": "2026-05-14T11:59:00.000Z",
+      "value": "/Users/xj/Documents/减肥/tsconfig.build.json"
+    },
+    {
+      "at": "2026-05-14T11:59:00.000Z",
+      "value": "/Users/xj/Documents/减肥/package.json"
     }
   ],
-  "recoveryPoint": "G4·Backend/Data/Feishu/Command foundation 已开始：/Users/xj/Documents/减肥 已有 Egg.js + TypeScript 骨架、/health、/health/database、Prisma schema、初始 MySQL migration SQL、第一批 User/Competition/Participant/WeighIn repository、FeishuEventLogRepository、Feishu SDK 长连接启动守卫、飞书归一化/回复、首批命令解析、CREATE_COMPETITION/SIGN_UP/SUBMIT_WEEKLY_WEIGHT 真实 flow、feishu_event_logs 幂等，以及奖金池/周期/称重时间/结算时间/家庭模式/固定做饭人配置落库。服务器联调准备已转为 GitHub 私有仓库 + ECS deploy key 路径；已补 dotenv/config 并新增 docs/deploy-runbook.md；GitHub 私有仓库已推送，ECS 公钥已作为只读 Deploy Key 添加。下一步：在 ECS 配置 ~/.ssh/config 并 clone，配置服务器 .env，执行 Prisma migration，PM2 启动，并进飞书群实测。生产前仍应轮换 MySQL 密码。Feishu App Secret、百炼 key、MySQL 密码不写聊天或仓库。",
+  "recoveryPoint": "G4·Backend/Data/Feishu/Command foundation 已开始：/Users/xj/Documents/减肥 已有 Egg.js + TypeScript 骨架、/health、/health/database、Prisma schema、初始 MySQL migration SQL、第一批 User/Competition/Participant/WeighIn repository、FeishuEventLogRepository、Feishu SDK 长连接启动守卫、飞书归一化/回复、首批命令解析、CREATE_COMPETITION/SIGN_UP/SUBMIT_WEEKLY_WEIGHT 真实 flow、feishu_event_logs 幂等，以及奖金池/周期/称重时间/结算时间/家庭模式/固定做饭人配置落库。服务器联调已完成 GitHub 私有仓库部署准备、ECS clone、npm ci、Prisma generate、.env 配置、DATABASE_URL URL 编码修正、Prisma migration 成功。PM2 首启暴露 Egg 生产 JS runtime 问题，已本地修复：tsconfig.build.json + clean/build/pretest/prestart，生产模式 /health 已验证 200。下一步：推送修复，ECS git pull 后重启 PM2，验证 /health、/health/database，再进飞书群实测。生产前仍应轮换 MySQL 密码。Feishu App Secret、百炼 key、MySQL 密码不写聊天或仓库。",
   "createdAt": "2026-05-12T08:42:06.782Z",
-  "updatedAt": "2026-05-14T11:32:00.000Z"
+  "updatedAt": "2026-05-14T11:59:00.000Z"
 }
