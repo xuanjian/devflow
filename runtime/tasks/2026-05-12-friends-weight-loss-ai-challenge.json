@@ -229,6 +229,11 @@
       "at": "2026-05-14T12:21:00.000Z",
       "gate": "G4",
       "text": "飞书长连接启动验证成功：此前 PM2 日志显示 Feishu WS client disabled or credentials missing，排查后确认 FEISHU_ENABLE_WS_CLIENT 需要在服务器 .env 中设为 true 并重启。重启后日志出现 Feishu WS client started 与 ws client ready，说明后端已连接飞书长连接。下一步让用户在飞书真实群内重新 @减肥裁判 发送 创建减肥比赛；若仍无回复，再查看 pm2 logs 中是否出现 [feishu] received command 或发送消息错误。"
+    },
+    {
+      "at": "2026-05-14T12:31:00.000Z",
+      "gate": "G4",
+      "text": "飞书真实群聊联调已打通事件接收和群内回复：用户在群里 @减肥裁判 创建减肥比赛 后，机器人返回帮助文案。根因定位为飞书消息文本前面带机器人 mention，CommandParser 只匹配裸命令。已在 /Users/xj/Documents/减肥/app/service/command/commandParser.ts 增加命令归一化，支持去掉 leading <at>...</at> 和 @机器人 前缀；测试文件 /Users/xj/Documents/减肥/test/service/command/CommandParserService.test.ts 增加回归用例。验证已通过：npm test -- test/service/command/CommandParserService.test.ts；npm run tsc；npm test；npm run build。下一步：提交并推送，然后 ECS git pull 重启 PM2，再在飞书群重试 @减肥裁判 创建减肥比赛。"
     }
   ],
   "blockers": [],
@@ -326,7 +331,7 @@
       "value": "/Users/xj/Documents/减肥/package.json"
     }
   ],
-  "recoveryPoint": "G4·Backend/Data/Feishu/Command foundation 已开始：/Users/xj/Documents/减肥 已有 Egg.js + TypeScript 骨架、/health、/health/database、Prisma schema、初始 MySQL migration SQL、第一批 User/Competition/Participant/WeighIn repository、FeishuEventLogRepository、Feishu SDK 长连接启动守卫、飞书归一化/回复、首批命令解析、CREATE_COMPETITION/SIGN_UP/SUBMIT_WEEKLY_WEIGHT 真实 flow、feishu_event_logs 幂等，以及奖金池/周期/称重时间/结算时间/家庭模式/固定做饭人配置落库。服务器联调已完成 GitHub 私有仓库部署准备、ECS clone、npm ci、Prisma generate、.env 配置、DATABASE_URL URL 编码修正、Prisma migration 成功、PM2 启动成功、/health 通过、/health/database 通过。生产构建修复为 tsconfig.build.json + clean/build/pretest/prestart。飞书长连接已启动成功，日志显示 Feishu WS client started / ws client ready。下一步：飞书真实群聊联调，@减肥裁判 发送 创建减肥比赛，观察回复和 pm2 logs。生产前仍应轮换 MySQL 密码。Feishu App Secret、百炼 key、MySQL 密码不写聊天或仓库。",
+  "recoveryPoint": "G4·Backend/Data/Feishu/Command foundation 已开始：/Users/xj/Documents/减肥 已有 Egg.js + TypeScript 骨架、/health、/health/database、Prisma schema、初始 MySQL migration SQL、第一批 User/Competition/Participant/WeighIn repository、FeishuEventLogRepository、Feishu SDK 长连接启动守卫、飞书归一化/回复、首批命令解析、CREATE_COMPETITION/SIGN_UP/SUBMIT_WEEKLY_WEIGHT 真实 flow、feishu_event_logs 幂等，以及奖金池/周期/称重时间/结算时间/家庭模式/固定做饭人配置落库。服务器联调已完成 GitHub 私有仓库部署准备、ECS clone、npm ci、Prisma generate、.env 配置、DATABASE_URL URL 编码修正、Prisma migration 成功、PM2 启动成功、/health 通过、/health/database 通过。生产构建修复为 tsconfig.build.json + clean/build/pretest/prestart。飞书长连接已启动成功，日志显示 Feishu WS client started / ws client ready；真实群聊已验证能收到消息并回复。当前刚修复 @机器人 前缀导致命令不识别的问题：commandParser 会去掉 leading <at>...</at> 和 @机器人 前缀，回归测试/tsc/全量测试/build 均通过。下一步：提交推送，ECS git pull 重启 PM2 后，让用户在飞书群重试 @减肥裁判 创建减肥比赛。生产前仍应轮换 MySQL 密码。Feishu App Secret、百炼 key、MySQL 密码不写聊天或仓库。",
   "createdAt": "2026-05-12T08:42:06.782Z",
-  "updatedAt": "2026-05-14T12:21:00.000Z"
+  "updatedAt": "2026-05-14T12:31:00.000Z"
 }
