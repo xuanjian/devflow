@@ -4,12 +4,12 @@
   "title": "朋友减肥 AI 比赛软件",
   "status": "active",
   "taskLevel": "L3",
-  "currentGate": "G3",
+  "currentGate": "G4",
   "projectIds": [],
   "sceneIds": [
     "ai-task-board"
   ],
-  "summary": "朋友小圈子减肥AI比赛：飞书机器人+Egg.js+MySQL+Redis+DeepSeek，本地Mac+ngrok开发。6个Phase，4项前置待确认。开发方案已完成，待用户审阅。",
+  "summary": "朋友小圈子/家庭减肥 AI 比赛主持系统：飞书机器人 + Egg.js + TypeScript + MySQL + Redis + 百炼 DeepSeek。新版 PRD v0.2 已明确主链路、状态机、家庭做饭人、计划公平算法、评分扣分、AI边界、技术模块和验收标准；旧开发方案文件当前不存在，后续以 PRD v0.2 为准。",
   "gates": [
     {
       "id": "G1",
@@ -38,9 +38,11 @@
       "defaultArtifacts": [
         "plan or prototype references"
       ],
-      "status": "in_progress",
+      "status": "done",
       "artifacts": [
-        "/Users/xj/Documents/减肥/开发方案.md"
+        "/Users/xj/Documents/减肥/docs/product-requirements-v0.2.md",
+        "/Users/xj/Documents/减肥/docs/technical-design.md",
+        "/Users/xj/Documents/减肥/docs/task-breakdown.md"
       ]
     },
     {
@@ -50,8 +52,14 @@
       "defaultArtifacts": [
         "project progress entries"
       ],
-      "status": "pending",
-      "artifacts": []
+      "status": "in_progress",
+      "artifacts": [
+        "/Users/xj/Documents/减肥/package.json",
+        "/Users/xj/Documents/减肥/app/controller/health.ts",
+        "/Users/xj/Documents/减肥/app/service/database.ts",
+        "/Users/xj/Documents/减肥/prisma/schema.prisma",
+        "/Users/xj/Documents/减肥/prisma/migrations/20260514094000_init/migration.sql"
+      ]
     },
     {
       "id": "G5",
@@ -105,11 +113,99 @@
       "at": "2026-05-12T09:09:24.439Z",
       "gate": "G3",
       "text": "用户暂时离开处理其他事。G3 方案待审阅，4项前置待确认：①飞书应用 ②Redis ③DeepSeek Key ④ngrok。恢复时从 /Users/xj/Documents/减肥/开发方案.md 开始，确认方案后进 G4 编码。"
+    },
+    {
+      "at": "2026-05-13T15:26:59.285Z",
+      "gate": "G3",
+      "text": "收到用户重新梳理的 PRD v0.2。相比初始任务，已明确产品不是普通打卡机器人，而是 AI 减肥比赛主持系统；AI 只负责计划/提醒/点评文案，排名扣分和淘汰由后端确定性规则计算。当前仍在 G3，需要先收敛 MVP 执行切片和若干规则歧义，再进入 G4 编码。"
+    },
+    {
+      "at": "2026-05-14T03:16:32.393Z",
+      "gate": "G3",
+      "text": "用户确认部署经验不熟，需要后续按一步一步教学方式推进部署。部署方案应默认面向阿里云/腾讯云这类国内云服务器，先做最小可运行：Linux VPS + 域名 HTTPS + Node/Egg 后台 + MySQL + Redis + Nginx + PM2/systemd + 飞书事件回调。"
+    },
+    {
+      "at": "2026-05-14T08:09:25.324Z",
+      "gate": "G3",
+      "text": "PM 分工口径：用户负责前期业务和账号资源确认，Codex 负责产品方案、技术拆分、部署指导、代码实现和验收推进。当前需要用户优先提供：云服务器/域名情况、飞书应用准备情况、比赛第一批参与人数和规则、隐私口径、DeepSeek/百炼账号、是否先做无 Hermes 的 MVP。"
+    },
+    {
+      "at": "2026-05-14T08:14:51.153Z",
+      "gate": "G3",
+      "text": "部署前置进展：用户已在阿里云购买 ECS，配置为华北2北京、2核2G、Ubuntu 22.04 64位、40G ESSD Entry、3Mbps、1年、¥99。下一步需要进入 ECS 控制台确认实例创建完成，记录公网 IP，并设置/确认 SSH 登录密码或密钥。"
+    },
+    {
+      "at": "2026-05-14T08:48:33.457Z",
+      "gate": "G3",
+      "text": "部署进展记录：阿里云 ECS 已完成基础环境搭建。实例为华北2北京 Ubuntu 22.04，公网 Web 入口已验证可访问 Nginx 默认页；安全组已开放 22/80/443；服务器已安装 Node.js 20.20.2、npm 10.8.2、Nginx、MySQL 8.0.45、Redis 6.0.16、PM2 7.0.1；已创建 MySQL 数据库 weight_competition 和本地应用账号 weight_app；PM2 systemd 自启动已启用但当前无应用进程可保存。注意：数据库密码曾在截图中露出，上线前需要轮换。下一步：先补技术方案文档和任务拆分，再由 agent 执行 Egg.js 后台骨架、飞书回调、DB schema、核心规则与部署。"
+    },
+    {
+      "at": "2026-05-14T08:51:01.939Z",
+      "gate": "G3",
+      "text": "前置信息状态更新：数据库应用密码已在服务器初始化阶段生成，但因截图中曾露出，上线前需要轮换；飞书应用尚未创建，后续需要带用户进入飞书开放平台创建机器人应用并获取 App ID/App Secret/Verification Token/Encrypt Key；用户已有百炼/DashScope key，但不得写入聊天、仓库或 task 明文，只在配置服务器 .env 时由用户粘贴。已新增 /Users/xj/Documents/减肥/docs/input-checklist.md 跟踪前置信息。"
+    },
+    {
+      "at": "2026-05-14T09:01:08.943Z",
+      "gate": "G3",
+      "text": "飞书前置进展：已在飞书开放平台创建企业自建应用，应用名为“减肥裁判”。下一步需要在应用后台添加/启用机器人能力，再获取 App ID/App Secret，并在事件订阅里准备 Verification Token/Encrypt Key；这些密钥只写入服务器 .env，不在聊天或仓库明文记录。"
+    },
+    {
+      "at": "2026-05-14T09:09:30.000Z",
+      "gate": "G3",
+      "text": "飞书前置进展更新：应用“减肥裁判”已启用机器人能力；已开通 im:message / 获取与发送单聊、群组消息；事件订阅方式已保存为长连接；已添加 im.message.receive_v1 / 接收消息事件；已开通推荐权限“获取群组中用户@机器人消息”。后续后端应使用飞书官方 SDK 长连接接收事件，不再优先走公网回调 URL。App Secret 仍需用户后续只写入服务器 .env。"
+    },
+    {
+      "at": "2026-05-14T09:16:37.000Z",
+      "gate": "G3",
+      "text": "已完成 G3 技术方案和任务拆分文档：/Users/xj/Documents/减肥/docs/technical-design.md 与 /Users/xj/Documents/减肥/docs/task-breakdown.md。方案明确 Egg.js + TypeScript + MySQL + Redis + Feishu 长连接 + 百炼/DashScope，任务拆分按 Backend/Data/Feishu/Command/Competition/Profile/Plan/AI/Meal/Scheduler/Scoring/Deploy/Acceptance 分组，可作为后续 agent 执行入口。下一步需要用户审阅确认后进入 G4 开发。"
+    },
+    {
+      "at": "2026-05-14T09:42:05.000Z",
+      "gate": "G3",
+      "text": "已将 PRD v0.2 从桌面归档到项目 docs：/Users/xj/Documents/减肥/docs/product-requirements-v0.2.md。后续以项目内 PRD 路径作为权威入口；桌面旧文件仅作临时副本，不再作为恢复入口。"
+    },
+    {
+      "at": "2026-05-14T09:43:00.000Z",
+      "gate": "G4",
+      "text": "用户确认可以开始开发，已进入 G4。完成 backend foundation：Egg.js + TypeScript 项目骨架、typed config、/health、/health/database、Prisma 6.19.3 schema、初始 MySQL migration SQL、README 数据库说明和测试。验证已通过：npm test -- test/app/controller/health.test.ts test/app/controller/databaseHealth.test.ts；DATABASE_URL=mysql://weight_app:placeholder@127.0.0.1:3306/weight_competition npm run prisma:validate；DATABASE_URL=mysql://weight_app:placeholder@127.0.0.1:3306/weight_competition npm run prisma:generate；npm run tsc；npm run dev 后 curl /health 返回 ok。"
     }
   ],
   "blockers": [],
-  "artifacts": [],
-  "recoveryPoint": "G3·计划已写：/Users/xj/Documents/减肥/开发方案.md。下一步：①用户审阅确认方案 ②完成4项前置准备(飞书应用/Redis/DeepSeek Key/ngrok) ③进入G4按Phase1-6编码",
+  "artifacts": [
+    {
+      "at": "2026-05-13T15:26:59.285Z",
+      "value": "/Users/xj/Documents/减肥/docs/product-requirements-v0.2.md"
+    },
+    {
+      "at": "2026-05-14T08:49:30.000Z",
+      "value": "/Users/xj/Documents/减肥/docs/deployment-progress.md"
+    },
+    {
+      "at": "2026-05-14T08:54:30.000Z",
+      "value": "/Users/xj/Documents/减肥/docs/input-checklist.md"
+    },
+    {
+      "at": "2026-05-14T09:16:37.000Z",
+      "value": "/Users/xj/Documents/减肥/docs/technical-design.md"
+    },
+    {
+      "at": "2026-05-14T09:16:37.000Z",
+      "value": "/Users/xj/Documents/减肥/docs/task-breakdown.md"
+    },
+    {
+      "at": "2026-05-14T09:43:00.000Z",
+      "value": "/Users/xj/Documents/减肥/package.json"
+    },
+    {
+      "at": "2026-05-14T09:43:00.000Z",
+      "value": "/Users/xj/Documents/减肥/prisma/schema.prisma"
+    },
+    {
+      "at": "2026-05-14T09:43:00.000Z",
+      "value": "/Users/xj/Documents/减肥/prisma/migrations/20260514094000_init/migration.sql"
+    }
+  ],
+  "recoveryPoint": "G4·Backend/Data foundation 已开始：/Users/xj/Documents/减肥 已有 Egg.js + TypeScript 骨架、/health、/health/database、Prisma schema 和初始 MySQL migration SQL。下一步继续实现数据 repository 和服务器迁移执行；执行真实迁移前必须先轮换 MySQL 密码并只写入服务器 .env。随后推进 Feishu 长连接、命令解析、比赛状态机、资料校验、计划/AI/菜单、调度、评分、部署验收。Feishu App Secret、百炼 key、轮换后的 MySQL 密码不写聊天或仓库。",
   "createdAt": "2026-05-12T08:42:06.782Z",
-  "updatedAt": "2026-05-12T09:09:24.439Z"
+  "updatedAt": "2026-05-14T09:43:00.000Z"
 }
