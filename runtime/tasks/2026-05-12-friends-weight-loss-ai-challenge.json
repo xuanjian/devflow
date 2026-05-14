@@ -239,6 +239,11 @@
       "at": "2026-05-14T12:40:00.000Z",
       "gate": "G4",
       "text": "飞书端到端最小闭环验证成功：ECS 部署 @机器人 前缀解析修复后，用户在真实飞书群发送 @减肥裁判 创建减肥比赛，机器人回复“减肥比赛已创建。下一步请设置：奖金池、比赛周期、每周称重时间。” 这确认了 Feishu 长连接事件 -> 后端命令解析 -> MySQL 创建比赛 -> Feishu 群回复链路可用。下一步进入比赛配置命令联调：奖金池、比赛周期、每周称重时间、每周结算时间，然后继续 profile collection / AI plan / scoring scheduler。"
+    },
+    {
+      "at": "2026-05-14T12:55:00.000Z",
+      "gate": "G4",
+      "text": "完成自然语言比赛配置 + Profile 资料收集 MVP：新增 SET_COMPETITION_CONFIG 和 UPDATE_PROFILE 命令；CommandParser 支持解析“800 8个月 每周日晚上8点”“奖金800，比赛8周，每周日晚上8点称重，10点结算”，月份按 4 周换算并在回复中说明；报名成功后会提示补充身高、当前体重、目标体重、作息、运动偏好、午餐/晚餐场景；新增 ParticipantProfileRepository，将“身高175 体重80 目标72 晚上运动 12点睡 8点起 午餐外卖 晚餐在家”写入已有 participant_profiles 表。验证已通过：自然语言/Profile 焦点测试 29 passing；npm run tsc；npm test 47 passing；npm run build。下一步：提交推送，ECS git pull 重启 PM2 后在飞书群测试自然语言配置和 Profile。"
     }
   ],
   "blockers": [],
@@ -336,7 +341,7 @@
       "value": "/Users/xj/Documents/减肥/package.json"
     }
   ],
-  "recoveryPoint": "G4·Backend/Data/Feishu/Command foundation 已开始：/Users/xj/Documents/减肥 已有 Egg.js + TypeScript 骨架、/health、/health/database、Prisma schema、初始 MySQL migration SQL、第一批 User/Competition/Participant/WeighIn repository、FeishuEventLogRepository、Feishu SDK 长连接启动守卫、飞书归一化/回复、首批命令解析、CREATE_COMPETITION/SIGN_UP/SUBMIT_WEEKLY_WEIGHT 真实 flow、feishu_event_logs 幂等，以及奖金池/周期/称重时间/结算时间/家庭模式/固定做饭人配置落库。服务器联调已完成 GitHub 私有仓库部署准备、ECS clone、npm ci、Prisma generate、.env 配置、DATABASE_URL URL 编码修正、Prisma migration 成功、PM2 启动成功、/health 通过、/health/database 通过。生产构建修复为 tsconfig.build.json + clean/build/pretest/prestart。飞书长连接已启动成功，日志显示 Feishu WS client started / ws client ready；真实群聊已验证能收到消息并回复。@机器人 前缀解析修复已部署到 ECS，用户确认真实飞书群发送 @减肥裁判 创建减肥比赛 后回复“减肥比赛已创建。下一步请设置：奖金池、比赛周期、每周称重时间。” 下一步进入比赛配置命令联调：奖金池 800、比赛周期 8周、每周日 20:00 称重、每周日 22:00 结算；随后继续 profile collection / AI plan / scoring scheduler。生产前仍应轮换 MySQL 密码。Feishu App Secret、百炼 key、MySQL 密码不写聊天或仓库。",
+  "recoveryPoint": "G4·Backend/Data/Feishu/Command/Profile foundation 已开始：/Users/xj/Documents/减肥 已有 Egg.js + TypeScript 骨架、/health、/health/database、Prisma schema、初始 MySQL migration SQL、User/Competition/Participant/WeighIn/FeishuEventLog/ParticipantProfile repository、Feishu SDK 长连接启动守卫、飞书归一化/回复、首批命令解析、CREATE_COMPETITION/SIGN_UP/SUBMIT_WEEKLY_WEIGHT 真实 flow、feishu_event_logs 幂等、奖金池/周期/称重时间/结算时间/家庭模式/固定做饭人配置落库，以及自然语言组合配置/Profile 资料收集。服务器联调已完成 GitHub 私有仓库部署准备、ECS clone、npm ci、Prisma generate、.env 配置、DATABASE_URL URL 编码修正、Prisma migration 成功、PM2 启动成功、/health 通过、/health/database 通过。飞书长连接已启动成功，真实群聊已验证 @减肥裁判 创建减肥比赛 能创建比赛并回复。当前新增能力：可解析“800 8个月 每周日晚上8点”“奖金800，比赛8周，每周日晚上8点称重，10点结算”；报名后提示补资料；可解析并保存“身高175 体重80 目标72 晚上运动 12点睡 8点起 午餐外卖 晚餐在家”。验证已通过：焦点测试 29 passing；npm run tsc；npm test 47 passing；npm run build。下一步：提交推送，ECS git pull 重启 PM2 后在飞书群测试自然语言配置和 Profile；随后做 AI plan / scoring scheduler。生产前仍应轮换 MySQL 密码。Feishu App Secret、百炼 key、MySQL 密码不写聊天或仓库。",
   "createdAt": "2026-05-12T08:42:06.782Z",
-  "updatedAt": "2026-05-14T12:40:00.000Z"
+  "updatedAt": "2026-05-14T12:55:00.000Z"
 }
