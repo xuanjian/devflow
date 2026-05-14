@@ -224,6 +224,11 @@
       "at": "2026-05-14T12:04:00.000Z",
       "gate": "G4",
       "text": "ECS 生产进程验证成功：服务器已 git pull 到 1bb1911，PM2 weight-app 重启后等待启动完成，curl http://127.0.0.1:7001/health 返回 ok:true，curl http://127.0.0.1:7001/health/database 返回 ok:true 且 database.ok:true。说明 Egg 服务、生产构建、PM2、MySQL 连接均已通过服务器本机验证。下一步进入飞书真实群聊联调：添加/确认机器人在群内，@减肥裁判 发送 创建减肥比赛，然后观察机器人回复与 pm2 logs。"
+    },
+    {
+      "at": "2026-05-14T12:21:00.000Z",
+      "gate": "G4",
+      "text": "飞书长连接启动验证成功：此前 PM2 日志显示 Feishu WS client disabled or credentials missing，排查后确认 FEISHU_ENABLE_WS_CLIENT 需要在服务器 .env 中设为 true 并重启。重启后日志出现 Feishu WS client started 与 ws client ready，说明后端已连接飞书长连接。下一步让用户在飞书真实群内重新 @减肥裁判 发送 创建减肥比赛；若仍无回复，再查看 pm2 logs 中是否出现 [feishu] received command 或发送消息错误。"
     }
   ],
   "blockers": [],
@@ -321,7 +326,7 @@
       "value": "/Users/xj/Documents/减肥/package.json"
     }
   ],
-  "recoveryPoint": "G4·Backend/Data/Feishu/Command foundation 已开始：/Users/xj/Documents/减肥 已有 Egg.js + TypeScript 骨架、/health、/health/database、Prisma schema、初始 MySQL migration SQL、第一批 User/Competition/Participant/WeighIn repository、FeishuEventLogRepository、Feishu SDK 长连接启动守卫、飞书归一化/回复、首批命令解析、CREATE_COMPETITION/SIGN_UP/SUBMIT_WEEKLY_WEIGHT 真实 flow、feishu_event_logs 幂等，以及奖金池/周期/称重时间/结算时间/家庭模式/固定做饭人配置落库。服务器联调已完成 GitHub 私有仓库部署准备、ECS clone、npm ci、Prisma generate、.env 配置、DATABASE_URL URL 编码修正、Prisma migration 成功、PM2 启动成功、/health 通过、/health/database 通过。生产构建修复为 tsconfig.build.json + clean/build/pretest/prestart。下一步：飞书真实群聊联调，@减肥裁判 发送 创建减肥比赛，观察回复和 pm2 logs。生产前仍应轮换 MySQL 密码。Feishu App Secret、百炼 key、MySQL 密码不写聊天或仓库。",
+  "recoveryPoint": "G4·Backend/Data/Feishu/Command foundation 已开始：/Users/xj/Documents/减肥 已有 Egg.js + TypeScript 骨架、/health、/health/database、Prisma schema、初始 MySQL migration SQL、第一批 User/Competition/Participant/WeighIn repository、FeishuEventLogRepository、Feishu SDK 长连接启动守卫、飞书归一化/回复、首批命令解析、CREATE_COMPETITION/SIGN_UP/SUBMIT_WEEKLY_WEIGHT 真实 flow、feishu_event_logs 幂等，以及奖金池/周期/称重时间/结算时间/家庭模式/固定做饭人配置落库。服务器联调已完成 GitHub 私有仓库部署准备、ECS clone、npm ci、Prisma generate、.env 配置、DATABASE_URL URL 编码修正、Prisma migration 成功、PM2 启动成功、/health 通过、/health/database 通过。生产构建修复为 tsconfig.build.json + clean/build/pretest/prestart。飞书长连接已启动成功，日志显示 Feishu WS client started / ws client ready。下一步：飞书真实群聊联调，@减肥裁判 发送 创建减肥比赛，观察回复和 pm2 logs。生产前仍应轮换 MySQL 密码。Feishu App Secret、百炼 key、MySQL 密码不写聊天或仓库。",
   "createdAt": "2026-05-12T08:42:06.782Z",
-  "updatedAt": "2026-05-14T12:04:00.000Z"
+  "updatedAt": "2026-05-14T12:21:00.000Z"
 }
