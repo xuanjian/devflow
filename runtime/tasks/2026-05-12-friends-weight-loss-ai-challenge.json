@@ -209,6 +209,11 @@
       "at": "2026-05-14T11:05:00.000Z",
       "gate": "G4",
       "text": "进入服务器联调准备：本地自动 SSH root@8.140.196.216 因未配置可用 key/password 自动登录失败，改为 GitHub 私有仓库 + ECS deploy key 的部署路径。已补 dotenv/config，确保服务器 .env 会被 Egg 配置读取；新增 docs/deploy-runbook.md，记录私有 GitHub repo、deploy key、服务器 clone、.env、Prisma migrate、PM2 启动和健康检查步骤；README 和 deployment-progress 已更新。验证已通过：npm run tsc；npm test（40 passing）。下一步：创建/推送 GitHub 仓库，然后在 ECS 上生成 deploy key 并添加到 GitHub。"
+    },
+    {
+      "at": "2026-05-14T11:32:00.000Z",
+      "gate": "G4",
+      "text": "GitHub 私有仓库 xuanjian/weight-loss-ai-competition 已创建并推送 main；ECS 生成的公钥 ssh-ed25519 ... weight-app-ecs 已作为只读 Deploy Key 添加到 GitHub 仓库。下一步在 ECS 写入 ~/.ssh/config，测试 ssh -T git@github.com，然后 clone 到 /opt/weight-app/current，安装依赖，配置 .env，执行 Prisma migration 并用 PM2 启动。"
     }
   ],
   "blockers": [],
@@ -298,7 +303,7 @@
       "value": "/Users/xj/Documents/减肥/config/config.default.ts"
     }
   ],
-  "recoveryPoint": "G4·Backend/Data/Feishu/Command foundation 已开始：/Users/xj/Documents/减肥 已有 Egg.js + TypeScript 骨架、/health、/health/database、Prisma schema、初始 MySQL migration SQL、第一批 User/Competition/Participant/WeighIn repository、FeishuEventLogRepository、Feishu SDK 长连接启动守卫、飞书归一化/回复、首批命令解析、CREATE_COMPETITION/SIGN_UP/SUBMIT_WEEKLY_WEIGHT 真实 flow、feishu_event_logs 幂等，以及奖金池/周期/称重时间/结算时间/家庭模式/固定做饭人配置落库。服务器联调准备已转为 GitHub 私有仓库 + ECS deploy key 路径；已补 dotenv/config 并新增 docs/deploy-runbook.md。下一步：创建/推送 GitHub 仓库，在 ECS 上生成 deploy key，配置服务器 .env，执行 Prisma migration，PM2 启动，并进飞书群实测。生产前仍应轮换 MySQL 密码。Feishu App Secret、百炼 key、MySQL 密码不写聊天或仓库。",
+  "recoveryPoint": "G4·Backend/Data/Feishu/Command foundation 已开始：/Users/xj/Documents/减肥 已有 Egg.js + TypeScript 骨架、/health、/health/database、Prisma schema、初始 MySQL migration SQL、第一批 User/Competition/Participant/WeighIn repository、FeishuEventLogRepository、Feishu SDK 长连接启动守卫、飞书归一化/回复、首批命令解析、CREATE_COMPETITION/SIGN_UP/SUBMIT_WEEKLY_WEIGHT 真实 flow、feishu_event_logs 幂等，以及奖金池/周期/称重时间/结算时间/家庭模式/固定做饭人配置落库。服务器联调准备已转为 GitHub 私有仓库 + ECS deploy key 路径；已补 dotenv/config 并新增 docs/deploy-runbook.md；GitHub 私有仓库已推送，ECS 公钥已作为只读 Deploy Key 添加。下一步：在 ECS 配置 ~/.ssh/config 并 clone，配置服务器 .env，执行 Prisma migration，PM2 启动，并进飞书群实测。生产前仍应轮换 MySQL 密码。Feishu App Secret、百炼 key、MySQL 密码不写聊天或仓库。",
   "createdAt": "2026-05-12T08:42:06.782Z",
-  "updatedAt": "2026-05-14T11:05:00.000Z"
+  "updatedAt": "2026-05-14T11:32:00.000Z"
 }
