@@ -61,6 +61,11 @@
         "/Users/xj/Documents/减肥/app/repository/CompetitionRepository.ts",
         "/Users/xj/Documents/减肥/app/repository/ParticipantRepository.ts",
         "/Users/xj/Documents/减肥/app/repository/WeighInRepository.ts",
+        "/Users/xj/Documents/减肥/app/service/command/commandParser.ts",
+        "/Users/xj/Documents/减肥/app/service/command/commandRouter.ts",
+        "/Users/xj/Documents/减肥/app/service/feishu/feishuClient.ts",
+        "/Users/xj/Documents/减肥/app/service/feishu/feishuEvent.ts",
+        "/Users/xj/Documents/减肥/app/service/feishu/feishuMessage.ts",
         "/Users/xj/Documents/减肥/prisma/schema.prisma",
         "/Users/xj/Documents/减肥/prisma/migrations/20260514094000_init/migration.sql"
       ]
@@ -177,6 +182,11 @@
       "at": "2026-05-14T10:05:00.000Z",
       "gate": "G4",
       "text": "用户确认开发阶段数据库密码暂不轮换，生产前仍保留轮换要求。已完成第一批数据 repository：UserRepository、CompetitionRepository、ParticipantRepository、WeighInRepository；覆盖 Feishu 用户 upsert、草稿比赛创建、群内未完成比赛查询、参赛者幂等报名、每周体重幂等记录。验证已通过：npm test -- test/app/controller/health.test.ts test/app/controller/databaseHealth.test.ts test/repository/coreRepositories.test.ts；DATABASE_URL=mysql://weight_app:placeholder@127.0.0.1:3306/weight_competition npm run prisma:validate；npm run tsc。下一步进入 Feishu 长连接和命令解析骨架。"
+    },
+    {
+      "at": "2026-05-14T10:12:00.000Z",
+      "gate": "G4",
+      "text": "完成 Feishu/Command foundation：安装 @larksuiteoapi/node-sdk；新增 FeishuClientService、FeishuEventService、FeishuMessageService；app 启动时仅在 FEISHU_ENABLE_WS_CLIENT=true 且 App ID/Secret 都存在时启动长连接，默认无密钥不启动；新增 IncomingMessageEvent 归一化；新增 rule-first CommandParserService 和 CommandRouterService 占位回复。支持首批命令：创建减肥比赛、报名、本周体重/kg/斤、奖金池、比赛周期、每周称重/结算时间、家庭模式、固定做饭人、运动完成、今天请假、未知命令帮助。验证已通过：20 tests；Prisma validate；tsc；npm run dev 后 /health 正常且日志显示 Feishu WS disabled or credentials missing。后续待做：feishu_event_logs 幂等、真实 competition/profile flow、服务器 .env 后真实飞书群测试。"
     }
   ],
   "blockers": [],
@@ -228,9 +238,29 @@
     {
       "at": "2026-05-14T10:05:00.000Z",
       "value": "/Users/xj/Documents/减肥/app/repository/WeighInRepository.ts"
+    },
+    {
+      "at": "2026-05-14T10:12:00.000Z",
+      "value": "/Users/xj/Documents/减肥/app/service/command/commandParser.ts"
+    },
+    {
+      "at": "2026-05-14T10:12:00.000Z",
+      "value": "/Users/xj/Documents/减肥/app/service/command/commandRouter.ts"
+    },
+    {
+      "at": "2026-05-14T10:12:00.000Z",
+      "value": "/Users/xj/Documents/减肥/app/service/feishu/feishuClient.ts"
+    },
+    {
+      "at": "2026-05-14T10:12:00.000Z",
+      "value": "/Users/xj/Documents/减肥/app/service/feishu/feishuEvent.ts"
+    },
+    {
+      "at": "2026-05-14T10:12:00.000Z",
+      "value": "/Users/xj/Documents/减肥/app/service/feishu/feishuMessage.ts"
     }
   ],
-  "recoveryPoint": "G4·Backend/Data foundation 已开始：/Users/xj/Documents/减肥 已有 Egg.js + TypeScript 骨架、/health、/health/database、Prisma schema、初始 MySQL migration SQL，以及第一批 User/Competition/Participant/WeighIn repository。下一步进入 Feishu 长连接和命令解析骨架；执行真实迁移前需要 deployment .env 就绪。生产前仍应轮换 MySQL 密码。Feishu App Secret、百炼 key、MySQL 密码不写聊天或仓库。",
+  "recoveryPoint": "G4·Backend/Data/Feishu/Command foundation 已开始：/Users/xj/Documents/减肥 已有 Egg.js + TypeScript 骨架、/health、/health/database、Prisma schema、初始 MySQL migration SQL、第一批 User/Competition/Participant/WeighIn repository、Feishu SDK 长连接启动守卫、飞书消息归一化、文本回复 helper、首批命令解析和占位路由。下一步实现 feishu_event_logs 幂等，并把 CommandRouter 从占位回复接入真实 Competition/Profile flow。执行真实迁移和真实飞书群测试前需要 deployment .env 就绪。生产前仍应轮换 MySQL 密码。Feishu App Secret、百炼 key、MySQL 密码不写聊天或仓库。",
   "createdAt": "2026-05-12T08:42:06.782Z",
-  "updatedAt": "2026-05-14T10:05:00.000Z"
+  "updatedAt": "2026-05-14T10:12:00.000Z"
 }
