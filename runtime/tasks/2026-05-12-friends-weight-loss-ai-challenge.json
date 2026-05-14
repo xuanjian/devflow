@@ -249,6 +249,11 @@
       "at": "2026-05-14T13:08:00.000Z",
       "gate": "G4",
       "text": "完成发起人结束/重开比赛 MVP：新增 competitions.created_by_user_id 字段和 migration 20260514130000_add_competition_creator；创建比赛时记录飞书发送者为发起人；新增 END_COMPETITION / RESTART_COMPETITION 命令，支持“结束当前比赛”“结束比赛”“重新开一局”“重开一局”；只有发起人可以结束或重开带 creator 的比赛，旧数据 created_by_user_id 为空时允许结束，避免当前测试比赛卡住。验证已通过：DATABASE_URL=... npm run prisma:validate；npm run tsc；npm test 52 passing；npm run build。下一步：提交推送，ECS git pull 后先执行 npm run db:migrate，再重启 PM2 并在飞书群测试结束/重开。"
+    },
+    {
+      "at": "2026-05-14T13:40:00.000Z",
+      "gate": "G4",
+      "text": "根据真实飞书群测试修复两个 MVP 问题：1）自然语言配置“比赛 1个月 每周日晚上8点 上传体重”不再把 1个月 误解析为奖金池 1 元，同时保留“800 8个月 每周日晚上8点”这种首位裸金额 shorthand；2）Feishu sender 身份从 user_id 改为 user_id -> open_id -> union_id 兜底，解决事件只给 open_id 时“无法识别你的飞书用户身份，暂时不能报名”的问题。新增 CommandParser 和 FeishuEventService 回归测试。下一步：完整验证、提交推送、ECS git pull 重启 PM2，然后在真实飞书群重试配置和报名。"
     }
   ],
   "blockers": [],
@@ -346,7 +351,7 @@
       "value": "/Users/xj/Documents/减肥/package.json"
     }
   ],
-  "recoveryPoint": "G4·Backend/Data/Feishu/Command/Profile foundation 已开始：/Users/xj/Documents/减肥 已有 Egg.js + TypeScript 骨架、/health、/health/database、Prisma schema、User/Competition/Participant/WeighIn/FeishuEventLog/ParticipantProfile repository、Feishu SDK 长连接启动守卫、飞书归一化/回复、首批命令解析、CREATE_COMPETITION/SIGN_UP/SUBMIT_WEEKLY_WEIGHT 真实 flow、feishu_event_logs 幂等、奖金池/周期/称重时间/结算时间/家庭模式/固定做饭人配置落库、自然语言组合配置/Profile 资料收集，以及发起人结束/重开比赛。服务器联调已完成 GitHub 私有仓库部署准备、ECS clone、npm ci、Prisma generate、.env 配置、DATABASE_URL URL 编码修正、Prisma migration 成功、PM2 启动成功、/health 通过、/health/database 通过。飞书长连接已启动成功，真实群聊已验证 @减肥裁判 创建减肥比赛 能创建比赛并回复。当前新增能力：创建比赛记录 created_by_user_id；支持“结束当前比赛”“结束比赛”“重新开一局”“重开一局”，只有发起人能结束/重开新比赛，旧比赛无发起人时允许结束；新增 migration 20260514130000_add_competition_creator。验证已通过：DATABASE_URL=... npm run prisma:validate；npm run tsc；npm test 52 passing；npm run build。下一步：提交推送，ECS git pull 后先执行 npm run db:migrate，再重启 PM2 并在飞书群测试自然语言配置/Profile/结束/重开；随后做 AI plan / scoring scheduler。生产前仍应轮换 MySQL 密码。Feishu App Secret、百炼 key、MySQL 密码不写聊天或仓库。",
+  "recoveryPoint": "G4·Backend/Data/Feishu/Command/Profile foundation 已开始：/Users/xj/Documents/减肥 已有 Egg.js + TypeScript 骨架、/health、/health/database、Prisma schema、User/Competition/Participant/WeighIn/FeishuEventLog/ParticipantProfile repository、Feishu SDK 长连接启动守卫、飞书归一化/回复、首批命令解析、CREATE_COMPETITION/SIGN_UP/SUBMIT_WEEKLY_WEIGHT 真实 flow、feishu_event_logs 幂等、奖金池/周期/称重时间/结算时间/家庭模式/固定做饭人配置落库、自然语言组合配置/Profile 资料收集，以及发起人结束/重开比赛。服务器联调已完成 GitHub 私有仓库部署准备、ECS clone、npm ci、Prisma generate、.env 配置、DATABASE_URL URL 编码修正、Prisma migration 成功、PM2 启动成功、/health 通过、/health/database 通过。飞书长连接已启动成功，真实群聊已验证 @减肥裁判 创建减肥比赛 能创建比赛并回复。当前新增修复：自然语言配置“比赛 1个月 每周日晚上8点 上传体重”不再把 1个月 误识别为奖金池 1 元；Feishu sender 身份支持 user_id -> open_id -> union_id 兜底，避免真实群聊报名时无法识别用户。下一步：完整验证、提交推送、ECS git pull 重启 PM2，并在飞书群测试自然语言配置/Profile/报名/结束/重开；随后做 AI plan / scoring scheduler。生产前仍应轮换 MySQL 密码。Feishu App Secret、百炼 key、MySQL 密码不写聊天或仓库。",
   "createdAt": "2026-05-12T08:42:06.782Z",
-  "updatedAt": "2026-05-14T13:08:00.000Z"
+  "updatedAt": "2026-05-14T13:40:00.000Z"
 }
