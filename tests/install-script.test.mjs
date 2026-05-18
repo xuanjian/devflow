@@ -72,7 +72,7 @@ test("doctor passes when core links, OpenSpec, and superpowers are available", (
   const env = {
     HOME: home,
     AI_CONTEXT_SKILLS_HOMES: skillsHome,
-    PATH: `${binDir}${path.delimiter}${process.env.PATH}`
+    PATH: `${binDir}${path.delimiter}/bin${path.delimiter}/usr/bin`
   };
 
   const setup = runInstallScript(["setup"], env);
@@ -103,7 +103,7 @@ chmod +x "${path.join(binDir, "openspec")}"
   const env = {
     HOME: home,
     AI_CONTEXT_SKILLS_HOMES: skillsHome,
-    PATH: `${binDir}${path.delimiter}${process.env.PATH}`
+    PATH: `${binDir}${path.delimiter}/bin${path.delimiter}/usr/bin`
   };
 
   const setup = runInstallScript(["setup", "--install-openspec"], env);
