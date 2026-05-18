@@ -7,6 +7,7 @@ import { fileURLToPath } from "node:url";
 const testFile = fileURLToPath(import.meta.url);
 const rootDir = path.resolve(path.dirname(testFile), "..");
 const skillPath = path.join(rootDir, "bundles", "skills", "ai-context", "SKILL.md");
+const readmePath = path.join(rootDir, "README.md");
 
 test("ai-context skill documents chat subcommands as one routed skill", () => {
   const skill = fs.readFileSync(skillPath, "utf8");
@@ -30,4 +31,16 @@ test("ai-context:add contract covers project, scene, skill, and rule association
   assert.match(skill, /add_scene/);
   assert.match(skill, /add_skill_from_path/);
   assert.match(skill, /add_rule/);
+});
+
+test("README keeps chat entry guidance without a common commands block", () => {
+  const readme = fs.readFileSync(readmePath, "utf8");
+
+  assert.match(readme, /## 聊天入口/);
+  assert.match(readme, /@ai-context:init/);
+  assert.match(readme, /@ai-context:add \/path\/to\/project/);
+  assert.match(readme, /@ai-context:task/);
+  assert.doesNotMatch(readme, /## 常用命令/);
+  assert.doesNotMatch(readme, /## 常用聊天入口/);
+  assert.doesNotMatch(readme, /## 终端排障和本地开发/);
 });

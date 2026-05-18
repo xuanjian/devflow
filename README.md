@@ -322,37 +322,6 @@ npm run build
 
 也可以在面板的“检查”页查看是否有失败项。
 
-## 常用命令
-
-```bash
-# 查看安装状态
-node scripts/install-ai-context.mjs check
-
-# 交互式初始化 AI 工具配置
-ai-context init
-
-# 非交互式初始化指定 AI 工具
-ai-context init --tools codex,claude-code,cursor
-
-# 验证配置和关系
-node scripts/install-ai-context.mjs validate
-
-# 安装核心 skill
-node scripts/install-ai-context.mjs install
-
-# 卸载核心 skill 链接
-node scripts/install-ai-context.mjs uninstall
-
-# 本地开发面板
-npm run dev
-
-# 构建面板
-npm run build
-
-# 运行测试
-npm test
-```
-
 ## 重要目录
 
 ```text
