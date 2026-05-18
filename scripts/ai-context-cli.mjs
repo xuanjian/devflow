@@ -20,12 +20,14 @@ function usage() {
   console.log(`Usage:
   ai-context init
   ai-context init --tools codex,claude-code,cursor
+  ai-context init --dir ~/Documents/ai-context --tools codex
   ai-context init --tools codex,qoderwork --skip-openspec
 
 Options:
   --tools <ids>       Comma-separated AI tools. Available: ${toolProviders.map(tool => tool.id).join(', ')}
   --yes               Non-interactive confirmation.
-  --root <path>       ai-context checkout path. Defaults to current directory when it is an ai-context checkout.
+  --dir <path>        Local ai-context directory to create or reuse. Defaults to ./ai-context outside a checkout.
+  --root <path>       Existing ai-context checkout path. Alias for --dir when the path already exists.
   --skip-openspec     Do not install OpenSpec during init.
   --help              Show help.
 `);
@@ -79,16 +81,66 @@ function isAiContextRoot(candidateRoot) {
     && fs.existsSync(path.join(candidateRoot, 'scripts', 'install-ai-context.mjs'));
 }
 
+function isDirectoryEmpty(directoryPath) {
+  if (!fs.existsSync(directoryPath)) return true;
+  return fs.statSync(directoryPath).isDirectory() && fs.readdirSync(directoryPath).length === 0;
+}
+
+function shouldSkipTemplateEntry(relativePath) {
+  const normalized = relativePath.split(path.sep).join('/');
+  if (!normalized) return false;
+  return [
+    '.git',
+    'node_modules',
+    '.playwright-mcp',
+    '.superpowers',
+    'dist',
+  ].some(skipPath => normalized === skipPath || normalized.startsWith(`${skipPath}/`))
+    || normalized.endsWith('.tgz')
+    || normalized.endsWith('.tmp')
+    || normalized.endsWith('.swp')
+    || normalized.includes('/.DS_Store')
+    || normalized === '.DS_Store';
+}
+
+function copyTemplateDirectory(sourceDir, targetDir, relativeBase = '') {
+  fs.mkdirSync(targetDir, { recursive: true });
+  for (const entry of fs.readdirSync(sourceDir, { withFileTypes: true })) {
+    const relativePath = path.join(relativeBase, entry.name);
+    if (shouldSkipTemplateEntry(relativePath)) continue;
+    const sourcePath = path.join(sourceDir, entry.name);
+    const targetPath = path.join(targetDir, entry.name);
+    if (entry.isDirectory()) {
+      copyTemplateDirectory(sourcePath, targetPath, relativePath);
+    } else if (entry.isSymbolicLink()) {
+      fs.symlinkSync(fs.readlinkSync(sourcePath), targetPath);
+    } else if (entry.isFile()) {
+      fs.copyFileSync(sourcePath, targetPath);
+      fs.chmodSync(targetPath, fs.statSync(sourcePath).mode);
+    }
+  }
+}
+
+function ensureLocalRoot(targetRoot) {
+  if (isAiContextRoot(targetRoot)) return targetRoot;
+  if (fs.existsSync(targetRoot) && !isDirectoryEmpty(targetRoot)) {
+    throw new Error(`target directory is not empty and is not an ai-context checkout: ${targetRoot}`);
+  }
+  copyTemplateDirectory(packageRoot, targetRoot);
+  if (!isAiContextRoot(targetRoot)) throw new Error(`failed to create ai-context checkout: ${targetRoot}`);
+  return targetRoot;
+}
+
 function resolveRoot(flags) {
+  const explicitDir = flags.dir && flags.dir !== true ? path.resolve(String(flags.dir)) : undefined;
   const explicitRoot = flags.root && flags.root !== true ? path.resolve(String(flags.root)) : undefined;
-  if (explicitRoot) {
-    if (!isAiContextRoot(explicitRoot)) throw new Error(`not an ai-context checkout: ${explicitRoot}`);
-    return explicitRoot;
+  const explicitTarget = explicitDir || explicitRoot;
+  if (explicitTarget) {
+    return ensureLocalRoot(explicitTarget);
   }
   const cwd = process.cwd();
   if (isAiContextRoot(cwd)) return cwd;
-  if (isAiContextRoot(packageRoot)) return packageRoot;
-  throw new Error('run ai-context init from an ai-context checkout, or pass --root <path>');
+  return ensureLocalRoot(path.join(cwd, 'ai-context'));
 }
 
 function skillHomesForTools(toolIds, homeDir) {

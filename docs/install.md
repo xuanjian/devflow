@@ -16,10 +16,23 @@ This document is the clean-machine install path for the public ai-context framew
 
 ```bash
 npm install -g @xuanjames/ai-context
-git clone <repo-url> ai-context
+ai-context init
+```
+
+`git clone` is not required for normal installation. When `ai-context init` runs outside an existing ai-context checkout, it creates `./ai-context` from the npm package template and installs selected AI tool links to that local directory.
+
+Use a custom location when needed:
+
+```bash
+ai-context init --dir ~/Documents/ai-context
+```
+
+Install local app dependencies only when you want to run the board:
+
+```bash
 cd ai-context
 npm install
-ai-context init
+npm run dev
 ```
 
 `ai-context init` opens a terminal selector for AI tool targets:

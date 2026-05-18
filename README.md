@@ -30,10 +30,21 @@
 
 ```bash
 npm install -g @xuanjames/ai-context
-git clone <repo-url> ai-context
+ai-context init
+```
+
+如果当前目录还没有 `ai-context`，直接运行 `ai-context init` 会自动创建 `./ai-context` 本地工作目录，所以不需要手动 `git clone`。想指定位置可以用：
+
+```bash
+ai-context init --dir ~/Documents/ai-context
+```
+
+需要启动看板时再进入本地目录安装前端依赖：
+
+```bash
 cd ai-context
 npm install
-ai-context init
+npm run dev
 ```
 
 `ai-context init` 会像 OpenSpec 初始化一样在终端里选择要配置的 AI 工具，可以多选：

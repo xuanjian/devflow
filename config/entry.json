@@ -59,9 +59,6 @@
     ],
     "primaryInstallFlow": [
       "npm install -g @xuanjames/ai-context",
-      "git clone <repo-url> ai-context",
-      "cd ai-context",
-      "npm install",
       "ai-context init",
       "ask the AI tool to run ai-context-init"
     ],
@@ -112,7 +109,8 @@
         "opencode",
         "workbuddy"
       ],
-      "internalScriptStatus": "setup and doctor are retained for tests, CI, and low-level troubleshooting only; normal users should run ai-context init."
+      "internalScriptStatus": "setup and doctor are retained for tests, CI, and low-level troubleshooting only; normal users should run ai-context init.",
+      "createsLocalCheckout": "When run outside an existing ai-context checkout, ai-context init creates ./ai-context from the npm package template. Use --dir <path> to choose another location."
     }
   },
   "taskFlow": {
