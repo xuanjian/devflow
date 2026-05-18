@@ -44,3 +44,70 @@ test("install links routing and initialization skills, then tells the user what 
   assert.equal(fs.existsSync(path.join(skillsHome, "ai-context")), false);
   assert.equal(fs.existsSync(path.join(skillsHome, "ai-context-init")), false);
 });
+
+test("setup installs core skills and reports required workflow tools", () => {
+  const skillsHome = fs.mkdtempSync(path.join(os.tmpdir(), "ai-context-setup-skills-"));
+  const env = {
+    HOME: fs.mkdtempSync(path.join(os.tmpdir(), "ai-context-setup-home-")),
+    AI_CONTEXT_SKILLS_HOMES: skillsHome
+  };
+
+  const setup = runInstallScript(["setup"], env);
+  assert.equal(setup.status, 0, setup.stderr);
+  assert.match(setup.stdout, /setup complete/);
+  assert.match(setup.stdout, /OpenSpec/);
+  assert.match(setup.stdout, /superpowers/);
+  assert.equal(fs.lstatSync(path.join(skillsHome, "ai-context")).isSymbolicLink(), true);
+  assert.equal(fs.lstatSync(path.join(skillsHome, "ai-context-init")).isSymbolicLink(), true);
+});
+
+test("doctor passes when core links, OpenSpec, and superpowers are available", () => {
+  const home = fs.mkdtempSync(path.join(os.tmpdir(), "ai-context-doctor-home-"));
+  const skillsHome = fs.mkdtempSync(path.join(os.tmpdir(), "ai-context-doctor-skills-"));
+  const binDir = fs.mkdtempSync(path.join(os.tmpdir(), "ai-context-doctor-bin-"));
+  const openspecPath = path.join(binDir, "openspec");
+  fs.mkdirSync(path.join(home, ".codex", "superpowers"), { recursive: true });
+  fs.writeFileSync(openspecPath, "#!/bin/sh\nprintf 'openspec-test\\n'\n");
+  fs.chmodSync(openspecPath, 0o755);
+  const env = {
+    HOME: home,
+    AI_CONTEXT_SKILLS_HOMES: skillsHome,
+    PATH: `${binDir}${path.delimiter}${process.env.PATH}`
+  };
+
+  const setup = runInstallScript(["setup"], env);
+  assert.equal(setup.status, 0, setup.stderr);
+
+  const doctor = runInstallScript(["doctor"], env);
+  assert.equal(doctor.status, 0, doctor.stderr);
+  assert.match(doctor.stdout, /ok OpenSpec CLI: openspec-test/);
+  assert.match(doctor.stdout, /ok Codex superpowers:/);
+  assert.match(doctor.stdout, /doctor passed/);
+});
+
+test("setup can install OpenSpec when explicitly requested", () => {
+  const home = fs.mkdtempSync(path.join(os.tmpdir(), "ai-context-openspec-home-"));
+  const skillsHome = fs.mkdtempSync(path.join(os.tmpdir(), "ai-context-openspec-skills-"));
+  const binDir = fs.mkdtempSync(path.join(os.tmpdir(), "ai-context-openspec-bin-"));
+  const npmLog = path.join(home, "npm.log");
+  const npmPath = path.join(binDir, "npm");
+  fs.writeFileSync(npmPath, `#!/bin/sh
+printf "%s\\n" "$*" > "${npmLog}"
+cat > "${path.join(binDir, "openspec")}" <<'EOF'
+#!/bin/sh
+printf 'openspec-installed\\n'
+EOF
+chmod +x "${path.join(binDir, "openspec")}"
+`);
+  fs.chmodSync(npmPath, 0o755);
+  const env = {
+    HOME: home,
+    AI_CONTEXT_SKILLS_HOMES: skillsHome,
+    PATH: `${binDir}${path.delimiter}${process.env.PATH}`
+  };
+
+  const setup = runInstallScript(["setup", "--install-openspec"], env);
+  assert.equal(setup.status, 0, setup.stderr);
+  assert.match(fs.readFileSync(npmLog, "utf8"), /install -g @fission-ai\/openspec@latest/);
+  assert.match(setup.stdout, /ok OpenSpec CLI: openspec-installed/);
+});

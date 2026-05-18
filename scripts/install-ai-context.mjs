@@ -2,6 +2,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
+import { execFileSync } from 'node:child_process';
 
 const root = path.resolve(new URL('..', import.meta.url).pathname);
 const entryPath = path.join(root, 'config', 'entry.json');
@@ -14,6 +15,7 @@ const coreSkills = [
 const managedEntryMarker = '<!-- ai-context:managed-entry:start -->';
 const managedEntryEndMarker = '<!-- ai-context:managed-entry:end -->';
 const userHome = process.env.HOME || path.resolve(root, '..', '..');
+const superpowersDir = process.env.AI_CONTEXT_SUPERPOWERS_DIR || path.join(userHome, '.codex', 'superpowers');
 const projectPathOverrides = resolveProjectPathOverrides();
 const projectSearchRoots = resolveProjectSearchRoots();
 const allowedRuleApplyModes = new Set(['global', 'project-on-demand', 'scene-on-demand', 'task-gate', 'manual']);
@@ -98,11 +100,34 @@ function resolveProjectPath(project) {
 
 function usage() {
   console.log(`Usage:
+  node scripts/install-ai-context.mjs setup [--project-skills] [--install-openspec]
+  node scripts/install-ai-context.mjs doctor
   node scripts/install-ai-context.mjs install [--project-skills]
   node scripts/install-ai-context.mjs check
   node scripts/install-ai-context.mjs uninstall
   node scripts/install-ai-context.mjs sync-projects [--project <project-id>] [--entries-only|--skills-only] [--write]
   node scripts/install-ai-context.mjs validate`);
+}
+
+function shellQuote(value) {
+  return `'${String(value).replace(/'/g, "'\\''")}'`;
+}
+
+function commandExists(command) {
+  try {
+    execFileSync('sh', ['-lc', `command -v ${shellQuote(command)}`], { stdio: 'ignore' });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function commandVersion(command) {
+  try {
+    return execFileSync(command, ['--version'], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim();
+  } catch {
+    return '';
+  }
 }
 
 function readJson(relativePath) {
@@ -357,6 +382,87 @@ function install(options = {}) {
   for (const skillLink of skillLinks) console.log(`installed skill: ${skillLink.linkPath} -> ${skillLink.sourcePath}`);
   console.log('next: ask your AI tool to run the ai-context-init skill to initialize profile, projects, scenes, skills, and rules.');
   if (options.projectSkills) syncProjects({ write: true, skillsOnly: true });
+}
+
+function workflowToolStatuses() {
+  const nodeMajor = Number(process.versions.node.split('.')[0] || 0);
+  const nodeMinor = Number(process.versions.node.split('.')[1] || 0);
+  const nodeOk = nodeMajor > 20 || nodeMajor === 20 && nodeMinor >= 19;
+  const openspecInstalled = commandExists('openspec');
+  const superpowersInstalled = fs.existsSync(superpowersDir);
+  const installedLinks = skillLinks.filter(skillLink => fs.existsSync(skillLink.linkPath)
+    && fs.lstatSync(skillLink.linkPath).isSymbolicLink()
+    && (path.resolve(path.dirname(skillLink.linkPath), fs.readlinkSync(skillLink.linkPath)) === skillLink.sourcePath
+      || path.resolve(fs.readlinkSync(skillLink.linkPath)) === skillLink.sourcePath));
+
+  return [
+    {
+      id: 'node',
+      ok: nodeOk,
+      label: 'Node.js >= 20.19',
+      detail: process.version,
+      fix: 'Install Node.js 20.19.0 or newer before installing OpenSpec.',
+    },
+    {
+      id: 'skills',
+      ok: installedLinks.length === skillLinks.length,
+      label: 'ai-context core skill links',
+      detail: `${installedLinks.length}/${skillLinks.length}`,
+      fix: 'Run: node scripts/install-ai-context.mjs setup',
+    },
+    {
+      id: 'openspec',
+      ok: openspecInstalled,
+      label: 'OpenSpec CLI',
+      detail: openspecInstalled ? commandVersion('openspec') || 'installed' : 'missing',
+      fix: 'Run: npm install -g @fission-ai/openspec@latest',
+    },
+    {
+      id: 'superpowers',
+      ok: superpowersInstalled,
+      label: 'Codex superpowers',
+      detail: superpowersInstalled ? superpowersDir : 'missing',
+      fix: 'Install or restore Codex superpowers so ~/.codex/superpowers exists.',
+    },
+  ];
+}
+
+function ensureOpenSpecInstalled() {
+  if (commandExists('openspec')) {
+    console.log('OpenSpec already installed');
+    return;
+  }
+  console.log('installing OpenSpec: npm install -g @fission-ai/openspec@latest');
+  execFileSync('npm', ['install', '-g', '@fission-ai/openspec@latest'], { stdio: 'inherit' });
+}
+
+function printWorkflowToolReport(statuses, { strict = false } = {}) {
+  for (const status of statuses) {
+    console.log(`${status.ok ? 'ok' : strict ? 'ERROR' : 'WARN'} ${status.label}: ${status.detail}`);
+    if (!status.ok) console.log(`  fix: ${status.fix}`);
+  }
+}
+
+function setup(options = {}) {
+  install(options);
+  if (options.installOpenSpec) ensureOpenSpecInstalled();
+  const statuses = workflowToolStatuses();
+  printWorkflowToolReport(statuses);
+  console.log('setup complete');
+  console.log('next: run node scripts/install-ai-context.mjs doctor after OpenSpec and superpowers are available.');
+}
+
+function doctor() {
+  validate();
+  check();
+  const statuses = workflowToolStatuses();
+  printWorkflowToolReport(statuses, { strict: true });
+  const failed = statuses.filter(status => !status.ok);
+  if (failed.length) {
+    console.error(`doctor failed: ${failed.map(status => status.id).join(', ')}`);
+    process.exit(1);
+  }
+  console.log('doctor passed');
 }
 
 function uninstall() {
@@ -715,6 +821,13 @@ try {
   const [command, ...args] = process.argv.slice(2);
   if (!command || command === 'help' || command === '-h' || command === '--help') {
     usage();
+  } else if (command === 'setup') {
+    setup({
+      projectSkills: args.includes('--project-skills'),
+      installOpenSpec: args.includes('--install-openspec'),
+    });
+  } else if (command === 'doctor') {
+    doctor();
   } else if (command === 'install') {
     install({ projectSkills: args.includes('--project-skills') });
   } else if (command === 'check') {

@@ -151,6 +151,7 @@ The panel reads JSON indexes and relationship arrays. Before completion, verify:
 Do not say initialization is complete until these pass:
 
 ```bash
+node scripts/install-ai-context.mjs doctor
 node scripts/install-ai-context.mjs validate
 npm test
 ```

@@ -41,6 +41,9 @@
   "installation": {
     "script": "scripts/install-ai-context.mjs",
     "commands": [
+      "setup",
+      "setup --install-openspec",
+      "doctor",
       "install",
       "install --project-skills",
       "check",
@@ -50,6 +53,25 @@
       "sync-projects --project <project-id> --write",
       "sync-projects --project <project-id> --skills-only --write",
       "validate"
+    ],
+    "primaryInstallFlow": [
+      "npm install",
+      "node scripts/install-ai-context.mjs setup --install-openspec",
+      "node scripts/install-ai-context.mjs doctor",
+      "ask the AI tool to run ai-context-init"
+    ],
+    "workflowDependencies": [
+      {
+        "id": "openspec",
+        "purpose": "Optional spec-driven source of truth for L3/L4, Jira/Notion/Figma/PRD-backed, cross-project, cross-device, or high-risk tasks.",
+        "install": "npm install -g @fission-ai/openspec@latest",
+        "verify": "openspec --version"
+      },
+      {
+        "id": "superpowers",
+        "purpose": "Execution discipline layer for brainstorming, TDD, debugging, planning, verification, review, and branch finishing.",
+        "verify": "~/.codex/superpowers exists"
+      }
     ],
     "skillLinks": [
       "~/.agents/skills/ai-context -> <ai-context-root>/bundles/skills/ai-context",
@@ -71,7 +93,7 @@
     "legacyProjectEntrypointsToPrune": [
       "claude.md"
     ],
-    "afterInstall": "Ask the AI tool to run the ai-context-init skill to initialize profile, projects, scenes, skills, and rules."
+    "afterInstall": "Run doctor, then ask the AI tool to run the ai-context-init skill to initialize profile, projects, scenes, skills, and rules."
   },
   "taskFlow": {
     "currentPointer": "runtime/current.json",

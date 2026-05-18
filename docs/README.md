@@ -2,6 +2,11 @@
 
 `docs` 目录用于放初始化后生成的本地说明文档。刚安装时这里保持最小状态，不预置个人项目或公司资料。
 
+## 框架文档
+
+- `docs/install.md`：新机器安装、OpenSpec/superpowers 依赖、首次初始化、项目接入和隐私检查。
+- `docs/project-introduction.md`：ai-context 的任务处理流程、G1-G7、OpenSpec/superpowers 分工和看板用法。
+
 ## 初始化后通常会生成
 
 - `docs/repos/<project-id>.md`：项目介绍、入口、技术栈、运行方式、注意事项。
