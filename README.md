@@ -134,16 +134,22 @@ ai-context init --skip-openspec
 @ai-context:add scene 前后端联调
 @ai-context:add skill /path/to/skill
 @ai-context:add rule bff/error-handling
+@ai-context:del project old-project
+@ai-context:del skill old-skill
+@ai-context:del rule old/rule
+@ai-context:del scene old-scene
 @ai-context:task 新增盘点单打印预览
 @ai-context:panel
+@ai-context:init
 ```
 
-这些入口默认走同一个 `ai-context` skill，不是拆成多个常驻 skill。`add`、`task`、`panel` 只是子意图：ai-context 先读 JSON 索引做路由，再按需调用底层 action 或脚本写入项目、场景、skill、rule 和任务状态。
+这些入口默认走同一个 `ai-context` skill，不是拆成多个常驻 skill。`init`、`add`、`del`、`task`、`panel` 只是子意图：ai-context 先读 JSON 索引做路由，再按需调用底层 action 或脚本写入项目、场景、skill、rule 和任务状态。
 
 - `@ai-context:add`：新增/更新项目、场景、skill、rule。新增项目时只需要项目路径；系统会扫描 `AGENTS.md`、`CLAUDE.md`、`README.md`、Cursor rules 和项目内 `SKILL.md`。新增场景、skill、rule 时，如果关联项目不能推断，AI 应该询问要挂载到哪些项目。
+- `@ai-context:del`：删除 ai-context 里的项目、场景、skill、rule 索引和挂载关系；只删除 ai-context 托管文件，不删除真实业务仓库。
 - `@ai-context:task`：开一个可恢复任务，记录项目、场景、G1-G7 gate、OpenSpec 状态、验证结果和 recovery point。
 - `@ai-context:panel`：打开或解释本地看板，看板只展示 JSON 状态，不作为新的事实来源。
-- `@ai-context:init`：首次配置本机画像、项目、场景、skill 和 rule。
+- `@ai-context:init`：首次安装后的聊天引导入口，带用户把本机画像、项目、场景、skill 和 rule 配到能跑通面板和路由流程。
 
 OpenSpec 仍然是 L3/L4、PRD/Jira/Notion/Figma、跨项目或高风险任务的规格层；ai-context 在任务状态里记录 OpenSpec change/path/status。普通 L1/L2 小改不强制 OpenSpec。
 

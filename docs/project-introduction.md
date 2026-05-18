@@ -26,8 +26,13 @@ ai-context is intended to be used from the AI chat as a routed skill:
 @ai-context:add scene 前后端联调
 @ai-context:add skill /path/to/skill
 @ai-context:add rule bff/error-handling
+@ai-context:del project old-project
+@ai-context:del scene old-scene
+@ai-context:del skill old-skill
+@ai-context:del rule old/rule
 @ai-context:task 新增盘点单打印预览
 @ai-context:panel
+@ai-context:init
 ```
 
 These entries are sub-intents of the same `ai-context` skill, not separate
@@ -39,6 +44,15 @@ state.
 enough: ai-context scans local AI entry docs and imports local skills/rules.
 For scenes, skills, and rules, it asks for project or scene association only
 when it cannot infer the mount target.
+
+`@ai-context:del` owns project/scene/skill/rule removal from ai-context. It
+removes indexes, mounts, generated docs, managed bundled skill/rule files, and
+runtime references, but it must not delete the real business repository or
+external source files.
+
+`@ai-context:init` is the first-install chat route. It should keep guiding the
+user until the local profile, first projects, scenes, skills, rules, and panel
+checks are configured enough to use ai-context without manual JSON editing.
 
 ## Task Flow
 

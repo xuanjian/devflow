@@ -153,6 +153,89 @@ test("add_rule creates a rule file and mounts project plus scene relationships",
   assert.ok(scene.rules.some((item) => item.id === "payment/safe-callback"));
 });
 
+test("delete_project removes project indexes and graph references without touching external repo", async () => {
+  const rootDir = await copyFixture();
+  const externalPath = (await readJson(path.join(rootDir, "config/projects/demo-project.json"))).path;
+
+  const result = await runAction({
+    rootDir,
+    actionId: "delete_project",
+    body: { projectId: "demo-project" }
+  });
+
+  assert.equal(result.ok, true);
+  assert.equal(await exists(path.join(rootDir, "config/projects/demo-project.json")), false);
+  assert.equal(await exists(path.join(rootDir, "docs/repos/demo-project.md")), false);
+  const projectIndex = await readJson(path.join(rootDir, "config/projects/index.json"));
+  assert.equal(projectIndex.projects.some((item) => item.id === "demo-project"), false);
+  const scene = await readJson(path.join(rootDir, "config/scenes/demo-scene.json"));
+  assert.equal(scene.projects.some((item) => item.id === "demo-project"), false);
+  const rules = await readJson(path.join(rootDir, "config/rules/rules.json"));
+  assert.deepEqual(rules.rules[0].projectIds, []);
+  const current = await readJson(path.join(rootDir, "runtime/current.json"));
+  assert.deepEqual(current.activeProjectIds, []);
+  const task = await readJson(path.join(rootDir, "runtime/tasks/demo-task.json"));
+  assert.deepEqual(task.projectIds, []);
+  assert.equal(externalPath, "/tmp/demo-project");
+});
+
+test("delete_scene removes scene indexes and task references", async () => {
+  const rootDir = await copyFixture();
+
+  const result = await runAction({
+    rootDir,
+    actionId: "delete_scene",
+    body: { sceneId: "demo-scene" }
+  });
+
+  assert.equal(result.ok, true);
+  assert.equal(await exists(path.join(rootDir, "config/scenes/demo-scene.json")), false);
+  assert.equal(await exists(path.join(rootDir, "docs/scenes/demo-scene.md")), false);
+  const sceneIndex = await readJson(path.join(rootDir, "config/scenes/index.json"));
+  assert.equal(sceneIndex.scenes.some((item) => item.id === "demo-scene"), false);
+  const project = await readJson(path.join(rootDir, "config/projects/demo-project.json"));
+  assert.equal(project.scenes.some((item) => item.id === "demo-scene"), false);
+  const rules = await readJson(path.join(rootDir, "config/rules/rules.json"));
+  assert.deepEqual(rules.rules[0].sceneIds, []);
+  const current = await readJson(path.join(rootDir, "runtime/current.json"));
+  assert.deepEqual(current.activeSceneIds, []);
+});
+
+test("delete_skill removes catalog entry and project mounts", async () => {
+  const rootDir = await copyFixture();
+
+  const result = await runAction({
+    rootDir,
+    actionId: "delete_skill",
+    body: { skillId: "demo-skill" }
+  });
+
+  assert.equal(result.ok, true);
+  const skills = await readJson(path.join(rootDir, "config/skills/skills.json"));
+  assert.equal(skills.skills.some((item) => item.id === "demo-skill"), false);
+  const project = await readJson(path.join(rootDir, "config/projects/demo-project.json"));
+  assert.equal(project.skills.some((item) => item.id === "demo-skill"), false);
+});
+
+test("delete_rule removes catalog entry and project plus scene mounts", async () => {
+  const rootDir = await copyFixture();
+
+  const result = await runAction({
+    rootDir,
+    actionId: "delete_rule",
+    body: { ruleId: "demo-rule" }
+  });
+
+  assert.equal(result.ok, true);
+  assert.equal(await exists(path.join(rootDir, "bundles/rules/demo-rule.md")), false);
+  const rules = await readJson(path.join(rootDir, "config/rules/rules.json"));
+  assert.equal(rules.rules.some((item) => item.id === "demo-rule"), false);
+  const project = await readJson(path.join(rootDir, "config/projects/demo-project.json"));
+  assert.equal(project.rules.some((item) => item.id === "demo-rule"), false);
+  const scene = await readJson(path.join(rootDir, "config/scenes/demo-scene.json"));
+  assert.equal(scene.rules.some((item) => item.id === "demo-rule"), false);
+});
+
 async function copyFixture() {
   const source = new URL("./fixtures/basic-ai-context/", import.meta.url);
   const rootDir = await fs.mkdtemp(path.join(os.tmpdir(), "context-studio-fixture-"));
@@ -162,4 +245,13 @@ async function copyFixture() {
 
 async function readJson(filePath) {
   return JSON.parse(await fs.readFile(filePath, "utf8"));
+}
+
+async function exists(filePath) {
+  try {
+    await fs.access(filePath);
+    return true;
+  } catch {
+    return false;
+  }
 }

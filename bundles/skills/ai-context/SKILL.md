@@ -102,9 +102,12 @@ selected sub-intent.
 Supported chat triggers:
 
 - `@ai-context:add`: add or update a project, scene, skill, or rule.
+- `@ai-context:del`: delete a project, scene, skill, or rule from ai-context.
 - `@ai-context:task`: create, resume, or update a durable G1-G7 task.
 - `@ai-context:panel`: open, explain, or validate the local task/project panel.
-- `@ai-context:init`: run first-time onboarding after terminal installation.
+- `@ai-context:init`: run first-time onboarding after terminal installation and
+  guide the user until local profile, projects, scenes, skills, and rules are
+  configured enough for the panel and routing flow to work.
 
 Use another skill only when the sub-intent needs that specialist behavior. For
 example, when `@ai-context:add skill` requires authoring or rewriting the actual
@@ -137,6 +140,25 @@ OpenSpec path/status in the ai-context project or task state. Do not run
 OpenSpec for every small project unless the task is L3/L4, spec-backed, or the
 user asks for it.
 
+### `@ai-context:del`
+
+Route by object:
+
+- Project: ask for or infer `projectId`, preview affected scenes, rules, tasks,
+  and current state, then call `delete_project` or equivalent script flow.
+- Scene: ask for or infer `sceneId`, preview mounted projects, rules, tasks, and
+  current state, then call `delete_scene` or equivalent script flow.
+- Skill: ask for or infer `skillId`, preview mounted projects, then call
+  `delete_skill` or equivalent script flow.
+- Rule: ask for or infer `ruleId`, preview mounted projects and scenes, then
+  call `delete_rule` or equivalent script flow.
+
+Deletion is scoped to ai-context metadata and managed files. It must not delete
+the real business repository at `project.path`, external source docs, external
+skills, or external rule files. Prefer removing indexes, mounts, generated docs,
+managed bundled skill/rule files, and runtime references. If the target is
+ambiguous, ask one concise confirmation question before writing.
+
 ### `@ai-context:task`
 
 Create or update a task JSON before work that should survive the current chat.
@@ -161,7 +183,8 @@ separate source of truth.
 ## Commands
 
 Use `ai-context init` for user-facing terminal installation. Use chat
-subcommands such as `@ai-context:add`, `@ai-context:task`, and
+subcommands such as `@ai-context:init`, `@ai-context:add`, `@ai-context:del`,
+`@ai-context:task`, and
 `@ai-context:panel` for day-to-day AI operation. Under the hood, the AI should
 use `contextctl` or core actions for ai-context maintenance. Do not hand-edit
 multiple indexes for routine additions when a script/action can do it.

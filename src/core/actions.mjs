@@ -34,6 +34,18 @@ const ACTIONS = {
   add_rule: {
     run: addRule
   },
+  delete_project: {
+    run: deleteProject
+  },
+  delete_scene: {
+    run: deleteScene
+  },
+  delete_skill: {
+    run: deleteSkill
+  },
+  delete_rule: {
+    run: deleteRule
+  },
   create_minimal_profile_json: {
     run: ({ rootPath, actionId }) => createFileOnce(rootPath, actionId, "config/profile.json", JSON.stringify({
       version: 1,
@@ -311,6 +323,128 @@ async function addRule({ rootPath, actionId, body }) {
   }
 
   return actionOk(actionId, `新增规则 ${imported.rule.name}，已挂载 ${projects.length} 个项目、${scenes.length} 个场景。`, imported.changedPaths);
+}
+
+async function deleteProject({ rootPath, actionId, body }) {
+  const id = normalizeId(body?.projectId || body?.id || body?.name);
+  if (!id) return actionError(actionId, "invalid_project_id", "删除项目需要填写 projectId。");
+
+  const projectIndex = await readRootJson(rootPath, "config/projects/index.json", { version: 1, projects: [] });
+  const indexEntry = (projectIndex.projects || []).find((item) => item.id === id);
+  if (!indexEntry) return actionError(actionId, "unknown_project", `Unknown projectId: ${id}`);
+
+  const changedPaths = [];
+  const projectPath = indexEntry.path || `config/projects/${id}.json`;
+  const project = await readOptionalRootJson(rootPath, projectPath);
+  const docPath = project?.doc?.path || `docs/repos/${id}.md`;
+
+  projectIndex.projects = removeById(projectIndex.projects || [], id);
+  await writeRootJson(rootPath, "config/projects/index.json", projectIndex);
+  changedPaths.push("config/projects/index.json");
+  changedPaths.push(...await removeRootPaths(rootPath, [projectPath, docPath]));
+
+  const sceneIndex = await readRootJson(rootPath, "config/scenes/index.json", { version: 1, scenes: [] });
+  for (const sceneItem of sceneIndex.scenes || []) {
+    const scene = await readOptionalRootJson(rootPath, sceneItem.path || `config/scenes/${sceneItem.id}.json`);
+    if (!scene?.projects) continue;
+    const nextProjects = removeById(scene.projects, id);
+    if (nextProjects.length === scene.projects.length) continue;
+    scene.projects = nextProjects;
+    await writeRootJson(rootPath, sceneItem.path || `config/scenes/${sceneItem.id}.json`, scene);
+    changedPaths.push(sceneItem.path || `config/scenes/${sceneItem.id}.json`);
+  }
+
+  const ruleCatalog = await readRootJson(rootPath, "config/rules/rules.json", { version: 1, rules: [] });
+  let rulesChanged = false;
+  for (const rule of ruleCatalog.rules || []) {
+    const nextProjectIds = removeValue(rule.projectIds || [], id);
+    if (nextProjectIds.length !== (rule.projectIds || []).length) {
+      rule.projectIds = nextProjectIds;
+      rulesChanged = true;
+    }
+  }
+  if (rulesChanged) {
+    await writeRootJson(rootPath, "config/rules/rules.json", ruleCatalog);
+    changedPaths.push("config/rules/rules.json");
+  }
+
+  changedPaths.push(...await removeRuntimeReferences(rootPath, { projectId: id }));
+  return actionOk(actionId, `删除项目 ${id}。真实业务仓库不会被删除。`, changedPaths);
+}
+
+async function deleteScene({ rootPath, actionId, body }) {
+  const id = normalizeId(body?.sceneId || body?.id || body?.name);
+  if (!id) return actionError(actionId, "invalid_scene_id", "删除场景需要填写 sceneId。");
+
+  const sceneIndex = await readRootJson(rootPath, "config/scenes/index.json", { version: 1, scenes: [] });
+  const indexEntry = (sceneIndex.scenes || []).find((item) => item.id === id);
+  if (!indexEntry) return actionError(actionId, "unknown_scene", `Unknown sceneId: ${id}`);
+
+  const changedPaths = [];
+  const scenePath = indexEntry.path || `config/scenes/${id}.json`;
+  const scene = await readOptionalRootJson(rootPath, scenePath);
+  const docPath = scene?.source?.path || indexEntry.sourcePath || `docs/scenes/${id}.md`;
+
+  sceneIndex.scenes = removeById(sceneIndex.scenes || [], id);
+  await writeRootJson(rootPath, "config/scenes/index.json", sceneIndex);
+  changedPaths.push("config/scenes/index.json");
+  changedPaths.push(...await removeRootPaths(rootPath, [scenePath, docPath]));
+
+  changedPaths.push(...await removeSceneFromProjects(rootPath, id));
+
+  const ruleCatalog = await readRootJson(rootPath, "config/rules/rules.json", { version: 1, rules: [] });
+  let rulesChanged = false;
+  for (const rule of ruleCatalog.rules || []) {
+    const nextSceneIds = removeValue(rule.sceneIds || [], id);
+    if (nextSceneIds.length !== (rule.sceneIds || []).length) {
+      rule.sceneIds = nextSceneIds;
+      rulesChanged = true;
+    }
+  }
+  if (rulesChanged) {
+    await writeRootJson(rootPath, "config/rules/rules.json", ruleCatalog);
+    changedPaths.push("config/rules/rules.json");
+  }
+
+  changedPaths.push(...await removeRuntimeReferences(rootPath, { sceneId: id }));
+  return actionOk(actionId, `删除场景 ${id}。`, changedPaths);
+}
+
+async function deleteSkill({ rootPath, actionId, body }) {
+  const id = normalizeId(body?.skillId || body?.id || body?.name);
+  if (!id) return actionError(actionId, "invalid_skill_id", "删除 skill 需要填写 skillId。");
+
+  const skillCatalog = await readRootJson(rootPath, "config/skills/skills.json", { version: 1, skills: [] });
+  const skill = (skillCatalog.skills || []).find((item) => item.id === id);
+  if (!skill) return actionError(actionId, "unknown_skill", `Unknown skillId: ${id}`);
+
+  const changedPaths = [];
+  skillCatalog.skills = removeById(skillCatalog.skills || [], id);
+  await writeRootJson(rootPath, "config/skills/skills.json", skillCatalog);
+  changedPaths.push("config/skills/skills.json");
+  changedPaths.push(...await removeProjectMount(rootPath, "skills", id, skill.sourcePath));
+  changedPaths.push(...await removeGeneratedSource(rootPath, skill.sourcePath, "bundles/skills/"));
+
+  return actionOk(actionId, `删除 skill ${id}。`, changedPaths);
+}
+
+async function deleteRule({ rootPath, actionId, body }) {
+  const id = normalizeRuleId(body?.ruleId || body?.id || body?.name);
+  if (!id) return actionError(actionId, "invalid_rule_id", "删除 rule 需要填写 ruleId。");
+
+  const ruleCatalog = await readRootJson(rootPath, "config/rules/rules.json", { version: 1, rules: [] });
+  const rule = (ruleCatalog.rules || []).find((item) => item.id === id);
+  if (!rule) return actionError(actionId, "unknown_rule", `Unknown ruleId: ${id}`);
+
+  const changedPaths = [];
+  ruleCatalog.rules = removeById(ruleCatalog.rules || [], id);
+  await writeRootJson(rootPath, "config/rules/rules.json", ruleCatalog);
+  changedPaths.push("config/rules/rules.json");
+  changedPaths.push(...await removeProjectMount(rootPath, "rules", id, rule.sourcePath));
+  changedPaths.push(...await removeSceneRuleMount(rootPath, id));
+  changedPaths.push(...await removeGeneratedSource(rootPath, rule.sourcePath, "bundles/rules/"));
+
+  return actionOk(actionId, `删除 rule ${id}。`, changedPaths);
 }
 
 async function createFileOnce(rootPath, actionId, relativePath, contents) {
@@ -667,6 +801,14 @@ async function readRootJson(rootPath, relativePath, fallback) {
   }
 }
 
+async function readOptionalRootJson(rootPath, relativePath) {
+  try {
+    return JSON.parse(await fs.readFile(resolveInside(rootPath, relativePath), "utf8"));
+  } catch {
+    return null;
+  }
+}
+
 async function readOptionalJson(filePath) {
   try {
     return JSON.parse(await fs.readFile(filePath, "utf8"));
@@ -695,6 +837,119 @@ async function writeRootText(rootPath, relativePath, value) {
   await fs.writeFile(filePath, value, "utf8");
 }
 
+async function removeRootPaths(rootPath, relativePaths) {
+  const changedPaths = [];
+  for (const relativePath of uniqueSorted(relativePaths.filter(Boolean))) {
+    await fs.rm(resolveInside(rootPath, relativePath), { recursive: true, force: true });
+    changedPaths.push(relativePath);
+  }
+  return changedPaths;
+}
+
+async function removeGeneratedSource(rootPath, sourcePath, allowedPrefix) {
+  if (!sourcePath || path.isAbsolute(sourcePath) || !sourcePath.startsWith(allowedPrefix)) return [];
+  const removePath = sourcePath.endsWith("/SKILL.md") ? path.dirname(sourcePath) : sourcePath;
+  return removeRootPaths(rootPath, [removePath]);
+}
+
+async function removeProjectMount(rootPath, field, id, sourcePath) {
+  const changedPaths = [];
+  const projectIndex = await readRootJson(rootPath, "config/projects/index.json", { version: 1, projects: [] });
+  for (const item of projectIndex.projects || []) {
+    const projectPath = item.path || `config/projects/${item.id}.json`;
+    const project = await readOptionalRootJson(rootPath, projectPath);
+    if (!project?.[field]) continue;
+    const current = project[field] || [];
+    const next = current.filter((mount) => mount.id !== id);
+    if (next.length === current.length) continue;
+    project[field] = next;
+    if (project.readPolicy?.onDemandRead && sourcePath) {
+      project.readPolicy.onDemandRead = removeValue(project.readPolicy.onDemandRead, sourcePath);
+    }
+    await writeRootJson(rootPath, projectPath, project);
+    changedPaths.push(projectPath);
+  }
+  return changedPaths;
+}
+
+async function removeSceneFromProjects(rootPath, sceneId) {
+  const changedPaths = [];
+  const projectIndex = await readRootJson(rootPath, "config/projects/index.json", { version: 1, projects: [] });
+  for (const item of projectIndex.projects || []) {
+    const projectPath = item.path || `config/projects/${item.id}.json`;
+    const project = await readOptionalRootJson(rootPath, projectPath);
+    if (!project?.scenes) continue;
+    const nextScenes = removeById(project.scenes, sceneId);
+    if (nextScenes.length === project.scenes.length) continue;
+    project.scenes = nextScenes;
+    await writeRootJson(rootPath, projectPath, project);
+    changedPaths.push(projectPath);
+  }
+  return changedPaths;
+}
+
+async function removeSceneRuleMount(rootPath, ruleId) {
+  const changedPaths = [];
+  const sceneIndex = await readRootJson(rootPath, "config/scenes/index.json", { version: 1, scenes: [] });
+  for (const item of sceneIndex.scenes || []) {
+    const scenePath = item.path || `config/scenes/${item.id}.json`;
+    const scene = await readOptionalRootJson(rootPath, scenePath);
+    if (!scene?.rules) continue;
+    const nextRules = removeById(scene.rules, ruleId);
+    if (nextRules.length === scene.rules.length) continue;
+    scene.rules = nextRules;
+    await writeRootJson(rootPath, scenePath, scene);
+    changedPaths.push(scenePath);
+  }
+  return changedPaths;
+}
+
+async function removeRuntimeReferences(rootPath, { projectId, sceneId }) {
+  const changedPaths = [];
+  const current = await readOptionalRootJson(rootPath, "runtime/current.json");
+  if (current) {
+    let changed = false;
+    if (projectId && Array.isArray(current.activeProjectIds)) {
+      const next = removeValue(current.activeProjectIds, projectId);
+      changed = changed || next.length !== current.activeProjectIds.length;
+      current.activeProjectIds = next;
+    }
+    if (sceneId && Array.isArray(current.activeSceneIds)) {
+      const next = removeValue(current.activeSceneIds, sceneId);
+      changed = changed || next.length !== current.activeSceneIds.length;
+      current.activeSceneIds = next;
+    }
+    if (changed) {
+      await writeRootJson(rootPath, "runtime/current.json", current);
+      changedPaths.push("runtime/current.json");
+    }
+  }
+
+  for (const entry of await safeReaddir(resolveInside(rootPath, "runtime/tasks"))) {
+    if (!entry.isFile() || !entry.name.endsWith(".json")) continue;
+    const taskPath = `runtime/tasks/${entry.name}`;
+    const task = await readOptionalRootJson(rootPath, taskPath);
+    if (!task) continue;
+    let changed = false;
+    if (projectId && Array.isArray(task.projectIds)) {
+      const next = removeValue(task.projectIds, projectId);
+      changed = changed || next.length !== task.projectIds.length;
+      task.projectIds = next;
+    }
+    if (sceneId && Array.isArray(task.sceneIds)) {
+      const next = removeValue(task.sceneIds, sceneId);
+      changed = changed || next.length !== task.sceneIds.length;
+      task.sceneIds = next;
+    }
+    if (changed) {
+      await writeRootJson(rootPath, taskPath, task);
+      changedPaths.push(taskPath);
+    }
+  }
+
+  return changedPaths;
+}
+
 async function safeStat(filePath) {
   try {
     return await fs.stat(filePath);
@@ -715,6 +970,14 @@ function upsertById(list, item) {
   const index = list.findIndex((current) => current.id === item.id);
   if (index === -1) list.push(item);
   else list[index] = { ...list[index], ...item };
+}
+
+function removeById(list, id) {
+  return (list || []).filter((item) => item.id !== id);
+}
+
+function removeValue(list, value) {
+  return (list || []).filter((item) => item !== value);
 }
 
 function listFromBody(value) {

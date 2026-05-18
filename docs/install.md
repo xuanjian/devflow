@@ -75,7 +75,10 @@ After `ai-context init` completes, ask the AI tool:
 @ai-context:init
 ```
 
-The init skill should collect local-only data and write it into the user's own checkout:
+The init route should guide the user through first-time setup until local
+profile, projects, scenes, skills, and rules are configured enough for routing
+and the panel to work. It should collect local-only data and write it into the
+user's own checkout:
 
 - `config/profile.json`
 - `config/projects/*.json`
@@ -114,6 +117,19 @@ For scenes, skills, and rules, use the same chat entry:
 When the association cannot be inferred, the AI should ask which `projectIds`
 or `sceneIds` to mount. Under the hood this maps to actions such as
 `add_project_from_path`, `add_scene`, `add_skill_from_path`, and `add_rule`.
+
+To remove ai-context metadata, use:
+
+```text
+@ai-context:del project old-project
+@ai-context:del scene old-scene
+@ai-context:del skill old-skill
+@ai-context:del rule old/rule
+```
+
+Deletion removes indexes, mounts, generated docs, managed bundled skill/rule
+files, and runtime references inside ai-context. It must not delete the real
+business repository path or external source files.
 
 ## OpenSpec Per Project
 
@@ -177,6 +193,7 @@ Common chat entries:
 @ai-context:add /path/to/project
 @ai-context:task 新增一个需求
 @ai-context:panel
+@ai-context:del project old-project
 ```
 
 ## Privacy Checklist Before Publishing

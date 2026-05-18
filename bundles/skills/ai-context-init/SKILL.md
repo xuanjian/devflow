@@ -7,9 +7,15 @@ description: Use after installing ai-context when the user needs first-time onbo
 
 ## Purpose
 
-Use this skill immediately after `ai-context` is installed, or whenever a user wants to initialize their own ai-context setup from rough notes.
+Use this skill immediately after `ai-context` is installed, normally through the
+chat entry `@ai-context:init`, or whenever a user wants to initialize their own
+ai-context setup from rough notes.
 
-The user should not need to design JSON. You interview them, normalize messy information, write the repository's config/docs, and verify the existing ai-context panel can display the result.
+The user should not need to design JSON. You interview them, normalize messy
+information, write the repository's config/docs, and verify the existing
+ai-context panel can display the result. Keep guiding until local profile,
+projects, scenes, skills, and rules are configured enough for routing and panel
+checks to work.
 
 ## Privacy Boundary
 
