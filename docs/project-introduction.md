@@ -17,6 +17,29 @@ The recoverable task chain is one outcome of this control plane. The bigger valu
 
 Do not install `gstack` or `ce` as default workflow tools. ai-context only borrows the useful handoff idea: every stage leaves a compact artifact that feeds the next stage.
 
+## Chat Entries
+
+ai-context is intended to be used from the AI chat as a routed skill:
+
+```text
+@ai-context:add /path/to/project
+@ai-context:add scene 前后端联调
+@ai-context:add skill /path/to/skill
+@ai-context:add rule bff/error-handling
+@ai-context:task 新增盘点单打印预览
+@ai-context:panel
+```
+
+These entries are sub-intents of the same `ai-context` skill, not separate
+always-loaded skills. The router keeps context small by reading indexes first,
+then loading only the selected project, scene, rule, skill, OpenSpec, or task
+state.
+
+`@ai-context:add` owns project/scene/skill/rule intake. For projects, a path is
+enough: ai-context scans local AI entry docs and imports local skills/rules.
+For scenes, skills, and rules, it asks for project or scene association only
+when it cannot infer the mount target.
+
 ## Task Flow
 
 Tracked tasks move through G1-G7:
@@ -97,7 +120,8 @@ Then open the URL printed by Vite, usually `http://127.0.0.1:5173/`.
 
 1. User states a goal.
 2. ai-context selects the project, scene, task level, and whether OpenSpec is needed.
-3. For tracked work, `contextctl task start` writes the task JSON.
+3. For tracked work, `@ai-context:task` writes the task JSON through the
+   underlying task action/script.
 4. The AI loads only selected project/scene/rule/skill/spec context.
 5. superpowers drives planning, TDD, debugging, verification, and review.
 6. Each G1-G7 gate leaves a compact handoff note.

@@ -125,6 +125,28 @@ ai-context init --skip-openspec
 
 完整安装说明见 [docs/install.md](docs/install.md)，项目流程说明见 [docs/project-introduction.md](docs/project-introduction.md)。`scripts/install-ai-context.mjs setup/doctor` 只作为内部脚本和排障入口，不作为日常安装入口。
 
+## 聊天入口
+
+安装后，日常操作不是让用户记一堆终端命令，而是在 AI 聊天框里触发 ai-context：
+
+```text
+@ai-context:add /path/to/project
+@ai-context:add scene 前后端联调
+@ai-context:add skill /path/to/skill
+@ai-context:add rule bff/error-handling
+@ai-context:task 新增盘点单打印预览
+@ai-context:panel
+```
+
+这些入口默认走同一个 `ai-context` skill，不是拆成多个常驻 skill。`add`、`task`、`panel` 只是子意图：ai-context 先读 JSON 索引做路由，再按需调用底层 action 或脚本写入项目、场景、skill、rule 和任务状态。
+
+- `@ai-context:add`：新增/更新项目、场景、skill、rule。新增项目时只需要项目路径；系统会扫描 `AGENTS.md`、`CLAUDE.md`、`README.md`、Cursor rules 和项目内 `SKILL.md`。新增场景、skill、rule 时，如果关联项目不能推断，AI 应该询问要挂载到哪些项目。
+- `@ai-context:task`：开一个可恢复任务，记录项目、场景、G1-G7 gate、OpenSpec 状态、验证结果和 recovery point。
+- `@ai-context:panel`：打开或解释本地看板，看板只展示 JSON 状态，不作为新的事实来源。
+- `@ai-context:init`：首次配置本机画像、项目、场景、skill 和 rule。
+
+OpenSpec 仍然是 L3/L4、PRD/Jira/Notion/Figma、跨项目或高风险任务的规格层；ai-context 在任务状态里记录 OpenSpec change/path/status。普通 L1/L2 小改不强制 OpenSpec。
+
 ## 启动面板
 
 ```bash
@@ -198,10 +220,10 @@ http://127.0.0.1:5173/
 
 ## 添加项目
 
-面板或 AI action 里的“新增项目”只需要用户提供项目路径，例如：
+聊天框里的 `@ai-context:add` 新增项目只需要用户提供项目路径，例如：
 
 ```text
-/path/to/your/project
+@ai-context:add /path/to/your/project
 ```
 
 系统会尝试读取项目里的说明文件：
@@ -221,7 +243,13 @@ http://127.0.0.1:5173/
 
 ## 添加场景
 
-场景用于描述一类工作流。最少需要：
+场景用于描述一类工作流。可以在聊天框里说：
+
+```text
+@ai-context:add scene 前后端联调
+```
+
+最少需要：
 
 - 场景名称
 - 场景用途
@@ -235,7 +263,13 @@ http://127.0.0.1:5173/
 
 ## 添加 skill
 
-skill 是 AI 可复用能力。最少需要：
+skill 是 AI 可复用能力。可以在聊天框里说：
+
+```text
+@ai-context:add skill /path/to/skill
+```
+
+最少需要：
 
 - skill 路径，指向一个包含 `SKILL.md` 的目录
 - 要挂载到哪些项目或场景
@@ -256,6 +290,10 @@ bundles/skills/<skill-id>/SKILL.md
 ## 添加 rule
 
 rule 是项目或场景的执行规则。可以从已有 `.md` 文件导入，也可以让 AI 根据用途生成。
+
+```text
+@ai-context:add rule bff/error-handling
+```
 
 建议至少提供：
 
@@ -344,13 +382,13 @@ docs/                             初始化后生成项目和场景文档
 
 ## 推荐工作流
 
-1. 克隆仓库。
-2. 执行安装脚本。
-3. 启动面板。
-4. 让 AI 执行 `ai-context-init`。
-5. 把第一个项目加进来。
-6. 根据真实工作流创建场景。
-7. 按项目或场景挂 skill 和 rule。
-8. 开始任务时把任务目标和当前阶段写入 `runtime/current.json` / `runtime/tasks/*.json`。
+1. `npm install -g @xuanjames/ai-context`。
+2. 运行 `ai-context init`，选择要配置的 AI 工具。
+3. 在 AI 聊天框里运行 `@ai-context:init`。
+4. 用 `@ai-context:add /path/to/project` 把第一个项目加进来。
+5. 根据真实工作流用 `@ai-context:add scene ...` 创建场景。
+6. 按项目或场景挂 skill 和 rule。
+7. 开始任务时用 `@ai-context:task ...` 写入 `runtime/current.json` / `runtime/tasks/*.json`。
+8. 需要观察状态时用 `@ai-context:panel` 或本地 `npm run dev`。
 9. 切换到 Codex、Claude Code 或 Cursor 时，让新工具先读取 ai-context 后继续。
 10. 用“检查”页确认没有 JSON 或关系错误。

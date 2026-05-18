@@ -72,7 +72,7 @@ ai-context init --skip-openspec
 After `ai-context init` completes, ask the AI tool:
 
 ```text
-运行 ai-context-init
+@ai-context:init
 ```
 
 The init skill should collect local-only data and write it into the user's own checkout:
@@ -90,14 +90,30 @@ Do not commit private output back to the public skeleton.
 
 ## Add A Project
 
-For a local project, use the maintenance command instead of hand-editing indexes:
+For a local project, use the chat entry instead of asking the user to hand-edit
+indexes or remember maintenance scripts:
 
-```bash
-node scripts/contextctl.mjs add project /path/to/project --sync-projects
-node scripts/install-ai-context.mjs validate
+```text
+@ai-context:add /path/to/project
 ```
 
-`contextctl` creates the project doc/config and updates indexes. `sync-projects` writes lightweight project entry files such as `AGENTS.md`, `CLAUDE.md`, and `.cursor/rules/00-ai-context.mdc` so each project can point back to this ai-context checkout.
+The `ai-context` skill should scan `AGENTS.md`, `CLAUDE.md`, `README.md`,
+Cursor rules, and project-local `SKILL.md` directories, then call the underlying
+action/script that writes the project doc/config and updates indexes together.
+If the project has no AI entry docs, ai-context should create a managed project
+entry instead of failing.
+
+For scenes, skills, and rules, use the same chat entry:
+
+```text
+@ai-context:add scene 前后端联调
+@ai-context:add skill /path/to/skill
+@ai-context:add rule bff/error-handling
+```
+
+When the association cannot be inferred, the AI should ask which `projectIds`
+or `sceneIds` to mount. Under the hood this maps to actions such as
+`add_project_from_path`, `add_scene`, `add_skill_from_path`, and `add_rule`.
 
 ## OpenSpec Per Project
 
@@ -110,7 +126,10 @@ cd /path/to/project
 openspec init
 ```
 
-For small L1/L2 edits, skip OpenSpec and track only the ai-context task state when needed.
+For small L1/L2 edits, skip OpenSpec and track only the ai-context task state
+when needed. If a newly added project should be spec-managed, ai-context can run
+or recommend `openspec init` for that project and record the OpenSpec status in
+task/project state.
 
 ## Shared Standards
 
@@ -150,6 +169,14 @@ node scripts/install-ai-context.mjs sync-projects
 
 # Write project entries
 node scripts/install-ai-context.mjs sync-projects --write
+```
+
+Common chat entries:
+
+```text
+@ai-context:add /path/to/project
+@ai-context:task 新增一个需求
+@ai-context:panel
 ```
 
 ## Privacy Checklist Before Publishing

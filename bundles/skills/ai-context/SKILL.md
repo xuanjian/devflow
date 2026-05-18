@@ -92,11 +92,79 @@ G7 must record:
 - Lessons learned or reusable decisions that should feed future specs/tasks.
 - Archive notes and known gaps.
 
+## Chat Subcommands
+
+These chat triggers are not separate skills by default. Treat them as one
+ai-context skill with different sub-intent routes. This keeps the loaded context
+small: the router reads indexes first, then loads only the files needed by the
+selected sub-intent.
+
+Supported chat triggers:
+
+- `@ai-context:add`: add or update a project, scene, skill, or rule.
+- `@ai-context:task`: create, resume, or update a durable G1-G7 task.
+- `@ai-context:panel`: open, explain, or validate the local task/project panel.
+- `@ai-context:init`: run first-time onboarding after terminal installation.
+
+Use another skill only when the sub-intent needs that specialist behavior. For
+example, when `@ai-context:add skill` requires authoring or rewriting the actual
+`SKILL.md` content, also use `superpowers:writing-skills`. Do not create one
+large always-loaded skill per subcommand unless the route needs reusable domain
+judgment that cannot stay in this router.
+
+### `@ai-context:add`
+
+Route by object:
+
+- Project: user can provide only a project path. Scan `AGENTS.md`, `CLAUDE.md`,
+  `claude.md`, `README.md`, `.cursor/rules`, and project-local `SKILL.md`
+  directories. Then call the `add_project_from_path` action or equivalent
+  script flow so it writes project docs, project JSON, imported skills, imported
+  rules, and indexes together.
+- Scene: ask which `projectIds` the scene should mount when not inferable, then
+  call the `add_scene` action or equivalent script flow.
+- Skill: ask which `projectIds` or family the skill should mount to when not
+  inferable, then call the `add_skill_from_path` action or equivalent script
+  flow. If no `SKILL.md` exists, author it first with the writing-skills flow,
+  then import it.
+- Rule: ask which `projectIds` and `sceneIds` should receive the rule when not
+  inferable, then call the `add_rule` action or equivalent script flow.
+
+For a new project with no AI entry docs, create an ai-context managed project
+entry and docs instead of failing. If the project should also use OpenSpec for
+durable specs, run or recommend `openspec init` in that project and record the
+OpenSpec path/status in the ai-context project or task state. Do not run
+OpenSpec for every small project unless the task is L3/L4, spec-backed, or the
+user asks for it.
+
+### `@ai-context:task`
+
+Create or update a task JSON before work that should survive the current chat.
+Infer project, scene, level, and gate from the current workspace and user text.
+Ask only one concise question when the project or scope cannot be inferred.
+
+The task route owns:
+
+- Task title and level.
+- Selected projects and scenes.
+- Current G1-G7 gate.
+- OpenSpec change id/path/status when OpenSpec is selected.
+- Recovery point, artifacts, blockers, verification notes, and archive notes.
+
+### `@ai-context:panel`
+
+Use this route for dashboard requests: show what the panel is for, start the
+local panel when requested, or validate the data the panel reads. The panel is a
+view over `runtime/current.json`, task JSON, and config indexes; it is not a
+separate source of truth.
+
 ## Commands
 
-Use `ai-context init` for user-facing installation and `contextctl` for
-ai-context maintenance. Do not hand-edit multiple indexes for routine additions
-when a `contextctl` command can do it.
+Use `ai-context init` for user-facing terminal installation. Use chat
+subcommands such as `@ai-context:add`, `@ai-context:task`, and
+`@ai-context:panel` for day-to-day AI operation. Under the hood, the AI should
+use `contextctl` or core actions for ai-context maintenance. Do not hand-edit
+multiple indexes for routine additions when a script/action can do it.
 
 ```bash
 ai-context init
