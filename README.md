@@ -149,7 +149,7 @@ ai-context init --skip-openspec
 - `@ai-context:task`：创建或继续一个可恢复任务。
 - `@ai-context:panel`：查看或打开任务/项目看板。
 
-大型需求、PRD/Jira/Notion/Figma、跨项目或高风险任务可以进入 OpenSpec；普通小改不强制使用 OpenSpec。
+当任务比较大、需求还只是一个概念时，AI 会先给出几个可选方向，帮你一步步选出目标、边界和优先级；你可以直接选 `1/2/3`，也可以基于选项提出自己的想法。大型需求、PRD/Jira/Notion/Figma、跨项目或高风险任务可以进入 OpenSpec；普通小改不强制使用 OpenSpec。
 
 ## 启动面板
 

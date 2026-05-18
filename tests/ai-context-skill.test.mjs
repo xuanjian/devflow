@@ -45,6 +45,18 @@ test("ai-context:del contract covers safe removal actions", () => {
   assert.match(skill, /must not delete\s+the real business repository/i);
 });
 
+test("ai-context:task uses Socratic multiple-choice clarification for large vague work", () => {
+  const skill = fs.readFileSync(skillPath, "utf8");
+  const readme = fs.readFileSync(readmePath, "utf8");
+
+  assert.match(skill, /Socratic multiple-choice clarification/i);
+  assert.match(skill, /2-3 concrete\s+options/i);
+  assert.match(skill, /choose\s+`1`,\s+`2`,\s+`3`/i);
+  assert.match(skill, /Avoid asking only open-ended questions/i);
+  assert.match(readme, /几个可选方向/);
+  assert.match(readme, /1\/2\/3/);
+});
+
 test("README keeps chat entry guidance without a common commands block", () => {
   const readme = fs.readFileSync(readmePath, "utf8");
 

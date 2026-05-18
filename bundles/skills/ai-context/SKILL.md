@@ -165,6 +165,24 @@ Create or update a task JSON before work that should survive the current chat.
 Infer project, scene, level, and gate from the current workspace and user text.
 Ask only one concise question when the project or scope cannot be inferred.
 
+For L3/L4 tasks, vague product ideas, or requests where the user only has a
+concept, use Socratic multiple-choice clarification during G1 Intake. Do not
+push the user to invent every boundary from scratch. Present 2-3 concrete
+options with trade-offs and a recommended default, then let the user choose
+`1`, `2`, `3`, modify an option, or describe a new direction. Ask one focused
+choice at a time and turn the selected answers into the task summary, scope,
+non-goals, acceptance criteria, and OpenSpec decision.
+
+Good clarification prompts:
+
+- "这个任务更像哪一种？1. 修现有流程 2. 新增模块 3. 先做方案验证。"
+- "优先目标选哪个？1. 尽快可用 2. 体验完整 3. 后续可扩展。"
+- "本轮边界建议选哪个？1. 只做核心闭环 2. 核心加管理配置 3. 先出 PRD/OpenSpec。"
+
+Avoid asking only open-ended questions such as "你想做什么边界？" when the
+user has not yet formed the requirement. The AI should provide candidate
+structures so the user can react, choose, or correct them.
+
 The task route owns:
 
 - Task title and level.

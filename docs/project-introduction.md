@@ -58,7 +58,7 @@ checks are configured enough to use ai-context without manual JSON editing.
 
 Tracked tasks move through G1-G7:
 
-- G1 Intent / Intake: record the goal, scope, level, selected projects/scenes, and whether OpenSpec is needed.
+- G1 Intent / Intake: record the goal, scope, level, selected projects/scenes, and whether OpenSpec is needed. For L3/L4 or vague concept tasks, use Socratic multiple-choice questions so the user can choose among concrete options instead of inventing the full boundary from scratch.
 - G2 Discovery: gather evidence, constraints, upstream links, and unknowns.
 - G3 Plan / Product UI: produce the plan, UI notes, technical design, or OpenSpec proposal/design/tasks/spec delta.
 - G4 Development: implement within the selected write scope and record changed files and expected verification.
