@@ -56,4 +56,8 @@ test("README keeps chat entry guidance without a common commands block", () => {
   assert.doesNotMatch(readme, /## 常用命令/);
   assert.doesNotMatch(readme, /## 常用聊天入口/);
   assert.doesNotMatch(readme, /## 终端排障和本地开发/);
+  assert.doesNotMatch(readme, /同一个 `ai-context` skill/);
+  assert.doesNotMatch(readme, /子意图/);
+  assert.doesNotMatch(readme, /底层 action/);
+  assert.doesNotMatch(readme, /JSON 索引做路由/);
 });
