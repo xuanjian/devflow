@@ -41,6 +41,9 @@
   "installation": {
     "script": "scripts/install-ai-context.mjs",
     "commands": [
+      "ai-context init",
+      "ai-context init --tools codex,claude-code,cursor",
+      "ai-context init --skip-openspec",
       "setup",
       "setup --install-openspec",
       "doctor",
@@ -55,9 +58,11 @@
       "validate"
     ],
     "primaryInstallFlow": [
+      "npm install -g @xuanjames/ai-context",
+      "git clone <repo-url> ai-context",
+      "cd ai-context",
       "npm install",
-      "node scripts/install-ai-context.mjs setup --install-openspec",
-      "node scripts/install-ai-context.mjs doctor",
+      "ai-context init",
       "ask the AI tool to run ai-context-init"
     ],
     "workflowDependencies": [
@@ -74,12 +79,12 @@
       }
     ],
     "skillLinks": [
-      "~/.agents/skills/ai-context -> <ai-context-root>/bundles/skills/ai-context",
-      "~/.agents/skills/ai-context-init -> <ai-context-root>/bundles/skills/ai-context-init",
-      "~/.codex/skills/ai-context -> <ai-context-root>/bundles/skills/ai-context",
-      "~/.codex/skills/ai-context-init -> <ai-context-root>/bundles/skills/ai-context-init",
-      "~/.claude/skills/ai-context -> <ai-context-root>/bundles/skills/ai-context",
-      "~/.claude/skills/ai-context-init -> <ai-context-root>/bundles/skills/ai-context-init"
+      "~/.codex/skills/<skill> for Codex",
+      "~/.claude/skills/<skill> for Claude Code",
+      "~/.cursor/skills/<skill> for Cursor",
+      "~/.qoderwork/skills/<skill> for QoderWork",
+      "~/.opencode/skills/<skill> for OpenCode",
+      "~/.workbuddy/skills/<skill> for WorkBuddy"
     ],
     "globalEntrypoints": [],
     "globalEntrypointsStatus": "deprecated; do not create home-level AGENTS.md, CLAUDE.md, or WORK_CONTEXT.md by default",
@@ -93,7 +98,22 @@
     "legacyProjectEntrypointsToPrune": [
       "claude.md"
     ],
-    "afterInstall": "Run doctor, then ask the AI tool to run the ai-context-init skill to initialize profile, projects, scenes, skills, and rules."
+    "afterInstall": "Ask the AI tool to run the ai-context-init skill to initialize profile, projects, scenes, skills, and rules.",
+    "cli": {
+      "bin": "ai-context",
+      "package": "@xuanjames/ai-context",
+      "initCommand": "ai-context init",
+      "nonInteractiveExample": "ai-context init --tools codex,claude-code,cursor",
+      "supportedTools": [
+        "codex",
+        "claude-code",
+        "cursor",
+        "qoderwork",
+        "opencode",
+        "workbuddy"
+      ],
+      "internalScriptStatus": "setup and doctor are retained for tests, CI, and low-level troubleshooting only; normal users should run ai-context init."
+    }
   },
   "taskFlow": {
     "currentPointer": "runtime/current.json",

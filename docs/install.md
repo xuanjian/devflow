@@ -10,45 +10,53 @@ This document is the clean-machine install path for the public ai-context framew
 - Codex or another AI coding tool that can read local skills.
 - Codex superpowers installed or restored under `~/.codex/superpowers`.
 
-Install OpenSpec globally when this machine will run spec-backed tasks:
-
-```bash
-npm install -g @fission-ai/openspec@latest
-openspec --version
-```
-
-[OpenSpec's official installation guide](https://github.com/Fission-AI/OpenSpec/blob/main/docs/installation.md) lists the same npm package and verifies with `openspec --version`.
+`ai-context init` installs OpenSpec automatically unless `--skip-openspec` is passed. [OpenSpec's official installation guide](https://github.com/Fission-AI/OpenSpec/blob/main/docs/installation.md) uses `npm install -g @fission-ai/openspec@latest` and verifies with `openspec --version`.
 
 ## Fresh Install
 
 ```bash
-git clone <repo-url>
-cd ai-context-lite
+npm install -g @xuanjames/ai-context
+git clone <repo-url> ai-context
+cd ai-context
 npm install
-node scripts/install-ai-context.mjs setup --install-openspec
-node scripts/install-ai-context.mjs doctor
+ai-context init
 ```
 
-`setup --install-openspec` does four things:
+`ai-context init` opens a terminal selector for AI tool targets:
+
+- Codex
+- Claude Code
+- Cursor
+- QoderWork
+- OpenCode
+- WorkBuddy
+
+Use Up/Down to move, Space to toggle, and Enter to install.
+
+For automated setup:
+
+```bash
+ai-context init --tools codex,claude-code,cursor
+```
+
+`ai-context init` does four things:
 
 - Validates the ai-context skeleton.
-- Links the `ai-context` and `ai-context-init` skills into common AI tool skill directories.
+- Links the `ai-context` and `ai-context-init` skills into selected AI tool skill directories.
 - Installs OpenSpec with `npm install -g @fission-ai/openspec@latest` when it is missing.
 - Reports whether OpenSpec and superpowers are available.
 
-`doctor` is stricter. It exits with failure when the core skill links, OpenSpec, or superpowers are missing.
-
-If you do not want the script to mutate global npm packages, run plain `setup` and install OpenSpec manually only when `doctor` asks for it:
+If you do not want the init command to mutate global npm packages:
 
 ```bash
-node scripts/install-ai-context.mjs setup
-npm install -g @fission-ai/openspec@latest
-node scripts/install-ai-context.mjs doctor
+ai-context init --skip-openspec
 ```
+
+`scripts/install-ai-context.mjs setup` and `doctor` still exist for tests, CI, and low-level troubleshooting, but they are not the normal user install flow.
 
 ## First Local Initialization
 
-After `doctor` passes, ask the AI tool:
+After `ai-context init` completes, ask the AI tool:
 
 ```text
 运行 ai-context-init
@@ -107,13 +115,13 @@ Use OpenSpec for per-change requirements, proposals, design notes, task lists, a
 
 ```bash
 # Install core skill links and print workflow dependency status
-node scripts/install-ai-context.mjs setup
+ai-context init
 
-# Install core skill links and OpenSpec in one command
-node scripts/install-ai-context.mjs setup --install-openspec
+# Install selected tools non-interactively
+ai-context init --tools codex,claude-code,qoderwork
 
-# Strict install verification
-node scripts/install-ai-context.mjs doctor
+# Skip OpenSpec global install
+ai-context init --skip-openspec
 
 # Validate JSON indexes and references
 node scripts/install-ai-context.mjs validate

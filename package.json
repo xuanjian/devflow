@@ -1,8 +1,11 @@
 {
-  "name": "ai-context",
+  "name": "@xuanjames/ai-context",
   "version": "0.1.0",
-  "private": true,
+  "private": false,
   "type": "module",
+  "bin": {
+    "ai-context": "scripts/ai-context-cli.mjs"
+  },
   "scripts": {
     "dev": "vite src/app --host 127.0.0.1 --config src/app/vite.config.js",
     "build": "vite build src/app --outDir ../../dist/app --config src/app/vite.config.js",

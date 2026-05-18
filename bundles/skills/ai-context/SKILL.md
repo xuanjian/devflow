@@ -94,14 +94,13 @@ G7 must record:
 
 ## Commands
 
-Use the install script for setup checks and `contextctl` for ai-context
-maintenance. Do not hand-edit multiple indexes for routine additions when a
-`contextctl` command can do it.
+Use `ai-context init` for user-facing installation and `contextctl` for
+ai-context maintenance. Do not hand-edit multiple indexes for routine additions
+when a `contextctl` command can do it.
 
 ```bash
-node scripts/install-ai-context.mjs setup
-node scripts/install-ai-context.mjs setup --install-openspec
-node scripts/install-ai-context.mjs doctor
+ai-context init
+ai-context init --tools codex,claude-code,cursor
 node scripts/contextctl.mjs task start "<title>" --projects <ids> --scenes <ids> --gate G1 --level <L1-L4>
 node scripts/contextctl.mjs task update [task-id] --gate <G1-G7> --note "<progress or decision>"
 node scripts/contextctl.mjs task finish [task-id] --note "<verification and handoff>"
@@ -141,12 +140,12 @@ it, the task already belongs to an active tracked flow, or the edit changes
 release/build/deployment behavior. Do not store throwaway chat or one-line
 answers as tasks.
 
-Use the install script for installation, validation, and project entry syncing:
+Use the CLI for installation, and keep the install script for validation,
+project entry syncing, tests, CI, and low-level troubleshooting:
 
 ```bash
-node scripts/install-ai-context.mjs setup
-node scripts/install-ai-context.mjs setup --install-openspec
-node scripts/install-ai-context.mjs doctor
+ai-context init
+ai-context init --tools codex,claude-code,cursor
 node scripts/install-ai-context.mjs check
 node scripts/install-ai-context.mjs validate
 node scripts/install-ai-context.mjs install
@@ -156,7 +155,7 @@ node scripts/install-ai-context.mjs sync-projects
 node scripts/install-ai-context.mjs sync-projects --project <project-id> --skills-only --write
 ```
 
-`setup --install-openspec` is the preferred new-machine flow: it validates the skeleton, installs core skill links, installs OpenSpec when missing, and reports superpowers readiness. Use plain `setup` when global npm package changes should be manual. `doctor` is strict and should pass before claiming the install is ready. After install, ask the AI tool to run `ai-context-init` for first-time onboarding: it should collect the user's profile, projects, scenes, skills, and rules from rough input, then write normalized docs and JSON that the panel can display. Use `install --project-skills` on a local development machine to also reconcile mounted project skills into `.agents/.codex/.claude` directories. Reconcile means adding links for skills currently listed in `config/projects/<project-id>.json` and pruning managed links that no longer appear there. `sync-projects` previews project entry changes by default; use `--write` only when intentionally updating local project entry files.
+`ai-context init` is the preferred new-machine flow. It presents a terminal multi-select for Codex, Claude Code, Cursor, QoderWork, OpenCode, and WorkBuddy; installs core skill links only into selected targets; installs OpenSpec when missing unless `--skip-openspec` is passed; and reports the next onboarding step. After install, ask the AI tool to run `ai-context-init` for first-time onboarding: it should collect the user's profile, projects, scenes, skills, and rules from rough input, then write normalized docs and JSON that the panel can display. Use `install --project-skills` on a local development machine to also reconcile mounted project skills into `.agents/.codex/.claude` directories. Reconcile means adding links for skills currently listed in `config/projects/<project-id>.json` and pruning managed links that no longer appear there. `sync-projects` previews project entry changes by default; use `--write` only when intentionally updating local project entry files.
 
 Installation and workflow docs:
 
