@@ -5,6 +5,8 @@
   "workflowOrder": [
     "Read entry/profile/current JSON first.",
     "Use ai-context-init after install to collect local profile, projects, scenes, skills, and rules.",
+    "For L3/L4 work or requests backed by Jira, Notion, Figma, PRD, or cross-project acceptance criteria, use OpenSpec as the optional spec-driven source of truth before implementation; do not load it for small L1/L2 edits unless already selected.",
+    "Carry forward each gate's concrete output as the input to the next gate: intake informs discovery, discovery informs plan/spec, plan/spec informs implementation, implementation evidence informs integration, integration evidence informs acceptance, and acceptance informs run/archive.",
     "Use project and scene indexes to select only the context needed for the current task.",
     "When work should survive the chat, create or update runtime task state with contextctl task start/update/finish before implementation."
   ],
@@ -33,6 +35,7 @@
     "scenes": "Read docs/scenes/*.md only after a scene JSON is selected and detailed workflow text is needed.",
     "rules": "Read config/rules/rules.json first. Active rule sources under bundles/rules/** are loaded only when selected by project, scene, or task gate.",
     "skills": "Read active bundles/skills/** only when task state, project JSON, or an explicit user request triggers the skill.",
+    "openspec": "Read or create OpenSpec only when the task is L3/L4, has explicit Jira/Notion/Figma/PRD/spec input, crosses projects/devices, or needs durable acceptance criteria. Store only the OpenSpec change id, path, status, and handoff summary in task JSON.",
     "profile": "A fresh install has no long profile. Run ai-context-init to create local profile details."
   },
   "installation": {
@@ -80,6 +83,27 @@
       "node scripts/contextctl.mjs task update [task-id] --gate <G1-G7> --note \"<progress or decision>\"",
       "node scripts/contextctl.mjs task finish [task-id] --note \"<verification and handoff>\""
     ],
+    "specLayer": {
+      "tool": "OpenSpec",
+      "defaultUse": "optional for L3/L4 and explicit spec-backed work; skipped for routine L1/L2 edits",
+      "taskJsonFields": [
+        "spec.tool",
+        "spec.changeId",
+        "spec.path",
+        "spec.status",
+        "spec.handoff"
+      ],
+      "statusValues": [
+        "none",
+        "proposed",
+        "approved",
+        "applied",
+        "verified",
+        "archived"
+      ],
+      "archivePolicy": "At G7, completed OpenSpec changes should be synced or archived so delta specs merge into openspec/specs/ and the completed change moves to openspec/changes/archive/. Record lessons learned as a compact task note or follow-up artifact before archive when they should influence future work."
+    },
+    "handoffPolicy": "Every gate should leave a compact artifact or note that the next gate consumes. Do not add gstack or ce as default tools; only borrow the handoff discipline of feeding each stage's output into the next stage.",
     "gates": [
       "G1",
       "G2",

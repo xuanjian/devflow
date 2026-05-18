@@ -2,12 +2,44 @@
 **/.DS_Store
 
 # Runtime task instances may contain Jira details, screenshots, temporary notes,
-# or environment-specific evidence. Track the protocol README, not ticket data.
+# local project links, or environment-specific evidence. Track only the empty
+# framework placeholder in master.
 runtime/tasks/*
-!runtime/tasks/README.md
 !runtime/tasks/.gitkeep
+runtime/current.local.json
+
+# Local project, scene, rule, skill, and registry data. The public/master branch
+# should remain a fresh ai-context framework, not one machine's inventory.
+config/projects/*
+!config/projects/
+!config/projects/index.json
+!config/projects/ai-context.json
+
+config/scenes/*
+!config/scenes/
+!config/scenes/index.json
+!config/scenes/ai-context-config.json
+
+bundles/rules/
+bundles/skills/*
+!bundles/skills/
+!bundles/skills/ai-context/
+!bundles/skills/ai-context/**
+!bundles/skills/ai-context-init/
+!bundles/skills/ai-context-init/**
+
+docs/person/
+docs/repos/
+docs/scenes/
+docs/reference/
+docs/superpowers/
+docs/prototypes/
+docs/templates/
+
+registry/
 
 # Local editor, generated skill links, and tool noise.
+.agents/skills/
 .codex/skills/
 .claude/skills/
 node_modules/

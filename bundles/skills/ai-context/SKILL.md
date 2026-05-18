@@ -15,6 +15,8 @@ It keeps AI context loading small and stable:
 - Treat the `ai-context` repository entry as portable source of truth; do not read or require home-level compatibility files by default.
 - For development, debugging, documentation, integration, research, and context-maintenance tasks, use superpowers as the process driver; begin with `superpowers:brainstorming` unless the current continuation clearly requires a more specific superpower.
 - Use `runtime/current.json` and task JSON as the task-state layer, not as the workflow driver.
+- Use OpenSpec as an optional spec-driven source of truth for L3/L4, Jira/Notion/Figma/PRD-backed, cross-project, cross-device, or high-risk tasks; do not load it for routine L1/L2 edits unless already selected.
+- Carry each gate's concrete output forward as the next gate's input; do not install or load `gstack` or `ce` by default.
 - Select the project and scene from JSON.
 - Load Markdown, rules, or other skills only when the selected JSON says they are needed.
 - Store active work in `runtime/current.json` and `runtime/tasks/<task-id>.json`.
@@ -44,13 +46,14 @@ Do not read every file under `docs/repos/`, `docs/scenes/`, `bundles/rules/`, or
 Routing order:
 
 1. Read entry/profile/current JSON.
-2. If the task is development, debugging, documentation, integration, research, or context maintenance, enter the superpower-driven flow first, normally starting from `superpowers:brainstorming`.
-3. Use runtime task state to classify task size, affected projects/scenes, current G1-G7 gate, roles, verification path, blockers, recovery point, and dashboard-visible state.
-4. Read project and scene indexes as candidate lists, then read only selected detail JSON files.
-5. Load source Markdown, rules, project skills, or additional superpowers only when the active superpower flow, runtime task state, or selected detail JSON requires them.
-6. When a selected scene has `rules`, resolve those ids through `config/rules/rules.json` and load only the matching `scene-on-demand` rule sources when the task needs scene-level guidance.
+2. Use runtime task state to classify task size, affected projects/scenes, current G1-G7 gate, roles, verification path, blockers, recovery point, and dashboard-visible state.
+3. For L3/L4 or explicit spec-backed work, select or create an OpenSpec change and record only its change id, path, status, and handoff summary in task JSON.
+4. If the task is development, debugging, documentation, integration, research, or context maintenance, enter the superpower-driven flow, normally starting from `superpowers:brainstorming`.
+5. Read project and scene indexes as candidate lists, then read only selected detail JSON files.
+6. Load source Markdown, rules, project skills, OpenSpec artifacts, or additional superpowers only when the active superpower flow, runtime task state, or selected detail JSON requires them.
+7. When a selected scene has `rules`, resolve those ids through `config/rules/rules.json` and load only the matching `scene-on-demand` rule sources when the task needs scene-level guidance.
 
-Superpowers drive the workflow. Runtime task state makes that workflow visible by recording size, scope, gate, roles, blockers, recovery point, and progress; it does not replace or outrank superpower process rules.
+Superpowers drive the execution discipline. OpenSpec, when selected, owns the durable requirement/specification artifact. Runtime task state makes both visible by recording size, scope, gate, roles, spec status, blockers, recovery point, and progress; it does not replace or outrank either layer.
 
 Project JSON owns project relationships:
 
@@ -85,6 +88,8 @@ G7 must record:
 - How to integrate with other selected projects.
 - How to package test/pre/prod.
 - What was verified.
+- OpenSpec sync/archive result when a change was selected.
+- Lessons learned or reusable decisions that should feed future specs/tasks.
 - Archive notes and known gaps.
 
 ## Commands
