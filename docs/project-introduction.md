@@ -1,6 +1,8 @@
 # ai-context Project Introduction
 
-ai-context is a portable local context framework for AI coding tools. Its job is not to load every document into the model. Its job is to route the current request to the smallest useful set of project, scene, rule, skill, spec, and task-state files.
+ai-context is a portable local control plane for AI coding tools. Its job is not only to reduce context or recover tasks. It owns the local project map, project relationships, context routing, workflow state, rule/skill governance, tool adapters, privacy boundary, and task-board observability.
+
+Instead of loading every document into the model, ai-context routes the current request to the smallest useful set of project, scene, rule, skill, spec, and task-state files.
 
 ## Core Layers
 
@@ -10,6 +12,8 @@ ai-context uses four layers:
 - superpowers: the execution discipline layer. It drives brainstorming, TDD, debugging, planning, verification, review, and branch finishing.
 - OpenSpec: the optional spec-driven layer. It is used for L3/L4 work, PRD/Jira/Notion/Figma-backed work, cross-project work, or high-risk changes.
 - task board: the visibility layer. It shows active task state, gate progress, relationships, and checks from the JSON indexes.
+
+The recoverable task chain is one outcome of this control plane. The bigger value is that an AI tool can decide which project is involved, which related projects may be affected, which rules and skills apply, whether a durable OpenSpec change is needed, and where the next session should resume.
 
 Do not install `gstack` or `ce` as default workflow tools. ai-context only borrows the useful handoff idea: every stage leaves a compact artifact that feeds the next stage.
 
