@@ -27,7 +27,7 @@ export default function Sidebar({ activeView, filters, onViewChange, onFiltersCh
         <span className="brand-mark">CS</span>
         <div>
           <h1>上下文工作台</h1>
-          <p>ai-context 关系图谱</p>
+          <p>DevFlow 关系图谱</p>
         </div>
       </div>
       <nav aria-label="主导航">

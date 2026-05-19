@@ -55,7 +55,7 @@ test("server returns an empty profile document when fresh install has no source 
     assert.equal(profileDocument.sourcePath, "");
     assert.equal(profileDocument.markdown, "");
     assert.equal(profileDocument.empty, true);
-    assert.match(profileDocument.message, /ai-context-init/);
+    assert.match(profileDocument.message, /devflow-init/);
   } finally {
     await server.close();
     await fs.rm(rootDir, { recursive: true, force: true });

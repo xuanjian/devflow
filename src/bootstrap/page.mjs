@@ -40,7 +40,7 @@ export function renderBootstrapPage({ checks = [] } = {}) {
   <body>
     <main>
       <h1>Context Studio</h1>
-      <p class="subtitle">Initialization checks for the local ai-context panel.</p>
+      <p class="subtitle">Initialization checks for the local DevFlow panel.</p>
       <section class="panel">
         <div class="panel-header">
           <h2>Initialization</h2>

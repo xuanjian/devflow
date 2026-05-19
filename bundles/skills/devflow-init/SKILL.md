@@ -1,26 +1,26 @@
 ---
-name: ai-context-init
-description: Use after installing ai-context when the user needs first-time onboarding, personal AI preferences, project inventory, scene creation, skill/rule mounting, or migration from scattered notes into ai-context JSON.
+name: devflow-init
+description: Use after installing DevFlow when the user needs first-time onboarding, personal AI preferences, project inventory, scene creation, skill/rule mounting, or migration from scattered notes into DevFlow JSON.
 ---
 
-# ai-context-init
+# devflow-init
 
 ## Purpose
 
-Use this skill immediately after `ai-context` is installed, normally through the
-chat entry `@ai-context:init`, or whenever a user wants to initialize their own
-ai-context setup from rough notes.
+Use this skill immediately after DevFlow is installed, normally through the
+chat entry `@devflow:init`, or whenever a user wants to initialize their own
+DevFlow setup from rough notes.
 
 The user should not need to design JSON. You interview them, normalize messy
 information, write the repository's config/docs, and verify the existing
-ai-context panel can display the result. Keep guiding until local profile,
+DevFlow panel can display the result. Keep guiding until local profile,
 projects, scenes, skills, and rules are configured enough for routing and panel
 checks to work.
 
 ## Privacy Boundary
 
 - Do not write secrets, credentials, tokens, private ticket URLs, private account identifiers, or personal identity details into public files.
-- Local machine paths are allowed only in the user's private/local ai-context checkout.
+- Local machine paths are allowed only in the user's private/local DevFlow checkout.
 - If the user is preparing a public template, replace private project names and paths with generic placeholders.
 
 ## Read First
@@ -177,4 +177,4 @@ node scripts/install-ai-context.mjs validate
 npm test
 ```
 
-Then start or refresh the existing ai-context panel and confirm the new projects, scenes, skills, and rules appear without a JSON or graph reference error.
+Then start or refresh the existing DevFlow panel and confirm the new projects, scenes, skills, and rules appear without a JSON or graph reference error.

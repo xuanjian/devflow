@@ -3,10 +3,10 @@
   "generatedAt": "2026-05-12T06:31:45.459Z",
   "scenes": [
     {
-      "id": "ai-context-config",
-      "name": "ai-context configuration",
-      "summary": "Install, validate, and initialize ai-context.",
-      "path": "config/scenes/ai-context-config.json",
+      "id": "devflow-config",
+      "name": "DevFlow configuration",
+      "summary": "Install, validate, and initialize DevFlow.",
+      "path": "config/scenes/devflow-config.json",
       "sourcePath": "config/entry.json"
     }
   ]

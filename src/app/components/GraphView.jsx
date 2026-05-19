@@ -112,7 +112,7 @@ export default function GraphView({ graph, selectedNodeId, onSelectNode, onRunAc
         viewBox={`0 0 ${viewport.width} ${viewport.height}`}
         width={viewport.width}
         role="img"
-        aria-label="ai-context 上下文关系图"
+        aria-label="DevFlow 上下文关系图"
       >
         {onRunAction ? (
           <foreignObject height="54" width="830" x={actionBar.x} y={actionBar.y}>
@@ -262,7 +262,7 @@ function fieldsForModal(type) {
     { name: "purpose", label: "规则用途", type: "textarea", placeholder: "没有现成规则文件时，这里用于生成配套 rule 文件" },
     { name: "sourcePath", label: "现有规则文件路径", placeholder: "可选，支持 .md / .mdc" },
     commonProjectMount,
-    { name: "sceneIds", label: "挂载场景 ID", placeholder: "多个用逗号分隔，例如 ai-context-config,payment-debug" },
+    { name: "sceneIds", label: "挂载场景 ID", placeholder: "多个用逗号分隔，例如 devflow-config,payment-debug" },
     {
       name: "applyMode",
       label: "触发方式",
@@ -295,7 +295,7 @@ function modalHelp(type) {
   const help = {
     project: "只需要项目路径；系统会扫描项目说明文档、skills、rules，并写入关系 JSON。",
     scene: "场景名称必填；挂载项目后会同时写 scene JSON 和项目 scenes 关系。",
-    skill: "Skill 路径必填；系统会复制到 ai-context 并挂到指定项目。",
+    skill: "Skill 路径必填；系统会复制到 DevFlow 并挂到指定项目。",
     rule: "Rule ID 必填；有文件就复制，没有文件则用规则用途生成模板。"
   };
   return help[type] || "";

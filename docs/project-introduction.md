@@ -1,58 +1,58 @@
-# ai-context Project Introduction
+# DevFlow Project Introduction
 
-ai-context is a portable local control plane for AI coding tools. Its job is not only to reduce context or recover tasks. It owns the local project map, project relationships, context routing, workflow state, rule/skill governance, tool adapters, privacy boundary, and task-board observability.
+DevFlow is a portable local control plane for AI coding tools. Its job is not only to reduce context or recover tasks. It owns the local project map, project relationships, context routing, workflow state, rule/skill governance, tool adapters, privacy boundary, and task-board observability.
 
-Instead of loading every document into the model, ai-context routes the current request to the smallest useful set of project, scene, rule, skill, spec, and task-state files.
+Instead of loading every document into the model, DevFlow routes the current request to the smallest useful set of project, scene, rule, skill, spec, and task-state files.
 
 ## Core Layers
 
-ai-context uses four layers:
+DevFlow uses four layers:
 
-- ai-context: the routing and state layer. It stores project indexes, scene indexes, rules, skills, and task JSON.
+- DevFlow: the routing and state layer. It stores project indexes, scene indexes, rules, skills, and task JSON.
 - superpowers: the execution discipline layer. It drives brainstorming, TDD, debugging, planning, verification, review, and branch finishing.
 - OpenSpec: the optional spec-driven layer. It is used for L3/L4 work, PRD/Jira/Notion/Figma-backed work, cross-project work, or high-risk changes.
 - task board: the visibility layer. It shows active task state, gate progress, relationships, and checks from the JSON indexes.
 
 The recoverable task chain is one outcome of this control plane. The bigger value is that an AI tool can decide which project is involved, which related projects may be affected, which rules and skills apply, whether a durable OpenSpec change is needed, and where the next session should resume.
 
-Do not install `gstack` or `ce` as default workflow tools. ai-context only borrows the useful handoff idea: every stage leaves a compact artifact that feeds the next stage.
+Do not install `gstack` or `ce` as default workflow tools. DevFlow only borrows the useful handoff idea: every stage leaves a compact artifact that feeds the next stage.
 
 ## Chat Entries
 
-ai-context is intended to be used from the AI chat as a routed skill:
+DevFlow is intended to be used from the AI chat as a routed skill:
 
 ```text
-@ai-context:add /path/to/project
-@ai-context:add scene 前后端联调
-@ai-context:add skill /path/to/skill
-@ai-context:add rule bff/error-handling
-@ai-context:del project old-project
-@ai-context:del scene old-scene
-@ai-context:del skill old-skill
-@ai-context:del rule old/rule
-@ai-context:task 新增盘点单打印预览
-@ai-context:panel
-@ai-context:init
+@devflow:add /path/to/project
+@devflow:add scene 前后端联调
+@devflow:add skill /path/to/skill
+@devflow:add rule bff/error-handling
+@devflow:del project old-project
+@devflow:del scene old-scene
+@devflow:del skill old-skill
+@devflow:del rule old/rule
+@devflow:task 新增盘点单打印预览
+@devflow:panel
+@devflow:init
 ```
 
-These entries are sub-intents of the same `ai-context` skill, not separate
+These entries are sub-intents of the same `DevFlow` skill, not separate
 always-loaded skills. The router keeps context small by reading indexes first,
 then loading only the selected project, scene, rule, skill, OpenSpec, or task
 state.
 
-`@ai-context:add` owns project/scene/skill/rule intake. For projects, a path is
-enough: ai-context scans local AI entry docs and imports local skills/rules.
+`@devflow:add` owns project/scene/skill/rule intake. For projects, a path is
+enough: DevFlow scans local AI entry docs and imports local skills/rules.
 For scenes, skills, and rules, it asks for project or scene association only
 when it cannot infer the mount target.
 
-`@ai-context:del` owns project/scene/skill/rule removal from ai-context. It
+`@devflow:del` owns project/scene/skill/rule removal from DevFlow. It
 removes indexes, mounts, generated docs, managed bundled skill/rule files, and
 runtime references, but it must not delete the real business repository or
 external source files.
 
-`@ai-context:init` is the first-install chat route. It should keep guiding the
+`@devflow:init` is the first-install chat route. It should keep guiding the
 user until the local profile, first projects, scenes, skills, rules, and panel
-checks are configured enough to use ai-context without manual JSON editing.
+checks are configured enough to use DevFlow without manual JSON editing.
 
 ## Task Flow
 
@@ -77,7 +77,7 @@ Use OpenSpec when the task needs a durable spec:
 - Cross-project or cross-device behavior.
 - High-risk work such as release, packaging, permissions, money, data migration, inventory, or account flows.
 
-Do not use OpenSpec for every small edit. For L1/L2 work, ai-context task state plus superpowers execution is usually enough.
+Do not use OpenSpec for every small edit. For L1/L2 work, DevFlow task state plus superpowers execution is usually enough.
 
 When OpenSpec is selected, task JSON should store only the compact link information:
 
@@ -133,8 +133,8 @@ Then open the URL printed by Vite, usually `http://127.0.0.1:5173/`.
 ## Typical Workflow
 
 1. User states a goal.
-2. ai-context selects the project, scene, task level, and whether OpenSpec is needed.
-3. For tracked work, `@ai-context:task` writes the task JSON through the
+2. DevFlow selects the project, scene, task level, and whether OpenSpec is needed.
+3. For tracked work, `@devflow:task` writes the task JSON through the
    underlying task action/script.
 4. The AI loads only selected project/scene/rule/skill/spec context.
 5. superpowers drives planning, TDD, debugging, verification, and review.

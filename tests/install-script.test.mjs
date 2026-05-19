@@ -19,36 +19,36 @@ function runInstallScript(args, env) {
 }
 
 test("install links routing and initialization skills, then tells the user what to run next", () => {
-  const skillsHome = fs.mkdtempSync(path.join(os.tmpdir(), "ai-context-skills-"));
+  const skillsHome = fs.mkdtempSync(path.join(os.tmpdir(), "devflow-skills-"));
   const env = {
-    HOME: fs.mkdtempSync(path.join(os.tmpdir(), "ai-context-home-")),
+    HOME: fs.mkdtempSync(path.join(os.tmpdir(), "devflow-home-")),
     AI_CONTEXT_SKILLS_HOMES: skillsHome
   };
 
   const install = runInstallScript(["install"], env);
   assert.equal(install.status, 0, install.stderr);
-  assert.match(install.stdout, /installed skill: .*ai-context/);
-  assert.match(install.stdout, /installed skill: .*ai-context-init/);
-  assert.match(install.stdout, /ai-context-init/);
-  assert.equal(fs.lstatSync(path.join(skillsHome, "ai-context")).isSymbolicLink(), true);
-  assert.equal(fs.lstatSync(path.join(skillsHome, "ai-context-init")).isSymbolicLink(), true);
+  assert.match(install.stdout, /installed skill: .*devflow/);
+  assert.match(install.stdout, /installed skill: .*devflow-init/);
+  assert.match(install.stdout, /devflow-init/);
+  assert.equal(fs.lstatSync(path.join(skillsHome, "devflow")).isSymbolicLink(), true);
+  assert.equal(fs.lstatSync(path.join(skillsHome, "devflow-init")).isSymbolicLink(), true);
 
   const check = runInstallScript(["check"], env);
   assert.equal(check.status, 0, check.stderr);
-  assert.match(check.stdout, /skill source ai-context: ok/);
-  assert.match(check.stdout, /skill source ai-context-init: ok/);
+  assert.match(check.stdout, /skill source devflow: ok/);
+  assert.match(check.stdout, /skill source devflow-init: ok/);
   assert.match(check.stdout, /skill installed: yes/);
 
   const uninstall = runInstallScript(["uninstall"], env);
   assert.equal(uninstall.status, 0, uninstall.stderr);
-  assert.equal(fs.existsSync(path.join(skillsHome, "ai-context")), false);
-  assert.equal(fs.existsSync(path.join(skillsHome, "ai-context-init")), false);
+  assert.equal(fs.existsSync(path.join(skillsHome, "devflow")), false);
+  assert.equal(fs.existsSync(path.join(skillsHome, "devflow-init")), false);
 });
 
 test("setup installs core skills and reports required workflow tools", () => {
-  const skillsHome = fs.mkdtempSync(path.join(os.tmpdir(), "ai-context-setup-skills-"));
+  const skillsHome = fs.mkdtempSync(path.join(os.tmpdir(), "devflow-setup-skills-"));
   const env = {
-    HOME: fs.mkdtempSync(path.join(os.tmpdir(), "ai-context-setup-home-")),
+    HOME: fs.mkdtempSync(path.join(os.tmpdir(), "devflow-setup-home-")),
     AI_CONTEXT_SKILLS_HOMES: skillsHome
   };
 
@@ -57,14 +57,14 @@ test("setup installs core skills and reports required workflow tools", () => {
   assert.match(setup.stdout, /setup complete/);
   assert.match(setup.stdout, /OpenSpec/);
   assert.match(setup.stdout, /superpowers/);
-  assert.equal(fs.lstatSync(path.join(skillsHome, "ai-context")).isSymbolicLink(), true);
-  assert.equal(fs.lstatSync(path.join(skillsHome, "ai-context-init")).isSymbolicLink(), true);
+  assert.equal(fs.lstatSync(path.join(skillsHome, "devflow")).isSymbolicLink(), true);
+  assert.equal(fs.lstatSync(path.join(skillsHome, "devflow-init")).isSymbolicLink(), true);
 });
 
 test("doctor passes when core links, OpenSpec, and superpowers are available", () => {
-  const home = fs.mkdtempSync(path.join(os.tmpdir(), "ai-context-doctor-home-"));
-  const skillsHome = fs.mkdtempSync(path.join(os.tmpdir(), "ai-context-doctor-skills-"));
-  const binDir = fs.mkdtempSync(path.join(os.tmpdir(), "ai-context-doctor-bin-"));
+  const home = fs.mkdtempSync(path.join(os.tmpdir(), "devflow-doctor-home-"));
+  const skillsHome = fs.mkdtempSync(path.join(os.tmpdir(), "devflow-doctor-skills-"));
+  const binDir = fs.mkdtempSync(path.join(os.tmpdir(), "devflow-doctor-bin-"));
   const openspecPath = path.join(binDir, "openspec");
   fs.mkdirSync(path.join(home, ".codex", "superpowers"), { recursive: true });
   fs.writeFileSync(openspecPath, "#!/bin/sh\nprintf 'openspec-test\\n'\n");
@@ -86,9 +86,9 @@ test("doctor passes when core links, OpenSpec, and superpowers are available", (
 });
 
 test("setup can install OpenSpec when explicitly requested", () => {
-  const home = fs.mkdtempSync(path.join(os.tmpdir(), "ai-context-openspec-home-"));
-  const skillsHome = fs.mkdtempSync(path.join(os.tmpdir(), "ai-context-openspec-skills-"));
-  const binDir = fs.mkdtempSync(path.join(os.tmpdir(), "ai-context-openspec-bin-"));
+  const home = fs.mkdtempSync(path.join(os.tmpdir(), "devflow-openspec-home-"));
+  const skillsHome = fs.mkdtempSync(path.join(os.tmpdir(), "devflow-openspec-skills-"));
+  const binDir = fs.mkdtempSync(path.join(os.tmpdir(), "devflow-openspec-bin-"));
   const npmLog = path.join(home, "npm.log");
   const npmPath = path.join(binDir, "npm");
   fs.writeFileSync(npmPath, `#!/bin/sh

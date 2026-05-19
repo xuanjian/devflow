@@ -9,24 +9,24 @@ runtime/tasks/*
 runtime/current.local.json
 
 # Local project, scene, rule, skill, and registry data. The public/master branch
-# should remain a fresh ai-context framework, not one machine's inventory.
+# should remain a fresh DevFlow framework, not one machine's inventory.
 config/projects/*
 !config/projects/
 !config/projects/index.json
-!config/projects/ai-context.json
+!config/projects/devflow.json
 
 config/scenes/*
 !config/scenes/
 !config/scenes/index.json
-!config/scenes/ai-context-config.json
+!config/scenes/devflow-config.json
 
 bundles/rules/
 bundles/skills/*
 !bundles/skills/
-!bundles/skills/ai-context/
-!bundles/skills/ai-context/**
-!bundles/skills/ai-context-init/
-!bundles/skills/ai-context-init/**
+!bundles/skills/devflow/
+!bundles/skills/devflow/**
+!bundles/skills/devflow-init/
+!bundles/skills/devflow-init/**
 
 docs/person/
 docs/repos/

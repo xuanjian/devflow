@@ -9,7 +9,7 @@ export default function OverviewView({ graph, checks, onSelectNode, onViewChange
   const failedChecks = (checks || []).filter((check) => ["fail", "warning", "missing"].includes(check.status));
 
   return (
-    <section className="overview-view" aria-label="ai-context 总览">
+    <section className="overview-view" aria-label="DevFlow 总览">
       <OverviewCard
         title="安装与 AI 工具配置"
         subtitle="来自 /api/checks，确认必要文件、目录和 Codex / Claude Code / Agents 链接。"

@@ -6,8 +6,8 @@
   "collaborationPreferences": [],
   "privacy": [
     "Do not store secrets, tokens, credentials, or private account identifiers in this repository.",
-    "Use ai-context-init to collect local-only user details after installation."
+    "Use devflow-init to collect local-only user details after installation."
   ],
-  "whenToReadFullProfile": "No full profile exists yet. Run the ai-context-init skill to create a local profile when needed.",
+  "whenToReadFullProfile": "No full profile exists yet. Run the devflow-init skill to create a local profile when needed.",
   "whenToReadCurrentTask": "Read runtime/current.json. A fresh install has no active task."
 }

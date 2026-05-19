@@ -6,5 +6,5 @@
   "activeSceneIds": [],
   "currentGate": null,
   "recentTaskIds": [],
-  "note": "Fresh install state. No active task. Run ai-context-init to configure local context."
+  "note": "Fresh install state. No active task. Run devflow-init to configure local context."
 }

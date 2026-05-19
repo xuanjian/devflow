@@ -1,38 +1,38 @@
 {
   "version": 1,
   "generatedAt": "2026-05-12T06:31:45.459Z",
-  "note": "Fresh install catalog. Project bindings live in config/projects/<project>.json. Run ai-context-init to add local skills.",
+  "note": "Fresh install catalog. Project bindings live in config/projects/<project>.json. Run devflow-init to add local skills.",
   "skills": [
     {
-      "id": "ai-context",
-      "name": "ai-context",
-      "description": "Use when entering, installing, validating, or modifying ai-context, or when routing tasks through project/scene/rule/skill JSON indexes.",
-      "trigger": "Use when installing ai-context, checking configuration, routing a new task, updating indexes, or advancing G1-G7 task flow.",
-      "sourcePath": "bundles/skills/ai-context/SKILL.md",
+      "id": "devflow",
+      "name": "DevFlow",
+      "description": "Use when entering, installing, validating, or modifying DevFlow, or when routing tasks through project/scene/rule/skill JSON indexes.",
+      "trigger": "Use when installing DevFlow, checking configuration, routing a new task, updating indexes, or advancing G1-G7 task flow.",
+      "sourcePath": "bundles/skills/devflow/SKILL.md",
       "tags": [
-        "ai-context",
+        "devflow",
         "workflow"
       ],
       "defaultSceneIds": [
-        "ai-context-config"
+        "devflow-config"
       ],
-      "whenToLoad": "Load at the start of ai-context setup or when a task modifies this repository.",
+      "whenToLoad": "Load at the start of DevFlow setup or when a task modifies this repository.",
       "sourceExists": true,
       "sourceType": "file"
     },
     {
-      "id": "ai-context-init",
-      "name": "ai-context-init",
-      "description": "Use after installing ai-context when the user needs first-time onboarding, personal AI preferences, project inventory, scene creation, skill/rule mounting, or migration from scattered notes into ai-context JSON.",
-      "trigger": "Use after install, first-time setup, onboarding, importing project inventory, creating profile, creating scenes, or turning messy notes into ai-context configuration.",
-      "sourcePath": "bundles/skills/ai-context-init/SKILL.md",
+      "id": "devflow-init",
+      "name": "devflow-init",
+      "description": "Use after installing DevFlow when the user needs first-time onboarding, personal AI preferences, project inventory, scene creation, skill/rule mounting, or migration from scattered notes into DevFlow JSON.",
+      "trigger": "Use after install, first-time setup, onboarding, importing project inventory, creating profile, creating scenes, or turning messy notes into DevFlow configuration.",
+      "sourcePath": "bundles/skills/devflow-init/SKILL.md",
       "tags": [
-        "ai-context",
+        "devflow",
         "onboarding",
         "workflow"
       ],
       "defaultSceneIds": [
-        "ai-context-config"
+        "devflow-config"
       ],
       "whenToLoad": "Load after install or when initializing profile, projects, scenes, skills, and rules from user-provided notes.",
       "sourceExists": true,

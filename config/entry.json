@@ -1,10 +1,10 @@
 {
   "version": 1,
-  "name": "ai-context entry",
+  "name": "DevFlow entry",
   "purpose": "Stable portable AI entrypoint. Read this repository JSON indexes first, then load source markdown/rules/skills only when selected by task context. Do not rely on home-level compatibility files.",
   "workflowOrder": [
     "Read entry/profile/current JSON first.",
-    "Use ai-context-init after install to collect local profile, projects, scenes, skills, and rules.",
+    "Use devflow-init after install to collect local profile, projects, scenes, skills, and rules.",
     "For L3/L4 work or requests backed by Jira, Notion, Figma, PRD, or cross-project acceptance criteria, use OpenSpec as the optional spec-driven source of truth before implementation; do not load it for small L1/L2 edits unless already selected.",
     "Carry forward each gate's concrete output as the input to the next gate: intake informs discovery, discovery informs plan/spec, plan/spec informs implementation, implementation evidence informs integration, integration evidence informs acceptance, and acceptance informs run/archive.",
     "Use project and scene indexes to select only the context needed for the current task.",
@@ -20,7 +20,7 @@
     "matched config/scenes/<scene-id>.json",
     "config/skills/skills.json only when skill selection is needed",
     "config/rules/rules.json only when rule lookup is needed",
-    "bundles/skills/ai-context-init/SKILL.md when the user is onboarding or initializing ai-context"
+    "bundles/skills/devflow-init/SKILL.md when the user is onboarding or initializing DevFlow"
   ],
   "routingDecision": {
     "projectsIndex": "Read config/projects/index.json first as the candidate list. Use id, name, technologyFamilyId, path, and summary to choose matched project JSON files.",
@@ -36,14 +36,14 @@
     "rules": "Read config/rules/rules.json first. Active rule sources under bundles/rules/** are loaded only when selected by project, scene, or task gate.",
     "skills": "Read active bundles/skills/** only when task state, project JSON, or an explicit user request triggers the skill.",
     "openspec": "Read or create OpenSpec only when the task is L3/L4, has explicit Jira/Notion/Figma/PRD/spec input, crosses projects/devices, or needs durable acceptance criteria. Store only the OpenSpec change id, path, status, and handoff summary in task JSON.",
-    "profile": "A fresh install has no long profile. Run ai-context-init to create local profile details."
+    "profile": "A fresh install has no long profile. Run devflow-init to create local profile details."
   },
   "installation": {
     "script": "scripts/install-ai-context.mjs",
     "commands": [
-      "ai-context init",
-      "ai-context init --tools codex,claude-code,cursor",
-      "ai-context init --skip-openspec",
+      "devflow init",
+      "devflow init --tools codex,claude-code,cursor",
+      "devflow init --skip-openspec",
       "setup",
       "setup --install-openspec",
       "doctor",
@@ -58,9 +58,9 @@
       "validate"
     ],
     "primaryInstallFlow": [
-      "npm install -g @xuanjames/ai-context",
-      "ai-context init",
-      "ask the AI tool to run ai-context-init"
+      "npm install -g @xuanjames/devflow",
+      "devflow init",
+      "ask the AI tool to run devflow-init"
     ],
     "workflowDependencies": [
       {
@@ -90,17 +90,17 @@
       "CLAUDE.md",
       ".ai-configs/claude.md",
       ".claude/CLAUDE.md",
-      ".cursor/rules/00-ai-context.mdc"
+      ".cursor/rules/00-devflow.mdc"
     ],
     "legacyProjectEntrypointsToPrune": [
       "claude.md"
     ],
-    "afterInstall": "Ask the AI tool to run the ai-context-init skill to initialize profile, projects, scenes, skills, and rules.",
+    "afterInstall": "Ask the AI tool to run the devflow-init skill to initialize profile, projects, scenes, skills, and rules.",
     "cli": {
-      "bin": "ai-context",
-      "package": "@xuanjames/ai-context",
-      "initCommand": "ai-context init",
-      "nonInteractiveExample": "ai-context init --tools codex,claude-code,cursor",
+      "bin": "devflow",
+      "package": "@xuanjames/devflow",
+      "initCommand": "devflow init",
+      "nonInteractiveExample": "devflow init --tools codex,claude-code,cursor",
       "supportedTools": [
         "codex",
         "claude-code",
@@ -109,8 +109,8 @@
         "opencode",
         "workbuddy"
       ],
-      "internalScriptStatus": "setup and doctor are retained for tests, CI, and low-level troubleshooting only; normal users should run ai-context init.",
-      "createsLocalCheckout": "When run outside an existing ai-context checkout, ai-context init creates ./ai-context from the npm package template. Use --dir <path> to choose another location."
+      "internalScriptStatus": "setup and doctor are retained for tests, CI, and low-level troubleshooting only; normal users should run devflow init.",
+      "createsLocalCheckout": "When run outside an existing devflow checkout, devflow init creates ./devflow from the npm package template. Use --dir <path> to choose another location."
     }
   },
   "taskFlow": {

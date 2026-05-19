@@ -9,8 +9,8 @@ import { stdin as input, stdout as output } from 'node:process';
 const root = path.resolve(new URL('..', import.meta.url).pathname);
 const userHome = process.env.HOME || path.resolve(root, '..', '..');
 const coreSkills = [
-  { id: 'ai-context', sourcePath: path.join(root, 'bundles', 'skills', 'ai-context') },
-  { id: 'ai-context-init', sourcePath: path.join(root, 'bundles', 'skills', 'ai-context-init') },
+  { id: 'devflow', sourcePath: path.join(root, 'bundles', 'skills', 'devflow') },
+  { id: 'devflow-init', sourcePath: path.join(root, 'bundles', 'skills', 'devflow-init') },
 ];
 const superpowersDir = path.join(userHome, '.codex', 'superpowers');
 const skillsHomes = resolveSkillsHomes();
@@ -451,7 +451,7 @@ function dependencyNames(pkg) {
 function inferFamily(projectPath, pkg) {
   const normalized = projectPath.split(path.sep).join('/');
   const deps = dependencyNames(pkg).join(' ');
-  if (normalized.includes('/Documents/ai-context')) return 'workflow';
+  if (normalized.includes('/Documents/ai-context') || normalized.includes('/Documents/devflow')) return 'workflow';
   if (normalized.includes('/frontend/')) return 'frontend';
   if (normalized.includes('/node/')) return 'bff';
   if (normalized.includes('/ios/')) return 'ios';
@@ -502,7 +502,7 @@ function inferDefaultRules(project, ruleCatalog) {
 }
 
 function inferDefaultSkills(project, skillCatalog) {
-  if (project.id === 'ai-context') return ['ai-context'];
+  if (project.id === 'devflow') return ['devflow'];
   const skillIds = new Set((skillCatalog.skills || []).map(skill => skill.id));
   const candidates = [];
   return candidates.filter(id => skillIds.has(id));
@@ -731,7 +731,7 @@ function doctor() {
   add('node', Boolean(process.execPath), process.version);
   add('codex command', commandExists('codex'), commandExists('codex') ? 'found in PATH' : 'not found in PATH');
   add('superpowers', fs.existsSync(superpowersDir), superpowersDir);
-  add('ai-context root', fs.existsSync(root), root);
+  add('DevFlow root', fs.existsSync(root), root);
   add('entry.json', fs.existsSync(path.join(root, 'config', 'entry.json')), 'config/entry.json');
   add('profile.json', fs.existsSync(path.join(root, 'config', 'profile.json')), 'config/profile.json');
   add('current.json', fs.existsSync(path.join(root, 'runtime', 'current.json')), 'runtime/current.json');

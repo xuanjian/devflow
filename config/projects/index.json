@@ -3,11 +3,11 @@
   "generatedAt": "2026-05-12T06:31:45.459Z",
   "projects": [
     {
-      "id": "ai-context",
-      "name": "ai-context",
+      "id": "devflow",
+      "name": "DevFlow",
       "technologyFamilyId": "workflow",
-      "path": "config/projects/ai-context.json",
-      "summary": "AI context configuration center, installer, onboarding skill, and task-flow skeleton."
+      "path": "config/projects/devflow.json",
+      "summary": "AI development workflow control plane, installer, onboarding skill, and TaskFlow skeleton."
     }
   ]
 }

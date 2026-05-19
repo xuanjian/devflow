@@ -9,11 +9,11 @@ const entryPath = path.join(root, 'config', 'entry.json');
 const currentPath = path.join(root, 'runtime', 'current.json');
 const managedSkillsRoot = path.join(root, 'bundles', 'skills');
 const coreSkills = [
-  { id: 'ai-context', sourcePath: path.join(managedSkillsRoot, 'ai-context') },
-  { id: 'ai-context-init', sourcePath: path.join(managedSkillsRoot, 'ai-context-init') },
+  { id: 'devflow', sourcePath: path.join(managedSkillsRoot, 'devflow') },
+  { id: 'devflow-init', sourcePath: path.join(managedSkillsRoot, 'devflow-init') },
 ];
-const managedEntryMarker = '<!-- ai-context:managed-entry:start -->';
-const managedEntryEndMarker = '<!-- ai-context:managed-entry:end -->';
+const managedEntryMarker = '<!-- devflow:managed-entry:start -->';
+const managedEntryEndMarker = '<!-- devflow:managed-entry:end -->';
 const userHome = process.env.HOME || path.resolve(root, '..', '..');
 const superpowersDir = process.env.AI_CONTEXT_SUPERPOWERS_DIR || path.join(userHome, '.codex', 'superpowers');
 const projectPathOverrides = resolveProjectPathOverrides();
@@ -204,7 +204,7 @@ ${lines.join('\n')}
 function portableProjectOverrideSection() {
   return `Portable project override:
 
-- This project entry is the ai-context source of truth for this checkout.
+- This project entry is the DevFlow source of truth for this checkout.
 - Do not read or require home-level compatibility files by default.
 - If a parent/global instruction asks for those home files, treat this project entry and the JSON files below as the stronger, portable entry.
 
@@ -232,7 +232,7 @@ function cursorRule(project) {
 alwaysApply: true
 ---
 ${managedEntryMarker}
-# ${project.name || project.id} ai-context entry
+# ${project.name || project.id} DevFlow entry
 
 ${portableProjectOverrideSection()}Read first:
 
@@ -240,7 +240,7 @@ ${portableProjectOverrideSection()}Read first:
 2. \`config/projects/${project.id}.json\`
 3. \`runtime/current.json\`
 
-Do not load all ai-context Markdown by default. Follow the selected JSON indexes.
+Do not load all DevFlow Markdown by default. Follow the selected JSON indexes.
 ${projectSkillsSection(project)}
 ${managedEntryEndMarker}
 `;
@@ -252,7 +252,7 @@ function isManagedProjectEntryContent(content) {
   const managedMarkers = [
     path.join(root, 'config', 'entry.json'),
     path.join(root, 'runtime', 'current.json'),
-    'ai-context/repos/',
+    'devflow/repos/',
     'registry/scenes.json',
   ];
   return managedMarkers.some(marker => content.includes(marker));
@@ -302,7 +302,7 @@ function projectEntryPruneTargets(project) {
     if (isManagedProjectEntryContent(content)) {
       targets.push({ filePath, action: 'delete', reason: 'managed legacy lowercase Claude entry' });
     } else {
-      targets.push({ filePath, action: 'skip-protected', reason: 'lowercase Claude entry is not recognized as ai-context managed content' });
+      targets.push({ filePath, action: 'skip-protected', reason: 'lowercase Claude entry is not recognized as DevFlow managed content' });
     }
   }
 
@@ -380,7 +380,7 @@ function install(options = {}) {
   for (const skillLink of skillLinks) ensureSkillLink(skillLink);
 
   for (const skillLink of skillLinks) console.log(`installed skill: ${skillLink.linkPath} -> ${skillLink.sourcePath}`);
-  console.log('next: ask your AI tool to run the ai-context-init skill to initialize profile, projects, scenes, skills, and rules.');
+  console.log('next: ask your AI tool to run the devflow-init skill to initialize profile, projects, scenes, skills, and rules.');
   if (options.projectSkills) syncProjects({ write: true, skillsOnly: true });
 }
 
@@ -406,9 +406,9 @@ function workflowToolStatuses() {
     {
       id: 'skills',
       ok: installedLinks.length === skillLinks.length,
-      label: 'ai-context core skill links',
+      label: 'DevFlow core skill links',
       detail: `${installedLinks.length}/${skillLinks.length}`,
-      fix: 'Run: node scripts/install-ai-context.mjs setup',
+      fix: 'Run: devflow init',
     },
     {
       id: 'openspec',
@@ -525,7 +525,7 @@ function syncProjects(options = {}) {
       [path.join(localProject.path, 'CLAUDE.md'), projectEntry(project)],
       [path.join(localProject.path, '.ai-configs', 'claude.md'), projectEntry(project)],
       [path.join(localProject.path, '.claude', 'CLAUDE.md'), projectEntry(project)],
-      [path.join(localProject.path, '.cursor', 'rules', '00-ai-context.mdc'), cursorRule(project)],
+      [path.join(localProject.path, '.cursor', 'rules', '00-devflow.mdc'), cursorRule(project)],
     ];
     const entryWriteActions = syncEntries
       ? entryTargets.map(([filePath, content]) => projectEntryWriteAction(filePath, content))
@@ -679,8 +679,8 @@ function validate() {
     'config/rules/rules.json',
     'config/tasks/gates.json',
     'runtime/current.json',
-    'bundles/skills/ai-context/SKILL.md',
-    'bundles/skills/ai-context-init/SKILL.md',
+    'bundles/skills/devflow/SKILL.md',
+    'bundles/skills/devflow-init/SKILL.md',
   ]) {
     if (!exists(file)) pushUniqueError(errors, `missing required file: ${file}`);
   }
@@ -814,7 +814,7 @@ function finishValidation(errors, warnings) {
     for (const error of errors) console.error(`ERROR ${error}`);
     process.exit(1);
   }
-  console.log(`ai-context validation passed${warnings.length ? ` with ${warnings.length} warning(s)` : ''}`);
+  console.log(`DevFlow validation passed${warnings.length ? ` with ${warnings.length} warning(s)` : ''}`);
 }
 
 try {

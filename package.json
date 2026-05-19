@@ -1,10 +1,10 @@
 {
-  "name": "@xuanjames/ai-context",
+  "name": "@xuanjames/devflow",
   "version": "0.1.0",
   "private": false,
   "type": "module",
   "bin": {
-    "ai-context": "scripts/ai-context-cli.mjs"
+    "devflow": "scripts/devflow-cli.mjs"
   },
   "scripts": {
     "dev": "vite src/app --host 127.0.0.1 --config src/app/vite.config.js",

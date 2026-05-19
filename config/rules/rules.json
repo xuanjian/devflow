@@ -1,6 +1,6 @@
 {
   "version": 1,
   "generatedAt": "2026-05-12T06:31:45.459Z",
-  "note": "Fresh install has no rules. Run ai-context-init or add_rule to create local rules.",
+  "note": "Fresh install has no rules. Run devflow-init or add_rule to create local rules.",
   "rules": []
 }

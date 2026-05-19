@@ -5,7 +5,7 @@
 ## 框架文档
 
 - `docs/install.md`：新机器安装、OpenSpec/superpowers 依赖、首次初始化、项目接入和隐私检查。
-- `docs/project-introduction.md`：ai-context 的任务处理流程、G1-G7、OpenSpec/superpowers 分工和看板用法。
+- `docs/project-introduction.md`：DevFlow 的任务处理流程、G1-G7、OpenSpec/superpowers 分工和看板用法。
 
 ## 初始化后通常会生成
 
@@ -15,7 +15,7 @@
 
 ## 生成方式
 
-推荐让 AI 执行 `ai-context-init`，通过对话收集信息后自动生成这些文档和对应 JSON 关系。
+推荐让 AI 执行 `devflow-init`，通过对话收集信息后自动生成这些文档和对应 JSON 关系。
 
 也可以在面板中新增项目、场景、skill、rule，让后端 action 生成配套文件。
 

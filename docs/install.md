@@ -1,6 +1,6 @@
-# ai-context Installation
+# DevFlow Installation
 
-This document is the clean-machine install path for the public ai-context framework. It must stay free of local projects, private paths, tickets, accounts, tasks, and personal profile data.
+This document is the clean-machine install path for the public DevFlow framework. It must stay free of local projects, private paths, tickets, accounts, tasks, and personal profile data.
 
 ## Prerequisites
 
@@ -10,32 +10,32 @@ This document is the clean-machine install path for the public ai-context framew
 - Codex or another AI coding tool that can read local skills.
 - Codex superpowers installed or restored under `~/.codex/superpowers`.
 
-`ai-context init` installs OpenSpec automatically unless `--skip-openspec` is passed. [OpenSpec's official installation guide](https://github.com/Fission-AI/OpenSpec/blob/main/docs/installation.md) uses `npm install -g @fission-ai/openspec@latest` and verifies with `openspec --version`.
+`devflow init` installs OpenSpec automatically unless `--skip-openspec` is passed. [OpenSpec's official installation guide](https://github.com/Fission-AI/OpenSpec/blob/main/docs/installation.md) uses `npm install -g @fission-ai/openspec@latest` and verifies with `openspec --version`.
 
 ## Fresh Install
 
 ```bash
-npm install -g @xuanjames/ai-context
-ai-context init
+npm install -g @xuanjames/devflow
+devflow init
 ```
 
-`git clone` is not required for normal installation. When `ai-context init` runs outside an existing ai-context checkout, it creates `./ai-context` from the npm package template and installs selected AI tool links to that local directory.
+`git clone` is not required for normal installation. When `devflow init` runs outside an existing devflow checkout, it creates `./devflow` from the npm package template and installs selected AI tool links to that local directory.
 
 Use a custom location when needed:
 
 ```bash
-ai-context init --dir ~/Documents/ai-context
+devflow init --dir ~/.local/share/devflow
 ```
 
 Install local app dependencies only when you want to run the board:
 
 ```bash
-cd ai-context
+cd devflow
 npm install
 npm run dev
 ```
 
-`ai-context init` opens a terminal selector for AI tool targets:
+`devflow init` opens a terminal selector for AI tool targets:
 
 - Codex
 - Claude Code
@@ -49,30 +49,30 @@ Use Up/Down to move, Space to toggle, and Enter to install.
 For automated setup:
 
 ```bash
-ai-context init --tools codex,claude-code,cursor
+devflow init --tools codex,claude-code,cursor
 ```
 
-`ai-context init` does four things:
+`devflow init` does four things:
 
-- Validates the ai-context skeleton.
-- Links the `ai-context` and `ai-context-init` skills into selected AI tool skill directories.
+- Validates the DevFlow skeleton.
+- Links the `DevFlow` and `devflow-init` skills into selected AI tool skill directories.
 - Installs OpenSpec with `npm install -g @fission-ai/openspec@latest` when it is missing.
 - Reports whether OpenSpec and superpowers are available.
 
 If you do not want the init command to mutate global npm packages:
 
 ```bash
-ai-context init --skip-openspec
+devflow init --skip-openspec
 ```
 
 `scripts/install-ai-context.mjs setup` and `doctor` still exist for tests, CI, and low-level troubleshooting, but they are not the normal user install flow.
 
 ## First Local Initialization
 
-After `ai-context init` completes, ask the AI tool:
+After `devflow init` completes, ask the AI tool:
 
 ```text
-@ai-context:init
+@devflow:init
 ```
 
 The init route should guide the user through first-time setup until local
@@ -97,38 +97,38 @@ For a local project, use the chat entry instead of asking the user to hand-edit
 indexes or remember maintenance scripts:
 
 ```text
-@ai-context:add /path/to/project
+@devflow:add /path/to/project
 ```
 
-The `ai-context` skill should scan `AGENTS.md`, `CLAUDE.md`, `README.md`,
+The `devflow` skill should scan `AGENTS.md`, `CLAUDE.md`, `README.md`,
 Cursor rules, and project-local `SKILL.md` directories, then call the underlying
 action/script that writes the project doc/config and updates indexes together.
-If the project has no AI entry docs, ai-context should create a managed project
+If the project has no AI entry docs, DevFlow should create a managed project
 entry instead of failing.
 
 For scenes, skills, and rules, use the same chat entry:
 
 ```text
-@ai-context:add scene 前后端联调
-@ai-context:add skill /path/to/skill
-@ai-context:add rule bff/error-handling
+@devflow:add scene 前后端联调
+@devflow:add skill /path/to/skill
+@devflow:add rule bff/error-handling
 ```
 
 When the association cannot be inferred, the AI should ask which `projectIds`
 or `sceneIds` to mount. Under the hood this maps to actions such as
 `add_project_from_path`, `add_scene`, `add_skill_from_path`, and `add_rule`.
 
-To remove ai-context metadata, use:
+To remove DevFlow metadata, use:
 
 ```text
-@ai-context:del project old-project
-@ai-context:del scene old-scene
-@ai-context:del skill old-skill
-@ai-context:del rule old/rule
+@devflow:del project old-project
+@devflow:del scene old-scene
+@devflow:del skill old-skill
+@devflow:del rule old/rule
 ```
 
 Deletion removes indexes, mounts, generated docs, managed bundled skill/rule
-files, and runtime references inside ai-context. It must not delete the real
+files, and runtime references inside DevFlow. It must not delete the real
 business repository path or external source files.
 
 ## OpenSpec Per Project
@@ -142,14 +142,14 @@ cd /path/to/project
 openspec init
 ```
 
-For small L1/L2 edits, skip OpenSpec and track only the ai-context task state
-when needed. If a newly added project should be spec-managed, ai-context can run
+For small L1/L2 edits, skip OpenSpec and track only the DevFlow task state
+when needed. If a newly added project should be spec-managed, DevFlow can run
 or recommend `openspec init` for that project and record the OpenSpec status in
 task/project state.
 
 ## Shared Standards
 
-Use ai-context rules and skills for long-lived standards:
+Use DevFlow rules and skills for long-lived standards:
 
 - BFF conventions.
 - Frontend conventions.
@@ -163,13 +163,13 @@ Use OpenSpec for per-change requirements, proposals, design notes, task lists, a
 
 ```bash
 # Install core skill links and print workflow dependency status
-ai-context init
+devflow init
 
 # Install selected tools non-interactively
-ai-context init --tools codex,claude-code,qoderwork
+devflow init --tools codex,claude-code,qoderwork
 
 # Skip OpenSpec global install
-ai-context init --skip-openspec
+devflow init --skip-openspec
 
 # Validate JSON indexes and references
 node scripts/install-ai-context.mjs validate
@@ -190,10 +190,10 @@ node scripts/install-ai-context.mjs sync-projects --write
 Common chat entries:
 
 ```text
-@ai-context:add /path/to/project
-@ai-context:task 新增一个需求
-@ai-context:panel
-@ai-context:del project old-project
+@devflow:add /path/to/project
+@devflow:task 新增一个需求
+@devflow:panel
+@devflow:del project old-project
 ```
 
 ## Privacy Checklist Before Publishing

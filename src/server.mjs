@@ -106,7 +106,7 @@ async function readProfileDocument(rootPath) {
       sourcePath: "",
       markdown: "",
       empty: true,
-      message: "No profile document is configured yet. Run ai-context-init to create one."
+      message: "No profile document is configured yet. Run devflow-init to create one."
     };
   }
   try {

@@ -33,7 +33,7 @@ export async function runChecks({ rootDir = process.cwd(), runCommands = true } 
       title: "Persona profile document",
       area: "profile",
       status: "pass",
-      message: "Fresh install has no profile document yet. Run ai-context-init to create one."
+      message: "Fresh install has no profile document yet. Run devflow-init to create one."
     });
   }
   checks.push(jsonCheck("projects_index", "Projects index", "config", projects));
@@ -211,7 +211,7 @@ async function skillLinksCheck(rootPath, entryResult) {
   }
   return {
     id: "ai_context_skill_links",
-    title: "ai-context skill links",
+    title: "DevFlow skill links",
     area: "install",
     status: missing.length ? "warning" : "pass",
     message: missing.length ? `Missing or mismatched skill links: ${missing.join(", ")}` : "Skill links resolved.",
@@ -234,7 +234,8 @@ async function existsAt(rootPath, relativePath) {
 function expandPath(value, rootPath) {
   return String(value)
     .replace(/^~(?=$|\/)/, os.homedir())
-    .replaceAll("<ai-context-root>", rootPath);
+    .replaceAll("<devflow-root>", rootPath)
+    .replaceAll("<DevFlow-root>", rootPath);
 }
 
 function runCommand(command, { cwd, timeoutMs }) {

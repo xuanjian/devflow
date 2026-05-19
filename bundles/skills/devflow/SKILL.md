@@ -1,18 +1,18 @@
 ---
-name: ai-context
-description: Use when entering, installing, validating, or modifying the ai-context project; also use when routing a task through project/scene/rule/skill JSON indexes or advancing G1-G7 task flow.
+name: devflow
+description: Use when entering, installing, validating, or modifying the DevFlow project; also use when routing a task through project/scene/rule/skill JSON indexes or advancing G1-G7 task flow.
 ---
 
-# ai-context
+# DevFlow
 
 ## Purpose
 
-This skill is the single AI entrypoint for the local `ai-context` repository.
+This skill is the single AI entrypoint for the local DevFlow repository.
 
-It keeps AI context loading small and stable:
+It keeps AI workflow context loading small and stable:
 
 - Read JSON indexes first.
-- Treat the `ai-context` repository entry as portable source of truth; do not read or require home-level compatibility files by default.
+- Treat the `DevFlow` repository entry as portable source of truth; do not read or require home-level compatibility files by default.
 - For development, debugging, documentation, integration, research, and context-maintenance tasks, use superpowers as the process driver; begin with `superpowers:brainstorming` unless the current continuation clearly requires a more specific superpower.
 - Use `runtime/current.json` and task JSON as the task-state layer, not as the workflow driver.
 - Use OpenSpec as an optional spec-driven source of truth for L3/L4, Jira/Notion/Figma/PRD-backed, cross-project, cross-device, or high-risk tasks; do not load it for routine L1/L2 edits unless already selected.
@@ -23,9 +23,9 @@ It keeps AI context loading small and stable:
 
 ## First Files To Read
 
-1. `<ai-context-root>/config/entry.json`
-2. `<ai-context-root>/config/profile.json`
-3. `<ai-context-root>/runtime/current.json`
+1. `<devflow-root>/config/entry.json`
+2. `<devflow-root>/config/profile.json`
+3. `<devflow-root>/runtime/current.json`
 4. Active task file from `runtime/current.json`
 
 Do not read home-level compatibility files unless the user explicitly asks to
@@ -95,27 +95,27 @@ G7 must record:
 ## Chat Subcommands
 
 These chat triggers are not separate skills by default. Treat them as one
-ai-context skill with different sub-intent routes. This keeps the loaded context
+DevFlow skill with different sub-intent routes. This keeps the loaded context
 small: the router reads indexes first, then loads only the files needed by the
 selected sub-intent.
 
 Supported chat triggers:
 
-- `@ai-context:add`: add or update a project, scene, skill, or rule.
-- `@ai-context:del`: delete a project, scene, skill, or rule from ai-context.
-- `@ai-context:task`: create, resume, or update a durable G1-G7 task.
-- `@ai-context:panel`: open, explain, or validate the local task/project panel.
-- `@ai-context:init`: run first-time onboarding after terminal installation and
+- `@devflow:add`: add or update a project, scene, skill, or rule.
+- `@devflow:del`: delete a project, scene, skill, or rule from DevFlow.
+- `@devflow:task`: create, resume, or update a durable G1-G7 task.
+- `@devflow:panel`: open, explain, or validate the local task/project panel.
+- `@devflow:init`: run first-time onboarding after terminal installation and
   guide the user until local profile, projects, scenes, skills, and rules are
   configured enough for the panel and routing flow to work.
 
 Use another skill only when the sub-intent needs that specialist behavior. For
-example, when `@ai-context:add skill` requires authoring or rewriting the actual
+example, when `@devflow:add skill` requires authoring or rewriting the actual
 `SKILL.md` content, also use `superpowers:writing-skills`. Do not create one
 large always-loaded skill per subcommand unless the route needs reusable domain
 judgment that cannot stay in this router.
 
-### `@ai-context:add`
+### `@devflow:add`
 
 Route by object:
 
@@ -133,14 +133,14 @@ Route by object:
 - Rule: ask which `projectIds` and `sceneIds` should receive the rule when not
   inferable, then call the `add_rule` action or equivalent script flow.
 
-For a new project with no AI entry docs, create an ai-context managed project
+For a new project with no AI entry docs, create an DevFlow managed project
 entry and docs instead of failing. If the project should also use OpenSpec for
 durable specs, run or recommend `openspec init` in that project and record the
-OpenSpec path/status in the ai-context project or task state. Do not run
+OpenSpec path/status in the DevFlow project or task state. Do not run
 OpenSpec for every small project unless the task is L3/L4, spec-backed, or the
 user asks for it.
 
-### `@ai-context:del`
+### `@devflow:del`
 
 Route by object:
 
@@ -153,13 +153,13 @@ Route by object:
 - Rule: ask for or infer `ruleId`, preview mounted projects and scenes, then
   call `delete_rule` or equivalent script flow.
 
-Deletion is scoped to ai-context metadata and managed files. It must not delete
+Deletion is scoped to DevFlow metadata and managed files. It must not delete
 the real business repository at `project.path`, external source docs, external
 skills, or external rule files. Prefer removing indexes, mounts, generated docs,
 managed bundled skill/rule files, and runtime references. If the target is
 ambiguous, ask one concise confirmation question before writing.
 
-### `@ai-context:task`
+### `@devflow:task`
 
 Create or update a task JSON before work that should survive the current chat.
 Infer project, scene, level, and gate from the current workspace and user text.
@@ -191,7 +191,7 @@ The task route owns:
 - OpenSpec change id/path/status when OpenSpec is selected.
 - Recovery point, artifacts, blockers, verification notes, and archive notes.
 
-### `@ai-context:panel`
+### `@devflow:panel`
 
 Use this route for dashboard requests: show what the panel is for, start the
 local panel when requested, or validate the data the panel reads. The panel is a
@@ -200,16 +200,16 @@ separate source of truth.
 
 ## Commands
 
-Use `ai-context init` for user-facing terminal installation. Use chat
-subcommands such as `@ai-context:init`, `@ai-context:add`, `@ai-context:del`,
-`@ai-context:task`, and
-`@ai-context:panel` for day-to-day AI operation. Under the hood, the AI should
-use `contextctl` or core actions for ai-context maintenance. Do not hand-edit
+Use `DevFlow init` for user-facing terminal installation. Use chat
+subcommands such as `@devflow:init`, `@devflow:add`, `@devflow:del`,
+`@devflow:task`, and
+`@devflow:panel` for day-to-day AI operation. Under the hood, the AI should
+use `contextctl` or core actions for DevFlow maintenance. Do not hand-edit
 multiple indexes for routine additions when a script/action can do it.
 
 ```bash
-ai-context init
-ai-context init --tools codex,claude-code,cursor
+DevFlow init
+DevFlow init --tools codex,claude-code,cursor
 node scripts/contextctl.mjs task start "<title>" --projects <ids> --scenes <ids> --gate G1 --level <L1-L4>
 node scripts/contextctl.mjs task update [task-id] --gate <G1-G7> --note "<progress or decision>"
 node scripts/contextctl.mjs task finish [task-id] --note "<verification and handoff>"
@@ -218,7 +218,7 @@ node scripts/contextctl.mjs add project <repo-path>
 
 ## Default Task Creation Triggers
 
-In any project window that can read this ai-context entry, default to creating
+In any project window that can read this DevFlow entry, default to creating
 or updating a task JSON through `contextctl task ...` whenever the request looks
 like real work that should survive the current chat. This is not tied to a
 specific project, product, or active task.
@@ -237,7 +237,7 @@ Do this before implementation for:
   inventory, or other high-risk workflow work.
 - Any L3/L4 task, any work expected to continue across sessions or days, or any
   task where future windows should know the current gate and recovery point.
-- Any user wording like "建 task", "走 ai-context task", "同步到 task",
+- Any user wording like "建 task", "走 DevFlow task", "同步到 task",
   "按 G1-G7", "后面继续", "记录这个流程", "自动去写", or "任务看板".
 
 If unsure whether a development request is L1 or L2+, bias toward starting a
@@ -253,8 +253,8 @@ Use the CLI for installation, and keep the install script for validation,
 project entry syncing, tests, CI, and low-level troubleshooting:
 
 ```bash
-ai-context init
-ai-context init --tools codex,claude-code,cursor
+DevFlow init
+DevFlow init --tools codex,claude-code,cursor
 node scripts/install-ai-context.mjs check
 node scripts/install-ai-context.mjs validate
 node scripts/install-ai-context.mjs install
@@ -264,7 +264,7 @@ node scripts/install-ai-context.mjs sync-projects
 node scripts/install-ai-context.mjs sync-projects --project <project-id> --skills-only --write
 ```
 
-`ai-context init` is the preferred new-machine flow. It presents a terminal multi-select for Codex, Claude Code, Cursor, QoderWork, OpenCode, and WorkBuddy; installs core skill links only into selected targets; installs OpenSpec when missing unless `--skip-openspec` is passed; and reports the next onboarding step. After install, ask the AI tool to run `ai-context-init` for first-time onboarding: it should collect the user's profile, projects, scenes, skills, and rules from rough input, then write normalized docs and JSON that the panel can display. Use `install --project-skills` on a local development machine to also reconcile mounted project skills into `.agents/.codex/.claude` directories. Reconcile means adding links for skills currently listed in `config/projects/<project-id>.json` and pruning managed links that no longer appear there. `sync-projects` previews project entry changes by default; use `--write` only when intentionally updating local project entry files.
+`DevFlow init` is the preferred new-machine flow. It presents a terminal multi-select for Codex, Claude Code, Cursor, QoderWork, OpenCode, and WorkBuddy; installs core skill links only into selected targets; installs OpenSpec when missing unless `--skip-openspec` is passed; and reports the next onboarding step. After install, ask the AI tool to run `DevFlow-init` for first-time onboarding: it should collect the user's profile, projects, scenes, skills, and rules from rough input, then write normalized docs and JSON that the panel can display. Use `install --project-skills` on a local development machine to also reconcile mounted project skills into `.agents/.codex/.claude` directories. Reconcile means adding links for skills currently listed in `config/projects/<project-id>.json` and pruning managed links that no longer appear there. `sync-projects` previews project entry changes by default; use `--write` only when intentionally updating local project entry files.
 
 Installation and workflow docs:
 
@@ -295,12 +295,12 @@ catalog, and docs in sync by memory.
 
 ## Maintenance Triggers
 
-Use this `ai-context` skill as the maintenance entrypoint for:
+Use this `DevFlow` skill as the maintenance entrypoint for:
 
-- Adding, archiving, or updating a project in ai-context.
-- Adding, archiving, or updating a scene in ai-context.
-- Adding, archiving, or updating a rule in ai-context.
-- Registering, mounting, or removing a skill in ai-context.
+- Adding, archiving, or updating a project in DevFlow.
+- Adding, archiving, or updating a scene in DevFlow.
+- Adding, archiving, or updating a rule in DevFlow.
+- Registering, mounting, or removing a skill in DevFlow.
 - Running install, doctor, validate, sync, or bootstrap checks.
 
 Then route by object:

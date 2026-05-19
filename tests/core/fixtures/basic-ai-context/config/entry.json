@@ -3,7 +3,7 @@
   "name": "fixture entry",
   "installation": {
     "skillLinks": [
-      "~/.codex/skills/ai-context -> <ai-context-root>/bundles/skills/ai-context"
+      "~/.codex/skills/devflow -> <devflow-root>/bundles/skills/devflow"
     ]
   },
   "sourceReadPolicy": {

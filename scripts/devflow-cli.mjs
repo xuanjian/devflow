@@ -18,16 +18,16 @@ const toolProviders = [
 
 function usage() {
   console.log(`Usage:
-  ai-context init
-  ai-context init --tools codex,claude-code,cursor
-  ai-context init --dir ~/Documents/ai-context --tools codex
-  ai-context init --tools codex,qoderwork --skip-openspec
+  devflow init
+  devflow init --tools codex,claude-code,cursor
+  devflow init --dir ~/.local/share/devflow --tools codex
+  devflow init --tools codex,qoderwork --skip-openspec
 
 Options:
   --tools <ids>       Comma-separated AI tools. Available: ${toolProviders.map(tool => tool.id).join(', ')}
   --yes               Non-interactive confirmation.
-  --dir <path>        Local ai-context directory to create or reuse. Defaults to ./ai-context outside a checkout.
-  --root <path>       Existing ai-context checkout path. Alias for --dir when the path already exists.
+  --dir <path>        Local DevFlow directory to create or reuse. Defaults to ./devflow outside a checkout.
+  --root <path>       Existing DevFlow checkout path. Alias for --dir when the path already exists.
   --skip-openspec     Do not install OpenSpec during init.
   --help              Show help.
 `);
@@ -76,7 +76,7 @@ function ensureKnownTools(toolIds) {
   if (unknown.length) throw new Error(`unknown AI tool(s): ${unknown.join(', ')}`);
 }
 
-function isAiContextRoot(candidateRoot) {
+function isDevFlowRoot(candidateRoot) {
   return fs.existsSync(path.join(candidateRoot, 'config', 'entry.json'))
     && fs.existsSync(path.join(candidateRoot, 'scripts', 'install-ai-context.mjs'));
 }
@@ -122,12 +122,12 @@ function copyTemplateDirectory(sourceDir, targetDir, relativeBase = '') {
 }
 
 function ensureLocalRoot(targetRoot) {
-  if (isAiContextRoot(targetRoot)) return targetRoot;
+  if (isDevFlowRoot(targetRoot)) return targetRoot;
   if (fs.existsSync(targetRoot) && !isDirectoryEmpty(targetRoot)) {
-    throw new Error(`target directory is not empty and is not an ai-context checkout: ${targetRoot}`);
+    throw new Error(`target directory is not empty and is not a DevFlow checkout: ${targetRoot}`);
   }
   copyTemplateDirectory(packageRoot, targetRoot);
-  if (!isAiContextRoot(targetRoot)) throw new Error(`failed to create ai-context checkout: ${targetRoot}`);
+  if (!isDevFlowRoot(targetRoot)) throw new Error(`failed to create DevFlow checkout: ${targetRoot}`);
   return targetRoot;
 }
 
@@ -139,8 +139,8 @@ function resolveRoot(flags) {
     return ensureLocalRoot(explicitTarget);
   }
   const cwd = process.cwd();
-  if (isAiContextRoot(cwd)) return cwd;
-  return ensureLocalRoot(path.join(cwd, 'ai-context'));
+  if (isDevFlowRoot(cwd)) return cwd;
+  return ensureLocalRoot(path.join(cwd, 'devflow'));
 }
 
 function skillHomesForTools(toolIds, homeDir) {
@@ -149,7 +149,7 @@ function skillHomesForTools(toolIds, homeDir) {
 
 function renderToolSelect(cursorIndex, selectedIds) {
   process.stdout.write('\x1Bc');
-  console.log('Welcome to ai-context!');
+  console.log('Welcome to DevFlow!');
   console.log('');
   console.log('Which AI tools do you want to configure?');
   console.log('Use Up/Down to move, Space to toggle, Enter to continue.');
@@ -226,13 +226,13 @@ function runInit(root, toolIds, flags) {
 
   console.log(`Selected AI tools: ${selectedLabels.join(', ')}`);
   console.log(`Configured ${skillHomes.length} skill target(s).`);
-  console.log(`ai-context root: ${root}`);
+  console.log(`DevFlow root: ${root}`);
   if (flags['skip-openspec']) {
     console.log('OpenSpec install skipped.');
   } else {
     console.log('OpenSpec checked or installed.');
   }
-  console.log('Next: run ai-context-init in your AI tool for local project/profile onboarding.');
+  console.log('Next: run devflow-init in your AI tool for local project/profile onboarding.');
 }
 
 async function main() {

@@ -1,8 +1,8 @@
 # bundles
 
-This folder contains bundled ai-context assets. A fresh install keeps only the core skills:
+This folder contains bundled DevFlow assets. A fresh install keeps only the core skills:
 
-- `bundles/skills/ai-context/SKILL.md`
-- `bundles/skills/ai-context-init/SKILL.md`
+- `bundles/skills/devflow/SKILL.md`
+- `bundles/skills/devflow-init/SKILL.md`
 
-Project-specific skills and rules should be imported locally through `ai-context-init` or panel actions after installation.
+Project-specific skills and rules should be imported locally through `devflow-init` or panel actions after installation.

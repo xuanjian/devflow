@@ -626,17 +626,17 @@ async function listMarkdownFiles(root, depth) {
 async function ensureProjectEntryNote(projectPath, rootPath) {
   const note = `
 
-<!-- ai-context:managed-entry:start -->
-## ai-context 协作入口
+<!-- DevFlow:managed-entry:start -->
+## DevFlow 协作入口
 
-- 当前项目已接入 ai-context，请先读取 \`${path.join(rootPath, "config/entry.json")}\`。
-- 命中项目后再按需读取 ai-context 中的项目、场景、skill、rule JSON。
+- 当前项目已接入 DevFlow，请先读取 \`${path.join(rootPath, "config/entry.json")}\`。
+- 命中项目后再按需读取 DevFlow 中的项目、场景、skill、rule JSON。
 - 不要在聊天窗口一次性加载所有上下文，按任务需要加载。
-<!-- ai-context:managed-entry:end -->
+<!-- DevFlow:managed-entry:end -->
 `;
   const target = path.join(projectPath, "AGENTS.md");
   const existing = await readOptionalText(target);
-  if (existing?.includes("<!-- ai-context:managed-entry:start -->")) {
+  if (existing?.includes("<!-- DevFlow:managed-entry:start -->")) {
     return "";
   }
   await fs.writeFile(target, `${existing || `# ${path.basename(projectPath)}\n`}${note}`, "utf8");
@@ -663,7 +663,7 @@ ${project.summary}
 
 ${docLines}
 
-## ai-context 读取规则
+## DevFlow 读取规则
 
 - 用户选择该项目后，先读取 \`config/projects/${project.id}.json\`。
 - 只有 JSON 摘要不足时，再读取本文件和项目内原始说明文档。
@@ -768,7 +768,7 @@ function inferTechnologyFamily(projectPath, packageJson) {
   if (normalized.includes("/frontend/") || /(react|vue|vite|next|webpack|taro)/i.test(deps)) return "frontend";
   if (normalized.includes("/node/") || /(egg|koa|midway|tegg)/i.test(deps)) return "bff";
   if (normalized.includes("/ios/") || /\.(xcworkspace|xcodeproj)$/i.test(normalized)) return "ios";
-  if (normalized.includes("ai-context")) return "workflow";
+  if (normalized.toLowerCase().includes("devflow") || normalized.includes("/ai-context")) return "workflow";
   return "unknown";
 }
 

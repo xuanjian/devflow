@@ -14,7 +14,7 @@ const files = [
   path.join(projectRoot, 'claude.md'),
   path.join(projectRoot, '.ai-configs', 'claude.md'),
   path.join(projectRoot, '.claude', 'CLAUDE.md'),
-  path.join(projectRoot, '.cursor', 'rules', '00-ai-context.mdc'),
+  path.join(projectRoot, '.cursor', 'rules', '00-devflow.mdc'),
 ];
 
 const snapshots = new Map();
@@ -37,13 +37,13 @@ function hasExactDirEntry(filePath) {
 }
 
 try {
-  fs.writeFileSync(path.join(projectRoot, 'claude.md'), `# Legacy ai-context entry\n\n${managedMarker}\n`);
+  fs.writeFileSync(path.join(projectRoot, 'claude.md'), `# Legacy DevFlow entry\n\n${managedMarker}\n`);
 
   const result = spawnSync(process.execPath, [
     'scripts/install-ai-context.mjs',
     'sync-projects',
     '--project',
-    'ai-context',
+    'devflow',
     '--entries-only',
     '--write',
   ], {
@@ -63,15 +63,15 @@ try {
   ]) {
     if (!fs.existsSync(file)) throw new Error(`expected generated entry file: ${file}`);
     const content = fs.readFileSync(file, 'utf8');
-    if (!content.includes('config/projects/ai-context.json')) {
-      throw new Error(`generated entry does not point at ai-context project JSON: ${file}`);
+    if (!content.includes('config/projects/devflow.json')) {
+      throw new Error(`generated entry does not point at DevFlow project JSON: ${file}`);
     }
     if (!content.includes(portableOverrideMarker)) {
       throw new Error(`generated entry does not contain portable project override: ${file}`);
     }
   }
 
-  const cursorRule = path.join(projectRoot, '.cursor', 'rules', '00-ai-context.mdc');
+  const cursorRule = path.join(projectRoot, '.cursor', 'rules', '00-devflow.mdc');
   if (!fs.existsSync(cursorRule)) throw new Error(`expected generated cursor rule: ${cursorRule}`);
   if (!fs.readFileSync(cursorRule, 'utf8').includes(portableOverrideMarker)) {
     throw new Error(`generated cursor rule does not contain portable project override: ${cursorRule}`);
