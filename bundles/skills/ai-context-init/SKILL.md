@@ -40,9 +40,24 @@ Do not bulk-read `docs/repos/**`, `bundles/rules/**`, or `bundles/skills/**` unt
 Ask in small batches. Stop after each batch if the answer is unclear.
 
 1. Personal profile:
-   - What should AI remember about the user's work style?
-   - Which context should stay private or local-only?
-   - How should tasks be tracked: lightweight, G1-G7, or only for larger work?
+   - If `config/profile.json` or `docs/person/profile.md` is missing or still
+     a placeholder, create the minimal files first, then help the user complete
+     them.
+   - Use Socratic multiple-choice questions instead of asking the user to invent
+     a full profile from scratch. Offer 2-3 concrete choices per question, with
+     a recommended default, and let the user pick `1`, `2`, `3`, modify an
+     option, or describe their own preference.
+   - Clarify what AI should remember about the user's work style.
+   - Clarify which context should stay private or local-only.
+   - Clarify how tasks should be tracked: lightweight, G1-G7, or only for
+     larger work.
+   - Write the selected answers into `config/profile.json` and
+     `docs/person/profile.md` in a concise, reusable form.
+
+   Example profile questions:
+   - "你希望 AI 默认怎么推进？1. 直接执行 2. 先给方案 3. 先问清楚再做。推荐：1，除非任务高风险。"
+   - "哪些内容默认只留本机？1. 公司项目和任务 2. 账号/链接/截图 3. 全部个人画像。推荐：1+2。"
+   - "任务记录默认选哪种？1. 小任务不记，大任务记 2. 所有开发任务都记 3. 只在你明确要求时记。推荐：1。"
 
 2. Projects:
    - Which projects should be registered first?

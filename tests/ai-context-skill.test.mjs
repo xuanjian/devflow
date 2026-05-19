@@ -7,6 +7,7 @@ import { fileURLToPath } from "node:url";
 const testFile = fileURLToPath(import.meta.url);
 const rootDir = path.resolve(path.dirname(testFile), "..");
 const skillPath = path.join(rootDir, "bundles", "skills", "ai-context", "SKILL.md");
+const initSkillPath = path.join(rootDir, "bundles", "skills", "ai-context-init", "SKILL.md");
 const readmePath = path.join(rootDir, "README.md");
 
 test("ai-context skill documents chat subcommands as one routed skill", () => {
@@ -55,6 +56,18 @@ test("ai-context:task uses Socratic multiple-choice clarification for large vagu
   assert.match(skill, /Avoid asking only open-ended questions/i);
   assert.match(readme, /几个可选方向/);
   assert.match(readme, /1\/2\/3/);
+});
+
+test("ai-context:init creates missing profile through guided choices", () => {
+  const initSkill = fs.readFileSync(initSkillPath, "utf8");
+  const readme = fs.readFileSync(readmePath, "utf8");
+
+  assert.match(initSkill, /config\/profile\.json.*docs\/person\/profile\.md/s);
+  assert.match(initSkill, /Socratic multiple-choice questions/i);
+  assert.match(initSkill, /pick\s+`1`,\s+`2`,\s+`3`/i);
+  assert.match(initSkill, /Write the selected answers into `config\/profile\.json`/);
+  assert.match(readme, /如果还没有个人画像/);
+  assert.match(readme, /选项式提问/);
 });
 
 test("README keeps chat entry guidance without a common commands block", () => {

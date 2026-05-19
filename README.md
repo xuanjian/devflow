@@ -143,7 +143,7 @@ ai-context init --skip-openspec
 @ai-context:init
 ```
 
-- `@ai-context:init`：首次配置本机资料和项目工作台。
+- `@ai-context:init`：首次配置本机资料和项目工作台；如果还没有个人画像，AI 会通过选项式提问帮你整理。
 - `@ai-context:add`：添加项目、场景、skill 或 rule。
 - `@ai-context:del`：移除项目、场景、skill 或 rule 的登记关系；不会删除真实业务仓库。
 - `@ai-context:task`：创建或继续一个可恢复任务。
