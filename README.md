@@ -77,7 +77,7 @@ DevFlow 不默认读取所有 Markdown、规则、skill 和历史任务，而是
 ## 安装
 
 ```bash
-npm install -g @xuanjames/devflow
+npm install -g @xuanmimi/devflow
 devflow init
 ```
 
@@ -355,7 +355,7 @@ docs/                             初始化后生成项目和场景文档
 
 ## 推荐工作流
 
-1. `npm install -g @xuanjames/devflow`。
+1. `npm install -g @xuanmimi/devflow`。
 2. 运行 `devflow init`，选择要配置的 AI 工具。
 3. 在 AI 聊天框里运行 `@devflow:init`。
 4. 用 `@devflow:add /path/to/project` 把第一个项目加进来。

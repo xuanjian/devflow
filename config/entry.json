@@ -58,7 +58,7 @@
       "validate"
     ],
     "primaryInstallFlow": [
-      "npm install -g @xuanjames/devflow",
+      "npm install -g @xuanmimi/devflow",
       "devflow init",
       "ask the AI tool to run devflow-init"
     ],
@@ -98,7 +98,7 @@
     "afterInstall": "Ask the AI tool to run the devflow-init skill to initialize profile, projects, scenes, skills, and rules.",
     "cli": {
       "bin": "devflow",
-      "package": "@xuanjames/devflow",
+      "package": "@xuanmimi/devflow",
       "initCommand": "devflow init",
       "nonInteractiveExample": "devflow init --tools codex,claude-code,cursor",
       "supportedTools": [

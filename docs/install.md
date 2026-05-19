@@ -15,7 +15,7 @@ This document is the clean-machine install path for the public DevFlow framework
 ## Fresh Install
 
 ```bash
-npm install -g @xuanjames/devflow
+npm install -g @xuanmimi/devflow
 devflow init
 ```
 
