@@ -15,7 +15,7 @@ This document is the clean-machine install path for the public DevFlow framework
 ## Fresh Install
 
 ```bash
-npm install -g @xuanmimi/devflow
+npm install -g @xuanmimi/devflow --registry=https://registry.npmjs.org/
 devflow init
 ```
 

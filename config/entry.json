@@ -58,7 +58,7 @@
       "validate"
     ],
     "primaryInstallFlow": [
-      "npm install -g @xuanmimi/devflow",
+      "npm install -g @xuanmimi/devflow --registry=https://registry.npmjs.org/",
       "devflow init",
       "ask the AI tool to run devflow-init"
     ],
