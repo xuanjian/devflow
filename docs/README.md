@@ -10,6 +10,7 @@
 ## 初始化后通常会生成
 
 - 项目介绍正文默认放在业务项目的 `.ai-configs/project.md`；DevFlow 只在 `config/projects/*.json` 里记录入口路径和关系。
+- 业务项目的 `.ai-configs/rules/` 和 `.ai-configs/skills/` 可存放项目专属 rule/skill；DevFlow 只登记外部来源路径和挂载关系。
 - `docs/scenes/<scene-id>.md`：场景说明、涉及项目、协作步骤、验证方式。
 - `docs/person/profile.md`：本机用户画像和 AI 协作偏好。
 

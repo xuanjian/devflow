@@ -86,6 +86,8 @@ user's own checkout:
 - `config/skills/skills.json`
 - `config/rules/rules.json`
 - project-local `.ai-configs/project.md`
+- project-local `.ai-configs/rules/`
+- project-local `.ai-configs/skills/`
 - `docs/scenes/*.md`
 - `docs/person/profile.md`
 
@@ -204,6 +206,6 @@ Common chat entries:
 Before merging to the public master skeleton:
 
 - `runtime/tasks/*.json` should not contain local task data.
-- Project-local `.ai-configs/project.md`, `docs/scenes/*.md`, and `docs/person/*.md` should not be committed to the public skeleton with private project details.
+- Project-local `.ai-configs/project.md`, `.ai-configs/rules/`, `.ai-configs/skills/`, `docs/scenes/*.md`, and `docs/person/*.md` should not be committed to the public skeleton with private project details.
 - `config/projects/*.json`, `config/scenes/*.json`, `config/rules/rules.json`, and `config/skills/skills.json` should not contain private project paths or company terms.
 - No token, cookie, account, ticket URL, internal repository URL, screenshot path, or personal profile detail should be committed.

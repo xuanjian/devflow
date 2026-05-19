@@ -17,6 +17,22 @@ The recoverable task chain is one outcome of this control plane. The bigger valu
 
 Do not install `gstack` or `ce` as default workflow tools. DevFlow only borrows the useful handoff idea: every stage leaves a compact artifact that feeds the next stage.
 
+## Distributed Project Context
+
+Project-specific AI context should live with the business project:
+
+- `.ai-configs/project.md`: the main project AI document.
+- `.ai-configs/rules/`: project-specific rules.
+- `.ai-configs/skills/`: project-specific skills.
+- `AGENTS.md` / `CLAUDE.md`: lightweight AI-tool entries that point back to DevFlow.
+- `.cursor/rules/`: Cursor-facing rule entry, which can point to or mirror `.ai-configs/rules/`.
+
+DevFlow should not duplicate those files into `docs/repos`. It stores the
+portable relationship layer instead: project ids, paths, scenes, mounted
+skills, mounted rules, task state, and source paths. This keeps reusable
+project knowledge close to the code while keeping cross-project routing and
+board visibility centralized.
+
 ## Chat Entries
 
 DevFlow is intended to be used from the AI chat as a routed skill:
@@ -41,7 +57,8 @@ then loading only the selected project, scene, rule, skill, OpenSpec, or task
 state.
 
 `@devflow:add` owns project/scene/skill/rule intake. For projects, a path is
-enough: DevFlow scans local AI entry docs and imports local skills/rules.
+enough: DevFlow scans `.ai-configs/project.md`, lightweight AI entry docs,
+Cursor rules, and project-local skills/rules.
 For scenes, skills, and rules, it asks for project or scene association only
 when it cannot infer the mount target.
 
@@ -111,6 +128,7 @@ The board reads the same JSON that AI tools read:
 - `config/scenes/*.json`: workflow scenes and cross-project relationships.
 - `config/skills/skills.json`: reusable capability catalog.
 - `config/rules/rules.json`: durable rule catalog.
+- business project `.ai-configs/project.md`, `.ai-configs/rules/`, and `.ai-configs/skills/`: distributed project context loaded only when selected.
 
 Use the board to answer:
 

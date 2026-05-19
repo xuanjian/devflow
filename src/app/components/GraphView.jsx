@@ -293,10 +293,10 @@ function modalTitle(type) {
 
 function modalHelp(type) {
   const help = {
-    project: "只需要项目路径；系统会扫描项目说明文档、skills、rules，并写入关系 JSON。",
+    project: "只需要项目路径；系统会扫描 .ai-configs、入口文档、skills、rules，并写入关系 JSON。",
     scene: "场景名称必填；挂载项目后会同时写 scene JSON 和项目 scenes 关系。",
-    skill: "Skill 路径必填；系统会复制到 DevFlow 并挂到指定项目。",
-    rule: "Rule ID 必填；有文件就复制，没有文件则用规则用途生成模板。"
+    skill: "Skill 路径必填；系统会登记来源路径并挂到指定项目。",
+    rule: "Rule ID 必填；有文件就登记来源路径，没有文件则用规则用途生成模板。"
   };
   return help[type] || "";
 }

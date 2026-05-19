@@ -75,7 +75,7 @@ Ask in small batches. Stop after each batch if the answer is unclear.
      - "先只注册 DevFlow 自己，保持最小配置。"
      - "添加你常用的业务项目，请提供本机路径。"
      - "暂时不添加项目，后续用 `@devflow:add /path/to/project`。"
-   - For each path, inspect project guide files such as `AGENTS.md`, `CLAUDE.md`, `README.md`, `.cursor/rules/*.mdc`, and project-local skills.
+   - For each path, inspect project guide files such as `.ai-configs/project.md`, `AGENTS.md`, `CLAUDE.md`, `README.md`, `.ai-configs/rules/`, `.cursor/rules/*.mdc`, `.ai-configs/skills/`, and project-local skills.
 
 3. Scenes:
    - Ask whether common cross-project scenes are needed.
@@ -153,7 +153,7 @@ Before writing files, normalize the conversation into this shape:
 
 Prefer the existing maintenance actions and scripts over hand-editing multiple files:
 
-- Add project: use the panel action `add_project_from_path` or the equivalent backend action. It scans project docs, registers project-local skills/rules as distributed sources, writes `config/projects/<id>.json`, updates `config/projects/index.json`, and adds lightweight managed entries in the project. If `.ai-configs` is missing, tell the user first and only create `.ai-configs/project.md` after confirmation.
+- Add project: use the panel action `add_project_from_path` or the equivalent backend action. It scans `.ai-configs/project.md`, lightweight AI entries, Cursor rules, and project-local skills/rules; registers project-local skills/rules as distributed sources; writes `config/projects/<id>.json`; updates `config/projects/index.json`; and adds lightweight managed entries in the project. If `.ai-configs` is missing, tell the user first and only create `.ai-configs/project.md` after confirmation.
 - Add scene: use `add_scene` with scene id/name, purpose, and mounted project ids.
 - Add skill: use `add_skill_from_path` when a `SKILL.md` path exists; otherwise register only after the user confirms the generated skill content.
 - Add rule: use `add_rule`; if no source file exists, provide `purpose` so the action can generate a rule template.
@@ -163,6 +163,8 @@ When manual edits are unavoidable, update all affected files together:
 - `config/projects/index.json`
 - `config/projects/<project-id>.json`
 - the selected project's `.ai-configs/project.md`
+- the selected project's `.ai-configs/rules/` when adding project-local rules
+- the selected project's `.ai-configs/skills/` when adding project-local skills
 - `config/scenes/index.json`
 - `config/scenes/<scene-id>.json`
 - `config/skills/skills.json`

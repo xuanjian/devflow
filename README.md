@@ -53,7 +53,7 @@ DevFlow 不默认读取所有 Markdown、规则、skill 和历史任务，而是
 
 - 建立本地 AI 项目地图：项目、技术族、仓库路径、上下游关系、场景组合和验证入口都可索引。
 - 自动做需求路由：用户只说需求时，AI 可以先判断项目、场景、规则、skill、OpenSpec 和任务等级。
-- 减少聊天窗口上下文：AI 先读 JSON 索引，只在需要时加载项目文档、规则或 skill。
+- 减少聊天窗口上下文：AI 先读 JSON 索引，只在需要时加载业务项目的 `.ai-configs` 正文、规则或 skill。
 - 管理多个项目和项目关系：把本机多个项目登记成项目卡片，并记录项目路径、说明、规则、技能、场景关系和跨项目联动方式。
 - 管理工作场景：把“单项目修改”“前后端联调”“发布打包”“文档整理”等流程抽成场景。
 - 管理 skill 和 rule：把可复用能力和项目规范挂到指定项目或场景上，避免每次手动解释。
@@ -346,7 +346,15 @@ config/rules/rules.json           rule 索引
 runtime/current.json              当前任务状态，刚安装为空
 bundles/skills/devflow         核心维护 skill
 bundles/skills/devflow-init    首次初始化 skill
-docs/                             初始化后生成项目和场景文档
+docs/                             安装、流程、场景和画像文档
+
+业务项目内：
+.ai-configs/project.md            项目 AI 正文，跟随业务仓库维护
+.ai-configs/rules/                项目专属 rule，DevFlow 只登记来源路径
+.ai-configs/skills/               项目专属 skill，DevFlow 只登记来源路径
+AGENTS.md                         Codex 轻量入口
+CLAUDE.md                         Claude 轻量入口
+.cursor/rules/                    Cursor 规则入口，可指向或同步 .ai-configs/rules
 ```
 
 ## 隐私说明
