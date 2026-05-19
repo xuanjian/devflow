@@ -90,6 +90,33 @@ test("add_project_from_path scans project docs, skills, rules and writes relatio
   assert.ok(rules.rules.some((rule) => rule.id === "payment-app/payment" && rule.projectIds.includes("payment-app")));
 });
 
+test("add_project_from_path skips unreadable rule symlinks", async () => {
+  const rootDir = await copyFixture();
+  const projectDir = await fs.mkdtemp(path.join(os.tmpdir(), "external-project-"));
+  await fs.mkdir(path.join(projectDir, ".ai-configs/rules"), { recursive: true });
+  await fs.writeFile(path.join(projectDir, "README.md"), "# Symlink App\n", "utf8");
+  await fs.symlink(".ai-configs", path.join(projectDir, ".cursor"));
+  await fs.symlink(
+    path.join(projectDir, "missing-rule-source.mdc"),
+    path.join(projectDir, ".ai-configs/rules/broken-rule.mdc")
+  );
+
+  const result = await runAction({
+    rootDir,
+    actionId: "add_project_from_path",
+    body: {
+      projectPath: projectDir,
+      projectId: "symlink-app",
+      name: "Symlink App",
+      technologyFamilyId: "frontend"
+    }
+  });
+
+  assert.equal(result.ok, true, result.error?.message);
+  const rules = await readJson(path.join(rootDir, "config/rules/rules.json"));
+  assert.equal(rules.rules.some((rule) => rule.id === "symlink-app/broken-rule"), false);
+});
+
 test("add_scene creates scene docs and mounts it to projects", async () => {
   const rootDir = await copyFixture();
 

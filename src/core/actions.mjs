@@ -614,9 +614,11 @@ async function listMarkdownFiles(root, depth) {
   const entries = await safeReaddir(root);
   for (const entry of entries) {
     const filePath = path.join(root, entry.name);
-    if (entry.isDirectory()) {
+    const stat = await safeStat(filePath);
+    if (!stat) continue;
+    if (stat.isDirectory()) {
       files.push(...await listMarkdownFiles(filePath, depth - 1));
-    } else if (/\.(md|mdc)$/i.test(entry.name)) {
+    } else if (stat.isFile() && /\.(md|mdc)$/i.test(entry.name)) {
       files.push(filePath);
     }
   }
