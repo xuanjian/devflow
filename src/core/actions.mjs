@@ -109,9 +109,24 @@ async function addProjectFromPath({ rootPath, actionId, body }) {
   const repoType = String(body?.repoType || inferRepoType(technologyFamilyId, packageJson));
   const sourceDocs = await scanProjectIntroDocs(projectPath);
   const summary = String(body?.summary || summarizeProject(name, sourceDocs));
+  const aiConfigsDir = path.join(projectPath, ".ai-configs");
+  const projectDocPath = path.join(aiConfigsDir, "project.md");
+  const hasAiConfigs = (await safeStat(aiConfigsDir))?.isDirectory();
+  if (!hasAiConfigs && !isTruthy(body?.confirmAiConfigsMigration)) {
+    return actionError(
+      actionId,
+      "confirmation_required",
+      `项目 ${name} 还没有 .ai-configs。确认后 DevFlow 会创建 .ai-configs/project.md，把现有项目入口资料整理成项目内唯一正文，并只在 DevFlow 中登记索引关系。`
+    );
+  }
+
   const changedPaths = [];
+  const projectDocNote = await ensureDistributedProjectDoc(projectPath, { id, name, summary, sourceDocs });
+  if (projectDocNote) changedPaths.push(projectDocNote);
   const projectRuleNote = await ensureProjectEntryNote(projectPath, rootPath);
   if (projectRuleNote) changedPaths.push(projectRuleNote);
+  const claudeEntryNote = await ensureClaudeEntry(projectPath);
+  if (claudeEntryNote) changedPaths.push(claudeEntryNote);
 
   const projectIndex = await readRootJson(rootPath, "config/projects/index.json", { version: 1, projects: [] });
   const skillCatalog = await readRootJson(rootPath, "config/skills/skills.json", { version: 1, skills: [] });
@@ -119,9 +134,10 @@ async function addProjectFromPath({ rootPath, actionId, body }) {
 
   const importedSkills = [];
   for (const skillDir of await scanSkillDirs(projectPath)) {
-    const imported = await importSkillDirectory(rootPath, skillDir, {
+    const imported = await registerExternalSkillDirectory(skillDir, {
       id: `${id}-${normalizeId(path.basename(skillDir))}`,
       projectIds: [id],
+      sourceProjectId: id,
       catalog: skillCatalog
     });
     importedSkills.push(imported.skill);
@@ -131,7 +147,7 @@ async function addProjectFromPath({ rootPath, actionId, body }) {
   const importedRules = [];
   for (const ruleFile of await scanRuleFiles(projectPath)) {
     const ruleBase = normalizeRuleFileId(path.basename(ruleFile, path.extname(ruleFile)));
-    const imported = await importRuleFile(rootPath, ruleFile, {
+    const imported = await registerExternalRuleFile(ruleFile, {
       id: `${id}/${ruleBase}`,
       name: titleFromId(ruleBase),
       purpose: `Rules discovered from ${name}.`,
@@ -153,11 +169,20 @@ async function addProjectFromPath({ rootPath, actionId, body }) {
     summary,
     path: projectPath,
     tags: uniqueSorted([technologyFamilyId, ...listFromBody(body?.tags)]),
+    entryFiles: buildProjectEntryFiles(projectPath),
+    sourceOfTruth: {
+      projectDoc: "distributed",
+      rules: "distributed",
+      skills: "distributed",
+      relations: "centralized",
+      tasks: "centralized"
+    },
     doc: {
-      path: `docs/repos/${id}.md`,
+      path: projectDocPath,
+      location: "distributed",
       title: name,
       summary,
-      whenToRead: "Read after this project is selected and the JSON summary is insufficient."
+      whenToRead: "Read after this project is selected and the JSON summary is insufficient. This file lives in the business project."
     },
     scenes: [],
     skills: importedSkills.map(makeSkillMount),
@@ -165,11 +190,11 @@ async function addProjectFromPath({ rootPath, actionId, body }) {
     readPolicy: {
       defaultRead: [`config/projects/${id}.json`],
       onDemandRead: [
-        `docs/repos/${id}.md`,
+        projectDocPath,
         ...importedSkills.map((skill) => skill.sourcePath),
         ...importedRules.map((rule) => rule.sourcePath)
       ],
-      notes: "Start with JSON. Load source docs, skills, and rules only when the task needs them."
+      notes: "Start with JSON. Load distributed project docs, skills, and rules only when the task needs them."
     }
   };
 
@@ -183,12 +208,11 @@ async function addProjectFromPath({ rootPath, actionId, body }) {
 
   await writeRootJson(rootPath, "config/projects/index.json", projectIndex);
   await writeRootJson(rootPath, `config/projects/${id}.json`, project);
-  await writeRootText(rootPath, `docs/repos/${id}.md`, buildImportedProjectDoc(project, sourceDocs, importedSkills, importedRules));
   await writeRootJson(rootPath, "config/skills/skills.json", skillCatalog);
   await writeRootJson(rootPath, "config/rules/rules.json", ruleCatalog);
-  changedPaths.push("config/projects/index.json", `config/projects/${id}.json`, `docs/repos/${id}.md`, "config/skills/skills.json", "config/rules/rules.json");
+  changedPaths.push("config/projects/index.json", `config/projects/${id}.json`, "config/skills/skills.json", "config/rules/rules.json");
 
-  return actionOk(actionId, `新增项目 ${name}，导入 ${importedSkills.length} 个 skill、${importedRules.length} 条 rule。`, changedPaths);
+  return actionOk(actionId, `新增项目 ${name}，登记 ${importedSkills.length} 个外部 skill、${importedRules.length} 条外部 rule。`, changedPaths);
 }
 
 async function addScene({ rootPath, actionId, body }) {
@@ -337,11 +361,12 @@ async function deleteProject({ rootPath, actionId, body }) {
   const projectPath = indexEntry.path || `config/projects/${id}.json`;
   const project = await readOptionalRootJson(rootPath, projectPath);
   const docPath = project?.doc?.path || `docs/repos/${id}.md`;
+  const managedDocPath = isManagedRootPath(docPath, "docs/repos/") ? docPath : "";
 
   projectIndex.projects = removeById(projectIndex.projects || [], id);
   await writeRootJson(rootPath, "config/projects/index.json", projectIndex);
   changedPaths.push("config/projects/index.json");
-  changedPaths.push(...await removeRootPaths(rootPath, [projectPath, docPath]));
+  changedPaths.push(...await removeRootPaths(rootPath, [projectPath, managedDocPath]));
 
   const sceneIndex = await readRootJson(rootPath, "config/scenes/index.json", { version: 1, scenes: [] });
   for (const sceneItem of sceneIndex.scenes || []) {
@@ -495,6 +520,28 @@ async function importSkillDirectory(rootPath, skillDir, options) {
   return { skill, changedPaths: [`bundles/skills/${id}/SKILL.md`] };
 }
 
+async function registerExternalSkillDirectory(skillDir, options) {
+  const skillFile = path.join(skillDir, "SKILL.md");
+  const frontmatter = readFrontmatter(await fs.readFile(skillFile, "utf8"));
+  const id = normalizeId(options.id || frontmatter.name || path.basename(skillDir));
+  if (!id) throw new Error("skill id is required");
+  const skill = {
+    id,
+    name: String(options.name || frontmatter.name || titleFromId(id)),
+    description: String(options.description || frontmatter.description || `Use when ${titleFromId(id)} is needed.`),
+    trigger: String(options.description || frontmatter.description || `Use when ${titleFromId(id)} is needed.`),
+    sourcePath: skillFile,
+    sourceProjectId: options.sourceProjectId,
+    tags: uniqueSorted(listFromBody(options.tags)),
+    defaultSceneIds: listFromBody(options.sceneIds),
+    whenToLoad: String(options.description || frontmatter.description || `Use when ${titleFromId(id)} is needed.`),
+    sourceExists: true,
+    sourceType: "external-file"
+  };
+  upsertById(options.catalog.skills, skill);
+  return { skill, changedPaths: [] };
+}
+
 async function importRuleFile(rootPath, sourcePath, options) {
   const id = normalizeRuleId(options.id);
   if (!id) throw new Error("rule id is required");
@@ -509,6 +556,20 @@ async function importRuleFile(rootPath, sourcePath, options) {
   });
   upsertById(options.catalog.rules, rule);
   return { rule, changedPaths: [`bundles/rules/${id}.md`] };
+}
+
+async function registerExternalRuleFile(sourcePath, options) {
+  const id = normalizeRuleId(options.id);
+  if (!id) throw new Error("rule id is required");
+  const rule = buildRuleRecord({
+    ...options,
+    id,
+    sourcePath,
+    sourceExists: true,
+    sourceType: "external-file"
+  });
+  upsertById(options.catalog.rules, rule);
+  return { rule, changedPaths: [] };
 }
 
 async function createRuleFile(rootPath, options) {
@@ -550,7 +611,7 @@ function buildRuleRecord(options) {
     applyMode: String(options.applyMode || "project-on-demand"),
     globs: listFromBody(options.globs).length ? listFromBody(options.globs) : ["**/*"],
     sourceExists: options.sourceExists !== false,
-    sourceType: "file"
+    sourceType: options.sourceType || "file"
   };
 }
 
@@ -584,7 +645,7 @@ async function scanProjectIntroDocs(projectPath) {
 }
 
 async function scanSkillDirs(projectPath) {
-  const roots = [".codex/skills", ".agents/skills", ".claude/skills", "skills"];
+  const roots = [".ai-configs/skills", ".codex/skills", ".agents/skills", ".claude/skills", "skills"];
   const dirs = [];
   for (const root of roots) {
     const absoluteRoot = path.join(projectPath, root);
@@ -602,6 +663,7 @@ async function scanSkillDirs(projectPath) {
 
 async function scanRuleFiles(projectPath) {
   return uniqueSorted([
+    ...await listMarkdownFiles(path.join(projectPath, ".ai-configs/rules"), 2),
     ...await listMarkdownFiles(path.join(projectPath, ".cursor/rules"), 2),
     ...await listMarkdownFiles(path.join(projectPath, "rules"), 3)
   ]);
@@ -631,6 +693,7 @@ async function ensureProjectEntryNote(projectPath, rootPath) {
 <!-- DevFlow:managed-entry:start -->
 ## DevFlow 协作入口
 
+- 当前项目的 AI 正文在 \`.ai-configs/project.md\`。
 - 当前项目已接入 DevFlow，请先读取 \`${path.join(rootPath, "config/entry.json")}\`。
 - 命中项目后再按需读取 DevFlow 中的项目、场景、skill、rule JSON。
 - 不要在聊天窗口一次性加载所有上下文，按任务需要加载。
@@ -643,6 +706,73 @@ async function ensureProjectEntryNote(projectPath, rootPath) {
   }
   await fs.writeFile(target, `${existing || `# ${path.basename(projectPath)}\n`}${note}`, "utf8");
   return target;
+}
+
+async function ensureClaudeEntry(projectPath) {
+  const note = `
+
+<!-- DevFlow:managed-claude-entry:start -->
+@AGENTS.md
+<!-- DevFlow:managed-claude-entry:end -->
+`;
+  const target = path.join(projectPath, "CLAUDE.md");
+  const existing = await readOptionalText(target);
+  if (existing?.includes("<!-- DevFlow:managed-claude-entry:start -->") || existing?.includes("@AGENTS.md")) {
+    return "";
+  }
+  await fs.writeFile(target, `${existing || "# CLAUDE.md\n"}${note}`, "utf8");
+  return target;
+}
+
+async function ensureDistributedProjectDoc(projectPath, project) {
+  const target = path.join(projectPath, ".ai-configs/project.md");
+  const existing = await readOptionalText(target);
+  if (existing) return "";
+  await fs.mkdir(path.dirname(target), { recursive: true });
+  await fs.writeFile(target, buildDistributedProjectDoc(project), "utf8");
+  return target;
+}
+
+function buildDistributedProjectDoc(project) {
+  const sourceDocLines = project.sourceDocs.length
+    ? project.sourceDocs.map((doc) => `- \`${doc.path}\``).join("\n")
+    : "- 未发现 AGENTS、CLAUDE、README 或 Cursor rules 文档。";
+  return `# ${project.name}
+
+## 项目定位
+
+${project.summary}
+
+## DevFlow 入口
+
+- DevFlow 项目 ID：\`${project.id}\`
+- 这是该业务项目自己的 AI 正文，跟随业务仓库维护。
+- DevFlow 只集中维护项目关系、场景、任务状态和挂载索引。
+
+## 原始资料来源
+
+${sourceDocLines}
+`;
+}
+
+function buildProjectEntryFiles(projectPath) {
+  return {
+    projectDoc: ".ai-configs/project.md",
+    agents: "AGENTS.md",
+    claude: "CLAUDE.md",
+    aiConfigRules: ".ai-configs/rules",
+    aiConfigSkills: ".ai-configs/skills",
+    cursorRules: ".cursor/rules"
+  };
+}
+
+function isManagedRootPath(filePath, allowedPrefix) {
+  return Boolean(
+    filePath
+    && !path.isAbsolute(filePath)
+    && !filePath.includes("..")
+    && filePath.startsWith(allowedPrefix)
+  );
 }
 
 function buildImportedProjectDoc(project, sourceDocs, skills, rules) {
@@ -986,6 +1116,10 @@ function listFromBody(value) {
   if (!value) return [];
   if (Array.isArray(value)) return value.map(String).map((item) => item.trim()).filter(Boolean);
   return String(value).split(/[,，\s]+/).map((item) => item.trim()).filter(Boolean);
+}
+
+function isTruthy(value) {
+  return value === true || value === 1 || value === "1" || value === "true" || value === "yes";
 }
 
 function uniqueSorted(values) {

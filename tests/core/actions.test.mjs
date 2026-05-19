@@ -69,25 +69,54 @@ test("add_project_from_path scans project docs, skills, rules and writes relatio
       projectPath: projectDir,
       projectId: "payment-app",
       name: "Payment App",
-      technologyFamilyId: "bff"
+      technologyFamilyId: "bff",
+      confirmAiConfigsMigration: true
     }
   });
 
   assert.equal(result.ok, true);
-  assert.ok(result.changedPaths.includes("docs/repos/payment-app.md"));
+  assert.ok(result.changedPaths.includes(path.join(projectDir, ".ai-configs/project.md")));
   assert.ok(result.changedPaths.includes("config/projects/payment-app.json"));
-  assert.ok(result.changedPaths.includes("bundles/skills/payment-app-release-helper/SKILL.md"));
-  assert.ok(result.changedPaths.includes("bundles/rules/payment-app/payment.md"));
+  assert.equal(result.changedPaths.includes("docs/repos/payment-app.md"), false);
+  assert.equal(await exists(path.join(rootDir, "docs/repos/payment-app.md")), false);
+  assert.equal(await exists(path.join(rootDir, "bundles/skills/payment-app-release-helper/SKILL.md")), false);
+  assert.equal(await exists(path.join(rootDir, "bundles/rules/payment-app/payment.md")), false);
 
   const project = await readJson(path.join(rootDir, "config/projects/payment-app.json"));
   assert.equal(project.path, projectDir);
+  assert.equal(project.doc.path, path.join(projectDir, ".ai-configs/project.md"));
+  assert.equal(project.sourceOfTruth.projectDoc, "distributed");
+  assert.equal(project.entryFiles.projectDoc, ".ai-configs/project.md");
   assert.equal(project.skills[0].id, "payment-app-release-helper");
+  assert.equal(project.skills[0].sourcePath, path.join(projectDir, ".codex/skills/release-helper/SKILL.md"));
   assert.equal(project.rules[0].id, "payment-app/payment");
+  assert.equal(project.rules[0].sourcePath, path.join(projectDir, ".cursor/rules/payment.mdc"));
 
   const skills = await readJson(path.join(rootDir, "config/skills/skills.json"));
-  assert.ok(skills.skills.some((skill) => skill.id === "payment-app-release-helper"));
+  assert.ok(skills.skills.some((skill) => skill.id === "payment-app-release-helper" && skill.sourceType === "external-file"));
   const rules = await readJson(path.join(rootDir, "config/rules/rules.json"));
-  assert.ok(rules.rules.some((rule) => rule.id === "payment-app/payment" && rule.projectIds.includes("payment-app")));
+  assert.ok(rules.rules.some((rule) => rule.id === "payment-app/payment" && rule.projectIds.includes("payment-app") && rule.sourceType === "external-file"));
+});
+
+test("add_project_from_path asks before creating .ai-configs", async () => {
+  const rootDir = await copyFixture();
+  const projectDir = await fs.mkdtemp(path.join(os.tmpdir(), "external-project-"));
+  await fs.writeFile(path.join(projectDir, "README.md"), "# Needs Confirmation\n", "utf8");
+
+  const result = await runAction({
+    rootDir,
+    actionId: "add_project_from_path",
+    body: {
+      projectPath: projectDir,
+      projectId: "needs-confirmation",
+      name: "Needs Confirmation",
+      technologyFamilyId: "frontend"
+    }
+  });
+
+  assert.equal(result.ok, false);
+  assert.equal(result.error.code, "confirmation_required");
+  assert.equal(await exists(path.join(projectDir, ".ai-configs/project.md")), false);
 });
 
 test("add_project_from_path skips unreadable rule symlinks", async () => {

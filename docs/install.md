@@ -85,7 +85,7 @@ user's own checkout:
 - `config/scenes/*.json`
 - `config/skills/skills.json`
 - `config/rules/rules.json`
-- `docs/repos/*.md`
+- project-local `.ai-configs/project.md`
 - `docs/scenes/*.md`
 - `docs/person/profile.md`
 
@@ -100,11 +100,14 @@ indexes or remember maintenance scripts:
 @devflow:add /path/to/project
 ```
 
-The `devflow` skill should scan `AGENTS.md`, `CLAUDE.md`, `README.md`,
-Cursor rules, and project-local `SKILL.md` directories, then call the underlying
-action/script that writes the project doc/config and updates indexes together.
-If the project has no AI entry docs, DevFlow should create a managed project
-entry instead of failing.
+The `devflow` skill should scan `.ai-configs/project.md`, `AGENTS.md`,
+`CLAUDE.md`, `README.md`, Cursor rules, `.ai-configs/rules`, and project-local
+`SKILL.md` directories, then call the underlying action/script that writes
+project config and updates indexes together. Project docs, project-local rules,
+and project-local skills stay in the business repository; DevFlow records their
+paths and relationships. If the project has no `.ai-configs`, DevFlow should
+tell the user it will create `.ai-configs/project.md` and only do so after
+confirmation.
 
 For scenes, skills, and rules, use the same chat entry:
 
@@ -201,6 +204,6 @@ Common chat entries:
 Before merging to the public master skeleton:
 
 - `runtime/tasks/*.json` should not contain local task data.
-- `docs/repos/*.md`, `docs/scenes/*.md`, and `docs/person/*.md` should not contain private project details.
+- Project-local `.ai-configs/project.md`, `docs/scenes/*.md`, and `docs/person/*.md` should not be committed to the public skeleton with private project details.
 - `config/projects/*.json`, `config/scenes/*.json`, `config/rules/rules.json`, and `config/skills/skills.json` should not contain private project paths or company terms.
 - No token, cookie, account, ticket URL, internal repository URL, screenshot path, or personal profile detail should be committed.

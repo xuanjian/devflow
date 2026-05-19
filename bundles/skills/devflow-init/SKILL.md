@@ -39,7 +39,7 @@ checks to work.
 6. `config/skills/skills.json`
 7. `config/rules/rules.json`
 
-Do not bulk-read `docs/repos/**`, `bundles/rules/**`, or `bundles/skills/**` until a selected project, scene, skill, or rule requires it.
+Do not bulk-read distributed project docs, `bundles/rules/**`, or `bundles/skills/**` until a selected project, scene, skill, or rule requires it.
 
 ## Interview Flow
 
@@ -153,7 +153,7 @@ Before writing files, normalize the conversation into this shape:
 
 Prefer the existing maintenance actions and scripts over hand-editing multiple files:
 
-- Add project: use the panel action `add_project_from_path` or the equivalent backend action. It scans project docs, imports project-local skills/rules, writes `docs/repos/<id>.md`, writes `config/projects/<id>.json`, updates `config/projects/index.json`, and adds the managed project entry note.
+- Add project: use the panel action `add_project_from_path` or the equivalent backend action. It scans project docs, registers project-local skills/rules as distributed sources, writes `config/projects/<id>.json`, updates `config/projects/index.json`, and adds lightweight managed entries in the project. If `.ai-configs` is missing, tell the user first and only create `.ai-configs/project.md` after confirmation.
 - Add scene: use `add_scene` with scene id/name, purpose, and mounted project ids.
 - Add skill: use `add_skill_from_path` when a `SKILL.md` path exists; otherwise register only after the user confirms the generated skill content.
 - Add rule: use `add_rule`; if no source file exists, provide `purpose` so the action can generate a rule template.
@@ -162,7 +162,7 @@ When manual edits are unavoidable, update all affected files together:
 
 - `config/projects/index.json`
 - `config/projects/<project-id>.json`
-- `docs/repos/<project-id>.md`
+- the selected project's `.ai-configs/project.md`
 - `config/scenes/index.json`
 - `config/scenes/<scene-id>.json`
 - `config/skills/skills.json`

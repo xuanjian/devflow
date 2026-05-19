@@ -624,13 +624,17 @@ function validateRuleMetadata(rule, label, errors) {
   if (!rule.sourcePath) {
     pushUniqueError(errors, `${label} missing sourcePath`);
   } else {
-    if (!rule.sourcePath.startsWith('bundles/rules/')) {
+    const isExternal = rule.sourceType === 'external-file' || path.isAbsolute(rule.sourcePath);
+    if (!isExternal && !rule.sourcePath.startsWith('bundles/rules/')) {
       pushUniqueError(errors, `${label} sourcePath must stay under bundles/rules/: ${rule.sourcePath}`);
     }
-    if (rule.sourcePath.endsWith('.mdc')) {
+    if (!isExternal && rule.sourcePath.endsWith('.mdc')) {
       pushUniqueError(errors, `${label} active rule source must be .md, not .mdc: ${rule.sourcePath}`);
     }
-    if (!rule.sourcePath.endsWith('.md')) {
+    if (isExternal && !/\.(md|mdc)$/i.test(rule.sourcePath)) {
+      pushUniqueError(errors, `${label} external rule source must be .md or .mdc: ${rule.sourcePath}`);
+    }
+    if (!isExternal && !rule.sourcePath.endsWith('.md')) {
       pushUniqueError(errors, `${label} active rule source must be Markdown .md: ${rule.sourcePath}`);
     }
     if (!exists(rule.sourcePath)) {

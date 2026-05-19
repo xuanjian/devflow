@@ -5,6 +5,7 @@ import process from 'node:process';
 import { execFileSync } from 'node:child_process';
 import { createInterface } from 'node:readline/promises';
 import { stdin as input, stdout as output } from 'node:process';
+import { runAction } from '../src/core/actions.mjs';
 
 const root = path.resolve(new URL('..', import.meta.url).pathname);
 const userHome = process.env.HOME || path.resolve(root, '..', '..');
@@ -93,7 +94,7 @@ Add project options:
   --skills <a,b,c>          Skill ids to mount.
   --yes                     Use inferred/default values without prompts.
   --dry-run                 Print the plan without writing files.
-  --force                   Overwrite existing generated project doc/config.
+  --force                   Overwrite existing generated project config.
   --allow-missing           Allow repo path that does not exist yet.
   --sync-projects           Run install-ai-context sync-projects after writing.
 
@@ -530,6 +531,15 @@ function makeSkillMount(skill) {
   };
 }
 
+function uniqueSortedMounts(items) {
+  const byId = new Map();
+  for (const item of items || []) {
+    if (!item?.id) continue;
+    byId.set(item.id, { ...byId.get(item.id), ...item });
+  }
+  return [...byId.values()].sort((a, b) => a.id.localeCompare(b.id));
+}
+
 function readSkillFrontmatter(skillFile) {
   const content = fs.readFileSync(skillFile, 'utf8');
   const match = content.match(/^---\n([\s\S]*?)\n---/);
@@ -932,7 +942,7 @@ async function addProject(positionals, flags) {
       summary,
       path: projectPath,
       tags: finalTags,
-      docPath: `docs/repos/${id}.md`,
+      docPath: path.join(projectPath, '.ai-configs/project.md'),
     };
 
     const defaultSceneIds = listFromFlag(flags.scenes).length ? listFromFlag(flags.scenes) : inferDefaultScenes(sceneIndex);
@@ -951,29 +961,25 @@ async function addProject(positionals, flags) {
     const selectedRules = selectedRuleIds.map(ruleId => (ruleCatalog.rules || []).find(rule => rule.id === ruleId));
     const selectedSkills = selectedSkillIds.map(skillId => (skillCatalog.skills || []).find(skill => skill.id === skillId));
 
-    const projectForDoc = {
-      ...draftProject,
-      sceneIds: selectedSceneIds,
-      ruleIds: selectedRuleIds,
-      skillIds: selectedSkillIds,
-    };
-    const projectConfig = buildProjectConfig(draftProject, selectedScenes, selectedRules, selectedSkills);
-
     printProjectPlan(draftProject, selectedSceneIds, selectedRuleIds, selectedSkillIds);
     if (flags['dry-run']) {
       console.log('\ndry-run: no files were written');
       return;
     }
-    const confirmed = await promptConfirm(rl, 'Write project config and docs', Boolean(flags.yes));
+    let confirmAiConfigsMigration = Boolean(flags.yes);
+    if (!fs.existsSync(path.join(projectPath, '.ai-configs'))) {
+      console.log(`\nDevFlow will create ${path.join(projectPath, '.ai-configs/project.md')} and keep project docs/rules/skills in the business repository.`);
+      confirmAiConfigsMigration = await promptConfirm(rl, 'Create .ai-configs/project.md for this project', Boolean(flags.yes));
+    }
+    const confirmed = await promptConfirm(rl, 'Write project config and relationship indexes', Boolean(flags.yes));
     if (!confirmed) {
       console.log('aborted');
       return;
     }
 
     const configPath = `config/projects/${id}.json`;
-    const docPath = `docs/repos/${id}.md`;
     if (!flags.force) {
-      for (const relativePath of [configPath, docPath]) {
+      for (const relativePath of [configPath]) {
         if (fs.existsSync(path.join(root, relativePath))) {
           throw new Error(`refusing to overwrite existing file without --force: ${relativePath}`);
         }
@@ -983,10 +989,46 @@ async function addProject(positionals, flags) {
       }
     }
 
-    upsertProjectIndex(projectIndex, draftProject);
-    writeText(docPath, buildProjectDoc(projectForDoc));
-    writeJson(configPath, projectConfig);
-    writeJson('config/projects/index.json', projectIndex);
+    const result = await runAction({
+      rootDir: root,
+      actionId: 'add_project_from_path',
+      body: {
+        projectPath,
+        projectId: id,
+        name,
+        technologyFamilyId,
+        repoType,
+        summary,
+        tags: finalTags,
+        confirmAiConfigsMigration,
+      },
+    });
+    if (!result.ok) {
+      throw new Error(result.error?.message || result.summary || 'add_project_from_path failed');
+    }
+
+    const writtenProject = readJson(configPath);
+    writtenProject.scenes = uniqueSortedMounts([
+      ...(writtenProject.scenes || []),
+      ...selectedScenes.map(makeSceneMount),
+    ]);
+    writtenProject.skills = uniqueSortedMounts([
+      ...(writtenProject.skills || []),
+      ...selectedSkills.map(makeSkillMount),
+    ]);
+    writtenProject.rules = uniqueSortedMounts([
+      ...(writtenProject.rules || []),
+      ...selectedRules.map(makeRuleMount),
+    ]);
+    if (writtenProject.readPolicy?.onDemandRead) {
+      writtenProject.readPolicy.onDemandRead = uniqueSorted([
+        ...writtenProject.readPolicy.onDemandRead,
+        ...selectedScenes.map(scene => scene.sourcePath).filter(Boolean),
+        ...selectedRules.map(rule => rule.sourcePath).filter(Boolean),
+        ...selectedSkills.map(skill => skill.sourcePath).filter(Boolean),
+      ]);
+    }
+    writeJson(configPath, writtenProject);
     updateSelectedScenes(draftProject, selectedScenes);
     updateRuleCatalog(draftProject, selectedRuleIds, selectedSceneIds);
 

@@ -31,7 +31,7 @@ It keeps AI workflow context loading small and stable:
 Do not read home-level compatibility files unless the user explicitly asks to
 inspect or repair those compatibility files.
 
-Do not read every file under `docs/repos/`, `docs/scenes/`, `bundles/rules/`, or `bundles/skills/` by default.
+Do not read every distributed project doc, `docs/scenes/`, `bundles/rules/`, or `bundles/skills/` by default.
 
 ## Routing Model
 
@@ -119,11 +119,14 @@ judgment that cannot stay in this router.
 
 Route by object:
 
-- Project: user can provide only a project path. Scan `AGENTS.md`, `CLAUDE.md`,
-  `claude.md`, `README.md`, `.cursor/rules`, and project-local `SKILL.md`
-  directories. Then call the `add_project_from_path` action or equivalent
-  script flow so it writes project docs, project JSON, imported skills, imported
-  rules, and indexes together.
+- Project: user can provide only a project path. Scan `.ai-configs/project.md`,
+  `AGENTS.md`, `CLAUDE.md`, `claude.md`, `README.md`, `.cursor/rules`,
+  `.ai-configs/rules`, and project-local `SKILL.md` directories. If the project
+  has no `.ai-configs`, explain that DevFlow will create `.ai-configs/project.md`
+  and ask for confirmation before migrating project entry content. Then call
+  `add_project_from_path` with the confirmation flag. DevFlow should write
+  project JSON and indexes, but project docs, project-local skills, and
+  project-local rules remain in the business repository as distributed sources.
 - Scene: ask which `projectIds` the scene should mount when not inferable, then
   call the `add_scene` action or equivalent script flow.
 - Skill: ask which `projectIds` or family the skill should mount to when not
@@ -133,8 +136,8 @@ Route by object:
 - Rule: ask which `projectIds` and `sceneIds` should receive the rule when not
   inferable, then call the `add_rule` action or equivalent script flow.
 
-For a new project with no AI entry docs, create an DevFlow managed project
-entry and docs instead of failing. If the project should also use OpenSpec for
+For a new project with no AI entry docs, create a lightweight DevFlow managed
+entry in the project after confirmation instead of failing. If the project should also use OpenSpec for
 durable specs, run or recommend `openspec init` in that project and record the
 OpenSpec path/status in the DevFlow project or task state. Do not run
 OpenSpec for every small project unless the task is L3/L4, spec-backed, or the
@@ -287,7 +290,7 @@ The command owns the fixed flow:
 2. Ask which scenes to mount.
 3. Ask which project rules to mount.
 4. Ask which skills to mount.
-5. Write `docs/repos/<id>.md`, `config/projects/<id>.json`, update indexes, update selected scene memberships, update selected rule metadata, and run validation.
+5. Write or confirm the project-local `.ai-configs/project.md`, write `config/projects/<id>.json`, update indexes, update selected scene memberships, update selected rule metadata, and run validation. Do not copy project-local docs, rules, or skills into DevFlow as a second source of truth.
 
 If `contextctl` cannot support a maintenance operation yet, extend `contextctl`
 first. Avoid manually keeping project JSON, scene JSON, rule catalog, skill

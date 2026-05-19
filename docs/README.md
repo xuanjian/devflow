@@ -9,7 +9,7 @@
 
 ## 初始化后通常会生成
 
-- `docs/repos/<project-id>.md`：项目介绍、入口、技术栈、运行方式、注意事项。
+- 项目介绍正文默认放在业务项目的 `.ai-configs/project.md`；DevFlow 只在 `config/projects/*.json` 里记录入口路径和关系。
 - `docs/scenes/<scene-id>.md`：场景说明、涉及项目、协作步骤、验证方式。
 - `docs/person/profile.md`：本机用户画像和 AI 协作偏好。
 

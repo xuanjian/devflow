@@ -31,7 +31,7 @@
   },
   "sourceReadPolicy": {
     "homeCompatibility": "Do not read or require home-level compatibility files by default. Treat this repository entry and JSON indexes as the portable source of truth.",
-    "projectDocs": "Read docs/repos/*.md only after a project JSON is selected and the summary is insufficient.",
+    "projectDocs": "Read the selected project's distributed entry file, usually <project>/.ai-configs/project.md, only after project JSON is selected and the summary is insufficient.",
     "scenes": "Read docs/scenes/*.md only after a scene JSON is selected and detailed workflow text is needed.",
     "rules": "Read config/rules/rules.json first. Active rule sources under bundles/rules/** are loaded only when selected by project, scene, or task gate.",
     "skills": "Read active bundles/skills/** only when task state, project JSON, or an explicit user request triggers the skill.",
