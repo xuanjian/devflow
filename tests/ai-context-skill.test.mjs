@@ -9,6 +9,7 @@ const rootDir = path.resolve(path.dirname(testFile), "..");
 const skillPath = path.join(rootDir, "bundles", "skills", "devflow", "SKILL.md");
 const initSkillPath = path.join(rootDir, "bundles", "skills", "devflow-init", "SKILL.md");
 const readmePath = path.join(rootDir, "README.md");
+const projectIntroPath = path.join(rootDir, "docs", "project-introduction.md");
 
 test("DevFlow skill documents chat subcommands as one routed skill", () => {
   const skill = fs.readFileSync(skillPath, "utf8");
@@ -70,6 +71,17 @@ test("devflow:init creates missing profile through guided choices", () => {
   assert.match(readme, /选项式提问/);
 });
 
+test("devflow:init keeps memory-derived private names out of public templates", () => {
+  const initSkill = fs.readFileSync(initSkillPath, "utf8");
+
+  assert.match(initSkill, /Assistant memory or home-level context may be used/i);
+  assert.match(initSkill, /do not write inferred private company/i);
+  assert.match(initSkill, /after the user confirms it/i);
+  assert.match(initSkill, /memory-derived candidates/i);
+  assert.match(initSkill, /frontend app/i);
+  assert.match(initSkill, /BFF\/API/i);
+});
+
 test("README keeps chat entry guidance without a common commands block", () => {
   const readme = fs.readFileSync(readmePath, "utf8");
 
@@ -85,4 +97,20 @@ test("README keeps chat entry guidance without a common commands block", () => {
   assert.doesNotMatch(readme, /子意图/);
   assert.doesNotMatch(readme, /底层 action/);
   assert.doesNotMatch(readme, /JSON 索引做路由/);
+});
+
+test("public docs avoid private project examples and company registry leaks", () => {
+  const publicFiles = [
+    readmePath,
+    projectIntroPath,
+    skillPath,
+    initSkillPath,
+    path.join(rootDir, "package-lock.json")
+  ];
+  const combined = publicFiles
+    .filter(filePath => fs.existsSync(filePath))
+    .map(filePath => fs.readFileSync(filePath, "utf8"))
+    .join("\n");
+
+  assert.doesNotMatch(combined, /DHB|HXB|newdhb|npm\.newdhb|盘点单/);
 });

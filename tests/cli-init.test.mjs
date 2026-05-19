@@ -47,6 +47,8 @@ test("devflow init creates a local devflow directory when run outside a checkout
   assert.equal(fs.existsSync(path.join(createdRoot, "config", "entry.json")), true);
   assert.equal(fs.existsSync(path.join(createdRoot, "scripts", "install-ai-context.mjs")), true);
   assert.equal(fs.existsSync(path.join(createdRoot, "node_modules")), false);
+  assert.equal(fs.existsSync(path.join(createdRoot, "package-lock.json")), false);
+  assert.match(fs.readFileSync(path.join(createdRoot, ".npmrc"), "utf8"), /registry=https:\/\/registry\.npmjs\.org\//);
   assert.match(result.stdout, new RegExp(`DevFlow root: ${fs.realpathSync(createdRoot).replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`));
 
   const skillLink = path.join(home, ".codex", "skills", "devflow");

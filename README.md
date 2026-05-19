@@ -44,7 +44,7 @@ DevFlow 不默认读取所有 Markdown、规则、skill 和历史任务，而是
 
 - 上下文更小：先用项目、场景、规则、skill 的摘要做路由，只有命中任务时才读源文档，减少 token 消耗。
 - 命中更准：AI 不会同时看到一堆无关项目、旧规则、历史任务，降低把旧信息当成当前事实的概率。
-- 隐私边界更清楚：个人画像、公司项目、任务证据、截图和内部链接只在本机初始化后按需进入上下文，不会混进公开框架。
+- 隐私边界更清楚：个人画像、私有项目、任务证据、截图和内部链接只在本机初始化后按需进入上下文，不会混进公开框架。
 - 跨项目关系更稳定：项目和场景关系写在 JSON 里，AI 可以先判断“这个需求涉及前端、BFF、iOS 还是发布脚本”，再加载对应资料。
 - 多工具更容易接力：Codex、Claude Code、Cursor、QoderWork 等工具都读同一套索引和任务状态，不需要每个窗口重复解释项目背景。
 - 长任务更容易恢复：G1-G7、OpenSpec change、验证结果、阻塞项和 recovery point 都在任务 JSON 里，下一次可以从明确位置继续。
@@ -138,7 +138,7 @@ devflow init --skip-openspec
 @devflow:del skill old-skill
 @devflow:del rule old/rule
 @devflow:del scene old-scene
-@devflow:task 新增盘点单打印预览
+@devflow:task 新增订单导出功能
 @devflow:panel
 @devflow:init
 ```
@@ -345,7 +345,7 @@ docs/                             初始化后生成项目和场景文档
 
 这个仓库的公开版本不应该提交：
 
-- 真实公司项目资料
+- 真实私有项目资料
 - 私有项目路径
 - token、cookie、账号、密钥
 - 工单、知识库链接、截图等敏感内容

@@ -22,6 +22,12 @@ checks to work.
 - Do not write secrets, credentials, tokens, private ticket URLs, private account identifiers, or personal identity details into public files.
 - Local machine paths are allowed only in the user's private/local DevFlow checkout.
 - If the user is preparing a public template, replace private project names and paths with generic placeholders.
+- Assistant memory or home-level context may be used as temporary onboarding
+  context, but do not write inferred private company, client, repository,
+  product, or project names into public template files. Only write a concrete
+  private name into the user's local DevFlow config after the user confirms it.
+- When offering examples, use generic labels such as "frontend app", "BFF/API",
+  "iOS app", "backend service", "release scripts", or "AI workflow project".
 
 ## Read First
 
@@ -56,12 +62,19 @@ Ask in small batches. Stop after each batch if the answer is unclear.
 
    Example profile questions:
    - "你希望 AI 默认怎么推进？1. 直接执行 2. 先给方案 3. 先问清楚再做。推荐：1，除非任务高风险。"
-   - "哪些内容默认只留本机？1. 公司项目和任务 2. 账号/链接/截图 3. 全部个人画像。推荐：1+2。"
+   - "哪些内容默认只留本机？1. 私有项目和任务 2. 账号/链接/截图 3. 全部个人画像。推荐：1+2。"
    - "任务记录默认选哪种？1. 小任务不记，大任务记 2. 所有开发任务都记 3. 只在你明确要求时记。推荐：1。"
 
 2. Projects:
    - Which projects should be registered first?
    - Ask for local paths when available.
+   - Public templates and examples must stay generic. If memory suggests likely
+     private projects, label them as memory-derived candidates and ask for
+     confirmation before writing local project config.
+   - Offer generic choices such as:
+     - "先只注册 DevFlow 自己，保持最小配置。"
+     - "添加你常用的业务项目，请提供本机路径。"
+     - "暂时不添加项目，后续用 `@devflow:add /path/to/project`。"
    - For each path, inspect project guide files such as `AGENTS.md`, `CLAUDE.md`, `README.md`, `.cursor/rules/*.mdc`, and project-local skills.
 
 3. Scenes:

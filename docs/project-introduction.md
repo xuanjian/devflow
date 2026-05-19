@@ -30,7 +30,7 @@ DevFlow is intended to be used from the AI chat as a routed skill:
 @devflow:del scene old-scene
 @devflow:del skill old-skill
 @devflow:del rule old/rule
-@devflow:task 新增盘点单打印预览
+@devflow:task 新增订单导出功能
 @devflow:panel
 @devflow:init
 ```

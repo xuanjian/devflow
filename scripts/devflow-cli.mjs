@@ -95,6 +95,7 @@ function shouldSkipTemplateEntry(relativePath) {
     '.playwright-mcp',
     '.superpowers',
     'dist',
+    'package-lock.json',
   ].some(skipPath => normalized === skipPath || normalized.startsWith(`${skipPath}/`))
     || normalized.endsWith('.tgz')
     || normalized.endsWith('.tmp')
@@ -131,16 +132,38 @@ function ensureLocalRoot(targetRoot) {
   return targetRoot;
 }
 
+function ensurePublicNpmRegistryConfig(targetRoot) {
+  const npmrcPath = path.join(targetRoot, '.npmrc');
+  const publicRegistryLine = 'registry=https://registry.npmjs.org/';
+  if (!fs.existsSync(npmrcPath)) {
+    fs.writeFileSync(npmrcPath, `${publicRegistryLine}\n`);
+    return;
+  }
+
+  const current = fs.readFileSync(npmrcPath, 'utf8');
+  const next = /^registry\s*=.*$/m.test(current)
+    ? current.replace(/^registry\s*=.*$/m, publicRegistryLine)
+    : `${current.trimEnd()}\n${publicRegistryLine}\n`;
+  if (next !== current) fs.writeFileSync(npmrcPath, next);
+}
+
 function resolveRoot(flags) {
   const explicitDir = flags.dir && flags.dir !== true ? path.resolve(String(flags.dir)) : undefined;
   const explicitRoot = flags.root && flags.root !== true ? path.resolve(String(flags.root)) : undefined;
   const explicitTarget = explicitDir || explicitRoot;
   if (explicitTarget) {
-    return ensureLocalRoot(explicitTarget);
+    const root = ensureLocalRoot(explicitTarget);
+    ensurePublicNpmRegistryConfig(root);
+    return root;
   }
   const cwd = process.cwd();
-  if (isDevFlowRoot(cwd)) return cwd;
-  return ensureLocalRoot(path.join(cwd, 'devflow'));
+  if (isDevFlowRoot(cwd)) {
+    ensurePublicNpmRegistryConfig(cwd);
+    return cwd;
+  }
+  const root = ensureLocalRoot(path.join(cwd, 'devflow'));
+  ensurePublicNpmRegistryConfig(root);
+  return root;
 }
 
 function skillHomesForTools(toolIds, homeDir) {
