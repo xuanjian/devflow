@@ -1,5 +1,8 @@
+---
+alwaysApply: true
+---
 <!-- devflow:managed-entry:start -->
-# DevFlow AI Entry
+# DevFlow DevFlow entry
 
 Portable project override:
 
@@ -9,11 +12,11 @@ Portable project override:
 
 Read first:
 
-1. config/entry.json
-2. config/projects/devflow.json
-3. runtime/current.json
+1. `config/entry.json`
+2. `config/projects/devflow.json`
+3. `runtime/current.json`
 
-Only load source Markdown, rules, or skills when the JSON index selects them for the current task.
+Do not load all DevFlow Markdown by default. Follow the selected JSON indexes.
 
 Mounted skills:
 

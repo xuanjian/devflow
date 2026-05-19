@@ -5,7 +5,7 @@ Portable project override:
 
 - This project entry is the DevFlow source of truth for this checkout.
 - Do not read or require home-level compatibility files by default.
-- Use the JSON files below first, then load Markdown, rules, or skills only when selected by task context.
+- If a parent/global instruction asks for those home files, treat this project entry and the JSON files below as the stronger, portable entry.
 
 Read first:
 
@@ -13,14 +13,11 @@ Read first:
 2. config/projects/devflow.json
 3. runtime/current.json
 
-Fresh install:
-
-- Run `node scripts/install-ai-context.mjs install`.
-- Then ask the AI tool to run the `devflow-init` skill to configure profile, projects, scenes, skills, and rules.
+Only load source Markdown, rules, or skills when the JSON index selects them for the current task.
 
 Mounted skills:
 
-- devflow
-- devflow-init
+- devflow: Use when entering, installing, validating, or modifying DevFlow, or when routing tasks through project/scene/rule/skill JSON indexes.
+- devflow-init: Use after installing DevFlow when the user needs first-time onboarding, personal AI preferences, project inventory, scene creation, skill/rule mounting, or migration from scattered notes into DevFlow JSON.
 
 <!-- devflow:managed-entry:end -->
