@@ -32,6 +32,40 @@ test("server exposes graph and checks APIs", async () => {
   }
 });
 
+test("server includes document previews in node details", async () => {
+  const server = await startServer({ rootDir: new URL("./core/fixtures/basic-ai-context/", import.meta.url), port: 0 });
+  try {
+    const details = await fetch(`${server.url}/api/nodes/project%3Ademo-project`).then((res) => res.json());
+
+    assert.equal(details.documentPreview.title, "project.md");
+    assert.equal(details.documentPreview.sourcePath, "docs/repos/demo-project.md");
+    assert.match(details.documentPreview.markdown, /demo/i);
+  } finally {
+    await server.close();
+  }
+});
+
+test("server validates document editor choices before opening files", async () => {
+  const rootDir = await fs.mkdtemp(path.join(os.tmpdir(), "devflow-open-document-"));
+  await fs.mkdir(path.join(rootDir, "docs"), { recursive: true });
+  await fs.writeFile(path.join(rootDir, "docs/demo.md"), "# Demo\n");
+  const server = await startServer({ rootDir, port: 0 });
+  try {
+    const response = await fetch(`${server.url}/api/actions/open_document`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ sourcePath: "docs/demo.md", editor: "vim" })
+    });
+    const body = await response.json();
+
+    assert.equal(response.status, 400);
+    assert.equal(body.error.code, "invalid_editor");
+  } finally {
+    await server.close();
+    await fs.rm(rootDir, { recursive: true, force: true });
+  }
+});
+
 test("server exposes the configured profile markdown document", async () => {
   const server = await startServer({ rootDir: new URL("./core/fixtures/basic-ai-context/", import.meta.url), port: 0 });
   try {

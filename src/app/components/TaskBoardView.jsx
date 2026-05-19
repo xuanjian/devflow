@@ -62,7 +62,7 @@ export default function TaskBoardView({ graph, selectedNodeId, onSelectNode }) {
                 <span>{gate.raw?.id || titleForNode(gate).split(" ")[0]}</span>
                 <strong>{gate.raw?.name || titleForNode(gate)}</strong>
                 <small>{gate.raw?.status || gate.status}</small>
-                <p>{gate.summary}</p>
+                <p className="gate-summary">{gate.summary}</p>
               </button>
             );
           })}

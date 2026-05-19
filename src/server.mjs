@@ -69,7 +69,7 @@ async function handleApiRoute({ request, response, rootPath, url }) {
     const nodeId = decodeURIComponent(url.pathname.slice("/api/nodes/".length));
     const details = getNodeDetails(graph, nodeId);
     return details
-      ? sendJson(response, 200, details)
+      ? sendJson(response, 200, { ...details, documentPreview: await readNodeDocumentPreview(rootPath, details.node) })
       : sendJson(response, 404, { error: { code: "unknown_node", message: `Unknown node: ${nodeId}` } });
   }
 
@@ -121,6 +121,56 @@ async function readProfileDocument(rootPath) {
       error: { code: error?.code || "read_profile_document_failed", message: error.message }
     };
   }
+}
+
+async function readNodeDocumentPreview(rootPath, node) {
+  const sourcePath = documentPathForNode(node);
+  if (!sourcePath) {
+    return null;
+  }
+  try {
+    const markdown = await fs.readFile(resolveInside(rootPath, sourcePath), "utf8");
+    return {
+      sourcePath,
+      title: documentTitleForNode(node),
+      markdown: trimDocumentPreview(markdown),
+      truncated: markdown.length > 2400
+    };
+  } catch (error) {
+    return {
+      sourcePath,
+      title: documentTitleForNode(node),
+      markdown: "",
+      error: { code: error?.code || "read_document_failed", message: error.message }
+    };
+  }
+}
+
+function documentPathForNode(node) {
+  if (node?.type === "project" || node?.type === "scene" || node?.type === "profile") {
+    return node.docPath || "";
+  }
+  if (node?.type === "skill" || node?.type === "rule") {
+    return node.sourcePath || "";
+  }
+  return "";
+}
+
+function documentTitleForNode(node) {
+  if (node?.type === "project") return "project.md";
+  if (node?.type === "skill") return "SKILL.md";
+  if (node?.type === "rule") return "rule 文档";
+  if (node?.type === "scene") return "scene 文档";
+  if (node?.type === "profile") return "profile 文档";
+  return "文档";
+}
+
+function trimDocumentPreview(markdown) {
+  const normalized = String(markdown || "").trim();
+  if (normalized.length <= 2400) {
+    return normalized;
+  }
+  return `${normalized.slice(0, 2400).trimEnd()}\n...`;
 }
 
 async function serveAppOrBootstrap(response, rootPath, requestPath) {

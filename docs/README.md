@@ -18,7 +18,7 @@
 
 推荐让 AI 执行 `devflow-init`，通过对话收集信息后自动生成这些文档和对应 JSON 关系。
 
-也可以在面板中新增项目、场景、skill、rule，让后端 action 生成配套文件。
+面板只展示和校验这些关系。新增项目、场景、skill、rule 应通过 AI 聊天框里的 `@devflow:add` / `devflow` skill 路线完成，由 skill 调用对应 action 或脚本生成配套文件。
 
 ## 隐私边界
 

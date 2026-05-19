@@ -1,9 +1,6 @@
 export const VIEW_LABELS = [
-  { key: "overview", label: "总览" },
   { key: "relations", label: "关系" },
-  { key: "tasks", label: "任务" },
-  { key: "persona", label: "画像" },
-  { key: "checks", label: "检查" }
+  { key: "tasks", label: "任务" }
 ];
 
 export const TYPE_LABELS = {

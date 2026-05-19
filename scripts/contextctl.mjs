@@ -7,7 +7,10 @@ import { createInterface } from 'node:readline/promises';
 import { stdin as input, stdout as output } from 'node:process';
 import { runAction } from '../src/core/actions.mjs';
 
-const root = path.resolve(new URL('..', import.meta.url).pathname);
+const packageRoot = path.resolve(new URL('..', import.meta.url).pathname);
+const root = process.env.DEVFLOW_ROOT_OVERRIDE
+  ? path.resolve(process.env.DEVFLOW_ROOT_OVERRIDE)
+  : packageRoot;
 const userHome = process.env.HOME || path.resolve(root, '..', '..');
 const coreSkills = [
   { id: 'devflow', sourcePath: path.join(root, 'bundles', 'skills', 'devflow') },
@@ -62,6 +65,7 @@ function usage() {
   node scripts/contextctl.mjs doctor
   node scripts/contextctl.mjs task start <title> [options]
   node scripts/contextctl.mjs task update [task-id] [options]
+  node scripts/contextctl.mjs task artifact [task-id] --file <path> [options]
   node scripts/contextctl.mjs task finish [task-id] [options]
   node scripts/contextctl.mjs add project <repo-path> [options]
   node scripts/contextctl.mjs add skill <skill-dir> [options]
@@ -75,7 +79,9 @@ Task options:
   --level <L1-L4>           Task size/risk level.
   --summary <summary>       Task summary.
   --note <text>             Append a timestamped note.
-  --artifact <path-or-text>  Append an artifact entry. Can be repeated via comma list.
+  --artifact <path-or-text>  Append an artifact entry to the current gate. Can be repeated via comma list.
+  --file <path>             For task artifact: copy an existing file into runtime/tasks/<task-id>/<gate>/.
+  --name <filename>         For task artifact: destination filename.
   --blocker <text>          Append a blocker entry.
   --recovery <text>         Set recovery point.
   --dry-run                 Print the task payload without writing files.
@@ -214,6 +220,14 @@ function taskPath(taskId) {
   return `runtime/tasks/${taskId}.json`;
 }
 
+function taskDir(taskId) {
+  return `runtime/tasks/${taskId}`;
+}
+
+function taskGateDir(taskId, gateId) {
+  return `${taskDir(taskId)}/${gateId}`;
+}
+
 function taskTitleFromPositionals(positionals, flags) {
   const title = flags.title || positionals.join(' ').trim();
   if (!title) throw new Error('task title is required');
@@ -276,6 +290,26 @@ function updateTaskGateStatuses(task, currentGateId) {
 function appendFlagEntries(target, flagValue, makeEntry) {
   for (const value of listFromFlag(flagValue)) {
     target.push(makeEntry(value));
+  }
+}
+
+function ensureTaskWorkspace(taskId) {
+  for (const gate of readJson('config/tasks/gates.json').gates || []) {
+    fs.mkdirSync(path.join(root, taskGateDir(taskId, gate.id)), { recursive: true });
+  }
+}
+
+function gateForTask(task, gateId) {
+  const id = ensureGateId(gateId || task.currentGate || 'G1');
+  updateTaskGateStatuses(task, id);
+  return task.gates.find(gate => gate.id === id);
+}
+
+function appendGateArtifacts(task, gateId, values, timestamp) {
+  const gate = gateForTask(task, gateId);
+  gate.artifacts = gate.artifacts || [];
+  for (const value of listFromFlag(values)) {
+    gate.artifacts.push({ at: timestamp, value });
   }
 }
 
@@ -354,7 +388,7 @@ async function taskStart(positionals, flags) {
     updatedAt: timestamp,
   };
   if (flags.note) task.notes.push({ at: timestamp, gate: currentGate, text: String(flags.note) });
-  appendFlagEntries(task.artifacts, flags.artifact, value => ({ at: timestamp, value }));
+  appendGateArtifacts(task, currentGate, flags.artifact, timestamp);
   appendFlagEntries(task.blockers, flags.blocker, value => ({ at: timestamp, status: 'open', text: value }));
 
   if (flags['dry-run']) {
@@ -363,6 +397,7 @@ async function taskStart(positionals, flags) {
     return;
   }
 
+  ensureTaskWorkspace(task.id);
   writeJson(relativePath, task);
   writeCurrentForTask(task);
   printTaskSummary(task, false);
@@ -387,9 +422,8 @@ async function taskUpdate(positionals, flags) {
     task.notes = task.notes || [];
     task.notes.push({ at: timestamp, gate: task.currentGate, text: String(flags.note) });
   }
-  task.artifacts = task.artifacts || [];
   task.blockers = task.blockers || [];
-  appendFlagEntries(task.artifacts, flags.artifact, value => ({ at: timestamp, value }));
+  appendGateArtifacts(task, task.currentGate, flags.artifact, timestamp);
   appendFlagEntries(task.blockers, flags.blocker, value => ({ at: timestamp, status: 'open', text: value }));
   task.updatedAt = timestamp;
 
@@ -399,9 +433,52 @@ async function taskUpdate(positionals, flags) {
     return;
   }
 
+  ensureTaskWorkspace(task.id);
   writeJson(relativePath, task);
   writeCurrentForTask(task);
   printTaskSummary(task, false);
+}
+
+async function taskArtifact(positionals, flags) {
+  const taskId = resolveTaskId(positionals);
+  const { relativePath, task } = readTask(taskId);
+  const gateId = ensureGateId(flags.gate || task.currentGate || 'G1');
+  const sourceFile = flags.file ? path.resolve(String(flags.file)) : '';
+  if (!sourceFile) {
+    throw new Error('task artifact requires --file <path>');
+  }
+  if (!fs.existsSync(sourceFile) || !fs.statSync(sourceFile).isFile()) {
+    throw new Error(`artifact file not found: ${sourceFile}`);
+  }
+
+  ensureTaskWorkspace(task.id);
+  const timestamp = nowIso();
+  const targetName = safeArtifactFileName(flags.name || path.basename(sourceFile));
+  const targetRelativePath = `${taskGateDir(task.id, gateId)}/${targetName}`;
+  const targetAbsolutePath = path.join(root, targetRelativePath);
+  fs.mkdirSync(path.dirname(targetAbsolutePath), { recursive: true });
+  fs.copyFileSync(sourceFile, targetAbsolutePath);
+
+  const gate = gateForTask(task, gateId);
+  gate.artifacts = gate.artifacts || [];
+  gate.artifacts.push({
+    at: timestamp,
+    value: targetRelativePath,
+    sourcePath: sourceFile,
+    note: flags.note ? String(flags.note) : undefined,
+  });
+  task.updatedAt = timestamp;
+
+  if (flags['dry-run']) {
+    printTaskSummary(task, true);
+    console.log(`  artifact: ${targetRelativePath}`);
+    return;
+  }
+
+  writeJson(relativePath, task);
+  writeCurrentForTask(task);
+  printTaskSummary(task, false);
+  console.log(`  artifact: ${targetRelativePath}`);
 }
 
 async function taskFinish(positionals, flags) {
@@ -415,8 +492,7 @@ async function taskFinish(positionals, flags) {
   if (flags.recovery) task.recoveryPoint = flags.recovery;
   task.notes = task.notes || [];
   if (flags.note) task.notes.push({ at: timestamp, gate: task.currentGate, text: String(flags.note) });
-  task.artifacts = task.artifacts || [];
-  appendFlagEntries(task.artifacts, flags.artifact, value => ({ at: timestamp, value }));
+  appendGateArtifacts(task, task.currentGate, flags.artifact, timestamp);
   task.updatedAt = timestamp;
 
   if (flags['dry-run']) {
@@ -425,9 +501,18 @@ async function taskFinish(positionals, flags) {
     return;
   }
 
+  ensureTaskWorkspace(task.id);
   writeJson(relativePath, task);
   writeCurrentForTask(task);
   printTaskSummary(task, false);
+}
+
+function safeArtifactFileName(value) {
+  const fileName = path.basename(String(value || '').trim());
+  if (!fileName || fileName === '.' || fileName === '..') {
+    throw new Error('artifact filename is required');
+  }
+  return fileName.replace(/[/:\\]/g, '-');
 }
 
 function readPackage(projectPath) {
@@ -614,9 +699,6 @@ function buildProjectConfig(project, selectedScenes, selectedRules, selectedSkil
 }
 
 function buildProjectDoc(project) {
-  const sceneLines = project.sceneIds.length
-    ? project.sceneIds.map(id => `- \`${id}\``).join('\n')
-    : '- none';
   const ruleLines = project.ruleIds.length
     ? project.ruleIds.map(id => `- \`${id}\``).join('\n')
     : '- none';
@@ -659,10 +741,6 @@ ${project.summary}
 - 先读 \`config/projects/${project.id}.json\`。
 - JSON 摘要不足时再读本文件和仓库内 README。
 - 需要执行规则或技能时，只读取下方挂载的 rules / skills。
-
-## 默认场景
-
-${sceneLines}
 
 ## 默认 Rules
 
@@ -1148,6 +1226,10 @@ async function main() {
   }
   if (command === 'task' && type === 'update') {
     await taskUpdate(rest, flags);
+    return;
+  }
+  if (command === 'task' && type === 'artifact') {
+    await taskArtifact(rest, flags);
     return;
   }
   if (command === 'task' && type === 'finish') {

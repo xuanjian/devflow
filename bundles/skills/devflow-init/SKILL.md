@@ -151,9 +151,9 @@ Before writing files, normalize the conversation into this shape:
 
 ## Write Path
 
-Prefer the existing maintenance actions and scripts over hand-editing multiple files:
+Prefer the existing maintenance actions and scripts over hand-editing multiple files. These writes are driven by the `devflow` / `devflow-init` skill route, not by the panel UI:
 
-- Add project: use the panel action `add_project_from_path` or the equivalent backend action. It scans `.ai-configs/project.md`, lightweight AI entries, Cursor rules, and project-local skills/rules; registers project-local skills/rules as distributed sources; writes `config/projects/<id>.json`; updates `config/projects/index.json`; and adds lightweight managed entries in the project. If `.ai-configs` is missing, tell the user first and only create `.ai-configs/project.md` after confirmation.
+- Add project: call `add_project_from_path` or the equivalent script flow. It scans `.ai-configs/project.md`, lightweight AI entries, Cursor rules, and project-local skills/rules; registers project-local skills/rules as distributed sources; writes `config/projects/<id>.json`; updates `config/projects/index.json`; and adds lightweight managed entries in the project. If `.ai-configs` is missing, tell the user first and only create `.ai-configs/project.md` after confirmation.
 - Add scene: use `add_scene` with scene id/name, purpose, and mounted project ids.
 - Add skill: use `add_skill_from_path` when a `SKILL.md` path exists; otherwise register only after the user confirms the generated skill content.
 - Add rule: use `add_rule`; if no source file exists, provide `purpose` so the action can generate a rule template.
@@ -174,7 +174,7 @@ When manual edits are unavoidable, update all affected files together:
 
 ## Panel Safety
 
-The panel reads JSON indexes and relationship arrays. Before completion, verify:
+The panel reads JSON indexes and relationship arrays. It is for viewing and validation, not for adding or maintaining config. Before completion, verify:
 
 - Every project index item points to an existing `config/projects/<id>.json`.
 - Every scene index item points to an existing `config/scenes/<id>.json`.

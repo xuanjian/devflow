@@ -167,9 +167,9 @@ http://127.0.0.1:5173/
 
 - 总览：查看当前项目、场景、技能、规则、任务状态。
 - 关系：查看项目、场景、技能、规则之间的关系图。
-- 任务：查看当前任务阶段和进度。
-- 画像：查看初始化后生成的个人画像文档。
-- 检查：查看配置文件、索引关系、skill 链接和面板依赖是否正常。
+- 任务：查看当前任务阶段、进度和各阶段产物。
+
+面板只负责查看，不负责新增或维护配置。新增项目、场景、skill、rule 统一通过 AI 聊天框里的 `@devflow:add` / `devflow` skill 路线完成。
 
 ## 跨工具连续任务
 
@@ -183,14 +183,16 @@ http://127.0.0.1:5173/
 - `config/rules/rules.json`：项目或场景规则目录。
 - `runtime/current.json`：当前任务指针。
 - `runtime/tasks/*.json`：任务阶段、进度、恢复点、验证记录。
+- `runtime/tasks/<task-id>/<G1-G7>/`：任务工作目录。聊天、OpenSpec、superpowers 或项目开发中生成的任务文档，都要复制或写入对应阶段目录，并登记到该 gate 的 `artifacts`。
 
 典型使用方式：
 
 1. 在 Codex 里开始一个任务，并让 AI 记录到 DevFlow。
 2. DevFlow 写入任务目标、相关项目、场景、规则和当前阶段。
-3. 切到 Claude Code 或 Cursor 后，让新工具读取同一个 DevFlow。
-4. 新工具根据 `runtime/current.json` 和任务 JSON 恢复上下文。
-5. 用户只需要说“继续当前任务”，不需要重新塞一堆资料。
+3. 如果 AI 在聊天、OpenSpec、superpowers 或项目目录里生成了设计/开发/验收文档，用 `contextctl task artifact` 复制到 `runtime/tasks/<task-id>/<G1-G7>/`，并登记到对应阶段。
+4. 切到 Claude Code 或 Cursor 后，让新工具读取同一个 DevFlow。
+5. 新工具根据 `runtime/current.json`、任务 JSON 和任务工作目录恢复上下文。
+6. 用户只需要说“继续当前任务”，不需要重新塞一堆资料。
 
 如果要让不同工具稳定恢复任务，建议每个任务至少记录：
 
@@ -198,6 +200,7 @@ http://127.0.0.1:5173/
 - 涉及项目
 - 当前阶段
 - 已完成内容
+- 每个 G1-G7 阶段的产物路径
 - 下一步要做什么
 - 关键规则或 skill
 - 验证结果和未解决问题
@@ -378,6 +381,6 @@ CLAUDE.md                         Claude 轻量入口
 5. 根据真实工作流用 `@devflow:add scene ...` 创建场景。
 6. 按项目或场景挂 skill 和 rule。
 7. 开始任务时用 `@devflow:task ...` 写入 `runtime/current.json` / `runtime/tasks/*.json`。
-8. 需要观察状态时用 `@devflow:panel` 或本地 `npm run dev`。
-9. 切换到 Codex、Claude Code 或 Cursor 时，让新工具先读取 DevFlow 后继续。
-10. 用“检查”页确认没有 JSON 或关系错误。
+8. 任务中生成的文档用 `node scripts/contextctl.mjs task artifact [task-id] --gate <G1-G7> --file <generated-doc-path>` 归档到任务目录。
+9. 需要观察状态时用 `@devflow:panel` 或本地 `npm run dev`。
+10. 切换到 Codex、Claude Code 或 Cursor 时，让新工具先读取 DevFlow 后继续。

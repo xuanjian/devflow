@@ -33,3 +33,27 @@ test("TaskBoardView renders tasks and gate progress from graph nodes", async () 
   expect(screen.getByLabelText("当前流程")).toHaveTextContent("G2 Discovery");
   expect(screen.queryAllByRole("button", { name: /G4 Development/ }).find((item) => item.classList.contains("gate-card"))).toBeUndefined();
 });
+
+test("TaskBoardView keeps long gate summaries inside the card preview", () => {
+  const graph = {
+    nodes: [
+      { id: "task:demo", type: "task", title: "Demo Task", summary: "Active work", status: "ok", raw: { currentGate: "G3", status: "doing", isActive: true } },
+      {
+        id: "gate:demo:G3",
+        type: "gate",
+        title: "G3 Plan",
+        summary: "记录 superpowers 输出的产品、UI、技术方案或交互原型；L3/L4 或显式规格输入的任务在这里记录 OpenSpec proposal/design/tasks/spec-delta/very/long/unbroken/path，并把可执行边界交给 G4。",
+        status: "ok",
+        raw: { id: "G3", name: "Plan / Product UI", status: "done" }
+      }
+    ],
+    edges: [
+      { from: "task:demo", to: "gate:demo:G3", relation: "has-gate" }
+    ]
+  };
+
+  const { container } = render(<TaskBoardView graph={graph} selectedNodeId="" onSelectNode={() => {}} />);
+  const summary = container.querySelector(".gate-card p");
+
+  expect(summary).toHaveClass("gate-summary");
+});

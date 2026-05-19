@@ -11,23 +11,28 @@ test("App renders loading state then main regions", async () => {
   global.fetch = vi.fn()
     .mockResolvedValueOnce({ ok: true, json: async () => ({
       nodes: [
-        { id: "task:demo", type: "task", title: "Demo Task", status: "ok", raw: { currentGate: "G4", status: "doing", projectIds: ["demo"] } },
-        { id: "profile:main", type: "profile", title: "Persona Profile", status: "ok", raw: { role: "Developer", products: ["DemoProduct"], strengths: ["React"] }, docPath: "docs/person/profile.md" }
+        { id: "project:demo", type: "project", title: "Demo Project", status: "ok" },
+        { id: "skill:demo", type: "skill", title: "Demo Skill", status: "ok" },
+        { id: "task:demo", type: "task", title: "Demo Task", status: "ok", raw: { currentGate: "G4", status: "doing", projectIds: ["demo"] } }
       ],
-      edges: [],
+      edges: [{ from: "project:demo", to: "skill:demo", relation: "uses-skill" }],
       groups: [],
       warnings: []
-    }) })
-    .mockResolvedValueOnce({ ok: true, json: async () => ({ checks: [] }) });
+    }) });
 
   render(<App />);
 
   expect(screen.getByText("上下文工作台")).toBeInTheDocument();
-  expect(await screen.findByText("安装与 AI 工具配置")).toBeInTheDocument();
-  expect(screen.getByText("工作流与 Tasks")).toBeInTheDocument();
+  expect(await screen.findByText("全局关系")).toBeInTheDocument();
+  expect(screen.getByRole("button", { name: "关系" })).toHaveClass("active");
+  expect(screen.getByRole("button", { name: "任务" })).toBeInTheDocument();
+  expect(screen.queryByRole("button", { name: "总览" })).not.toBeInTheDocument();
+  expect(screen.queryByRole("button", { name: "画像" })).not.toBeInTheDocument();
+  expect(screen.queryByRole("button", { name: "检查" })).not.toBeInTheDocument();
+  expect(screen.queryByPlaceholderText("搜索节点、文件或说明")).not.toBeInTheDocument();
 });
 
-test("App relation view hides the root node and starts with four relation groups", async () => {
+test("App relation view hides structural root and group nodes", async () => {
   global.fetch = vi.fn()
     .mockResolvedValueOnce({ ok: true, json: async () => ({
       nodes: [
@@ -47,17 +52,16 @@ test("App relation view hides the root node and starts with four relation groups
       ],
       groups: [],
       warnings: []
-    }) })
-    .mockResolvedValueOnce({ ok: true, json: async () => ({ checks: [] }) });
+    }) });
 
   render(<App />);
 
-  await screen.findByText("安装与 AI 工具配置");
-  await userEvent.click(screen.getByRole("button", { name: "关系" }));
+  await screen.findByText("全局关系");
 
-  expect(screen.getByRole("button", { name: "项目分组" })).toBeInTheDocument();
-  expect(screen.getByRole("button", { name: "场景分组" })).toBeInTheDocument();
-  expect(screen.getByRole("button", { name: "技能分组" })).toBeInTheDocument();
-  expect(screen.getByRole("button", { name: "规则分组" })).toBeInTheDocument();
+  expect(screen.getByRole("button", { name: "Demo Project 项目" })).toBeInTheDocument();
+  expect(screen.queryByRole("button", { name: "项目 分组" })).not.toBeInTheDocument();
+  expect(screen.queryByRole("button", { name: "场景 分组" })).not.toBeInTheDocument();
+  expect(screen.queryByRole("button", { name: "技能 分组" })).not.toBeInTheDocument();
+  expect(screen.queryByRole("button", { name: "规则 分组" })).not.toBeInTheDocument();
   await waitFor(() => expect(screen.queryByRole("button", { name: "上下文索引根节点" })).not.toBeInTheDocument());
 });

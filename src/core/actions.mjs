@@ -34,6 +34,9 @@ const ACTIONS = {
   add_rule: {
     run: addRule
   },
+  open_document: {
+    run: openDocument
+  },
   delete_project: {
     run: deleteProject
   },
@@ -86,6 +89,38 @@ async function syncProjectEntry({ rootPath, actionId, body }) {
   }
 
   return runFixedCommand(rootPath, ["node", "scripts/install-ai-context.mjs", "sync-projects", "--project", projectId, "--write"], actionId);
+}
+
+async function openDocument({ rootPath, actionId, body }) {
+  const sourcePath = String(body?.sourcePath || "");
+  const editor = String(body?.editor || "default");
+  const allowedEditors = new Set(["default", "code", "cursor", "zed"]);
+  if (!sourcePath) {
+    return actionError(actionId, "invalid_source_path", "open_document requires sourcePath.");
+  }
+  if (!allowedEditors.has(editor)) {
+    return actionError(actionId, "invalid_editor", `Unsupported editor: ${editor}`);
+  }
+
+  const filePath = resolveInside(rootPath, sourcePath);
+  const stat = await safeStat(filePath);
+  if (!stat?.isFile()) {
+    return actionError(actionId, "missing_document", `Document file not found: ${sourcePath}`);
+  }
+
+  const command = editor === "default"
+    ? defaultOpenCommand(filePath)
+    : [editor, filePath];
+  const child = spawn(command[0], command.slice(1), { cwd: rootPath, detached: true, stdio: "ignore" });
+  child.on("error", () => {});
+  child.unref();
+  return actionOk(actionId, `Opened ${sourcePath}`, []);
+}
+
+function defaultOpenCommand(filePath) {
+  if (process.platform === "darwin") return ["open", filePath];
+  if (process.platform === "win32") return ["cmd", "/c", "start", "", filePath];
+  return ["xdg-open", filePath];
 }
 
 async function addProjectFromPath({ rootPath, actionId, body }) {

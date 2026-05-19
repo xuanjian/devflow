@@ -20,6 +20,7 @@ It keeps AI workflow context loading small and stable:
 - Select the project and scene from JSON.
 - Load Markdown, rules, or other skills only when the selected JSON says they are needed.
 - Store active work in `runtime/current.json` and `runtime/tasks/<task-id>.json`.
+- Treat `runtime/tasks/<task-id>/<G1-G7>/` as the task workspace. Any AI-generated document from chat, OpenSpec, superpowers, or implementation work must be copied or written under the matching gate directory and registered in that gate's `artifacts`.
 
 ## First Files To Read
 
@@ -193,13 +194,16 @@ The task route owns:
 - Current G1-G7 gate.
 - OpenSpec change id/path/status when OpenSpec is selected.
 - Recovery point, artifacts, blockers, verification notes, and archive notes.
+- Task workspace artifacts under `runtime/tasks/<task-id>/<G1-G7>/`. If a document is first generated in a project, OpenSpec change, or superpower spec folder, copy it into the active task gate with `contextctl task artifact` and register it there before moving on.
 
 ### `@devflow:panel`
 
 Use this route for dashboard requests: show what the panel is for, start the
 local panel when requested, or validate the data the panel reads. The panel is a
-view over `runtime/current.json`, task JSON, and config indexes; it is not a
-separate source of truth.
+read-only view over `runtime/current.json`, task JSON, and config indexes; it is
+not a separate source of truth and should not expose add/maintenance flows.
+Adding or maintaining projects, scenes, skills, and rules stays in the
+`@devflow:add` / `@devflow:del` skill routes.
 
 ## Commands
 
@@ -215,6 +219,7 @@ DevFlow init
 DevFlow init --tools codex,claude-code,cursor
 node scripts/contextctl.mjs task start "<title>" --projects <ids> --scenes <ids> --gate G1 --level <L1-L4>
 node scripts/contextctl.mjs task update [task-id] --gate <G1-G7> --note "<progress or decision>"
+node scripts/contextctl.mjs task artifact [task-id] --gate <G1-G7> --file <generated-doc-path> --note "<why this artifact matters>"
 node scripts/contextctl.mjs task finish [task-id] --note "<verification and handoff>"
 node scripts/contextctl.mjs add project <repo-path>
 ```
