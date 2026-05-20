@@ -6,6 +6,10 @@
 # framework placeholder in master.
 runtime/tasks/*
 !runtime/tasks/.gitkeep
+runtime/backups/
+runtime/stale-migration-files/
+runtime/*.json
+!runtime/current.json
 runtime/current.local.json
 
 # Local project, scene, rule, skill, and registry data. The public/master branch

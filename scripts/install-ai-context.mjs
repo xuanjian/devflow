@@ -14,6 +14,12 @@ const coreSkills = [
 ];
 const managedEntryMarker = '<!-- devflow:managed-entry:start -->';
 const managedEntryEndMarker = '<!-- devflow:managed-entry:end -->';
+const legacyManagedEntryMarkers = [
+  {
+    start: '<!-- ai-context:managed-entry:start -->',
+    end: '<!-- ai-context:managed-entry:end -->',
+  },
+];
 const userHome = process.env.HOME || path.resolve(root, '..', '..');
 const superpowersDir = process.env.AI_CONTEXT_SUPERPOWERS_DIR || path.join(userHome, '.codex', 'superpowers');
 const projectPathOverrides = resolveProjectPathOverrides();
@@ -249,6 +255,7 @@ ${managedEntryEndMarker}
 function isManagedProjectEntryContent(content) {
   if (!content) return false;
   if (content.includes(managedEntryMarker)) return true;
+  if (legacyManagedEntryMarkers.some(marker => content.includes(marker.start))) return true;
   const managedMarkers = [
     path.join(root, 'config', 'entry.json'),
     path.join(root, 'runtime', 'current.json'),
@@ -258,20 +265,42 @@ function isManagedProjectEntryContent(content) {
   return managedMarkers.some(marker => content.includes(marker));
 }
 
+function removeManagedBlock(content, startMarker, endMarker) {
+  let nextContent = content;
+  while (true) {
+    const startIndex = nextContent.indexOf(startMarker);
+    if (startIndex < 0) return nextContent;
+
+    const endIndex = nextContent.indexOf(endMarker, startIndex);
+    if (endIndex < startIndex) return nextContent;
+
+    const afterEndIndex = endIndex + endMarker.length;
+    nextContent = `${nextContent.slice(0, startIndex)}${nextContent.slice(afterEndIndex)}`;
+  }
+}
+
+function removeLegacyManagedEntryContent(content) {
+  return legacyManagedEntryMarkers.reduce(
+    (nextContent, marker) => removeManagedBlock(nextContent, marker.start, marker.end),
+    content
+  );
+}
+
 function upsertManagedProjectEntryContent(currentContent, managedContent) {
   if (currentContent === null || isManagedProjectEntryContent(currentContent) && !currentContent.includes(managedEntryEndMarker)) {
     return managedContent;
   }
   if (currentContent === undefined) return undefined;
 
-  const startIndex = currentContent.indexOf(managedEntryMarker);
-  const endIndex = currentContent.indexOf(managedEntryEndMarker);
+  const contentWithoutLegacyEntries = removeLegacyManagedEntryContent(currentContent);
+  const startIndex = contentWithoutLegacyEntries.indexOf(managedEntryMarker);
+  const endIndex = contentWithoutLegacyEntries.indexOf(managedEntryEndMarker);
   if (startIndex >= 0 && endIndex >= startIndex) {
     if (managedContent.trimStart().startsWith('---')) return managedContent;
     const afterEndIndex = endIndex + managedEntryEndMarker.length;
-    return `${currentContent.slice(0, startIndex)}${managedContent.trimEnd()}${currentContent.slice(afterEndIndex)}`;
+    return `${contentWithoutLegacyEntries.slice(0, startIndex)}${managedContent.trimEnd()}${contentWithoutLegacyEntries.slice(afterEndIndex)}`;
   }
-  return `${currentContent.trimEnd()}\n\n${managedContent}`;
+  return `${contentWithoutLegacyEntries.trimEnd()}\n\n${managedContent}`;
 }
 
 function projectEntryWriteAction(filePath, content) {

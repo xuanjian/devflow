@@ -111,3 +111,38 @@ chmod +x "${path.join(binDir, "openspec")}"
   assert.match(fs.readFileSync(npmLog, "utf8"), /install -g @fission-ai\/openspec@latest/);
   assert.match(setup.stdout, /ok OpenSpec CLI: openspec-installed/);
 });
+
+test("sync-projects removes legacy ai-context managed entry blocks", () => {
+  const home = fs.mkdtempSync(path.join(os.tmpdir(), "devflow-sync-home-"));
+  const projectDir = fs.mkdtempSync(path.join(os.tmpdir(), "devflow-sync-project-"));
+  const claudeEntry = path.join(projectDir, ".claude", "CLAUDE.md");
+  fs.mkdirSync(path.dirname(claudeEntry), { recursive: true });
+  fs.writeFileSync(claudeEntry, `# Existing notes
+
+<!-- ai-context:managed-entry:start -->
+# ai-context AI Entry
+
+Read first:
+
+1. config/projects/ai-context.json
+
+<!-- ai-context:managed-entry:end -->
+
+<!-- devflow:managed-entry:start -->
+# Old DevFlow Entry
+<!-- devflow:managed-entry:end -->
+`);
+
+  const sync = runInstallScript(["sync-projects", "--project", "devflow", "--entries-only", "--write"], {
+    HOME: home,
+    AI_CONTEXT_PROJECT_PATH_OVERRIDES: `devflow=${projectDir}`
+  });
+
+  assert.equal(sync.status, 0, sync.stderr);
+  const content = fs.readFileSync(claudeEntry, "utf8");
+  assert.doesNotMatch(content, /ai-context:managed-entry/);
+  assert.doesNotMatch(content, /config\/projects\/ai-context\.json/);
+  assert.match(content, /devflow:managed-entry:start/);
+  assert.match(content, /config\/projects\/devflow\.json/);
+  assert.match(content, /# Existing notes/);
+});
