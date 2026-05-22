@@ -32,6 +32,55 @@ test("server exposes graph and checks APIs", async () => {
   }
 });
 
+test("server API delegates graph, checks, node details, and actions to DevFlow service", async () => {
+  const calls = [];
+  const service = {
+    async buildContextGraph() {
+      calls.push("buildContextGraph");
+      return { nodes: [{ id: "project:demo", type: "project", title: "Demo" }], edges: [], warnings: [] };
+    },
+    async getNodeDetails(nodeId) {
+      calls.push(`getNodeDetails:${nodeId}`);
+      return { node: { id: nodeId, type: "project", title: "Demo" } };
+    },
+    async runChecks(input) {
+      calls.push(`runChecks:${input.runCommands}`);
+      return { checks: [{ id: "demo_check", status: "pass" }] };
+    },
+    async runAction(input) {
+      calls.push(`runAction:${input.actionId}:${input.body.value}`);
+      return { ok: true, actionId: input.actionId };
+    }
+  };
+  const server = await startServer({
+    rootDir: new URL("./core/fixtures/basic-ai-context/", import.meta.url),
+    port: 0,
+    service
+  });
+  try {
+    const graph = await fetch(`${server.url}/api/graph`).then((res) => res.json());
+    const nodeDetails = await fetch(`${server.url}/api/nodes/project%3Ademo`).then((res) => res.json());
+    const checks = await fetch(`${server.url}/api/checks`).then((res) => res.json());
+    const action = await fetch(`${server.url}/api/actions/demo_action`, {
+      method: "POST",
+      body: JSON.stringify({ value: "payload" })
+    }).then((res) => res.json());
+
+    assert.equal(graph.nodes[0].id, "project:demo");
+    assert.equal(nodeDetails.node.id, "project:demo");
+    assert.equal(checks.checks[0].id, "demo_check");
+    assert.equal(action.ok, true);
+    assert.deepEqual(calls, [
+      "buildContextGraph",
+      "getNodeDetails:project:demo",
+      "runChecks:false",
+      "runAction:demo_action:payload"
+    ]);
+  } finally {
+    await server.close();
+  }
+});
+
 test("server exposes the configured profile markdown document", async () => {
   const server = await startServer({ rootDir: new URL("./core/fixtures/basic-ai-context/", import.meta.url), port: 0 });
   try {

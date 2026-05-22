@@ -59,13 +59,13 @@ devflow init --dir ~/.local/share/devflow
 ```text
 @devflow:init
 @devflow:add /path/to/project
-@devflow:add scene 前后端联调
+@devflow:add scene-template 前后端联调
 @devflow:add skill /path/to/skill
 @devflow:add rule bff/error-handling
 @devflow:del project old-project
 @devflow:del skill old-skill
 @devflow:del rule old/rule
-@devflow:del scene old-scene
+@devflow:del scene-template old-scene
 @devflow:task 新增订单导出功能
 @devflow:panel
 ```

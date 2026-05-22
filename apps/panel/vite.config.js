@@ -1,6 +1,10 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
-import { handleApiRequest } from "../server.mjs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import { handleApiRequest } from "../../src/server.mjs";
+
+const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 
 export default defineConfig({
   plugins: [
@@ -13,7 +17,7 @@ export default defineConfig({
             const handled = await handleApiRequest({
               request,
               response,
-              rootDir: process.cwd()
+              rootDir: repoRoot
             });
             if (!handled) {
               next();

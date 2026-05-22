@@ -143,7 +143,8 @@ Read first:
   assert.doesNotMatch(content, /ai-context:managed-entry/);
   assert.doesNotMatch(content, /config\/projects\/ai-context\.json/);
   assert.match(content, /devflow:managed-entry:start/);
-  assert.match(content, /config\/projects\/devflow\.json/);
+  assert.match(content, /devflow query route "<user request>"/);
+  assert.match(content, /SQLite\/query migration is incomplete/);
   assert.match(content, /# Existing notes/);
 });
 
@@ -164,6 +165,11 @@ test("sync-projects writes on-demand DevFlow routing policy into agent entries",
 
   for (const content of [agentsEntry, claudeEntry, cursorEntry]) {
     assert.match(content, /DevFlow is an on-demand capability set/i);
+    assert.match(content, /Do not load all projects, scene templates, skills, rules, or task history by default/);
+    assert.match(content, /devflow query route "<user request>"/);
+    assert.match(content, /Read only returned readPaths and skills\.sourcePath/);
+    assert.match(content, /devflow query current/);
+    assert.match(content, /If devflow query is unavailable[\s\S]+SQLite\/query migration is incomplete/);
     assert.match(content, /none.*ordinary questions/i);
     assert.match(content, /resume.*current task/i);
     assert.match(content, /light.*small bug/i);

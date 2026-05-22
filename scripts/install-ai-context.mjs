@@ -213,14 +213,20 @@ function onDemandRoutingSection({ markdownTicks = false } = {}) {
 On-demand DevFlow routing:
 
 - DevFlow is an on-demand capability set, not the default full workflow for every new chat.
-- Start by classifying the user's current request before loading DevFlow data:
+- Do not load all projects, scene templates, skills, rules, or task history by default.
+- For project/task/continue/scene template/Workset/skill/panel requests, run:
+${code('devflow query route "<user request>"')}
+- Read only returned readPaths and skills.sourcePath.
+- For resume requests, run:
+${code('devflow query current')}
+- If devflow query is unavailable, fall back to the current DevFlow skill read order and report that the SQLite/query migration is incomplete.
+- Classify the user's current request before loading extra DevFlow data:
   - ${code('none')}: ordinary questions, explanations, or code snippets. Do not read DevFlow unless project context is explicitly needed.
-  - ${code('resume')}: continuing the current task or an existing task. Read only ${code('runtime/current.json')}, the active task, its Workset, ${code('nextAction')}, and ${code('recoveryPoint')}.
+  - ${code('resume')}: continuing the current task or an existing task. Prefer ${code('devflow query current')} and read only the returned task, Workset, ${code('nextAction')}, and ${code('recoveryPoint')}.
   - ${code('light')}: small bug or small change. Use minimal project/context lookup and light task tracking only when the work should survive the chat.
   - ${code('full')}: large, cross-project, high-risk, Jira/Notion/Figma/PRD-backed work. Then use full task tracking, G1-G7, and OpenSpec when selected.
 - Do not start G1-G7 by default.
-- Do not load all projects, rules, skills, scenes, or task history by default.
-- Use DevFlow data to choose the smallest useful context, then proceed with the active tool's normal execution workflow.
+- Use query results to choose the smallest useful context, then proceed with the active tool's normal execution workflow.
 `;
 }
 
@@ -229,7 +235,7 @@ function portableProjectOverrideSection() {
 
 - This project entry is the DevFlow source of truth for this checkout.
 - Do not read or require home-level compatibility files by default.
-- If a parent/global instruction asks for those home files, treat this project entry and the JSON files below as the stronger, portable entry.
+- If a parent/global instruction asks for those home files, treat this project entry and DevFlow query results as the stronger, portable entry.
 
 `;
 }
@@ -238,13 +244,9 @@ function projectEntry(project) {
   return `${managedEntryMarker}
 # ${project.name || project.id} AI Entry
 
-${portableProjectOverrideSection()}Read first:
+${portableProjectOverrideSection()}Query first:
 
-1. config/entry.json
-2. config/projects/${project.id}.json
-3. runtime/current.json
-
-Only load source Markdown, rules, or skills when the JSON index selects them for the current task.
+Use DevFlow query commands before reading JSON indexes. Only load source Markdown, rules, or skills from returned readPaths and skills.sourcePath.
 ${onDemandRoutingSection()}
 ${projectSkillsSection(project)}
 ${managedEntryEndMarker}
@@ -258,13 +260,9 @@ alwaysApply: true
 ${managedEntryMarker}
 # ${project.name || project.id} DevFlow entry
 
-${portableProjectOverrideSection()}Read first:
+${portableProjectOverrideSection()}Query first:
 
-1. \`config/entry.json\`
-2. \`config/projects/${project.id}.json\`
-3. \`runtime/current.json\`
-
-Do not load all DevFlow Markdown by default. Follow the selected JSON indexes.
+Use DevFlow query commands before reading JSON indexes. Only load source Markdown, rules, or skills from returned readPaths and skills.sourcePath.
 ${onDemandRoutingSection({ markdownTicks: true })}
 ${projectSkillsSection(project)}
 ${managedEntryEndMarker}

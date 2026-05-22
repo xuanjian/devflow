@@ -23,18 +23,31 @@ test("DevFlow skill documents chat subcommands as one routed skill", () => {
   assert.match(skill, /sub-intent/i);
 });
 
-test("devflow:add contract covers project, scene, skill, and rule association", () => {
+test("devflow:add contract covers project, scene-template, skill, and rule association", () => {
   const skill = fs.readFileSync(skillPath, "utf8");
 
   assert.match(skill, /project path/i);
   assert.match(skill, /AGENTS\.md/);
   assert.match(skill, /CLAUDE\.md/);
+  assert.match(skill, /@devflow:add scene-template/);
   assert.match(skill, /projectIds/);
   assert.match(skill, /sceneIds/);
   assert.match(skill, /add_project_from_path/);
   assert.match(skill, /add_scene/);
   assert.match(skill, /add_skill_from_path/);
   assert.match(skill, /add_rule/);
+});
+
+test("DevFlow skill routes panel and task work through query-first Workset scope", () => {
+  const skill = fs.readFileSync(skillPath, "utf8");
+
+  assert.match(skill, /devflow query route/);
+  assert.match(skill, /devflow query current/);
+  assert.match(skill, /Read only returned readPaths and skills\.sourcePath/);
+  assert.match(skill, /If devflow query is unavailable[\s\S]+SQLite\/query migration is incomplete/);
+  assert.match(skill, /@devflow:panel[\s\S]+panel is optional/i);
+  assert.match(skill, /CLI\/TUI and query commands are primary/i);
+  assert.match(skill, /@devflow:task[\s\S]+Workset as task runtime scope/i);
 });
 
 test("devflow:del contract covers safe removal actions", () => {

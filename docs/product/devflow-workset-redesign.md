@@ -192,7 +192,7 @@ Agent Adapter 需要写清楚：
   - `runCommands`
   - `verifyCommands`
   - `relatedProjectHints`
-- `scripts/contextctl.mjs` 的项目导入逻辑支持生成这些字段。
+- `devflow` CLI 的项目导入逻辑支持生成这些字段。
 - 面板详情页展示项目能力、入口和验证命令。
 
 验收结果：

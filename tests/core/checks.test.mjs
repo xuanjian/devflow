@@ -2,10 +2,10 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { runChecks } from "../../src/core/checks.mjs";
 
-test("runChecks reports profile, Vite app, and project docs as structured checks", async () => {
+test("runChecks reports profile, optional panel app, and project docs as structured checks", async () => {
   const result = await runChecks({ rootDir: new URL("./fixtures/basic-ai-context/", import.meta.url), runCommands: false });
 
-  assert.ok(result.checks.find((check) => check.id === "vite_app_resolved" && check.status === "pass"));
+  assert.ok(result.checks.find((check) => check.id === "panel_app_resolved" && check.status === "pass"));
   assert.ok(result.checks.find((check) => check.id === "profile_json" && check.status === "pass"));
   assert.ok(result.checks.find((check) => check.id === "person_profile_doc" && check.status === "pass"));
   assert.ok(result.checks.find((check) => check.id === "project_docs" && check.status === "pass"));

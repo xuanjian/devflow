@@ -108,16 +108,17 @@ async function directoryCheck(rootPath, id, title, area, relativePath, actionId)
 }
 
 async function viteAppCheck(rootPath) {
-  const indexExists = await existsAt(rootPath, "src/app/index.html");
-  const mainExists = await existsAt(rootPath, "src/app/main.jsx");
+  const panelPath = (await existsAt(rootPath, "apps/panel/index.html")) ? "apps/panel" : "src/app";
+  const indexExists = await existsAt(rootPath, `${panelPath}/index.html`);
+  const mainExists = await existsAt(rootPath, `${panelPath}/main.jsx`);
   const status = indexExists && mainExists ? "pass" : "fail";
   return {
-    id: "vite_app_resolved",
-    title: "Vite app",
-    area: "frontend",
+    id: "panel_app_resolved",
+    title: "Optional panel app",
+    area: "panel",
     status,
-    message: status === "pass" ? "Vite app entry files exist." : "Vite app entry files are missing.",
-    sourcePath: "src/app"
+    message: status === "pass" ? "Optional panel app entry files exist." : "Optional panel app entry files are missing.",
+    sourcePath: panelPath
   };
 }
 

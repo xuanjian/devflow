@@ -8,7 +8,7 @@
     "For L3/L4 work or requests backed by Jira, Notion, Figma, PRD, or cross-project acceptance criteria, use OpenSpec as the optional spec-driven source of truth before implementation; do not load it for small L1/L2 edits unless already selected.",
     "Carry forward each gate's concrete output as the input to the next gate: intake informs discovery, discovery informs plan/spec, plan/spec informs implementation, implementation evidence informs integration, integration evidence informs acceptance, and acceptance informs run/archive.",
     "Use project and scene indexes to select only the context needed for the current task.",
-    "When work should survive the chat, create or update runtime task state with contextctl task start/update/finish before implementation."
+    "When work should survive the chat, create or update runtime task state with devflow task start/update/finish before implementation."
   ],
   "defaultReadOrder": [
     "config/entry.json",
@@ -119,9 +119,9 @@
     "gatesPath": "config/tasks/gates.json",
     "defaultBehavior": "Fresh install has no active task. Create task JSON only when the user starts work that should survive the chat.",
     "commands": [
-      "node scripts/contextctl.mjs task start \"<title>\" --projects <ids> --scenes <ids> --gate G1 --level <L1-L4>",
-      "node scripts/contextctl.mjs task update [task-id] --gate <G1-G7> --note \"<progress or decision>\"",
-      "node scripts/contextctl.mjs task finish [task-id] --note \"<verification and handoff>\""
+      "devflow task start \"<title>\" --project <id> --template <scene-template-id> --gate G1 --level <L1-L4>",
+      "devflow task update <task-id> --gate <G1-G7> --note \"<progress or decision>\"",
+      "devflow task finish <task-id> --note \"<verification and handoff>\""
     ],
     "specLayer": {
       "tool": "OpenSpec",

@@ -3,11 +3,9 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { renderBootstrapPage } from "./bootstrap/page.mjs";
-import { runAction } from "./core/actions.mjs";
-import { runChecks } from "./core/checks.mjs";
-import { buildContextGraph, getNodeDetails } from "./core/graph.mjs";
 import { readJsonFile } from "./core/json-loader.mjs";
 import { resolveInside, toPath } from "./core/paths.mjs";
+import { createDevFlowService } from "./core/services/devflow-service.mjs";
 
 const DEFAULT_HOST = "127.0.0.1";
 const MIME_TYPES = {
@@ -18,10 +16,11 @@ const MIME_TYPES = {
   ".json": "application/json; charset=utf-8"
 };
 
-export async function startServer({ rootDir = process.cwd(), port = 0, host = DEFAULT_HOST } = {}) {
+export async function startServer({ rootDir = process.cwd(), port = 0, host = DEFAULT_HOST, service } = {}) {
   const rootPath = toPath(rootDir);
+  const devflowService = service || createDevFlowService({ rootDir: rootPath });
   const server = http.createServer((request, response) => {
-    handleRequest({ request, response, rootPath }).catch((error) => {
+    handleRequest({ request, response, rootPath, service: devflowService }).catch((error) => {
       sendJson(response, 500, { error: { code: "server_error", message: error.message } });
     });
   });
@@ -35,46 +34,46 @@ export async function startServer({ rootDir = process.cwd(), port = 0, host = DE
   };
 }
 
-export async function handleApiRequest({ request, response, rootDir = process.cwd() }) {
+export async function handleApiRequest({ request, response, rootDir = process.cwd(), service } = {}) {
   const rootPath = toPath(rootDir);
+  const devflowService = service || createDevFlowService({ rootDir: rootPath });
   const url = new URL(request.url, `http://${request.headers.host || "localhost"}`);
   if (!url.pathname.startsWith("/api/")) {
     return false;
   }
-  await handleApiRoute({ request, response, rootPath, url });
+  await handleApiRoute({ request, response, rootPath, url, service: devflowService });
   return true;
 }
 
-async function handleRequest({ request, response, rootPath }) {
+async function handleRequest({ request, response, rootPath, service }) {
   const url = new URL(request.url, `http://${request.headers.host || "localhost"}`);
 
   if (url.pathname.startsWith("/api/")) {
-    return handleApiRoute({ request, response, rootPath, url });
+    return handleApiRoute({ request, response, rootPath, url, service });
   }
 
   if (request.method !== "GET") {
     return sendJson(response, 405, { error: { code: "method_not_allowed", message: "Only GET is supported." } });
   }
 
-  return serveAppOrBootstrap(response, rootPath, url.pathname);
+  return serveAppOrBootstrap(response, rootPath, url.pathname, service);
 }
 
-async function handleApiRoute({ request, response, rootPath, url }) {
+async function handleApiRoute({ request, response, rootPath, url, service }) {
   if (url.pathname === "/api/graph" && request.method === "GET") {
-    return sendJson(response, 200, await buildContextGraph({ rootDir: rootPath }));
+    return sendJson(response, 200, await service.buildContextGraph());
   }
 
   if (url.pathname.startsWith("/api/nodes/") && request.method === "GET") {
-    const graph = await buildContextGraph({ rootDir: rootPath });
     const nodeId = decodeURIComponent(url.pathname.slice("/api/nodes/".length));
-    const details = getNodeDetails(graph, nodeId);
+    const details = await service.getNodeDetails(nodeId);
     return details
       ? sendJson(response, 200, details)
       : sendJson(response, 404, { error: { code: "unknown_node", message: `Unknown node: ${nodeId}` } });
   }
 
   if (url.pathname === "/api/checks" && request.method === "GET") {
-    return sendJson(response, 200, await runChecks({ rootDir: rootPath, runCommands: false }));
+    return sendJson(response, 200, await service.runChecks({ runCommands: false }));
   }
 
   if (url.pathname === "/api/profile-document" && request.method === "GET") {
@@ -91,7 +90,7 @@ async function handleApiRoute({ request, response, rootPath, url }) {
       return sendJson(response, 400, { error: bodyResult.error });
     }
     const body = bodyResult.data;
-    const result = await runAction({ rootDir: rootPath, actionId, body });
+    const result = await service.runAction({ actionId, body });
     return sendJson(response, result.ok ? 200 : 400, result);
   }
 
@@ -123,7 +122,7 @@ async function readProfileDocument(rootPath) {
   }
 }
 
-async function serveAppOrBootstrap(response, rootPath, requestPath) {
+async function serveAppOrBootstrap(response, rootPath, requestPath, service) {
   const distPath = path.join(rootPath, "dist/app");
   const normalized = requestPath === "/" ? "/index.html" : requestPath;
   const candidate = path.normalize(normalized).replace(/^(\.\.(\/|\\|$))+/, "");
@@ -147,7 +146,7 @@ async function serveAppOrBootstrap(response, rootPath, requestPath) {
     response.writeHead(200, { "content-type": MIME_TYPES[".html"] });
     response.end(index);
   } catch {
-    const checks = await runChecks({ rootDir: rootPath, runCommands: false });
+    const checks = await service.runChecks({ runCommands: false });
     response.writeHead(200, { "content-type": MIME_TYPES[".html"] });
     response.end(renderBootstrapPage(checks));
   }

@@ -1,0 +1,157 @@
+import fs from "node:fs/promises";
+import path from "node:path";
+import { normalizeCommandResult, normalizeWorkset } from "../contracts/devflow-types.mjs";
+
+export async function startTask(repository, input = {}) {
+  const taskId = input.taskId || slugify(input.title || "task");
+  const handoffPath = `runtime/tasks/${taskId}/handoff.md`;
+  const workset = normalizeWorkset({
+    id: `workset-${taskId}`,
+    taskId,
+    sourceText: input.title || "",
+    confidence: "manual",
+    reason: input.note || "Started from command service.",
+    sceneTemplateId: input.templateId,
+    projects: (input.projectIds || []).map((id) => ({ id, role: "primary" })),
+    skills: [],
+    rules: []
+  });
+  const task = {
+    id: taskId,
+    title: input.title || taskId,
+    gate: input.gate || "",
+    level: input.level || "",
+    status: "active",
+    note: input.note || "",
+    nextAction: input.nextAction || "",
+    recoveryPoint: input.recoveryPoint || "",
+    workset,
+    paths: {
+      handoff: handoffPath
+    }
+  };
+
+  await repository.writeTask(task);
+  await writeHandoff(input.rootDir, task, [`Started: ${new Date().toISOString()}`, input.note].filter(Boolean));
+  await repository.setRuntimeState({
+    activeTaskId: taskId,
+    activeTaskPath: "",
+    activeWorksetId: workset.id,
+    activeProjectIds: input.projectIds || [],
+    activeSceneTemplateId: input.templateId || "",
+    currentGate: input.gate || ""
+  });
+
+  return normalizeCommandResult({
+    status: "ok",
+    action: "startTask",
+    entityType: "task",
+    entityId: taskId,
+    message: `Started task ${taskId}.`,
+    paths: [handoffPath]
+  });
+}
+
+export async function updateTask(repository, input = {}) {
+  const task = await repository.getTask(input.taskId);
+  if (!task) {
+    return normalizeCommandResult({
+      status: "error",
+      action: "updateTask",
+      entityType: "task",
+      entityId: input.taskId,
+      message: `Task not found: ${input.taskId}`
+    });
+  }
+
+  const nextTask = {
+    ...task,
+    gate: input.gate || task.gate,
+    recoveryPoint: input.recoveryPoint || task.recoveryPoint || "",
+    notes: appendNote(task.notes, input.note)
+  };
+  await repository.writeTask(nextTask);
+  await writeHandoff(input.rootDir, nextTask, [`Updated: ${new Date().toISOString()}`, input.note].filter(Boolean));
+
+  return normalizeCommandResult({
+    status: "ok",
+    action: "updateTask",
+    entityType: "task",
+    entityId: nextTask.id,
+    message: `Updated task ${nextTask.id}.`,
+    paths: task.paths?.handoff ? [task.paths.handoff] : [`runtime/tasks/${nextTask.id}/handoff.md`]
+  });
+}
+
+export async function finishTask(repository, input = {}) {
+  const task = await repository.getTask(input.taskId);
+  if (!task) {
+    return normalizeCommandResult({
+      status: "error",
+      action: "finishTask",
+      entityType: "task",
+      entityId: input.taskId,
+      message: `Task not found: ${input.taskId}`
+    });
+  }
+
+  const nextTask = {
+    ...task,
+    status: "finished",
+    finishedNote: input.note || "",
+    notes: appendNote(task.notes, input.note)
+  };
+  await repository.writeTask(nextTask);
+  await writeHandoff(input.rootDir, nextTask, [`Finished: ${new Date().toISOString()}`, input.note].filter(Boolean));
+  await repository.setRuntimeState({
+    activeTaskId: "",
+    activeTaskPath: "",
+    activeWorksetId: "",
+    activeProjectIds: [],
+    activeSceneTemplateId: "",
+    currentGate: ""
+  });
+
+  return normalizeCommandResult({
+    status: "ok",
+    action: "finishTask",
+    entityType: "task",
+    entityId: nextTask.id,
+    message: `Finished task ${nextTask.id}.`,
+    paths: task.paths?.handoff ? [task.paths.handoff] : [`runtime/tasks/${nextTask.id}/handoff.md`]
+  });
+}
+
+function appendNote(notes, note) {
+  const nextNotes = Array.isArray(notes) ? [...notes] : [];
+  if (note) {
+    nextNotes.push(note);
+  }
+  return nextNotes;
+}
+
+function slugify(value) {
+  return String(value || "task")
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "") || "task";
+}
+
+async function writeHandoff(rootDir, task, lines = []) {
+  if (!rootDir) return;
+  const handoffPath = task.paths?.handoff || `runtime/tasks/${task.id}/handoff.md`;
+  const absolutePath = path.join(rootDir, handoffPath);
+  await fs.mkdir(path.dirname(absolutePath), { recursive: true });
+  const body = [
+    `# ${task.title || task.id}`,
+    "",
+    `Task: ${task.id}`,
+    task.workset?.id ? `Workset: ${task.workset.id}` : "",
+    task.workset?.sceneTemplateId ? `Scene Template: ${task.workset.sceneTemplateId}` : "",
+    task.recoveryPoint ? `Recovery: ${task.recoveryPoint}` : "",
+    "",
+    ...lines
+  ].filter((line) => line !== "").join("\n") + "\n";
+  await fs.writeFile(absolutePath, body, "utf8");
+}
