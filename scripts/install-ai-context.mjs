@@ -207,6 +207,23 @@ ${lines.join('\n')}
 `;
 }
 
+function onDemandRoutingSection({ markdownTicks = false } = {}) {
+  const code = value => markdownTicks ? `\`${value}\`` : value;
+  return `
+On-demand DevFlow routing:
+
+- DevFlow is an on-demand capability set, not the default full workflow for every new chat.
+- Start by classifying the user's current request before loading DevFlow data:
+  - ${code('none')}: ordinary questions, explanations, or code snippets. Do not read DevFlow unless project context is explicitly needed.
+  - ${code('resume')}: continuing the current task or an existing task. Read only ${code('runtime/current.json')}, the active task, its Workset, ${code('nextAction')}, and ${code('recoveryPoint')}.
+  - ${code('light')}: small bug or small change. Use minimal project/context lookup and light task tracking only when the work should survive the chat.
+  - ${code('full')}: large, cross-project, high-risk, Jira/Notion/Figma/PRD-backed work. Then use full task tracking, G1-G7, and OpenSpec when selected.
+- Do not start G1-G7 by default.
+- Do not load all projects, rules, skills, scenes, or task history by default.
+- Use DevFlow data to choose the smallest useful context, then proceed with the active tool's normal execution workflow.
+`;
+}
+
 function portableProjectOverrideSection() {
   return `Portable project override:
 
@@ -228,6 +245,7 @@ ${portableProjectOverrideSection()}Read first:
 3. runtime/current.json
 
 Only load source Markdown, rules, or skills when the JSON index selects them for the current task.
+${onDemandRoutingSection()}
 ${projectSkillsSection(project)}
 ${managedEntryEndMarker}
 `;
@@ -247,6 +265,7 @@ ${portableProjectOverrideSection()}Read first:
 3. \`runtime/current.json\`
 
 Do not load all DevFlow Markdown by default. Follow the selected JSON indexes.
+${onDemandRoutingSection({ markdownTicks: true })}
 ${projectSkillsSection(project)}
 ${managedEntryEndMarker}
 `;
@@ -699,6 +718,67 @@ function validateRuleMount(rule, catalogRule, label, errors, expectedApplyMode) 
   }
 }
 
+const publicPrivacyLeakPatterns = [
+  { label: 'absolute macOS home path', pattern: /\/Users\/[A-Za-z0-9._-]+\b/ },
+  { label: 'absolute Windows home path', pattern: /[A-Za-z]:\\Users\\[A-Za-z0-9._-]+\\/ },
+  { label: 'secret-like value', pattern: /\b(token|cookie|secret|password|passwd|api[_-]?key)\b\s*[:=]\s*["']?[A-Za-z0-9_\-./+=]{8,}/i },
+];
+
+function privatePrivacyLeakPatterns() {
+  return (process.env.AI_CONTEXT_PRIVATE_PRIVACY_PATTERNS || '')
+    .split(/\n|;;/)
+    .map(item => item.trim())
+    .filter(Boolean)
+    .map((pattern, index) => ({
+      label: `private pattern ${index + 1}`,
+      pattern: new RegExp(pattern, 'i'),
+    }));
+}
+
+function resolvePrivacyScanPath(filePath) {
+  return path.isAbsolute(filePath) ? filePath : path.join(root, filePath);
+}
+
+function publicPrivacyScanFiles(projectIndex, sceneIndex) {
+  const files = [
+    'README.md',
+    'docs/install.md',
+    'docs/project-introduction.md',
+    'docs/product/devflow-workset-redesign.md',
+    'config/profile.json',
+    'config/projects/index.json',
+    'config/scenes/index.json',
+    'config/skills/skills.json',
+    'config/rules/rules.json',
+    'runtime/current.json',
+    'bundles/skills/devflow/SKILL.md',
+    'bundles/skills/devflow-init/SKILL.md',
+    ...(projectIndex.projects || []).map(project => project.path).filter(Boolean),
+    ...(sceneIndex.scenes || []).map(scene => scene.path).filter(Boolean),
+  ];
+  const extraFiles = (process.env.AI_CONTEXT_PUBLIC_PRIVACY_SCAN_EXTRA_FILES || '')
+    .split(/[,;]/)
+    .map(item => item.trim())
+    .filter(Boolean);
+  return unique([...files, ...extraFiles]);
+}
+
+function validatePublicPrivacyBoundary(projectIndex, sceneIndex, errors) {
+  for (const file of publicPrivacyScanFiles(projectIndex, sceneIndex)) {
+    const filePath = resolvePrivacyScanPath(file);
+    if (!fs.existsSync(filePath)) continue;
+    const stat = fs.lstatSync(filePath);
+    if (!stat.isFile()) continue;
+    const content = fs.readFileSync(filePath, 'utf8');
+    for (const leak of [...publicPrivacyLeakPatterns, ...privatePrivacyLeakPatterns()]) {
+      if (leak.pattern.test(content)) {
+        const label = isInsidePath(filePath, root) ? path.relative(root, filePath) : filePath;
+        pushUniqueError(errors, `public template privacy leak (${leak.label}): ${label}`);
+      }
+    }
+  }
+}
+
 function validate() {
   const errors = [];
   const warnings = [];
@@ -837,6 +917,7 @@ function validate() {
   if (profile.sourcePath && !exists(profile.sourcePath)) {
     pushUniqueError(errors, `profile source path missing: ${profile.sourcePath}`);
   }
+  validatePublicPrivacyBoundary(projectIndex, sceneIndex, errors);
 
   finishValidation(errors, warnings);
 }

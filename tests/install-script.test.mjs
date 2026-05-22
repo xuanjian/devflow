@@ -146,3 +146,65 @@ Read first:
   assert.match(content, /config\/projects\/devflow\.json/);
   assert.match(content, /# Existing notes/);
 });
+
+test("sync-projects writes on-demand DevFlow routing policy into agent entries", () => {
+  const home = fs.mkdtempSync(path.join(os.tmpdir(), "devflow-routing-home-"));
+  const projectDir = fs.mkdtempSync(path.join(os.tmpdir(), "devflow-routing-project-"));
+
+  const sync = runInstallScript(["sync-projects", "--project", "devflow", "--entries-only", "--write"], {
+    HOME: home,
+    AI_CONTEXT_PROJECT_PATH_OVERRIDES: `devflow=${projectDir}`
+  });
+
+  assert.equal(sync.status, 0, sync.stderr);
+
+  const agentsEntry = fs.readFileSync(path.join(projectDir, "AGENTS.md"), "utf8");
+  const claudeEntry = fs.readFileSync(path.join(projectDir, "CLAUDE.md"), "utf8");
+  const cursorEntry = fs.readFileSync(path.join(projectDir, ".cursor", "rules", "00-devflow.mdc"), "utf8");
+
+  for (const content of [agentsEntry, claudeEntry, cursorEntry]) {
+    assert.match(content, /DevFlow is an on-demand capability set/i);
+    assert.match(content, /none.*ordinary questions/i);
+    assert.match(content, /resume.*current task/i);
+    assert.match(content, /light.*small bug/i);
+    assert.match(content, /full.*high-risk/i);
+    assert.match(content, /Do not start G1-G7 by default/i);
+  }
+});
+
+test("validate rejects obvious private data in public template files", () => {
+  const leakFile = path.join(os.tmpdir(), `devflow-private-leak-${process.pid}.md`);
+  fs.writeFileSync(leakFile, "private local path: /Users/example/Documents/private-project\n");
+
+  let result;
+  try {
+    result = runInstallScript(["validate"], {
+      AI_CONTEXT_PUBLIC_PRIVACY_SCAN_EXTRA_FILES: leakFile
+    });
+  } finally {
+    fs.rmSync(leakFile, { force: true });
+  }
+
+  assert.notEqual(result.status, 0);
+  assert.match(result.stderr, /public template privacy leak/i);
+  assert.match(result.stderr, /absolute macOS home path/i);
+});
+
+test("validate can use caller-provided private privacy patterns", () => {
+  const leakFile = path.join(os.tmpdir(), `devflow-private-pattern-${process.pid}.md`);
+  fs.writeFileSync(leakFile, "private project codename: internal-order-system\n");
+
+  let result;
+  try {
+    result = runInstallScript(["validate"], {
+      AI_CONTEXT_PUBLIC_PRIVACY_SCAN_EXTRA_FILES: leakFile,
+      AI_CONTEXT_PRIVATE_PRIVACY_PATTERNS: "internal-order-system"
+    });
+  } finally {
+    fs.rmSync(leakFile, { force: true });
+  }
+
+  assert.notEqual(result.status, 0);
+  assert.match(result.stderr, /public template privacy leak/i);
+  assert.match(result.stderr, /private pattern 1/i);
+});

@@ -112,5 +112,21 @@ test("public docs avoid private project examples and company registry leaks", ()
     .map(filePath => fs.readFileSync(filePath, "utf8"))
     .join("\n");
 
-  assert.doesNotMatch(combined, /DHB|HXB|newdhb|npm\.newdhb|盘点单/);
+  assert.doesNotMatch(combined, /\/Users\/[A-Za-z0-9._-]+|C:\\Users\\|token\s*[:=]|password\s*[:=]|api[_-]?key\s*[:=]/i);
+});
+
+test("public template config stays skeleton-only and avoids private inventory", () => {
+  const profile = JSON.parse(fs.readFileSync(path.join(rootDir, "config", "profile.json"), "utf8"));
+  const projects = JSON.parse(fs.readFileSync(path.join(rootDir, "config", "projects", "index.json"), "utf8"));
+  const scenes = JSON.parse(fs.readFileSync(path.join(rootDir, "config", "scenes", "index.json"), "utf8"));
+  const skills = JSON.parse(fs.readFileSync(path.join(rootDir, "config", "skills", "skills.json"), "utf8"));
+  const rules = JSON.parse(fs.readFileSync(path.join(rootDir, "config", "rules", "rules.json"), "utf8"));
+  const combined = JSON.stringify({ profile, projects, scenes, skills, rules });
+
+  assert.equal(profile.name || "", "");
+  assert.deepEqual((projects.projects || []).map(project => project.id), ["devflow"]);
+  assert.deepEqual((scenes.scenes || []).map(scene => scene.id), ["devflow-config"]);
+  assert.deepEqual((skills.skills || []).map(skill => skill.id).sort(), ["devflow", "devflow-init"]);
+  assert.deepEqual(rules.rules || [], []);
+  assert.doesNotMatch(combined, /\/Users\/[A-Za-z0-9._-]+|C:\\Users\\|token\s*[:=]|password\s*[:=]|api[_-]?key\s*[:=]/i);
 });

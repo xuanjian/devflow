@@ -27,13 +27,13 @@ DevFlow 后续应该从“固定流程系统”收敛成“动态上下文工作
 最终的 DevFlow 不应该要求用户提前选择固定场景，也不应该让每个任务都重新写一份 `AGENTS.md`。用户只需要说需求，例如：
 
 ```text
-修盘点单打印预览数量口径
+修库存打印预览数量口径
 ```
 
 DevFlow 应该自动完成：
 
 1. 从项目索引和能力图谱里找到候选业务域，例如 `inventory`、`print`、`webview`。
-2. 推断本次任务可能涉及的项目，例如 `dhbfront-manager-mobile`、`dhb-ios`、`bff-warehouse`。
+2. 推断本次任务可能涉及的项目，例如 `mobile-h5-app`、`native-ios-app`、`inventory-bff`。
 3. 如果置信度不够，只问一个关键问题，例如“这次是否涉及 BFF 接口修改？”。
 4. 创建或更新任务，记录本次实际 `Workset`、当前步骤、下一步、证据和恢复点。
 5. 只加载本次 Workset 命中的项目文档、规则、技能和任务上下文。
@@ -87,10 +87,10 @@ DevFlow 应该自动完成：
 {
   "workset": {
     "capabilities": ["inventory", "print", "webview"],
-    "projects": ["dhbfront-manager-mobile", "dhb-ios", "bff-warehouse"],
+    "projects": ["mobile-h5-app", "native-ios-app", "inventory-bff"],
     "rules": ["frontend/h5-bridge", "ios/webview-bridge"],
     "confidence": "high",
-    "reason": "命中盘点单、打印预览、H5/native bridge 关键词"
+    "reason": "命中库存、打印预览、H5/native bridge 关键词"
   }
 }
 ```
@@ -197,8 +197,8 @@ Agent Adapter 需要写清楚：
 
 验收结果：
 
-- `bff-warehouse` 能被 `inventory`、`stock`、`print` 等能力命中。
-- `dhbfront-manager-mobile` 能被 `mobile-h5`、`inventory-ui`、`webview-bridge` 等能力命中。
+- `inventory-bff` 能被 `inventory`、`stock`、`print` 等能力命中。
+- `mobile-h5-app` 能被 `mobile-h5`、`inventory-ui`、`webview-bridge` 等能力命中。
 - AI 不需要先读完整项目文档，也能判断项目是否可能相关。
 
 ### 第四阶段：新增 Capability Map
@@ -223,7 +223,7 @@ config/capabilities/<capability-id>.json
 
 验收结果：
 
-- 输入“盘点单打印预览”时，能命中 `inventory`、`print`、`webview`。
+- 输入“库存打印预览”时，能命中 `inventory`、`print`、`webview`。
 - 输入“商品详情相关商品”时，能命中 `goods`、`sku`、`frontend`。
 - 输入“发布失败”时，能命中 `release`、`package`、`version`。
 
@@ -240,7 +240,7 @@ config/capabilities/<capability-id>.json
 
 验收结果：
 
-- `stock-inventory-cross-stack` 可以推荐 `dhbfront-manager-mobile`、`dhb-ios`、`bff-warehouse`，但任务可以只选择其中一部分。
+- `stock-inventory-cross-stack` 可以推荐 `mobile-h5-app`、`native-ios-app`、`inventory-bff`，但任务可以只选择其中一部分。
 - 每次任务不需要复制或新建 scene。
 
 ### 第六阶段：新增 Workset 推断和确认
@@ -338,20 +338,19 @@ devflow task start "<需求文本>" --infer-workset
 
 ## 7. 推荐实施顺序
 
-1. 先改文档定位，统一“动态上下文工作台”和“按需能力集合”概念。
-2. 重做安装和 Agent IDE 入口适配，把 DevFlow 使用规则写入 Codex/Claude/Cursor 等工具入口；这是明天整改的第一优先级。
-3. 给项目 JSON 增加能力字段，并让面板能展示。
-4. 新增 Capability Map。
-5. 把 Scene 改造成 Scene Template。
-6. 实现 Workset 推断命令。
-7. 修改 task JSON，支持 `resume` / `light` / `full` / `none` 的行为判断和 light/full 两种追踪模式。
-8. 重做任务看板，让 Workset、下一步和恢复点成为一等信息。
+1. 合并阶段：统一“动态上下文工作台 / 按需能力集合”定位，同时完成 Agent IDE 入口适配和公开模板/本机私有边界。这是明天整改的第一优先级。
+2. 给项目 JSON 增加能力字段，并让面板能展示。
+3. 新增 Capability Map。
+4. 把 Scene 改造成 Scene Template。
+5. 实现 Workset 推断命令。
+6. 修改 task JSON，支持 `resume` / `light` / `full` / `none` 的行为判断和 light/full 两种追踪模式。
+7. 重做任务看板，让 Workset、下一步和恢复点成为一等信息。
 
-做完这八步后，DevFlow 的中心对象会从固定 `Scene` 转成动态 `Workset`，同时 Codex、Claude Code、Cursor 等 Agent IDE 会通过各自入口知道如何使用 DevFlow，而不是每次新对话都重新启动一套繁琐流程。
+做完这些步骤后，DevFlow 的中心对象会从固定 `Scene` 转成动态 `Workset`，同时 Codex、Claude Code、Cursor 等 Agent IDE 会通过各自入口知道如何使用 DevFlow，而不是每次新对话都重新启动一套繁琐流程。
 
 ## 8. 明天执行入口
 
-明天开始整改时，先不要改 Workset 推断算法，也不要先重做面板。第一天先做两件事：修正 Agent 入口行为，以及划清公开模板和本机私有数据边界。
+明天开始整改时，先不要改 Workset 推断算法，也不要先重做面板。第一天做一个合并阶段：修正 Agent 入口行为，并同步划清公开模板和本机私有数据边界。这两件事强关联，不能拆开做。
 
 ### 8.1 Agent 入口按需路由
 
@@ -381,7 +380,7 @@ devflow task start "<需求文本>" --infer-workset
 3. 更新 `.gitignore`、初始化逻辑或模板生成逻辑，确保私有数据不会被误提交。
 4. `doctor` 或 `validate` 至少要能检查明显的隐私泄漏风险，例如真实本机路径、任务证据目录、个人 profile。
 
-这两个阶段完成后，再继续做 Project Capability、Capability Map、Scene Template 和 Workset 推断。
+这个合并阶段完成后，再继续做 Project Capability、Capability Map、Scene Template 和 Workset 推断。
 
 ## 9. 第二批改进项
 
