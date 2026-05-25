@@ -154,13 +154,22 @@ async function readTaskRecord(rootPath, taskPath) {
 }
 
 async function normalizeTask(rootPath, task) {
-  if (task.workset) {
-    return { ...task, workset: normalizeWorkset(task.workset) };
-  }
+  const workset = task.workset ? normalizeWorkset(task.workset) : await buildLegacyWorkset(rootPath, task);
+  const sceneTemplateId = task.sceneTemplateId || task.sceneTemplateIds?.[0] || task.sceneIds?.[0] || workset?.sceneTemplateId || "";
+  const projectIds = task.projectIds?.length
+    ? task.projectIds
+    : (workset?.projects || []).map((project) => project.id).filter(Boolean);
+  const sceneIds = task.sceneIds?.length ? task.sceneIds : (sceneTemplateId ? [sceneTemplateId] : []);
 
   return {
     ...task,
-    workset: await buildLegacyWorkset(rootPath, task)
+    currentGate: task.currentGate || task.gate || "",
+    taskLevel: task.taskLevel || task.level || "",
+    level: task.level || task.taskLevel || "",
+    projectIds,
+    sceneIds,
+    sceneTemplateIds: task.sceneTemplateIds?.length ? task.sceneTemplateIds : sceneIds,
+    workset
   };
 }
 

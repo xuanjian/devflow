@@ -3,10 +3,21 @@ import assert from "node:assert/strict";
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { handleApiRequest, startServer } from "../src/server.mjs";
 
+const testDir = path.dirname(fileURLToPath(import.meta.url));
+const fixtureRoot = path.join(testDir, "core/fixtures/basic-ai-context");
+
+async function copyFixture() {
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "devflow-server-"));
+  await fs.cp(fixtureRoot, root, { recursive: true });
+  return root;
+}
+
 test("server serves bootstrap HTML without frontend build", async () => {
-  const server = await startServer({ rootDir: new URL("./core/fixtures/basic-ai-context/", import.meta.url), port: 0 });
+  const rootDir = await copyFixture();
+  const server = await startServer({ rootDir, port: 0 });
   try {
     const response = await fetch(`${server.url}/`);
     const html = await response.text();
@@ -16,19 +27,24 @@ test("server serves bootstrap HTML without frontend build", async () => {
     assert.match(html, /Initialization/);
   } finally {
     await server.close();
+    await fs.rm(rootDir, { recursive: true, force: true });
   }
 });
 
 test("server exposes graph and checks APIs", async () => {
-  const server = await startServer({ rootDir: new URL("./core/fixtures/basic-ai-context/", import.meta.url), port: 0 });
+  const rootDir = await copyFixture();
+  const server = await startServer({ rootDir, port: 0 });
   try {
     const graph = await fetch(`${server.url}/api/graph`).then((res) => res.json());
     const checks = await fetch(`${server.url}/api/checks`).then((res) => res.json());
 
     assert.ok(graph.nodes.length > 0);
+    assert.ok(graph.nodes.some((node) => node.id === "task:demo-task"));
+    assert.ok(graph.nodes.some((node) => node.id === "sceneTemplate:demo-scene"));
     assert.ok(checks.checks.length > 0);
   } finally {
     await server.close();
+    await fs.rm(rootDir, { recursive: true, force: true });
   }
 });
 
@@ -53,7 +69,7 @@ test("server API delegates graph, checks, node details, and actions to DevFlow s
     }
   };
   const server = await startServer({
-    rootDir: new URL("./core/fixtures/basic-ai-context/", import.meta.url),
+    rootDir: fixtureRoot,
     port: 0,
     service
   });
@@ -82,7 +98,8 @@ test("server API delegates graph, checks, node details, and actions to DevFlow s
 });
 
 test("server exposes the configured profile markdown document", async () => {
-  const server = await startServer({ rootDir: new URL("./core/fixtures/basic-ai-context/", import.meta.url), port: 0 });
+  const rootDir = await copyFixture();
+  const server = await startServer({ rootDir, port: 0 });
   try {
     const profileDocument = await fetch(`${server.url}/api/profile-document`).then((res) => res.json());
 
@@ -90,6 +107,40 @@ test("server exposes the configured profile markdown document", async () => {
     assert.match(profileDocument.markdown, /fixture collaboration preferences/i);
   } finally {
     await server.close();
+    await fs.rm(rootDir, { recursive: true, force: true });
+  }
+});
+
+test("server opens registered artifact documents in the browser", async () => {
+  const rootDir = await copyFixture();
+  const server = await startServer({ rootDir, port: 0 });
+  const artifactId = `artifact:${encodeURIComponent("docs/demo-technical-design.md")}`;
+  try {
+    const response = await fetch(`${server.url}/api/artifacts/${encodeURIComponent(artifactId)}`);
+    const html = await response.text();
+
+    assert.equal(response.status, 200);
+    assert.match(response.headers.get("content-type"), /text\/html/);
+    assert.match(html, /Demo Technical Design/);
+    assert.match(html, /docs\/demo-technical-design\.md/);
+  } finally {
+    await server.close();
+    await fs.rm(rootDir, { recursive: true, force: true });
+  }
+});
+
+test("server rejects unregistered artifact documents", async () => {
+  const rootDir = await copyFixture();
+  const server = await startServer({ rootDir, port: 0 });
+  try {
+    const response = await fetch(`${server.url}/api/artifacts/${encodeURIComponent("artifact:/etc/passwd")}`);
+    const body = await response.json();
+
+    assert.equal(response.status, 404);
+    assert.equal(body.error.code, "unknown_artifact");
+  } finally {
+    await server.close();
+    await fs.rm(rootDir, { recursive: true, force: true });
   }
 });
 
@@ -138,6 +189,7 @@ test("server rejects malformed JSON action bodies", async () => {
 });
 
 test("handleApiRequest handles API routes for Vite middleware", async () => {
+  const rootDir = await copyFixture();
   let statusCode = 200;
   let body = "";
   const headers = {};
@@ -160,15 +212,19 @@ test("handleApiRequest handles API routes for Vite middleware", async () => {
     }
   };
 
-  const handled = await handleApiRequest({
-    request,
-    response,
-    rootDir: new URL("./core/fixtures/basic-ai-context/", import.meta.url)
-  });
-  const payload = JSON.parse(body);
+  try {
+    const handled = await handleApiRequest({
+      request,
+      response,
+      rootDir
+    });
+    const payload = JSON.parse(body);
 
-  assert.equal(handled, true);
-  assert.equal(statusCode, 200);
-  assert.ok(headers["content-type"].includes("application/json"));
-  assert.ok(payload.nodes.length > 0);
+    assert.equal(handled, true);
+    assert.equal(statusCode, 200);
+    assert.ok(headers["content-type"].includes("application/json"));
+    assert.ok(payload.nodes.length > 0);
+  } finally {
+    await fs.rm(rootDir, { recursive: true, force: true });
+  }
 });

@@ -1,10 +1,12 @@
 import fs from "node:fs/promises";
+import fsSync from "node:fs";
 import path from "node:path";
 import os from "node:os";
 import { spawn } from "node:child_process";
 import { readJsonFile } from "./json-loader.mjs";
 import { resolveInside, toPath } from "./paths.mjs";
-import { buildContextGraph } from "./graph.mjs";
+import { buildPanelGraph } from "./panel-graph.mjs";
+import { defaultDbPath } from "./storage/schema.mjs";
 
 export async function runChecks({ rootDir = process.cwd(), runCommands = true } = {}) {
   const rootPath = toPath(rootDir);
@@ -44,7 +46,7 @@ export async function runChecks({ rootDir = process.cwd(), runCommands = true } 
   checks.push(jsonCheck("runtime_current", "Runtime current", "config", current));
   checks.push(await activeTaskCheck(rootPath, current));
 
-  const graph = await buildContextGraph({ rootDir: rootPath });
+  const graph = await buildChecksGraph(rootPath);
   checks.push({
     id: "graph_references",
     title: "Graph references",
@@ -64,6 +66,17 @@ export async function runChecks({ rootDir = process.cwd(), runCommands = true } 
   checks.push(await commandCheck(rootPath, "project_entry_sync_drift", "Project entry sync drift", ["node", "scripts/install-ai-context.mjs", "sync-projects"], runCommands));
 
   return { checks };
+}
+
+async function buildChecksGraph(rootPath) {
+  const dbPath = defaultDbPath(rootPath);
+  if (!fsSync.existsSync(dbPath)) {
+    const module = await import("./storage/rebuild-index.mjs");
+    await module.rebuildDevFlowIndex({ rootDir: rootPath, dbPath });
+  }
+  const module = await import("./repositories/sqlite-repository.mjs");
+  const repository = module.createSqliteRepository({ rootDir: rootPath, dbPath });
+  return buildPanelGraph(repository, { rootDir: rootPath });
 }
 
 function jsonCheck(id, title, area, result, actionId) {

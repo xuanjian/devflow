@@ -4,7 +4,7 @@ export default function OverviewView({ graph, checks, onSelectNode, onViewChange
   const nodes = graph.nodes || [];
   const byType = countBy(nodes, "type");
   const installChecks = (checks || []).filter((check) => ["install", "entries", "config", "profile"].includes(check.area));
-  const activeTask = nodes.find((node) => node.type === "task");
+  const activeTask = nodes.find((node) => node.type === "task" && node.raw?.isActive) || nodes.find((node) => node.type === "task");
   const profile = nodes.find((node) => node.type === "profile");
   const failedChecks = (checks || []).filter((check) => ["fail", "warning", "missing"].includes(check.status));
 
@@ -22,21 +22,21 @@ export default function OverviewView({ graph, checks, onSelectNode, onViewChange
       </OverviewCard>
 
       <OverviewCard
-        title="项目 / 技能 / 规则 / 场景"
-        subtitle="来自 config/projects、config/skills、config/rules、config/scenes。"
+        title="项目 / 技能 / 规则 / 模板"
+        subtitle="来自 SQLite 索引中的 projects、skills、rules、scene_templates。"
         actionLabel="查看关系"
         onAction={() => onViewChange("relations")}
       >
         <MetricRow label="项目" value={byType.project || 0} />
         <MetricRow label="技能" value={byType.skill || 0} />
         <MetricRow label="规则" value={byType.rule || 0} />
-        <MetricRow label="场景" value={byType.scene || 0} />
+        <MetricRow label="场景模板" value={byType.sceneTemplate || 0} />
         <MetricRow label="关系线" value={(graph.edges || []).length} />
       </OverviewCard>
 
       <OverviewCard
         title="工作流与 Tasks"
-        subtitle="来自 runtime/current.json 与 runtime/tasks/<task-id>.json。"
+        subtitle="来自 SQLite task/workset 索引与 runtime/tasks/<task-id>/handoff.md。"
         actionLabel="查看任务"
         onAction={() => onViewChange("tasks")}
       >
@@ -82,7 +82,7 @@ export default function OverviewView({ graph, checks, onSelectNode, onViewChange
           <SummaryPill label="节点总数" value={nodes.length} />
           <SummaryPill label="预警" value={failedChecks.length} tone={failedChecks.length ? "warning" : "ok"} />
           <SummaryPill label="当前任务" value={activeTask?.raw?.currentGate || "无"} tone="info" />
-          <SummaryPill label="数据源" value="config + runtime" tone="info" />
+          <SummaryPill label="数据源" value="SQLite + handoff" tone="info" />
         </div>
       </section>
     </section>

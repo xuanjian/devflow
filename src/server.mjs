@@ -72,6 +72,14 @@ async function handleApiRoute({ request, response, rootPath, url, service }) {
       : sendJson(response, 404, { error: { code: "unknown_node", message: `Unknown node: ${nodeId}` } });
   }
 
+  if (url.pathname.startsWith("/api/artifacts/") && request.method === "GET") {
+    const nodeId = decodeURIComponent(url.pathname.slice("/api/artifacts/".length));
+    const details = await service.getNodeDetails(nodeId);
+    return details?.node?.type === "artifact"
+      ? serveArtifactDocument(response, rootPath, details.node)
+      : sendJson(response, 404, { error: { code: "unknown_artifact", message: `Unknown artifact: ${nodeId}` } });
+  }
+
   if (url.pathname === "/api/checks" && request.method === "GET") {
     return sendJson(response, 200, await service.runChecks({ runCommands: false }));
   }
@@ -95,6 +103,62 @@ async function handleApiRoute({ request, response, rootPath, url, service }) {
   }
 
   return sendJson(response, 404, { error: { code: "unknown_api_route", message: `Unknown API route: ${url.pathname}` } });
+}
+
+async function serveArtifactDocument(response, rootPath, artifactNode) {
+  const artifactPath = artifactNode.raw?.path || artifactNode.sourcePath || "";
+  if (!artifactPath) {
+    return sendJson(response, 404, { error: { code: "artifact_path_missing", message: "Artifact path is missing." } });
+  }
+  const absolutePath = path.isAbsolute(artifactPath) ? artifactPath : resolveInside(rootPath, artifactPath);
+  try {
+    const content = await fs.readFile(absolutePath, "utf8");
+    const title = artifactNode.title || path.basename(artifactPath);
+    response.writeHead(200, { "content-type": "text/html; charset=utf-8" });
+    response.end(renderArtifactPage({ title, artifactPath, content }));
+  } catch (error) {
+    return sendJson(response, 404, {
+      error: {
+        code: error?.code || "read_artifact_failed",
+        message: error.message,
+        path: artifactPath
+      }
+    });
+  }
+}
+
+function renderArtifactPage({ title, artifactPath, content }) {
+  return `<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>${escapeHtml(title)}</title>
+  <style>
+    :root { color-scheme: dark; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    body { margin: 0; background: #171717; color: #e6edf3; }
+    header { position: sticky; top: 0; padding: 16px 22px; background: #202020; border-bottom: 1px solid #333; }
+    h1 { margin: 0 0 6px; font-size: 18px; }
+    p { margin: 0; color: #9aa4ad; font-size: 13px; word-break: break-all; }
+    pre { margin: 0; padding: 22px; white-space: pre-wrap; word-break: break-word; line-height: 1.55; font-size: 14px; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>${escapeHtml(title)}</h1>
+    <p>${escapeHtml(artifactPath)}</p>
+  </header>
+  <pre>${escapeHtml(content)}</pre>
+</body>
+</html>`;
+}
+
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;");
 }
 
 async function readProfileDocument(rootPath) {

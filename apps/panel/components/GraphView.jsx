@@ -1,20 +1,45 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { labelForType, titleForNode } from "../labels.js";
 
-export default function GraphView({ graph, selectedNodeId, onSelectNode, onRunAction }) {
-  const nodes = graph.nodes || [];
-  const positions = layoutNodes(nodes);
+const GRAPH_TOP_SAFE_SPACE = 86;
+const NODE_BOX_HALF_HEIGHT = 42;
+
+export default function GraphView({ graph, selectedNodeId, onSelectNode }) {
+  const [selectedProjectId, setSelectedProjectId] = useState("");
+  const [pinnedPositions, setPinnedPositions] = useState({});
+  const allNodes = graph.nodes || [];
+  const projectNodes = useMemo(() => allNodes.filter((node) => node.type === "project").sort(compareNodesByTitle), [allNodes]);
+  const projectGraph = useMemo(() => buildProjectGraph(graph, selectedProjectId), [graph, selectedProjectId]);
+  const nodes = projectGraph.nodes;
+  const positions = useMemo(() => mergePinnedPositions(layoutNodes(nodes), pinnedPositions), [nodes, pinnedPositions]);
   const viewport = getGraphViewport(positions);
-  const visibleEdges = selectVisibleEdges(graph.edges || [], selectedNodeId);
-  const highlightedNodeIds = getHighlightedNodeIds(visibleEdges, selectedNodeId);
-  const actionBar = getActionBarPlacement(nodes);
+  const visibleEdges = projectGraph.edges;
+  const activeFocusId = selectedProjectId || selectedNodeId;
+  const highlightedNodeIds = getHighlightedNodeIds(visibleEdges, activeFocusId);
   const viewportRef = useRef(null);
+  const svgRef = useRef(null);
   const dragRef = useRef(null);
+  const nodeDragRef = useRef(null);
+  const suppressClickRef = useRef("");
   const hasCenteredRef = useRef(false);
-  const [modalType, setModalType] = useState("");
-  const [form, setForm] = useState({});
-  const [submitting, setSubmitting] = useState(false);
-  const [submitError, setSubmitError] = useState("");
+
+  useEffect(() => {
+    if (selectedProjectId && !projectNodes.some((node) => node.id === selectedProjectId)) {
+      setSelectedProjectId("");
+    }
+  }, [projectNodes, selectedProjectId]);
+
+  useEffect(() => {
+    hasCenteredRef.current = false;
+  }, [selectedProjectId]);
+
+  useEffect(() => {
+    const visibleIds = new Set(nodes.map((node) => node.id));
+    setPinnedPositions((current) => {
+      const next = Object.fromEntries(Object.entries(current).filter(([id]) => visibleIds.has(id)));
+      return Object.keys(next).length === Object.keys(current).length ? current : next;
+    });
+  }, [nodes]);
 
   useEffect(() => {
     if (hasCenteredRef.current) {
@@ -26,12 +51,13 @@ export default function GraphView({ graph, selectedNodeId, onSelectNode, onRunAc
     }
     hasCenteredRef.current = true;
     requestAnimationFrame(() => {
-      element.scrollLeft = element.clientWidth < 500 ? 250 : 40;
+      element.scrollLeft = Math.max(0, viewport.width / 2 - element.clientWidth / 2 - 80);
+      element.scrollTop = 0;
     });
-  }, [viewport.width]);
+  }, [selectedProjectId, viewport.height, viewport.width]);
 
   function handleMouseDown(event) {
-    if (event.button !== 0 || event.target.closest(".graph-node, .graph-add-actions, .graph-config-modal")) {
+    if (event.button !== 0 || event.target.closest(".graph-node")) {
       return;
     }
     const element = viewportRef.current;
@@ -48,6 +74,22 @@ export default function GraphView({ graph, selectedNodeId, onSelectNode, onRunAc
   }
 
   function handleMouseMove(event) {
+    const nodeDrag = nodeDragRef.current;
+    if (nodeDrag) {
+      const point = eventPointInSvg(event, svgRef.current, viewport);
+      if (!point) {
+        return;
+      }
+      const x = clamp(point.x - nodeDrag.offsetX, 80, viewport.width - 80);
+      const y = clamp(point.y - nodeDrag.offsetY, GRAPH_TOP_SAFE_SPACE + NODE_BOX_HALF_HEIGHT, viewport.height - 80);
+      nodeDrag.moved = nodeDrag.moved || Math.hypot(x - nodeDrag.startX, y - nodeDrag.startY) > 3;
+      setPinnedPositions((current) => ({
+        ...current,
+        [nodeDrag.nodeId]: { x: Math.round(x), y: Math.round(y) }
+      }));
+      return;
+    }
+
     const drag = dragRef.current;
     const element = viewportRef.current;
     if (!drag || !element) {
@@ -58,283 +100,167 @@ export default function GraphView({ graph, selectedNodeId, onSelectNode, onRunAc
   }
 
   function stopDrag() {
+    if (nodeDragRef.current?.moved) {
+      suppressClickRef.current = nodeDragRef.current.nodeId;
+      setTimeout(() => {
+        suppressClickRef.current = "";
+      }, 0);
+    }
+    nodeDragRef.current = null;
     dragRef.current = null;
     viewportRef.current?.classList.remove("is-dragging");
   }
 
-  function openModal(type) {
-    setModalType(type);
-    setForm(defaultForm(type));
-    setSubmitError("");
-  }
-
-  function closeModal() {
-    if (submitting) return;
-    setModalType("");
-    setSubmitError("");
-  }
-
-  function updateField(field, value) {
-    setForm((current) => ({ ...current, [field]: value }));
-  }
-
-  async function submitConfig(event) {
-    event.preventDefault();
-    if (!onRunAction || !modalType) return;
-    setSubmitting(true);
-    setSubmitError("");
-    try {
-      await onRunAction(actionIdForModal(modalType), payloadForModal(modalType, form));
-      setModalType("");
-    } catch (error) {
-      setSubmitError(error?.message || String(error));
-    } finally {
-      setSubmitting(false);
+  function startNodeDrag(event, nodeId) {
+    if (event.button !== 0) {
+      return;
     }
+    const point = positions.get(nodeId);
+    const eventPoint = eventPointInSvg(event, svgRef.current, viewport);
+    if (!point || !eventPoint) {
+      return;
+    }
+    event.preventDefault();
+    event.stopPropagation();
+    nodeDragRef.current = {
+      nodeId,
+      offsetX: eventPoint.x - point.x,
+      offsetY: eventPoint.y - point.y,
+      startX: point.x,
+      startY: point.y,
+      moved: false
+    };
+  }
+
+  function selectNode(nodeId) {
+    if (suppressClickRef.current === nodeId) {
+      return;
+    }
+    onSelectNode(nodeId);
+  }
+
+  function selectProject(projectId) {
+    setSelectedProjectId(projectId);
+    onSelectNode(projectId);
   }
 
   return (
-    <section
-      className="graph-view"
-      aria-label="上下文关系图"
-      onMouseDown={handleMouseDown}
-      onMouseLeave={stopDrag}
-      onMouseMove={handleMouseMove}
-      onMouseUp={stopDrag}
-      ref={viewportRef}
-    >
-      <div className="graph-toolbar">
-        <strong>{selectedNodeId ? "聚焦关系" : "全局关系"}</strong>
-        <span>{selectedNodeId ? "正在显示当前节点的直接业务关联" : "选择一个节点后显示业务关联线；分组归属线已隐藏"}</span>
-      </div>
-      <svg
-        height={viewport.height}
-        viewBox={`0 0 ${viewport.width} ${viewport.height}`}
-        width={viewport.width}
-        role="img"
-        aria-label="DevFlow 上下文关系图"
-      >
-        {onRunAction ? (
-          <foreignObject height="54" width="830" x={actionBar.x} y={actionBar.y}>
-            <div className="graph-add-actions" xmlns="http://www.w3.org/1999/xhtml">
-              {GRAPH_ACTIONS.map((action) => (
-                <button key={action.type} onClick={() => openModal(action.type)} type="button">
-                  <span aria-hidden="true">+</span>
-                  {action.label}
-                </button>
-              ))}
-            </div>
-          </foreignObject>
-        ) : null}
-        {visibleEdges.map((edge) => {
-          const from = positions.get(edge.from);
-          const to = positions.get(edge.to);
-          if (!from || !to) return null;
-          return (
-            <line
-              className={`graph-edge ${edge.relation === "contains" ? "main-edge" : "focused-edge"}`}
-              data-testid={`edge-${edge.from}-${edge.to}-${edge.relation}`}
-              key={`${edge.from}-${edge.to}-${edge.relation}`}
-              x1={from.x}
-              y1={from.y}
-              x2={to.x}
-              y2={to.y}
-            />
-          );
-        })}
-        {nodes.map((node) => {
-          const point = positions.get(node.id);
-          return (
-            <foreignObject height="76" key={node.id} width="190" x={point.x - 95} y={point.y - 38}>
-              <button
-                className={`graph-node node-${node.type} status-${node.status} ${selectedNodeId === node.id ? "selected" : ""} ${highlightedNodeIds.has(node.id) ? "highlighted" : ""}`}
-                onClick={() => onSelectNode(node.id)}
-                type="button"
-              >
-                <span className="node-type-mark" aria-hidden="true">{shortTypeLabel(node.type)}</span>
-                <span className="node-copy">
-                  <strong>{titleForNode(node)}</strong>
-                  <span>{labelForType(node.type)}</span>
-                </span>
-              </button>
-            </foreignObject>
-          );
-        })}
-      </svg>
-      {modalType ? (
-        <div className="graph-modal-backdrop" onMouseDown={(event) => event.stopPropagation()} role="presentation">
-          <form className="graph-config-modal" onSubmit={submitConfig}>
-            <header>
-              <div>
-                <strong>{modalTitle(modalType)}</strong>
-                <span>{modalHelp(modalType)}</span>
-              </div>
-              <button aria-label="关闭" onClick={closeModal} type="button">×</button>
-            </header>
-            <div className="graph-config-fields">
-              {fieldsForModal(modalType).map((field) => (
-                <label key={field.name}>
-                  <span>{field.label}{field.required ? " *" : ""}</span>
-                  {field.type === "select" ? (
-                    <select
-                      onChange={(event) => updateField(field.name, event.target.value)}
-                      required={field.required}
-                      value={form[field.name] || field.defaultValue || ""}
-                    >
-                      {field.options.map((option) => (
-                        <option key={option.value} value={option.value}>{option.label}</option>
-                      ))}
-                    </select>
-                  ) : field.type === "textarea" ? (
-                    <textarea
-                      onChange={(event) => updateField(field.name, event.target.value)}
-                      placeholder={field.placeholder}
-                      required={field.required}
-                      rows={3}
-                      value={form[field.name] || ""}
-                    />
-                  ) : (
-                    <input
-                      onChange={(event) => updateField(field.name, event.target.value)}
-                      placeholder={field.placeholder}
-                      required={field.required}
-                      type="text"
-                      value={form[field.name] || ""}
-                    />
-                  )}
-                </label>
-              ))}
-            </div>
-            {submitError ? <p className="graph-submit-error" role="alert">{submitError}</p> : null}
-            <footer>
-              <button className="secondary-button" onClick={closeModal} type="button">取消</button>
-              <button className="primary-button" disabled={submitting} type="submit">
-                {submitting ? "写入中..." : "生成并关联"}
-              </button>
-            </footer>
-          </form>
+    <section className="graph-view" aria-label="上下文关系图">
+      <aside className="graph-project-rail" aria-label="项目列表">
+        <div className="project-rail-header">
+          <strong>项目列表</strong>
+          <span>{projectNodes.length} 个</span>
         </div>
-      ) : null}
+        <button
+          className={!selectedProjectId ? "active" : ""}
+          onClick={() => selectProject("")}
+          type="button"
+        >
+          全部项目
+        </button>
+        <div className="project-rail-list">
+          {projectNodes.map((project) => (
+            <button
+              aria-label={`筛选项目 ${titleForNode(project)}`}
+              className={selectedProjectId === project.id ? "active" : ""}
+              key={project.id}
+              onClick={() => selectProject(project.id)}
+              type="button"
+            >
+              <span className="project-rail-dot" aria-hidden="true" />
+              <span>{titleForNode(project)}</span>
+            </button>
+          ))}
+        </div>
+      </aside>
+      <div
+        className="graph-canvas"
+        onMouseDown={handleMouseDown}
+        onMouseLeave={stopDrag}
+        onMouseMove={handleMouseMove}
+        onMouseUp={stopDrag}
+        ref={viewportRef}
+      >
+        <div className="graph-toolbar">
+          <strong>{selectedProjectId ? "项目关系" : selectedNodeId ? "聚焦关系" : "全局关系"}</strong>
+          <span>{selectedProjectId ? "只显示当前项目的直接业务关联" : selectedNodeId ? "已突出当前节点的直接业务关联" : "拖拽画布查看全局关系；选择节点后聚焦相邻关系"}</span>
+        </div>
+        <svg
+          height={viewport.height}
+          viewBox={`0 0 ${viewport.width} ${viewport.height}`}
+          width={viewport.width}
+          role="img"
+          aria-label="DevFlow 上下文关系图"
+          ref={svgRef}
+        >
+          {visibleEdges.map((edge) => {
+            const from = positions.get(edge.from);
+            const to = positions.get(edge.to);
+            if (!from || !to) return null;
+            const fromAnchor = edgeAnchorPoint(from);
+            const toAnchor = edgeAnchorPoint(to);
+            return (
+              <line
+                className={`graph-edge ${edgeClassName(edge, selectedProjectId || selectedNodeId)}`}
+                data-testid={`edge-${edge.from}-${edge.to}-${edge.relation}`}
+                key={`${edge.from}-${edge.to}-${edge.relation}`}
+                x1={fromAnchor.x}
+                y1={fromAnchor.y}
+                x2={toAnchor.x}
+                y2={toAnchor.y}
+              />
+            );
+          })}
+          {nodes.map((node) => {
+            const point = positions.get(node.id);
+            return (
+              <foreignObject className="graph-node-shell" height="82" key={node.id} width="190" x={point.x - 95} y={point.y - 42}>
+                <button
+                  aria-label={`${titleForNode(node)} ${labelForType(node.type)}`}
+                  className={`graph-node node-${node.type} status-${node.status} ${activeFocusId === node.id ? "selected" : ""} ${highlightedNodeIds.has(node.id) ? "highlighted" : ""} ${activeFocusId && !highlightedNodeIds.has(node.id) ? "dimmed" : ""}`}
+                  data-testid={`graph-node-${node.id}`}
+                  onClick={() => selectNode(node.id)}
+                  onMouseDown={(event) => startNodeDrag(event, node.id)}
+                  type="button"
+                >
+                  <span className="node-dot" aria-hidden="true" />
+                  <span className="node-copy">{titleForNode(node)}</span>
+                </button>
+              </foreignObject>
+            );
+          })}
+        </svg>
+      </div>
     </section>
   );
 }
 
-const GRAPH_ACTIONS = [
-  { type: "project", label: "新增项目" },
-  { type: "scene", label: "新增场景" },
-  { type: "skill", label: "新增技能" },
-  { type: "rule", label: "新增规则" }
-];
+function buildProjectGraph(graph, selectedProjectId) {
+  const nodes = graph.nodes || [];
+  const edges = (graph.edges || []).filter((edge) => edge.relation !== "contains");
+  if (!selectedProjectId) {
+    return { nodes, edges };
+  }
 
-function fieldsForModal(type) {
-  const commonProjectMount = {
-    name: "projectIds",
-    label: "挂载项目 ID",
-    placeholder: "多个用逗号分隔，例如 api-service,demo-project"
-  };
-  if (type === "project") {
-    return [
-      { name: "projectPath", label: "项目路径", required: true, placeholder: "/path/to/project" },
-      { name: "projectId", label: "项目 ID", placeholder: "不填则用目录名生成" },
-      { name: "name", label: "项目名称", placeholder: "不填则用 package/name 或目录名" },
-      { name: "technologyFamilyId", label: "技术族", placeholder: "frontend / bff / ios / workflow / unknown" }
-    ];
-  }
-  if (type === "scene") {
-    return [
-      { name: "sceneId", label: "场景 ID", placeholder: "不填则由名称生成" },
-      { name: "name", label: "场景名称", required: true, placeholder: "例如 支付排障" },
-      { name: "summary", label: "场景说明", type: "textarea", placeholder: "这个场景解决什么任务" },
-      commonProjectMount
-    ];
-  }
-  if (type === "skill") {
-    return [
-      { name: "skillPath", label: "Skill 路径", required: true, placeholder: "/path/to/skill 或 /path/to/SKILL.md" },
-      { name: "skillId", label: "Skill ID", placeholder: "不填则用目录名生成" },
-      { name: "name", label: "Skill 名称", placeholder: "不填则读取 SKILL.md frontmatter" },
-      commonProjectMount
-    ];
-  }
-  return [
-    { name: "ruleId", label: "Rule ID", required: true, placeholder: "例如 payment/safe-callback" },
-    { name: "name", label: "Rule 名称", placeholder: "例如 支付回调规则" },
-    { name: "purpose", label: "规则用途", type: "textarea", placeholder: "没有现成规则文件时，这里用于生成配套 rule 文件" },
-    { name: "sourcePath", label: "现有规则文件路径", placeholder: "可选，支持 .md / .mdc" },
-    commonProjectMount,
-    { name: "sceneIds", label: "挂载场景 ID", placeholder: "多个用逗号分隔，例如 devflow-config,payment-debug" },
-    {
-      name: "applyMode",
-      label: "触发方式",
-      type: "select",
-      defaultValue: "project-on-demand",
-      options: [
-        { value: "project-on-demand", label: "项目按需" },
-        { value: "scene-on-demand", label: "场景按需" }
-      ]
+  const visibleIds = new Set([selectedProjectId]);
+  const projectEdges = edges.filter((edge) => {
+    const connected = edge.from === selectedProjectId || edge.to === selectedProjectId;
+    if (connected) {
+      visibleIds.add(edge.from);
+      visibleIds.add(edge.to);
     }
-  ];
-}
-
-function defaultForm(type) {
-  if (type === "rule") return { applyMode: "project-on-demand" };
-  return {};
-}
-
-function modalTitle(type) {
-  const titles = {
-    project: "新增项目",
-    scene: "新增场景",
-    skill: "新增技能",
-    rule: "新增规则"
-  };
-  return titles[type] || "新增";
-}
-
-function modalHelp(type) {
-  const help = {
-    project: "只需要项目路径；系统会扫描 .ai-configs、入口文档、skills、rules，并写入关系 JSON。",
-    scene: "场景名称必填；挂载项目后会同时写 scene JSON 和项目 scenes 关系。",
-    skill: "Skill 路径必填；系统会登记来源路径并挂到指定项目。",
-    rule: "Rule ID 必填；有文件就登记来源路径，没有文件则用规则用途生成模板。"
-  };
-  return help[type] || "";
-}
-
-function actionIdForModal(type) {
-  return {
-    project: "add_project_from_path",
-    scene: "add_scene",
-    skill: "add_skill_from_path",
-    rule: "add_rule"
-  }[type];
-}
-
-function payloadForModal(type, form) {
-  const payload = { ...form };
-  if (payload.projectIds) payload.projectIds = splitList(payload.projectIds);
-  if (payload.sceneIds) payload.sceneIds = splitList(payload.sceneIds);
-  if (type === "scene" && payload.summary && !payload.purpose) payload.purpose = payload.summary;
-  return Object.fromEntries(Object.entries(payload).filter(([, value]) => {
-    if (Array.isArray(value)) return value.length > 0;
-    return String(value || "").trim();
-  }));
-}
-
-function splitList(value) {
-  return String(value || "")
-    .split(/[,，\s]+/)
-    .map((item) => item.trim())
-    .filter(Boolean);
-}
-
-function selectVisibleEdges(edges, selectedNodeId) {
-  return edges.filter((edge) => {
-    if (edge.relation === "contains") {
-      return false;
-    }
-    return selectedNodeId && (edge.from === selectedNodeId || edge.to === selectedNodeId);
+    return connected;
   });
+
+  return {
+    nodes: nodes.filter((node) => visibleIds.has(node.id)),
+    edges: projectEdges
+  };
+}
+
+function edgeClassName(edge, selectedNodeId) {
+  if (!selectedNodeId) return "ambient-edge";
+  return edge.from === selectedNodeId || edge.to === selectedNodeId ? "focused-edge" : "muted-edge";
 }
 
 function getHighlightedNodeIds(edges, selectedNodeId) {
@@ -349,60 +275,104 @@ function getHighlightedNodeIds(edges, selectedNodeId) {
   return ids;
 }
 
+function compareNodesByTitle(left, right) {
+  return titleForNode(left).localeCompare(titleForNode(right));
+}
+
+function mergePinnedPositions(basePositions, pinnedPositions) {
+  const positions = new Map(basePositions);
+  for (const [nodeId, point] of Object.entries(pinnedPositions)) {
+    if (positions.has(nodeId)) {
+      positions.set(nodeId, point);
+    }
+  }
+  return positions;
+}
+
+function eventPointInSvg(event, svgElement, viewport) {
+  if (!svgElement) {
+    return null;
+  }
+  const rect = svgElement.getBoundingClientRect();
+  if (!rect.width || !rect.height) {
+    return null;
+  }
+  return {
+    x: ((event.clientX - rect.left) / rect.width) * viewport.width,
+    y: ((event.clientY - rect.top) / rect.height) * viewport.height
+  };
+}
+
+function clamp(value, min, max) {
+  return Math.min(max, Math.max(min, value));
+}
+
+function edgeAnchorPoint(point) {
+  return {
+    x: point.x,
+    y: point.y - 27
+  };
+}
+
 function getGraphViewport(positions) {
   const points = [...positions.values()];
   const maxX = Math.max(1280, ...points.map((point) => point.x + 160));
-  const maxY = Math.max(760, ...points.map((point) => point.y + 140));
+  const maxY = Math.max(980 + GRAPH_TOP_SAFE_SPACE, ...points.map((point) => point.y + 180));
   return {
     width: maxX,
     height: maxY
   };
 }
 
-function getActionBarPlacement(nodes) {
-  const hasRoot = nodes.some((node) => node.type === "root");
-  return { x: 70, y: hasRoot ? 288 : 158 };
-}
-
 function layoutNodes(nodes) {
   const positions = new Map();
   const groups = nodes.filter((node) => node.type === "group");
   const root = nodes.find((node) => node.type === "root");
-  if (root) positions.set(root.id, { x: 620, y: 110 });
+  const center = { x: 640, y: 360 + GRAPH_TOP_SAFE_SPACE };
+  if (root) positions.set(root.id, center);
 
-  const groupY = root ? 250 : 120;
-  const itemY = root ? 380 : 245;
   groups.forEach((node, index) => {
-    positions.set(node.id, { x: 170 + index * 215, y: groupY });
+    positions.set(node.id, { x: 310, y: 170 + GRAPH_TOP_SAFE_SPACE + index * 112 });
   });
 
-  const byType = new Map();
-  nodes.filter((node) => node.type !== "root" && node.type !== "group").forEach((node) => {
-    const list = byType.get(node.type) || [];
-    list.push(node);
-    byType.set(node.type, list);
-  });
-  const typeOrder = ["project", "scene", "skill", "rule", "profile", "task", "gate"];
-  typeOrder.forEach((type, typeIndex) => {
-    const list = byType.get(type) || [];
-    list.forEach((node, index) => {
-      positions.set(node.id, { x: 160 + typeIndex * 220, y: itemY + index * 104 });
+  const graphNodes = nodes.filter((node) => node.type !== "root" && node.type !== "group");
+  const goldenAngle = Math.PI * (3 - Math.sqrt(5));
+  graphNodes.forEach((node, index) => {
+    const radius = 115 + (index % 4) * 48 + Math.floor(index / 8) * 54;
+    const angle = index * goldenAngle - Math.PI / 2;
+    const typeOffset = typeOffsetForNode(node.type);
+    positions.set(node.id, {
+      x: Math.round(center.x + Math.cos(angle) * radius + typeOffset.x),
+      y: Math.round(center.y + Math.sin(angle) * radius + typeOffset.y)
     });
   });
-  return positions;
+  return normalizeTopSafeSpace(positions);
 }
 
-function shortTypeLabel(type) {
-  const labels = {
-    root: "根",
-    group: "组",
-    project: "项",
-    scene: "景",
-    skill: "技",
-    rule: "规",
-    profile: "像",
-    task: "任",
-    gate: "步"
+function normalizeTopSafeSpace(positions) {
+  const minY = Math.min(...[...positions.values()].map((point) => point.y - NODE_BOX_HALF_HEIGHT));
+  const topLimit = GRAPH_TOP_SAFE_SPACE;
+  if (!Number.isFinite(minY) || minY >= topLimit) {
+    return positions;
+  }
+  const offsetY = topLimit - minY;
+  const normalized = new Map();
+  for (const [id, point] of positions) {
+    normalized.set(id, { x: point.x, y: point.y + offsetY });
+  }
+  return normalized;
+}
+
+function typeOffsetForNode(type) {
+  const offsets = {
+    project: { x: -80, y: -10 },
+    sceneTemplate: { x: 54, y: -26 },
+    skill: { x: -36, y: 62 },
+    rule: { x: 74, y: 58 },
+    workset: { x: 124, y: -28 },
+    profile: { x: -110, y: -76 },
+    task: { x: 116, y: -70 },
+    gate: { x: 138, y: 88 }
   };
-  return labels[type] || "点";
+  return offsets[type] || { x: 0, y: 0 };
 }

@@ -100,7 +100,24 @@ function getRuntimeState(db) {
 }
 
 function normalizeTask(task) {
-  return task?.workset ? { ...task, workset: normalizeWorkset(task.workset) } : task;
+  if (!task) return task;
+  const workset = task.workset ? normalizeWorkset(task.workset) : null;
+  const sceneTemplateId = task.sceneTemplateId || task.sceneTemplateIds?.[0] || task.sceneIds?.[0] || workset?.sceneTemplateId || "";
+  const projectIds = task.projectIds?.length
+    ? task.projectIds
+    : (workset?.projects || []).map((project) => project.id).filter(Boolean);
+  const sceneIds = task.sceneIds?.length ? task.sceneIds : (sceneTemplateId ? [sceneTemplateId] : []);
+
+  return {
+    ...task,
+    currentGate: task.currentGate || task.gate || "",
+    taskLevel: task.taskLevel || task.level || "",
+    level: task.level || task.taskLevel || "",
+    projectIds,
+    sceneIds,
+    sceneTemplateIds: task.sceneTemplateIds?.length ? task.sceneTemplateIds : sceneIds,
+    ...(workset ? { workset } : {})
+  };
 }
 
 function upsertProject(db, project) {

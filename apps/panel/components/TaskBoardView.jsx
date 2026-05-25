@@ -16,7 +16,7 @@ export default function TaskBoardView({ graph, selectedNodeId, onSelectNode }) {
     <section className="task-board-view" aria-label="任务看板">
       <div className="task-list-panel">
         <h2>Tasks</h2>
-        {!tasks.length ? <p className="empty-state">还没有 runtime/tasks/*.json 任务。</p> : null}
+        {!tasks.length ? <p className="empty-state">还没有 SQLite task 记录。</p> : null}
         {tasks.map((task) => (
           <button
             className={selectedTask?.id === task.id ? "active" : ""}

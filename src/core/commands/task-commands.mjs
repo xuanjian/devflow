@@ -20,7 +20,9 @@ export async function startTask(repository, input = {}) {
     id: taskId,
     title: input.title || taskId,
     gate: input.gate || "",
+    currentGate: input.gate || "",
     level: input.level || "",
+    taskLevel: input.level || "",
     status: "active",
     note: input.note || "",
     nextAction: input.nextAction || "",
@@ -67,11 +69,20 @@ export async function updateTask(repository, input = {}) {
   const nextTask = {
     ...task,
     gate: input.gate || task.gate,
+    currentGate: input.gate || task.currentGate || task.gate || "",
     recoveryPoint: input.recoveryPoint || task.recoveryPoint || "",
     notes: appendNote(task.notes, input.note)
   };
   await repository.writeTask(nextTask);
   await writeHandoff(input.rootDir, nextTask, [`Updated: ${new Date().toISOString()}`, input.note].filter(Boolean));
+  await repository.setRuntimeState({
+    activeTaskId: nextTask.id,
+    activeTaskPath: "",
+    activeWorksetId: nextTask.workset?.id || "",
+    activeProjectIds: nextTask.projectIds || nextTask.workset?.projects?.map((project) => project.id).filter(Boolean) || [],
+    activeSceneTemplateId: nextTask.workset?.sceneTemplateId || "",
+    currentGate: nextTask.currentGate || nextTask.gate || ""
+  });
 
   return normalizeCommandResult({
     status: "ok",

@@ -7,7 +7,7 @@ import { addProject } from "../commands/project-commands.mjs";
 import { addSceneTemplate } from "../commands/template-commands.mjs";
 import { runAction as runPanelAction } from "../actions.mjs";
 import { runChecks as runPanelChecks } from "../checks.mjs";
-import { buildContextGraph as buildPanelGraph, getNodeDetails as getPanelNodeDetails } from "../graph.mjs";
+import { buildPanelGraph, getPanelNodeDetails } from "../panel-graph.mjs";
 import { defaultDbPath } from "../storage/schema.mjs";
 
 export function createDevFlowService({ rootDir, backend = "auto", repository } = {}) {
@@ -30,10 +30,10 @@ export function createDevFlowService({ rootDir, backend = "auto", repository } =
       return buildGraph(await getRepository(), input);
     },
     async buildContextGraph(input = {}) {
-      return buildPanelGraph({ rootDir, ...input });
+      return buildPanelGraph(await getRepository(), { rootDir, ...input });
     },
     async getNodeDetails(nodeId, input = {}) {
-      const graph = input.graph || await buildPanelGraph({ rootDir, ...input });
+      const graph = input.graph || await buildPanelGraph(await getRepository(), { rootDir, ...input });
       return getPanelNodeDetails(graph, nodeId);
     },
     async runChecks(input = {}) {

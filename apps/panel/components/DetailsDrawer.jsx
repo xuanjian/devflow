@@ -26,11 +26,13 @@ export default function DetailsDrawer({ details, onRunAction }) {
         <dt>文档</dt>
         <dd>{node.docPath || "无"}</dd>
       </dl>
-      <RelationshipList title="关联场景" items={related?.scenes} />
+      <RelationshipList title="关联场景模板" items={related?.sceneTemplates || related?.scenes} />
       <RelationshipList title="关联技能" items={related?.skills} />
       <RelationshipList title="关联规则" items={related?.rules} />
       <RelationshipList title="关联步骤" items={related?.gates} />
+      <RelationshipList title="关联产物" items={related?.artifacts} />
       <RelationshipList title="关联项目" items={related?.projects} />
+      <RelationshipList title="关联 Workset" items={related?.worksets} />
       <RelationshipList title="关联任务" items={related?.tasks} />
       {warnings?.length ? (
         <section>
@@ -49,7 +51,7 @@ export default function DetailsDrawer({ details, onRunAction }) {
         </section>
       ) : null}
       <details>
-        <summary>原始 JSON</summary>
+        <summary>原始数据</summary>
         <pre>{JSON.stringify(node.raw || {}, null, 2)}</pre>
       </details>
     </aside>
@@ -62,7 +64,15 @@ function RelationshipList({ title, items = [] }) {
     <section>
       <h3>{title}</h3>
       <ul>
-        {items.map((item) => <li key={item.id}>{item.title}</li>)}
+        {items.map((item) => (
+          <li key={item.id}>
+            {item.type === "artifact" ? (
+              <a href={`/api/artifacts/${encodeURIComponent(item.id)}`} rel="noreferrer" target="_blank">
+                {item.title}
+              </a>
+            ) : item.title}
+          </li>
+        ))}
       </ul>
     </section>
   );
