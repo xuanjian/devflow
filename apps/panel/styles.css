@@ -499,8 +499,8 @@ summary:focus-visible {
 
 .gate-track {
   display: grid;
-  gap: 10px;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 8px;
+  grid-template-columns: repeat(auto-fit, minmax(116px, 1fr));
   margin-top: 14px;
 }
 
@@ -512,9 +512,13 @@ summary:focus-visible {
 }
 
 .task-flow-header p {
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
   color: var(--muted);
+  display: -webkit-box;
   line-height: 1.5;
   margin: 8px 0 0;
+  overflow: hidden;
 }
 
 .task-flow-summary {
@@ -561,8 +565,9 @@ summary:focus-visible {
   align-content: start;
   color: var(--text);
   display: grid;
-  gap: 8px;
-  min-height: 168px;
+  gap: 5px;
+  min-height: 82px;
+  padding: 10px;
   text-align: left;
 }
 
@@ -579,6 +584,60 @@ summary:focus-visible {
 .gate-card p {
   line-height: 1.45;
   margin: 0;
+}
+
+.task-project-map {
+  border-top: 1px solid var(--line);
+  margin-top: 16px;
+  padding-top: 14px;
+}
+
+.task-project-map header {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+}
+
+.task-project-map h3 {
+  font-size: 15px;
+  margin: 0;
+}
+
+.task-project-map header span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.task-project-map svg {
+  display: block;
+  height: min(270px, 34vh);
+  margin-top: 10px;
+  overflow: visible;
+  touch-action: none;
+  width: 100%;
+}
+
+.project-map-edge {
+  stroke: rgba(125, 163, 255, 0.34);
+  stroke-linecap: round;
+  stroke-width: 1.2;
+}
+
+.project-map-node-shell {
+  overflow: visible;
+  pointer-events: none;
+}
+
+.project-map-graph-node {
+  pointer-events: auto;
+}
+
+.project-map-graph-node.project-node {
+  cursor: grab;
+}
+
+.project-map-graph-node.project-node:active {
+  cursor: grabbing;
 }
 
 .state-message {
@@ -755,7 +814,7 @@ summary:focus-visible {
   stroke: rgba(185, 185, 185, 0.20);
   stroke-linecap: round;
   stroke-width: 1.2;
-  transition: opacity 180ms ease, stroke 180ms ease, stroke-width 180ms ease;
+  transition: opacity 180ms ease, stroke 180ms ease, stroke-width 180ms ease, x1 120ms linear, y1 120ms linear, x2 120ms linear, y2 120ms linear;
 }
 
 .graph-edge.muted-edge {
@@ -793,7 +852,7 @@ summary:focus-visible {
   overflow: visible;
   padding: 7px 4px 4px;
   transition: opacity 180ms ease, transform 180ms ease;
-  user-select: text;
+  user-select: none;
   width: fit-content;
   max-width: 164px;
   pointer-events: auto;
@@ -841,7 +900,17 @@ summary:focus-visible {
 .graph-node.highlighted .node-dot,
 .graph-node.selected .node-dot,
 .graph-node:focus .node-dot {
+  animation: node-pulse 1.8s ease-in-out infinite;
   box-shadow: 0 0 0 5px var(--node-soft), 0 0 18px color-mix(in srgb, var(--node-accent) 56%, transparent);
+}
+
+@keyframes node-pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.12);
+  }
 }
 
 .graph-node.dimmed {

@@ -129,6 +129,24 @@ test("server opens registered artifact documents in the browser", async () => {
   }
 });
 
+test("server serves registered HTML artifacts as rendered HTML", async () => {
+  const rootDir = await copyFixture();
+  const server = await startServer({ rootDir, port: 0 });
+  const artifactId = `artifact:${encodeURIComponent("docs/demo-technical-design.html")}`;
+  try {
+    const response = await fetch(`${server.url}/api/artifacts/${encodeURIComponent(artifactId)}`);
+    const html = await response.text();
+
+    assert.equal(response.status, 200);
+    assert.match(response.headers.get("content-type"), /text\/html/);
+    assert.match(html, /<main data-testid="html-artifact">/);
+    assert.doesNotMatch(html, /&lt;main data-testid=/);
+  } finally {
+    await server.close();
+    await fs.rm(rootDir, { recursive: true, force: true });
+  }
+});
+
 test("server rejects unregistered artifact documents", async () => {
   const rootDir = await copyFixture();
   const server = await startServer({ rootDir, port: 0 });

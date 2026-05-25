@@ -3,15 +3,18 @@ import { labelForType, titleForNode } from "../labels.js";
 
 const GRAPH_TOP_SAFE_SPACE = 86;
 const NODE_BOX_HALF_HEIGHT = 42;
+const FORCE_VIEWPORT = { width: 2200, height: 1500 };
 
 export default function GraphView({ graph, selectedNodeId, onSelectNode }) {
   const [selectedProjectId, setSelectedProjectId] = useState("");
   const [pinnedPositions, setPinnedPositions] = useState({});
+  const [animatedPositions, setAnimatedPositions] = useState(new Map());
   const allNodes = graph.nodes || [];
   const projectNodes = useMemo(() => allNodes.filter((node) => node.type === "project").sort(compareNodesByTitle), [allNodes]);
   const projectGraph = useMemo(() => buildProjectGraph(graph, selectedProjectId), [graph, selectedProjectId]);
   const nodes = projectGraph.nodes;
-  const positions = useMemo(() => mergePinnedPositions(layoutNodes(nodes), pinnedPositions), [nodes, pinnedPositions]);
+  const seedPositions = useMemo(() => mergePinnedPositions(layoutNodes(nodes), pinnedPositions), [nodes, pinnedPositions]);
+  const positions = useMemo(() => mergeVisiblePositions(seedPositions, animatedPositions, nodes), [animatedPositions, nodes, seedPositions]);
   const viewport = getGraphViewport(positions);
   const visibleEdges = projectGraph.edges;
   const activeFocusId = selectedProjectId || selectedNodeId;
@@ -22,6 +25,8 @@ export default function GraphView({ graph, selectedNodeId, onSelectNode }) {
   const nodeDragRef = useRef(null);
   const suppressClickRef = useRef("");
   const hasCenteredRef = useRef(false);
+  const animationFrameRef = useRef(0);
+  const simulationRef = useRef({ nodes: new Map(), settled: false });
 
   useEffect(() => {
     if (selectedProjectId && !projectNodes.some((node) => node.id === selectedProjectId)) {
@@ -40,6 +45,34 @@ export default function GraphView({ graph, selectedNodeId, onSelectNode }) {
       return Object.keys(next).length === Object.keys(current).length ? current : next;
     });
   }, [nodes]);
+
+  useEffect(() => {
+    simulationRef.current = initializeSimulation({
+      current: simulationRef.current,
+      edges: visibleEdges,
+      nodes,
+      pinnedPositions,
+      seedPositions
+    });
+    setAnimatedPositions(snapshotSimulationPositions(simulationRef.current.nodes));
+    let lastTime = performance.now();
+
+    function tick(now) {
+      const delta = Math.min(32, now - lastTime);
+      lastTime = now;
+      const moving = stepSimulation(simulationRef.current, visibleEdges, pinnedPositions, delta);
+      setAnimatedPositions(snapshotSimulationPositions(simulationRef.current.nodes));
+      if (moving || nodeDragRef.current) {
+        animationFrameRef.current = requestAnimationFrame(tick);
+      } else {
+        simulationRef.current.settled = true;
+      }
+    }
+
+    cancelAnimationFrame(animationFrameRef.current);
+    animationFrameRef.current = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(animationFrameRef.current);
+  }, [nodes, pinnedPositions, seedPositions, visibleEdges]);
 
   useEffect(() => {
     if (hasCenteredRef.current) {
@@ -235,6 +268,142 @@ export default function GraphView({ graph, selectedNodeId, onSelectNode }) {
   );
 }
 
+function initializeSimulation({ current, edges, nodes, pinnedPositions, seedPositions }) {
+  const nextNodes = new Map();
+  for (const node of nodes) {
+    const existing = current.nodes.get(node.id);
+    const seeded = seedPositions.get(node.id) || { x: FORCE_VIEWPORT.width / 2, y: FORCE_VIEWPORT.height / 2 };
+    const pinned = pinnedPositions[node.id];
+    nextNodes.set(node.id, {
+      id: node.id,
+      type: node.type,
+      x: pinned?.x ?? existing?.x ?? seeded.x,
+      y: pinned?.y ?? existing?.y ?? seeded.y,
+      vx: existing?.vx ?? 0,
+      vy: existing?.vy ?? 0
+    });
+  }
+  const degree = new Map();
+  for (const edge of edges) {
+    degree.set(edge.from, (degree.get(edge.from) || 0) + 1);
+    degree.set(edge.to, (degree.get(edge.to) || 0) + 1);
+  }
+  for (const node of nextNodes.values()) {
+    node.degree = degree.get(node.id) || 0;
+  }
+  return { nodes: nextNodes, settled: false };
+}
+
+function stepSimulation(simulation, edges, pinnedPositions, delta) {
+  const nodes = [...simulation.nodes.values()];
+  if (!nodes.length) return false;
+  const pinnedIds = new Set(Object.keys(pinnedPositions));
+  const alpha = Math.min(1.2, Math.max(0.35, delta / 16));
+  const center = { x: FORCE_VIEWPORT.width / 2, y: FORCE_VIEWPORT.height / 2 + GRAPH_TOP_SAFE_SPACE / 2 };
+  let totalVelocity = 0;
+
+  for (let index = 0; index < nodes.length; index += 1) {
+    const left = nodes[index];
+    for (let nextIndex = index + 1; nextIndex < nodes.length; nextIndex += 1) {
+      const right = nodes[nextIndex];
+      let dx = right.x - left.x;
+      let dy = right.y - left.y;
+      let distanceSq = dx * dx + dy * dy;
+      if (distanceSq < 1) {
+        dx = deterministicJitter(left.id, right.id);
+        dy = deterministicJitter(right.id, left.id);
+        distanceSq = dx * dx + dy * dy;
+      }
+      const distance = Math.sqrt(distanceSq);
+      const strength = Math.min(22, 11000 / distanceSq) * alpha;
+      const fx = (dx / distance) * strength;
+      const fy = (dy / distance) * strength;
+      if (!pinnedIds.has(left.id)) {
+        left.vx -= fx;
+        left.vy -= fy;
+      }
+      if (!pinnedIds.has(right.id)) {
+        right.vx += fx;
+        right.vy += fy;
+      }
+    }
+  }
+
+  for (const edge of edges) {
+    const from = simulation.nodes.get(edge.from);
+    const to = simulation.nodes.get(edge.to);
+    if (!from || !to) continue;
+    const dx = to.x - from.x;
+    const dy = to.y - from.y;
+    const distance = Math.max(1, Math.hypot(dx, dy));
+    const desired = desiredEdgeDistance(from, to, edge);
+    const force = (distance - desired) * 0.012 * alpha;
+    const fx = (dx / distance) * force;
+    const fy = (dy / distance) * force;
+    if (!pinnedIds.has(from.id)) {
+      from.vx += fx;
+      from.vy += fy;
+    }
+    if (!pinnedIds.has(to.id)) {
+      to.vx -= fx;
+      to.vy -= fy;
+    }
+  }
+
+  for (const node of nodes) {
+    if (pinnedPositions[node.id]) {
+      node.x = pinnedPositions[node.id].x;
+      node.y = pinnedPositions[node.id].y;
+      node.vx = 0;
+      node.vy = 0;
+      continue;
+    }
+    const gravity = node.type === "group" || node.type === "root" ? 0.010 : 0.004;
+    node.vx += (center.x - node.x) * gravity * alpha;
+    node.vy += (center.y - node.y) * gravity * alpha;
+    node.vx *= 0.86;
+    node.vy *= 0.86;
+    node.x = clamp(node.x + node.vx * alpha, 90, FORCE_VIEWPORT.width - 90);
+    node.y = clamp(node.y + node.vy * alpha, GRAPH_TOP_SAFE_SPACE + 48, FORCE_VIEWPORT.height - 90);
+    totalVelocity += Math.abs(node.vx) + Math.abs(node.vy);
+  }
+
+  return totalVelocity / nodes.length > 0.035;
+}
+
+function desiredEdgeDistance(from, to, edge) {
+  if (edge.relation === "contains") return 180;
+  if (from.type === "task" || to.type === "task") return 250;
+  if (from.type === "artifact" || to.type === "artifact") return 210;
+  if (from.type === "workset" || to.type === "workset") return 235;
+  return 190 + Math.min(80, (from.degree + to.degree) * 4);
+}
+
+function deterministicJitter(leftId, rightId) {
+  let hash = 0;
+  const text = `${leftId}:${rightId}`;
+  for (let index = 0; index < text.length; index += 1) {
+    hash = (hash * 31 + text.charCodeAt(index)) >>> 0;
+  }
+  return (hash % 1000) / 500 - 1;
+}
+
+function snapshotSimulationPositions(nodes) {
+  const positions = new Map();
+  for (const node of nodes.values()) {
+    positions.set(node.id, { x: Math.round(node.x), y: Math.round(node.y) });
+  }
+  return positions;
+}
+
+function mergeVisiblePositions(seedPositions, animatedPositions, nodes) {
+  const positions = new Map();
+  for (const node of nodes) {
+    positions.set(node.id, animatedPositions.get(node.id) || seedPositions.get(node.id) || { x: 640, y: 420 });
+  }
+  return positions;
+}
+
 function buildProjectGraph(graph, selectedProjectId) {
   const nodes = graph.nodes || [];
   const edges = (graph.edges || []).filter((edge) => edge.relation !== "contains");
@@ -316,8 +485,8 @@ function edgeAnchorPoint(point) {
 
 function getGraphViewport(positions) {
   const points = [...positions.values()];
-  const maxX = Math.max(1280, ...points.map((point) => point.x + 160));
-  const maxY = Math.max(980 + GRAPH_TOP_SAFE_SPACE, ...points.map((point) => point.y + 180));
+  const maxX = Math.max(FORCE_VIEWPORT.width, ...points.map((point) => point.x + 160));
+  const maxY = Math.max(FORCE_VIEWPORT.height, ...points.map((point) => point.y + 180));
   return {
     width: maxX,
     height: maxY

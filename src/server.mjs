@@ -114,6 +114,11 @@ async function serveArtifactDocument(response, rootPath, artifactNode) {
   try {
     const content = await fs.readFile(absolutePath, "utf8");
     const title = artifactNode.title || path.basename(artifactPath);
+    if (isHtmlArtifact(artifactPath)) {
+      response.writeHead(200, { "content-type": MIME_TYPES[".html"] });
+      response.end(content);
+      return;
+    }
     response.writeHead(200, { "content-type": "text/html; charset=utf-8" });
     response.end(renderArtifactPage({ title, artifactPath, content }));
   } catch (error) {
@@ -125,6 +130,10 @@ async function serveArtifactDocument(response, rootPath, artifactNode) {
       }
     });
   }
+}
+
+function isHtmlArtifact(artifactPath) {
+  return [".html", ".htm"].includes(path.extname(artifactPath).toLowerCase());
 }
 
 function renderArtifactPage({ title, artifactPath, content }) {
