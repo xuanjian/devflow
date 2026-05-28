@@ -36,6 +36,7 @@ function usage() {
   devflow query skills --workset <task-or-workset-id>
   devflow query rules --template <id>
   devflow graph
+  devflow migrate from-json [--dry-run] [--keep-json]
   devflow task current
   devflow task start "<title>" --project <id> --template <id>
   devflow task update <task-id> --gate <G1-G7> --note "<progress>"
@@ -98,13 +99,18 @@ function ensureKnownTools(toolIds) {
 }
 
 function isDevFlowRoot(candidateRoot) {
-  return fs.existsSync(path.join(candidateRoot, 'config', 'entry.json'))
-    && fs.existsSync(path.join(candidateRoot, 'scripts', 'install-ai-context.mjs'));
+  return (
+    fs.existsSync(path.join(candidateRoot, 'config', 'entry.json'))
+    || fs.existsSync(path.join(candidateRoot, 'data', 'devflow.db'))
+  ) && fs.existsSync(path.join(candidateRoot, 'scripts', 'install-ai-context.mjs'));
 }
 
 function isDevFlowDataRoot(candidateRoot) {
-  return fs.existsSync(path.join(candidateRoot, 'config', 'entry.json'))
-    && fs.existsSync(path.join(candidateRoot, 'runtime', 'current.json'));
+  return fs.existsSync(path.join(candidateRoot, 'data', 'devflow.db'))
+    || (
+      fs.existsSync(path.join(candidateRoot, 'config', 'entry.json'))
+      && fs.existsSync(path.join(candidateRoot, 'runtime', 'current.json'))
+    );
 }
 
 function isDirectoryEmpty(directoryPath) {
@@ -707,6 +713,15 @@ async function runFacadeCommand(root, command, type, rest, flags) {
   }
   if (command === 'graph') {
     printJson(await service.buildGraph());
+    return;
+  }
+  if (command === 'migrate' && type === 'from-json') {
+    const module = await import('../src/core/storage/migrate-from-json.mjs');
+    printJson(await module.migrateDevFlowFromJson({
+      rootDir: root,
+      dryRun: Boolean(flags['dry-run']),
+      keepJson: Boolean(flags['keep-json']),
+    }));
     return;
   }
   if (command === 'task' && type === 'current') {
