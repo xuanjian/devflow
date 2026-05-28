@@ -5,10 +5,10 @@ import os from "node:os";
 import path from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
-import { seedSqliteFromJsonFixture } from "./helpers/sqlite-fixtures.mjs";
+import { seedSqliteFromJsonFixture } from "../helpers/sqlite-fixtures.mjs";
 
 const testFile = fileURLToPath(import.meta.url);
-const repoRoot = path.resolve(path.dirname(testFile), "..");
+const repoRoot = path.resolve(path.dirname(testFile), "../..");
 const cliPath = path.join(repoRoot, "scripts/devflow-cli.mjs");
 const fixtureRoot = path.join(repoRoot, "tests/core/fixtures/basic-ai-context");
 

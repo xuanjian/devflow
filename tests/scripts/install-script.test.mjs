@@ -5,12 +5,12 @@ import os from "node:os";
 import path from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
-import { check, syncProjects, validate } from "../scripts/install-ai-context.mjs";
-import { createSqliteRepository } from "../src/core/repositories/sqlite-repository.mjs";
-import { seedSqliteFromJsonFixture } from "./helpers/sqlite-fixtures.mjs";
+import { check, syncProjects, validate } from "../../scripts/install-ai-context.mjs";
+import { createSqliteRepository } from "../../src/core/repositories/sqlite-repository.mjs";
+import { seedSqliteFromJsonFixture } from "../helpers/sqlite-fixtures.mjs";
 
 const testFile = fileURLToPath(import.meta.url);
-const rootDir = path.resolve(path.dirname(testFile), "..");
+const rootDir = path.resolve(path.dirname(testFile), "../..");
 const scriptPath = path.join(rootDir, "scripts/install-ai-context.mjs");
 const basicFixtureRoot = path.join(rootDir, "tests/core/fixtures/basic-ai-context");
 const legacyJsonEntryGuidancePattern = /config\/(?:entry\.json|projects\/index\.json|projects\/<project-id>\.json|scenes\/index\.json|scenes\/<scene-id>\.json|skills\/skills\.json|rules\/rules\.json|tasks\/gates\.json)|runtime\/current\.json/;

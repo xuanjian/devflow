@@ -7,7 +7,7 @@ import test from "node:test";
 import { fileURLToPath } from "node:url";
 
 const testFile = fileURLToPath(import.meta.url);
-const rootDir = path.resolve(path.dirname(testFile), "..");
+const rootDir = path.resolve(path.dirname(testFile), "../..");
 const cliPath = path.join(rootDir, "scripts/devflow-cli.mjs");
 
 function runCli(args, env) {

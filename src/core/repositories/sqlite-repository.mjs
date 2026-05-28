@@ -171,7 +171,6 @@ export function createSqliteRepository({ rootDir = process.cwd(), dbPath = defau
 
     async deleteProject(projectId) {
       deleteEntity(db, "projects", projectId, [
-        ["documents", "owner_type = 'project' AND owner_id = ?"],
         ["project_skill_mounts", "project_id = ?"],
         ["project_rule_mounts", "project_id = ?"],
         ["workset_projects", "project_id = ?"],
@@ -182,7 +181,6 @@ export function createSqliteRepository({ rootDir = process.cwd(), dbPath = defau
 
     async deleteSceneTemplate(sceneTemplateId) {
       deleteEntity(db, "scene_templates", sceneTemplateId, [
-        ["documents", "owner_type = 'sceneTemplate' AND owner_id = ?"],
         ["scene_template_capabilities", "scene_template_id = ?"],
         ["scene_template_project_hints", "scene_template_id = ?"],
         ["scene_template_skill_hints", "scene_template_id = ?"],
@@ -193,7 +191,6 @@ export function createSqliteRepository({ rootDir = process.cwd(), dbPath = defau
 
     async deleteSkill(skillId) {
       deleteEntity(db, "skills", skillId, [
-        ["documents", "owner_type = 'skill' AND owner_id = ?"],
         ["project_skill_mounts", "skill_id = ?"],
         ["workset_skills", "skill_id = ?"],
         ["scene_template_skill_hints", "skill_id = ?"]
@@ -203,7 +200,6 @@ export function createSqliteRepository({ rootDir = process.cwd(), dbPath = defau
 
     async deleteRule(ruleId) {
       deleteEntity(db, "rules", ruleId, [
-        ["documents", "owner_type = 'rule' AND owner_id = ?"],
         ["project_rule_mounts", "rule_id = ?"],
         ["workset_rules", "rule_id = ?"],
         ["scene_template_rule_hints", "rule_id = ?"]

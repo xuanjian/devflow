@@ -14,7 +14,6 @@ export const REQUIRED_TABLES = [
   "scene_templates",
   "skills",
   "rules",
-  "documents",
   "project_skill_mounts",
   "project_rule_mounts",
   "scene_template_capabilities",

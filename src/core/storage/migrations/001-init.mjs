@@ -39,15 +39,6 @@ export function up(db) {
       raw_json TEXT NOT NULL
     );
 
-    CREATE TABLE IF NOT EXISTS documents (
-      id TEXT PRIMARY KEY,
-      owner_type TEXT NOT NULL,
-      owner_id TEXT NOT NULL,
-      path TEXT NOT NULL,
-      source_exists INTEGER NOT NULL DEFAULT 0,
-      raw_json TEXT NOT NULL
-    );
-
     CREATE TABLE IF NOT EXISTS project_skill_mounts (
       project_id TEXT NOT NULL,
       skill_id TEXT NOT NULL,

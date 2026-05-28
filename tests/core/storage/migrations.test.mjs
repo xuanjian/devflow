@@ -9,7 +9,7 @@ test("fresh DB applies all migrations in order", () => {
     initializeSchema(db);
 
     const versions = db.prepare("SELECT version FROM schema_version ORDER BY version").all();
-    assert.deepEqual(versions.map((row) => row.version), [1, 2]);
+    assert.deepEqual(versions.map((row) => row.version), [1, 2, 3]);
 
     const tables = db.prepare("SELECT name FROM sqlite_master WHERE type = 'table'").all().map((row) => row.name);
     assert.equal(tables.includes("projects"), true);
@@ -20,7 +20,7 @@ test("fresh DB applies all migrations in order", () => {
   }
 });
 
-test("legacy DB at v1 incrementally applies v2", () => {
+test("legacy DB at v1 incrementally applies later migrations", () => {
   const db = new Database(":memory:");
   try {
     db.exec(`
@@ -32,7 +32,7 @@ test("legacy DB at v1 incrementally applies v2", () => {
     initializeSchema(db);
 
     const versions = db.prepare("SELECT version FROM schema_version ORDER BY version").all();
-    assert.deepEqual(versions.map((row) => row.version), [1, 2]);
+    assert.deepEqual(versions.map((row) => row.version), [1, 2, 3]);
   } finally {
     db.close();
   }
@@ -45,7 +45,7 @@ test("migrations are idempotent", () => {
     initializeSchema(db);
 
     const count = db.prepare("SELECT COUNT(*) AS n FROM schema_version").get().n;
-    assert.equal(count, 2);
+    assert.equal(count, 3);
   } finally {
     db.close();
   }

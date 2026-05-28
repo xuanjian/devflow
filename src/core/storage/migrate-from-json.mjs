@@ -34,7 +34,6 @@ const TABLES_TO_CLEAR = [
   "scene_template_capabilities",
   "project_rule_mounts",
   "project_skill_mounts",
-  "documents",
   "rules",
   "skills",
   "scene_templates",
@@ -278,7 +277,7 @@ function insertProjects(db, rootPath, projects, warnings) {
       docPath: project.doc?.path || "",
       rawJson: stringify(project)
     });
-    insertDocument(db, rootPath, warnings, "project", project.id, project.doc?.path);
+    warnMissingSourcePath(rootPath, warnings, "project", project.id, project.doc?.path);
     for (const skill of project.skills || []) insertRef(db, "project_skill_mounts", "project_id", project.id, "skill_id", skill.id, skill);
     for (const rule of project.rules || []) insertRef(db, "project_rule_mounts", "project_id", project.id, "rule_id", rule.id, rule);
   }
@@ -298,7 +297,7 @@ function insertSceneTemplates(db, rootPath, sceneTemplates, warnings) {
       sourcePath: sceneTemplate.sourcePath || "",
       rawJson: stringify(sceneTemplate)
     });
-    insertDocument(db, rootPath, warnings, "sceneTemplate", sceneTemplate.id, sceneTemplate.sourcePath);
+    warnMissingSourcePath(rootPath, warnings, "sceneTemplate", sceneTemplate.id, sceneTemplate.sourcePath);
     for (const capabilityId of sceneTemplate.capabilityIds || []) {
       insertCapability.run(capabilityId, stringify({ id: capabilityId }));
       insertRef(db, "scene_template_capabilities", "scene_template_id", sceneTemplate.id, "capability_id", capabilityId, { id: capabilityId });
@@ -318,7 +317,7 @@ function insertSkills(db, rootPath, skills, warnings) {
       sourcePath: skill.sourcePath || "",
       rawJson: stringify(skill)
     });
-    insertDocument(db, rootPath, warnings, "skill", skill.id, skill.sourcePath);
+    warnMissingSourcePath(rootPath, warnings, "skill", skill.id, skill.sourcePath);
   }
 }
 
@@ -331,7 +330,7 @@ function insertRules(db, rootPath, rules, warnings) {
       sourcePath: rule.sourcePath || "",
       rawJson: stringify(rule)
     });
-    insertDocument(db, rootPath, warnings, "rule", rule.id, rule.sourcePath);
+    warnMissingSourcePath(rootPath, warnings, "rule", rule.id, rule.sourcePath);
   }
 }
 
@@ -416,7 +415,7 @@ function insertRef(db, table, leftColumn, leftValue, rightColumn, rightValue, ra
   );
 }
 
-function insertDocument(db, rootPath, warnings, ownerType, ownerId, sourcePath) {
+function warnMissingSourcePath(rootPath, warnings, ownerType, ownerId, sourcePath) {
   if (!sourcePath) return;
   const exists = fs.existsSync(resolveInside(rootPath, sourcePath));
   if (!exists) {
@@ -427,14 +426,6 @@ function insertDocument(db, rootPath, warnings, ownerType, ownerId, sourcePath) 
       path: sourcePath
     });
   }
-  db.prepare("INSERT OR REPLACE INTO documents (id, owner_type, owner_id, path, source_exists, raw_json) VALUES (?, ?, ?, ?, ?, ?)").run(
-    `${ownerType}:${ownerId}:${sourcePath}`,
-    ownerType,
-    ownerId,
-    sourcePath,
-    exists ? 1 : 0,
-    stringify({ ownerType, ownerId, path: sourcePath, exists })
-  );
 }
 
 function assertRowCountSanity(db, sourceCounts) {

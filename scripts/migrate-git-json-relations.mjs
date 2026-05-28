@@ -158,7 +158,6 @@ function upsertProject(database, repoRoot, project) {
     docPath: project.doc?.path || "",
     rawJson: stringify(project)
   });
-  insertDocument(database, repoRoot, "project", project.id, project.doc?.path);
   for (const skill of project.skills || []) insertRef(database, "project_skill_mounts", "project_id", project.id, "skill_id", skill.id, skill);
   for (const rule of project.rules || []) insertRef(database, "project_rule_mounts", "project_id", project.id, "rule_id", rule.id, rule);
 }
@@ -174,7 +173,6 @@ function upsertSceneTemplate(database, repoRoot, sceneTemplate) {
     sourcePath: sceneTemplate.sourcePath || sceneTemplate.source?.path || "",
     rawJson: stringify({ ...sceneTemplate, templateType: sceneTemplate.templateType || "scene-template" })
   });
-  insertDocument(database, repoRoot, "sceneTemplate", sceneTemplate.id, sceneTemplate.sourcePath || sceneTemplate.source?.path);
   for (const capabilityId of sceneTemplate.capabilityIds || []) {
     database.prepare("INSERT OR REPLACE INTO capabilities (id, raw_json) VALUES (?, ?)").run(capabilityId, stringify({ id: capabilityId }));
     insertRef(database, "scene_template_capabilities", "scene_template_id", sceneTemplate.id, "capability_id", capabilityId, { id: capabilityId });
@@ -197,7 +195,6 @@ function upsertSkill(database, repoRoot, skill) {
     sourcePath: skill.sourcePath || "",
     rawJson: stringify(skill)
   });
-  insertDocument(database, repoRoot, "skill", skill.id, skill.sourcePath);
 }
 
 function upsertRule(database, repoRoot, rule) {
@@ -207,7 +204,6 @@ function upsertRule(database, repoRoot, rule) {
     sourcePath: rule.sourcePath || "",
     rawJson: stringify(rule)
   });
-  insertDocument(database, repoRoot, "rule", rule.id, rule.sourcePath);
 }
 
 function upsertGraphEdge(database, edge) {
@@ -241,19 +237,6 @@ function buildGraphEdges({ projects, sceneTemplates, rules }) {
     for (const sceneId of rule.sceneIds || []) addEdge(`rule:${rule.id}`, `sceneTemplate:${sceneId}`, "applies-scene-template");
   }
   return edges;
-}
-
-function insertDocument(database, repoRoot, ownerType, ownerId, sourcePath) {
-  if (!sourcePath) return;
-  const exists = fs.existsSync(path.join(repoRoot, sourcePath));
-  database.prepare("INSERT OR REPLACE INTO documents (id, owner_type, owner_id, path, source_exists, raw_json) VALUES (?, ?, ?, ?, ?, ?)").run(
-    `${ownerType}:${ownerId}:${sourcePath}`,
-    ownerType,
-    ownerId,
-    sourcePath,
-    exists ? 1 : 0,
-    stringify({ ownerType, ownerId, path: sourcePath, exists })
-  );
 }
 
 function insertRef(database, table, leftColumn, leftValue, rightColumn, rightValue, rawValue) {
