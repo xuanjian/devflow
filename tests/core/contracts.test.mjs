@@ -189,7 +189,12 @@ test("normalizes query route results with sceneTemplate, workset, readPaths, and
     skills: [],
     rules: [],
     readPaths: ["config/projects/demo-project.json"],
-    nextAction: "Inspect selected project context."
+    nextAction: "Inspect selected project context.",
+    candidates: [],
+    historyHints: [],
+    clarify: [],
+    refinementHint: "",
+    inference: {}
   });
 });
 

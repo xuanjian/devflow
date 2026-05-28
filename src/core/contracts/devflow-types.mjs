@@ -122,7 +122,12 @@ export function normalizeQueryRouteResult(input = {}) {
     skills: input.skills || [],
     rules: input.rules || [],
     readPaths: input.readPaths || [],
-    nextAction: input.nextAction || ""
+    nextAction: input.nextAction || "",
+    candidates: input.candidates || [],
+    historyHints: input.historyHints || [],
+    clarify: input.clarify || [],
+    refinementHint: input.refinementHint || "",
+    inference: input.inference || {}
   };
 }
 

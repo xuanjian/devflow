@@ -101,6 +101,10 @@ export function createSqliteRepository({ rootDir = process.cwd(), dbPath = defau
       return listRaw(db, "graph_edges");
     },
 
+    async listProjectGraphEdges(relations = []) {
+      return listProjectGraphEdges(db, relations);
+    },
+
     async getConfig(key) {
       const row = db.prepare("SELECT raw_json FROM config WHERE key = ?").get(key);
       return row ? parseRaw(row.raw_json) : null;
@@ -327,6 +331,21 @@ function listJoinedProjectsForSceneTemplate(db, sceneTemplateId) {
     const hint = parseRaw(row.hint_json);
     return hint?.role ? { ...project, role: hint.role } : project;
   });
+}
+
+function listProjectGraphEdges(db, relations = []) {
+  const relationList = normalizeStringList(relations);
+  const relationFilter = relationList.length
+    ? `AND relation IN (${relationList.map(() => "?").join(", ")})`
+    : "";
+  return db.prepare(`
+    SELECT from_id AS "from", to_id AS "to", relation
+    FROM graph_edges
+    WHERE from_id LIKE 'project:%'
+      AND to_id LIKE 'project:%'
+      ${relationFilter}
+    ORDER BY from_id, to_id, relation
+  `).all(...relationList);
 }
 
 function getRuntimeState(db) {
