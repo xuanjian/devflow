@@ -662,4 +662,37 @@ R5 完成后可能会删除：`documents`（被 `task_documents` 取代后剩下
 
 - **顺序**：先走完整改主线 R3c → R4 → R5，SQLite schema 最终稳定后再统一做 W1/W2/W3/W4。理由：W1/W2 导数据依赖最终 schema，R5 还要改关系表查询，提前导会返工。
 - **R3b 已提交**：commit `8d973a8`，面板空 task 已确认与 R3b 无关（数据模型 gap）。
-- W1-W4 在 R5 完成后另列详细任务清单。
+- W1-W4 由 Codex 执行；Claude 负责方案/计划/提示词。详细方案见 §12.4，提示词在主线完成、schema 定稿后据此细化。
+
+### 12.4 各工作详细方案（调研于 2026-05-28）
+
+**W1 — 恢复历史配置**
+
+- 源快照：`8b67fdd^`，含 **27 项目 + 10 场景**。
+- 关键结论：旧配置字段结构与当前 `config/projects/devflow.json` **完全一致**（version/id/name/technologyFamilyId/repoType/summary/path/tags/doc/scenes/skills/rules/readPolicy），**无需格式转换**。
+- 工具：`scripts/migrate-git-json-relations.mjs`（默认 ref 已是 `8b67fdd^`）。改造为正式命令 `devflow restore-from-git [--ref <ref>] [--dry-run]`，把 27 项目 + 10 场景 + 关系 + 图边写入 SQLite（projects / scene_templates / 各关系表）。
+- 边界：只写 SQLite，不还原 JSON 文件；幂等（可重复跑）；`--dry-run` 预览。
+
+**W2 — task 目录导入器**
+
+- 源：`runtime/tasks/<id>/`，10 个目录。每个有 `handoff.md`（统一头：`# 标题` / `Task:` / `Workset:` / `Scene Template:` / `Recovery:` / `Updated:`），部分有 gate 子目录（G1/G2/...）和 `codex-tasks/`、证据 md。
+- 解析：正则提取 handoff 头部字段 → 重建 `tasks` 行（id/title/status/currentGate/recoveryPoint）+ `worksets` 行（id/sceneTemplateId）。`Updated` → updatedAt。
+- 文档登记：`handoff.md` 以 `kind='handoff'` 写入 `task_documents`；gate 子目录与证据 md 以 `kind='gate'`/`kind='artifact'` 登记 path（不搬动文件）。
+- 命令：`devflow import-tasks [--dry-run]`，或并入 restore。幂等。
+- 鲁棒性：handoff 缺字段时用合理默认 + 收集 warning，不中断。
+
+**W3 — 重建缺失 scene**
+
+- 缺失清单（git 无、需重建）：`dhb-hxb-business-suite`（被 `dhb-ios-0`、`dhb-17828` 引用）。其余 task 引用的 scene（如 `frontend-bff-debug`）W1 已恢复。
+- 方式：W1/W2 跑完后，扫描 SQLite 里 task/workset 引用但 `scene_templates` 缺失的 id，列成清单；由用户提供定义或从引用它的 task handoff 反推 projectHints，再 `devflow add scene-template` 写入。
+- 这步偏人工，Codex 产出"缺失 scene 清单 + 反推的 projectHints 建议"，用户确认后写入。
+
+**W4 — 分目录**
+
+- 目标：`/Users/xj/devflow` 回归干净的工具开发仓库 + 公开模板；用户真实数据迁到独立数据目录（`devflow init --dir ~/<data-dir>`）。
+- 步骤：在新数据目录初始化 → 在该目录跑 W1/W2/W3 把真实数据灌进它的 SQLite → 工具仓库清掉本地真实 task 目录与残留 → AI 工具入口指向数据目录。
+- 这是环境归置（非代码）；Codex 产出操作步骤脚本/清单，用户执行。
+
+### 12.5 W1-W4 执行顺序
+
+R5 完成后：W1（恢复配置）→ W2（导入 task）→ W3（补缺失 scene）→ W4（分目录，把灌好的数据迁到独立目录）。W1/W2 可同一命令族（restore），W3 依赖 W1/W2 的引用扫描，W4 最后做。
