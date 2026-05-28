@@ -95,6 +95,31 @@ test("migrateDevFlowFromJson imports JSON into SQLite and keeps JSON with --keep
   ]);
 });
 
+test("applyMigrationSnapshot imports JSON into SQLite without a git worktree", async () => {
+  const {
+    applyMigrationSnapshot,
+    collectJsonMigrationSnapshot
+  } = await import("../../../src/core/storage/migrate-from-json.mjs");
+  const { defaultDbPath, initializeSchema, openDevFlowDatabase } = await import("../../../src/core/storage/schema.mjs");
+  const root = copyFixture("devflow-migrate-apply-snapshot-");
+  const dbPath = defaultDbPath(root);
+  const snapshot = await collectJsonMigrationSnapshot({ rootDir: root, dbPath });
+  const db = openDevFlowDatabase({ rootDir: root, dbPath });
+  let sanityChecks;
+  try {
+    initializeSchema(db);
+    sanityChecks = applyMigrationSnapshot(db, snapshot);
+  } finally {
+    db.close();
+  }
+  const repository = createSqliteRepository({ rootDir: root });
+
+  assert.deepEqual(sanityChecks.projects, { expected: 1, actual: 1 });
+  assert.deepEqual(sanityChecks.tasks, { expected: 2, actual: 2 });
+  assert.equal((await repository.getActiveTask()).id, "demo-task");
+  assert.equal(fs.existsSync(path.join(root, "config/entry.json")), true);
+});
+
 test("migrateDevFlowFromJson deletes JSON after row-count sanity checks and preserves handoff markdown", async () => {
   const { migrateDevFlowFromJson } = await import("../../../src/core/storage/migrate-from-json.mjs");
   const root = copyFixture("devflow-migrate-delete-json-");

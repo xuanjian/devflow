@@ -1,9 +1,7 @@
 import fs from "node:fs/promises";
-import path from "node:path";
 import { normalizeSceneTemplate, normalizeWorkset } from "../contracts/devflow-types.mjs";
 import { readJsonFile } from "../json-loader.mjs";
 import { resolveInside, toPath } from "../paths.mjs";
-import { assertRepositoryContract } from "./repository-contract.mjs";
 
 export function createJsonRepository({ rootDir = process.cwd() } = {}) {
   const rootPath = toPath(rootDir);
@@ -82,51 +80,10 @@ export function createJsonRepository({ rootDir = process.cwd() } = {}) {
         rules: await repository.listRules(),
         tasks: await repository.listTasks()
       });
-    },
-
-    async writeProject(project) {
-      const projectId = requireId(project, "project");
-      await writeJson(rootPath, `config/projects/${projectId}.json`, project);
-      await upsertIndexItem(rootPath, "config/projects/index.json", "projects", {
-        id: projectId,
-        name: project.name || projectId,
-        technologyFamilyId: project.technologyFamilyId,
-        path: `config/projects/${projectId}.json`,
-        summary: project.summary || ""
-      });
-      return repository.getProject(projectId);
-    },
-
-    async writeSceneTemplate(sceneTemplate) {
-      const sceneTemplateId = requireId(sceneTemplate, "sceneTemplate");
-      const normalized = normalizeSceneTemplate(sceneTemplate);
-      await writeJson(rootPath, `config/scenes/${sceneTemplateId}.json`, normalized);
-      await upsertIndexItem(rootPath, "config/scenes/index.json", "scenes", {
-        id: sceneTemplateId,
-        name: normalized.name || sceneTemplateId,
-        summary: normalized.summary || "",
-        path: `config/scenes/${sceneTemplateId}.json`,
-        sourcePath: normalized.sourcePath
-      });
-      return repository.getSceneTemplate(sceneTemplateId);
-    },
-
-    async writeTask(task) {
-      const taskId = requireId(task, "task");
-      const normalized = await normalizeTask(rootPath, task);
-      await writeJson(rootPath, `runtime/tasks/${taskId}.json`, normalized);
-      return repository.getTask(taskId);
-    },
-
-    async setRuntimeState(runtimeState) {
-      const current = await readData(rootPath, "runtime/current.json", {});
-      const nextState = { ...current, ...runtimeState };
-      await writeJson(rootPath, "runtime/current.json", nextState);
-      return nextState;
     }
   };
 
-  return assertRepositoryContract(repository);
+  return repository;
 }
 
 async function readProjectRecord(rootPath, indexItem) {
@@ -279,37 +236,12 @@ function buildGraphEdges({ projects, sceneTemplates, rules, tasks }) {
   return edges;
 }
 
-async function upsertIndexItem(rootPath, indexPath, collectionName, item) {
-  const index = await readData(rootPath, indexPath, { version: 1, [collectionName]: [] });
-  const collection = index[collectionName] || [];
-  const itemIndex = collection.findIndex((existing) => existing.id === item.id);
-  if (itemIndex === -1) {
-    collection.push(item);
-  } else {
-    collection[itemIndex] = { ...collection[itemIndex], ...item };
-  }
-  await writeJson(rootPath, indexPath, { ...index, [collectionName]: collection });
-}
-
 async function readData(rootPath, relativePath, fallback) {
   const result = await readJsonFile(resolveInside(rootPath, relativePath));
   if (result.ok) {
     return result.data;
   }
   return fallback;
-}
-
-async function writeJson(rootPath, relativePath, data) {
-  const filePath = resolveInside(rootPath, relativePath);
-  await fs.mkdir(path.dirname(filePath), { recursive: true });
-  await fs.writeFile(filePath, `${JSON.stringify(data, null, 2)}\n`, "utf8");
-}
-
-function requireId(record, entityType) {
-  if (!record?.id) {
-    throw new TypeError(`Cannot write ${entityType} without an id`);
-  }
-  return record.id;
 }
 
 function uniqueRefs(refs) {

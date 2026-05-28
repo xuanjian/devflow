@@ -5,6 +5,7 @@ import os from "node:os";
 import path from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
+import { seedSqliteFromJsonFixture } from "./helpers/sqlite-fixtures.mjs";
 
 const testFile = fileURLToPath(import.meta.url);
 const repoRoot = path.resolve(path.dirname(testFile), "..");
@@ -30,8 +31,9 @@ function parseJson(result) {
   return JSON.parse(result.stdout);
 }
 
-test("devflow task start and update write task state through the CLI facade", () => {
+test("devflow task start and update write task state through the CLI facade", async () => {
   const root = copyFixture();
+  await seedSqliteFromJsonFixture(root);
   const start = parseJson(runScript(cliPath, root, [
     "task",
     "start",

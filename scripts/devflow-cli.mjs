@@ -43,7 +43,7 @@ function usage() {
   devflow add project <repo-path>
   devflow add scene-template "<name>"
   devflow doctor
-  devflow index rebuild
+  devflow index rebuild (deprecated noop)
 
 Options:
   --tools <ids>       Comma-separated AI tools. Available: ${toolProviders.map(tool => tool.id).join(', ')}
@@ -776,20 +776,39 @@ async function runFacadeCommand(root, command, type, rest, flags) {
   }
   if (command === 'doctor') {
     const dbPath = path.join(root, 'data/devflow.db');
-    const dbExists = fs.existsSync(dbPath);
-    printJson(normalizeCommandResult({
-      status: dbExists ? 'ok' : 'noop',
-      action: 'doctor',
-      entityType: undefined,
-      message: dbExists ? 'DevFlow SQLite index is available.' : 'SQLite index missing. Run devflow index rebuild.',
-      paths: dbExists ? ['data/devflow.db'] : [],
-      warnings: dbExists ? [] : [{ code: 'missing_sqlite_index', command: 'devflow index rebuild' }]
-    }));
+    const module = await import('../src/core/storage/sqlite-bootstrap.mjs');
+    try {
+      const ensured = await module.ensureSqliteDatabase({ rootDir: root, dbPath });
+      const created = ensured.status === 'created';
+      printJson(normalizeCommandResult({
+        status: 'ok',
+        action: 'doctor',
+        entityType: undefined,
+        message: created ? 'DevFlow SQLite database created from bundled defaults.' : 'DevFlow SQLite database is available.',
+        paths: ['data/devflow.db'],
+        warnings: []
+      }));
+    } catch (error) {
+      printJson(normalizeCommandResult({
+        status: 'noop',
+        action: 'doctor',
+        entityType: undefined,
+        message: `${error.message} Run devflow migrate from-json, then retry.`,
+        paths: fs.existsSync(dbPath) ? ['data/devflow.db'] : [],
+        warnings: [{ code: 'missing_sqlite_database_json_sources', command: 'devflow migrate from-json' }]
+      }));
+    }
     return;
   }
   if (command === 'index' && type === 'rebuild') {
-    const module = await import('../src/core/storage/rebuild-index.mjs');
-    printJson(await module.rebuildDevFlowIndex({ rootDir: root }));
+    printJson(normalizeCommandResult({
+      status: 'noop',
+      action: 'index rebuild',
+      entityType: undefined,
+      message: 'devflow index rebuild is deprecated. DevFlow no longer rebuilds SQLite from JSON automatically; run devflow migrate from-json explicitly for legacy checkouts.',
+      paths: [],
+      warnings: [{ code: 'deprecated_index_rebuild', command: 'devflow migrate from-json' }]
+    }));
     return;
   }
   usage();

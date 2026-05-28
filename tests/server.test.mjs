@@ -5,6 +5,7 @@ import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { handleApiRequest, startServer } from "../src/server.mjs";
+import { seedSqliteFromJsonFixture } from "./helpers/sqlite-fixtures.mjs";
 
 const testDir = path.dirname(fileURLToPath(import.meta.url));
 const fixtureRoot = path.join(testDir, "core/fixtures/basic-ai-context");
@@ -12,6 +13,7 @@ const fixtureRoot = path.join(testDir, "core/fixtures/basic-ai-context");
 async function copyFixture() {
   const root = await fs.mkdtemp(path.join(os.tmpdir(), "devflow-server-"));
   await fs.cp(fixtureRoot, root, { recursive: true });
+  await seedSqliteFromJsonFixture(root);
   return root;
 }
 

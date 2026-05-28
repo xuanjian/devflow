@@ -7,7 +7,7 @@ import { fileURLToPath } from "node:url";
 import { createJsonRepository } from "../../../src/core/repositories/json-repository.mjs";
 import { createSqliteRepository } from "../../../src/core/repositories/sqlite-repository.mjs";
 import { createDevFlowService } from "../../../src/core/services/devflow-service.mjs";
-import { rebuildDevFlowIndex } from "../../../src/core/storage/rebuild-index.mjs";
+import { seedSqliteFromJsonFixture } from "../../helpers/sqlite-fixtures.mjs";
 
 const testFile = fileURLToPath(import.meta.url);
 const repoRoot = path.resolve(path.dirname(testFile), "../../..");
@@ -20,12 +20,12 @@ function copyFixture(sourceRoot, prefix = "devflow-sqlite-") {
   return root;
 }
 
-test("rebuildDevFlowIndex creates data/devflow.db and sqlite repository matches JSON repository", async () => {
+test("snapshot import creates data/devflow.db and sqlite repository matches JSON repository", async () => {
   const root = copyFixture(basicFixtureRoot);
-  const result = await rebuildDevFlowIndex({ rootDir: root });
+  const result = await seedSqliteFromJsonFixture(root);
 
-  assert.equal(result.status, "ok");
-  assert.equal(result.action, "index rebuild");
+  assert.deepEqual(result.sanityChecks.projects, { expected: 1, actual: 1 });
+  assert.deepEqual(result.sanityChecks.tasks, { expected: 2, actual: 2 });
   assert.equal(fs.existsSync(path.join(root, "data/devflow.db")), true);
 
   const jsonRepository = createJsonRepository({ rootDir: root });
@@ -47,7 +47,7 @@ test("rebuildDevFlowIndex creates data/devflow.db and sqlite repository matches 
 
 test("sqlite backend supports service task commands without changing public calls", async () => {
   const root = copyFixture(basicFixtureRoot, "devflow-sqlite-service-");
-  await rebuildDevFlowIndex({ rootDir: root });
+  await seedSqliteFromJsonFixture(root);
   const service = createDevFlowService({ rootDir: root, backend: "sqlite" });
 
   const start = await service.startTask({
@@ -67,9 +67,10 @@ test("sqlite backend supports service task commands without changing public call
   assert.equal(current.task, null);
 });
 
-test("sqlite runtime state writes refresh the compatibility current.json pointer", async () => {
+test("sqlite runtime state writes stay in SQLite and do not create compatibility current.json", async () => {
   const root = copyFixture(basicFixtureRoot, "devflow-sqlite-current-");
-  await rebuildDevFlowIndex({ rootDir: root });
+  await seedSqliteFromJsonFixture(root);
+  fs.rmSync(path.join(root, "runtime/current.json"), { force: true });
   const service = createDevFlowService({ rootDir: root, backend: "sqlite" });
 
   await service.startTask({
@@ -79,22 +80,17 @@ test("sqlite runtime state writes refresh the compatibility current.json pointer
     gate: "G3"
   });
 
-  const current = JSON.parse(fs.readFileSync(path.join(root, "runtime/current.json"), "utf8"));
-  assert.equal(current.activeTaskId, "sqlite-current-pointer");
-  assert.equal(current.activeWorksetId, "workset-sqlite-current-pointer");
-  assert.deepEqual(current.activeProjectIds, ["demo-project"]);
-  assert.equal(current.activeSceneTemplateId, "new-scene");
-  assert.deepEqual(current.activeSceneIds, ["new-scene"]);
-  assert.equal(current.currentGate, "G3");
-  assert.equal(current.recentTaskIds[0], "sqlite-current-pointer");
+  assert.equal(fs.existsSync(path.join(root, "runtime/current.json")), false);
+  const current = await service.queryCurrent();
+  assert.equal(current.task.id, "sqlite-current-pointer");
+  assert.equal(current.workset.id, "workset-sqlite-current-pointer");
 });
 
-test("rebuildDevFlowIndex preserves records and reports missing source path warnings", async () => {
+test("snapshot import preserves records and reports missing source path warnings", async () => {
   const root = copyFixture(missingDocFixtureRoot, "devflow-sqlite-missing-");
-  const result = await rebuildDevFlowIndex({ rootDir: root });
+  const result = await seedSqliteFromJsonFixture(root);
   const repository = createSqliteRepository({ rootDir: root });
 
-  assert.equal(result.status, "ok");
-  assert.equal(result.warnings.some((warning) => warning.code === "missing_source_path" && warning.path === "docs/repos/missing.md"), true);
+  assert.equal(result.snapshot.warnings.some((warning) => warning.code === "missing_source_path" && warning.path === "docs/repos/missing.md"), true);
   assert.equal((await repository.getProject("demo-project")).id, "demo-project");
 });

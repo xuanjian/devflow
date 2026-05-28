@@ -5,6 +5,7 @@ import os from "node:os";
 import path from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
+import { seedSqliteFromJsonFixture } from "./helpers/sqlite-fixtures.mjs";
 
 const testFile = fileURLToPath(import.meta.url);
 const repoRoot = path.resolve(path.dirname(testFile), "..");
@@ -30,8 +31,9 @@ function parseJson(result) {
   return JSON.parse(result.stdout);
 }
 
-test("query route prints the locked JSON result shape", () => {
+test("query route prints the locked JSON result shape", async () => {
   const root = copyFixture();
+  await seedSqliteFromJsonFixture(root);
   const result = runCli(root, ["query", "route", "demo task"]);
   const json = parseJson(result);
 
@@ -43,8 +45,9 @@ test("query route prints the locked JSON result shape", () => {
   assert.equal(json.workset.projects[0].id, "demo-project");
 });
 
-test("query current, skills, rules, and graph print JSON without an HTTP server", () => {
+test("query current, skills, rules, and graph print JSON without an HTTP server", async () => {
   const root = copyFixture();
+  await seedSqliteFromJsonFixture(root);
   const current = parseJson(runCli(root, ["query", "current"]));
   const skills = parseJson(runCli(root, ["query", "skills", "--project", "demo-project"]));
   const worksetSkills = parseJson(runCli(root, ["query", "skills", "--workset", "demo-task"]));
@@ -74,14 +77,18 @@ test("doctor and index rebuild are accepted facade routes", () => {
 
   assert.equal(doctor.status, "noop");
   assert.equal(doctor.action, "doctor");
-  assert.match(doctor.message, /devflow index rebuild/);
-  assert.equal(rebuild.status, "ok");
+  assert.match(doctor.message, /devflow migrate from-json/);
+  assert.equal(doctor.warnings[0].code, "missing_sqlite_database_json_sources");
+  assert.equal(rebuild.status, "noop");
   assert.equal(rebuild.action, "index rebuild");
-  assert.equal(fs.existsSync(path.join(root, "data/devflow.db")), true);
+  assert.match(rebuild.message, /deprecated/i);
+  assert.match(rebuild.message, /devflow migrate from-json/);
+  assert.equal(fs.existsSync(path.join(root, "data/devflow.db")), false);
 });
 
-test("add scene-template derives a template id from the name", () => {
+test("add scene-template derives a template id from the name", async () => {
   const root = copyFixture();
+  await seedSqliteFromJsonFixture(root);
   const result = parseJson(runCli(root, ["add", "scene-template", "Payment Debug"]));
 
   assert.equal(result.status, "ok");

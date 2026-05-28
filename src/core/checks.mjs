@@ -1,5 +1,4 @@
 import fs from "node:fs/promises";
-import fsSync from "node:fs";
 import path from "node:path";
 import os from "node:os";
 import { spawn } from "node:child_process";
@@ -7,6 +6,7 @@ import { readJsonFile } from "./json-loader.mjs";
 import { resolveInside, toPath } from "./paths.mjs";
 import { buildPanelGraph } from "./panel-graph.mjs";
 import { defaultDbPath } from "./storage/schema.mjs";
+import { ensureSqliteDatabase } from "./storage/sqlite-bootstrap.mjs";
 
 export async function runChecks({ rootDir = process.cwd(), runCommands = true } = {}) {
   const rootPath = toPath(rootDir);
@@ -70,10 +70,7 @@ export async function runChecks({ rootDir = process.cwd(), runCommands = true } 
 
 async function buildChecksGraph(rootPath) {
   const dbPath = defaultDbPath(rootPath);
-  if (!fsSync.existsSync(dbPath)) {
-    const module = await import("./storage/rebuild-index.mjs");
-    await module.rebuildDevFlowIndex({ rootDir: rootPath, dbPath });
-  }
+  await ensureSqliteDatabase({ rootDir: rootPath, dbPath });
   const module = await import("./repositories/sqlite-repository.mjs");
   const repository = module.createSqliteRepository({ rootDir: rootPath, dbPath });
   return buildPanelGraph(repository, { rootDir: rootPath });

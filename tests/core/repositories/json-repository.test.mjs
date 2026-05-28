@@ -1,18 +1,31 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {
-  REPOSITORY_METHODS,
-  assertRepositoryContract
-} from "../../../src/core/repositories/repository-contract.mjs";
 import { createJsonRepository } from "../../../src/core/repositories/json-repository.mjs";
 
 const fixtureRoot = new URL("../fixtures/basic-ai-context/", import.meta.url);
 
-test("json repository exposes the locked public repository contract", () => {
+const JSON_IMPORT_METHODS = [
+  "listProjects",
+  "getProject",
+  "listSceneTemplates",
+  "getSceneTemplate",
+  "listSkills",
+  "listRules",
+  "listTasks",
+  "getTask",
+  "getActiveTask",
+  "getWorkset",
+  "listGraphEdges"
+];
+
+test("json repository is a read-only migration importer", () => {
   const repository = createJsonRepository({ rootDir: fixtureRoot });
 
-  assertRepositoryContract(repository);
-  assert.deepEqual(Object.keys(repository).sort(), [...REPOSITORY_METHODS].sort());
+  assert.deepEqual(Object.keys(repository).sort(), [...JSON_IMPORT_METHODS].sort());
+  assert.equal(repository.writeProject, undefined);
+  assert.equal(repository.writeSceneTemplate, undefined);
+  assert.equal(repository.writeTask, undefined);
+  assert.equal(repository.setRuntimeState, undefined);
 });
 
 test("listSceneTemplates returns normalized scene templates", async () => {

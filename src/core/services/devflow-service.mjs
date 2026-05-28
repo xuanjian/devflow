@@ -1,4 +1,3 @@
-import fs from "node:fs";
 import { queryRoute } from "../queries/route-query.mjs";
 import { queryCurrent, queryRules, querySkills } from "../queries/current-query.mjs";
 import { buildGraph } from "../queries/graph-query.mjs";
@@ -8,7 +7,7 @@ import { addSceneTemplate } from "../commands/template-commands.mjs";
 import { runAction as runPanelAction } from "../actions.mjs";
 import { runChecks as runPanelChecks } from "../checks.mjs";
 import { buildPanelGraph, getPanelNodeDetails } from "../panel-graph.mjs";
-import { defaultDbPath } from "../storage/schema.mjs";
+import { ensureSqliteDatabase } from "../storage/sqlite-bootstrap.mjs";
 
 export function createDevFlowService({ rootDir, backend = "auto", repository } = {}) {
   const getRepository = createRepositoryResolver({ rootDir, backend, repository });
@@ -68,11 +67,7 @@ function createRepositoryResolver({ rootDir, backend, repository }) {
       return resolvedRepository;
     }
     if (backend === "auto") {
-      const dbPath = defaultDbPath(rootDir);
-      if (!fs.existsSync(dbPath)) {
-        const module = await import("../storage/rebuild-index.mjs");
-        await module.rebuildDevFlowIndex({ rootDir, dbPath });
-      }
+      await ensureSqliteDatabase({ rootDir });
       backend = "sqlite";
     }
 
@@ -86,16 +81,6 @@ function createRepositoryResolver({ rootDir, backend, repository }) {
       return resolvedRepository;
     }
 
-    if (backend !== "json") {
-      throw new Error(`Unsupported DevFlow repository backend: ${backend}`);
-    }
-
-    const module = await import("../repositories/json-repository.mjs");
-    const createJsonRepository = module.createJsonRepository || module.default;
-    if (typeof createJsonRepository !== "function") {
-      throw new Error("JSON repository backend does not export createJsonRepository.");
-    }
-    resolvedRepository = createJsonRepository({ rootDir });
-    return resolvedRepository;
+    throw new Error(`Unsupported DevFlow repository backend: ${backend}`);
   };
 }

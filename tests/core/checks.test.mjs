@@ -5,12 +5,14 @@ import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { runChecks } from "../../src/core/checks.mjs";
+import { seedSqliteFromJsonFixture } from "../helpers/sqlite-fixtures.mjs";
 
 const testDir = path.dirname(fileURLToPath(import.meta.url));
 
 async function copyFixture(name) {
   const root = await fs.mkdtemp(path.join(os.tmpdir(), "devflow-checks-"));
   await fs.cp(path.join(testDir, "fixtures", name), root, { recursive: true });
+  await seedSqliteFromJsonFixture(root);
   return root;
 }
 

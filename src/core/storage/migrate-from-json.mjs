@@ -67,20 +67,7 @@ export async function migrateDevFlowFromJson({
   let sanityChecks;
   try {
     initializeSchema(db);
-    const writeAll = db.transaction(() => {
-      clearTables(db);
-      insertConfigRecords(db, snapshot.configRecords);
-      insertProjects(db, snapshot.rootPath, snapshot.projects, snapshot.warnings);
-      insertSceneTemplates(db, snapshot.rootPath, snapshot.sceneTemplates, snapshot.warnings);
-      insertSkills(db, snapshot.rootPath, snapshot.skills, snapshot.warnings);
-      insertRules(db, snapshot.rootPath, snapshot.rules, snapshot.warnings);
-      insertTasks(db, snapshot.tasks);
-      insertTaskDocuments(db, snapshot.taskDocuments);
-      if (snapshot.runtimeState) insertRuntimeState(db, snapshot.runtimeState);
-      insertGraphEdges(db, snapshot.graphEdges);
-    });
-    writeAll();
-    sanityChecks = assertRowCountSanity(db, snapshot.sourceCounts);
+    sanityChecks = applyMigrationSnapshot(db, snapshot);
   } finally {
     db.close();
   }
@@ -162,6 +149,23 @@ export async function collectJsonMigrationSnapshot({ rootDir = process.cwd(), db
       graphEdges: graphEdges.length
     }
   };
+}
+
+export function applyMigrationSnapshot(db, snapshot) {
+  const writeAll = db.transaction(() => {
+    clearTables(db);
+    insertConfigRecords(db, snapshot.configRecords || []);
+    insertProjects(db, snapshot.rootPath, snapshot.projects || [], snapshot.warnings || []);
+    insertSceneTemplates(db, snapshot.rootPath, snapshot.sceneTemplates || [], snapshot.warnings || []);
+    insertSkills(db, snapshot.rootPath, snapshot.skills || [], snapshot.warnings || []);
+    insertRules(db, snapshot.rootPath, snapshot.rules || [], snapshot.warnings || []);
+    insertTasks(db, snapshot.tasks || []);
+    insertTaskDocuments(db, snapshot.taskDocuments || []);
+    if (snapshot.runtimeState) insertRuntimeState(db, snapshot.runtimeState);
+    insertGraphEdges(db, snapshot.graphEdges || []);
+  });
+  writeAll();
+  return assertRowCountSanity(db, snapshot.sourceCounts || {});
 }
 
 function collectKnownSourceJsonPaths(rootPath) {

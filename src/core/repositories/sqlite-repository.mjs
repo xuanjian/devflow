@@ -1,5 +1,3 @@
-import fs from "node:fs";
-import path from "node:path";
 import { normalizeSceneTemplate, normalizeWorkset } from "../contracts/devflow-types.mjs";
 import { DEFAULT_ENTRY, ENTRY_CONFIG_KEY } from "../defaults/entry.mjs";
 import { DEFAULT_GATES, GATES_CONFIG_KEY } from "../defaults/gates.mjs";
@@ -125,7 +123,6 @@ export function createSqliteRepository({ rootDir = process.cwd(), dbPath = defau
       const current = getRuntimeState(db) || {};
       const nextState = normalizeRuntimeState({ ...current, ...runtimeState });
       db.prepare("INSERT OR REPLACE INTO runtime_state (key, raw_json) VALUES (?, ?)").run("current", stringify(nextState));
-      writeCompatibilityCurrentJson(rootDir, nextState);
       return nextState;
     }
   };
@@ -266,12 +263,6 @@ function normalizeRuntimeState(runtimeState) {
     nextState.recentTaskIds = [nextState.activeTaskId, ...recentTaskIds.filter((taskId) => taskId !== nextState.activeTaskId)];
   }
   return nextState;
-}
-
-function writeCompatibilityCurrentJson(rootDir, runtimeState) {
-  const currentPath = path.join(rootDir, "runtime/current.json");
-  fs.mkdirSync(path.dirname(currentPath), { recursive: true });
-  fs.writeFileSync(currentPath, `${JSON.stringify(runtimeState, null, 2)}\n`, "utf8");
 }
 
 function stringify(value) {

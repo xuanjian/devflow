@@ -5,6 +5,7 @@ import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { createDevFlowService } from "../../src/core/services/devflow-service.mjs";
+import { seedSqliteFromJsonFixture } from "../helpers/sqlite-fixtures.mjs";
 
 const testFile = fileURLToPath(import.meta.url);
 const repoRoot = path.resolve(path.dirname(testFile), "../..");
@@ -16,8 +17,23 @@ function copyFixture() {
   return root;
 }
 
-test("default service rebuilds SQLite and does not create normal-path JSON for new tasks", async () => {
+test("default service refuses implicit JSON rebuild when SQLite is missing", async () => {
   const root = copyFixture();
+  const service = createDevFlowService({ rootDir: root });
+
+  await assert.rejects(() => service.startTask({
+    title: "No JSON Task",
+    projectIds: ["demo-project"],
+    templateId: "demo-scene",
+    gate: "G2",
+    note: "sqlite main path"
+  }), /devflow migrate from-json/);
+  assert.equal(fs.existsSync(path.join(root, "data/devflow.db")), false);
+});
+
+test("default service uses seeded SQLite and does not create normal-path JSON for new tasks", async () => {
+  const root = copyFixture();
+  await seedSqliteFromJsonFixture(root);
   const service = createDevFlowService({ rootDir: root });
 
   const start = await service.startTask({
@@ -32,6 +48,7 @@ test("default service rebuilds SQLite and does not create normal-path JSON for n
   assert.equal(start.status, "ok");
   assert.equal(fs.existsSync(path.join(root, "data/devflow.db")), true);
   assert.equal(fs.existsSync(path.join(root, "runtime/tasks/no-json-task.json")), false);
+  assert.equal(fs.existsSync(path.join(root, "runtime/current.json")), true);
   assert.equal(fs.existsSync(path.join(root, "runtime/tasks/no-json-task/handoff.md")), true);
   assert.deepEqual(start.paths, ["runtime/tasks/no-json-task/handoff.md"]);
   assert.equal(current.task.id, "no-json-task");
@@ -40,6 +57,7 @@ test("default service rebuilds SQLite and does not create normal-path JSON for n
 
 test("default add commands write SQLite records without creating project or scene JSON", async () => {
   const root = copyFixture();
+  await seedSqliteFromJsonFixture(root);
   const service = createDevFlowService({ rootDir: root });
 
   const project = await service.addProject({
@@ -68,3 +86,13 @@ test("default add commands write SQLite records without creating project or scen
   assert.equal(route.workset.projects[0].id, "no-json-project");
 });
 
+test("fresh install without JSON bootstraps default SQLite records", async () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "devflow-json-retirement-fresh-"));
+  const service = createDevFlowService({ rootDir: root });
+
+  const route = await service.queryRoute({ text: "devflow" });
+
+  assert.equal(fs.existsSync(path.join(root, "data/devflow.db")), true);
+  assert.equal(fs.existsSync(path.join(root, "config/entry.json")), false);
+  assert.equal(route.workset.projects[0].id, "devflow");
+});
