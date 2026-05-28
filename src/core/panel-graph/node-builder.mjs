@@ -3,6 +3,7 @@ import { GROUP_BY_TYPE } from "./grouping.mjs";
 export function addQueryNode(graph, node, activeTaskId) {
   const raw = node.type === "task" ? normalizeTaskRaw(node.raw || {}) : (node.raw || {});
   const status = statusForNode({ ...node, raw }, activeTaskId);
+  const metadata = metadataForNode(node.type, raw);
   const panelNode = {
     id: node.id,
     type: node.type,
@@ -11,6 +12,7 @@ export function addQueryNode(graph, node, activeTaskId) {
     sourcePath: sourcePathForNode(node),
     docPath: raw.doc?.path || raw.sourcePath || "",
     status,
+    ...(metadata ? { metadata } : {}),
     raw: node.type === "task" ? { ...raw, isActive: raw.id === activeTaskId } : raw
   };
   addNode(graph, panelNode);
@@ -19,6 +21,27 @@ export function addQueryNode(graph, node, activeTaskId) {
   if (groupId) {
     addEdge(graph, groupId, node.id, "contains", "repository");
   }
+}
+
+export function metadataForNode(type, raw = {}) {
+  if (type !== "project") {
+    return null;
+  }
+  return {
+    products: normalizeStringList(raw.products),
+    domains: normalizeStringList(raw.domains),
+    role: normalizeString(raw.role)
+  };
+}
+
+function normalizeStringList(values) {
+  return [...new Set((Array.isArray(values) ? values : [])
+    .map((value) => normalizeString(value))
+    .filter(Boolean))];
+}
+
+function normalizeString(value) {
+  return String(value ?? "").trim();
 }
 
 export function normalizeTaskRaw(task) {

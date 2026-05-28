@@ -70,6 +70,53 @@ test("GraphView filters to a selected project from the project rail", async () =
   expect(screen.getByTestId("edge-project:demo-a-skill:demo-uses-skill")).toBeInTheDocument();
 });
 
+test("GraphView renders project metadata chips, relation legend, and relation edge classes", () => {
+  const graph = {
+    nodes: [
+      {
+        id: "project:goods-h5",
+        type: "project",
+        title: "Goods H5",
+        status: "ok",
+        metadata: { products: ["dhb"], domains: ["goods"], role: "h5" }
+      },
+      {
+        id: "project:bff-goods",
+        type: "project",
+        title: "BFF Goods",
+        status: "ok",
+        metadata: { products: ["dhb"], domains: ["goods"], role: "bff-service" }
+      },
+      {
+        id: "project:dhbfront-utils",
+        type: "project",
+        title: "dhbfront-utils",
+        status: "ok",
+        metadata: { products: ["dhb"], domains: [], role: "frontend-common" }
+      }
+    ],
+    edges: [
+      { from: "project:goods-h5", to: "project:bff-goods", relation: "calls" },
+      { from: "project:goods-h5", to: "project:dhbfront-utils", relation: "depends-on" },
+      { from: "project:bff-goods", to: "project:dhbfront-utils", relation: "chain" }
+    ]
+  };
+
+  render(<GraphView graph={graph} selectedNodeId="" onSelectNode={() => {}} />);
+
+  expect(screen.getByText("relation")).toBeInTheDocument();
+  expect(screen.getByText("chain")).toBeInTheDocument();
+  expect(screen.getByText("depends-on")).toBeInTheDocument();
+  expect(screen.getByText("calls")).toBeInTheDocument();
+  expect(screen.getAllByText("dhb").length).toBeGreaterThan(0);
+  expect(screen.getAllByText("goods").length).toBeGreaterThan(0);
+  expect(screen.getByText("h5")).toBeInTheDocument();
+  expect(screen.getByText("bff-service")).toBeInTheDocument();
+  expect(screen.getByTestId("edge-project:goods-h5-project:bff-goods-calls")).toHaveClass("relation-calls");
+  expect(screen.getByTestId("edge-project:goods-h5-project:dhbfront-utils-depends-on")).toHaveClass("relation-depends-on");
+  expect(screen.getByTestId("edge-project:bff-goods-project:dhbfront-utils-chain")).toHaveClass("relation-chain");
+});
+
 test("GraphView expands the canvas height to include long node columns", () => {
   const projectNodes = Array.from({ length: 18 }, (_, index) => ({
     id: `project:demo-${index}`,

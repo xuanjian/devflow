@@ -2,8 +2,15 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { labelForType, titleForNode } from "../labels.js";
 
 const GRAPH_TOP_SAFE_SPACE = 86;
-const NODE_BOX_HALF_HEIGHT = 42;
+const NODE_BOX_HALF_HEIGHT = 58;
+const NODE_BOX_HEIGHT = 116;
+const NODE_BOX_WIDTH = 190;
 const FORCE_VIEWPORT = { width: 2200, height: 1500 };
+const RELATION_LEGEND_ITEMS = [
+  { relation: "chain", label: "chain" },
+  { relation: "depends-on", label: "depends-on" },
+  { relation: "calls", label: "calls" }
+];
 
 export default function GraphView({ graph, selectedNodeId, onSelectNode }) {
   const [selectedProjectId, setSelectedProjectId] = useState("");
@@ -26,6 +33,7 @@ export default function GraphView({ graph, selectedNodeId, onSelectNode }) {
   const nodeDragRef = useRef(null);
   const suppressClickRef = useRef("");
   const hasCenteredRef = useRef(false);
+  const hasSettledCenteredRef = useRef(false);
   const animationFrameRef = useRef(0);
   const simulationRef = useRef({ nodes: new Map(), settled: false });
 
@@ -37,6 +45,7 @@ export default function GraphView({ graph, selectedNodeId, onSelectNode }) {
 
   useEffect(() => {
     hasCenteredRef.current = false;
+    hasSettledCenteredRef.current = false;
   }, [nodeLayoutKey, selectedProjectId]);
 
   useEffect(() => {
@@ -67,7 +76,21 @@ export default function GraphView({ graph, selectedNodeId, onSelectNode }) {
         animationFrameRef.current = requestAnimationFrame(tick);
       } else {
         simulationRef.current.settled = true;
+        centerSettledGraph();
       }
+    }
+
+    function centerSettledGraph() {
+      if (hasSettledCenteredRef.current || nodeDragRef.current) {
+        return;
+      }
+      const element = viewportRef.current;
+      if (!element) {
+        return;
+      }
+      hasSettledCenteredRef.current = true;
+      const settledPositions = snapshotSimulationPositions(simulationRef.current.nodes);
+      centerGraphCanvas(element, getGraphViewport(settledPositions), settledPositions);
     }
 
     cancelAnimationFrame(animationFrameRef.current);
@@ -215,8 +238,11 @@ export default function GraphView({ graph, selectedNodeId, onSelectNode }) {
         ref={viewportRef}
       >
         <div className="graph-toolbar">
-          <strong>{selectedProjectId ? "项目关系" : selectedNodeId ? "聚焦关系" : "全局关系"}</strong>
-          <span>{selectedProjectId ? "只显示当前项目的直接业务关联" : selectedNodeId ? "已突出当前节点的直接业务关联" : "拖拽画布查看全局关系；选择节点后聚焦相邻关系"}</span>
+          <div className="graph-toolbar-copy">
+            <strong>{selectedProjectId ? "项目关系" : selectedNodeId ? "聚焦关系" : "全局关系"}</strong>
+            <span>{selectedProjectId ? "只显示当前项目的直接业务关联" : selectedNodeId ? "已突出当前节点的直接业务关联" : "拖拽画布查看全局关系；选择节点后聚焦相邻关系"}</span>
+          </div>
+          <RelationLegend />
         </div>
         <svg
           height={viewport.height}
@@ -246,8 +272,9 @@ export default function GraphView({ graph, selectedNodeId, onSelectNode }) {
           })}
           {nodes.map((node) => {
             const point = positions.get(node.id);
+            const metadataTags = metadataTagsForNode(node);
             return (
-              <foreignObject className="graph-node-shell" height="82" key={node.id} width="190" x={point.x - 95} y={point.y - 42}>
+              <foreignObject className="graph-node-shell" height={NODE_BOX_HEIGHT} key={node.id} width={NODE_BOX_WIDTH} x={point.x - NODE_BOX_WIDTH / 2} y={point.y - NODE_BOX_HALF_HEIGHT}>
                 <button
                   aria-label={`${titleForNode(node)} ${labelForType(node.type)}`}
                   className={`graph-node node-${node.type} status-${node.status} ${activeFocusId === node.id ? "selected" : ""} ${highlightedNodeIds.has(node.id) ? "highlighted" : ""} ${activeFocusId && !highlightedNodeIds.has(node.id) ? "dimmed" : ""}`}
@@ -258,6 +285,13 @@ export default function GraphView({ graph, selectedNodeId, onSelectNode }) {
                 >
                   <span className="node-dot" aria-hidden="true" />
                   <span className="node-copy">{titleForNode(node)}</span>
+                  {metadataTags.length ? (
+                    <span className="node-metadata-tags" aria-label="项目 metadata">
+                      {metadataTags.map((tag) => (
+                        <span className={`node-metadata-chip ${tag.kind}`} key={`${tag.kind}:${tag.value}`}>{tag.value}</span>
+                      ))}
+                    </span>
+                  ) : null}
                 </button>
               </foreignObject>
             );
@@ -265,6 +299,20 @@ export default function GraphView({ graph, selectedNodeId, onSelectNode }) {
         </svg>
       </div>
     </section>
+  );
+}
+
+function RelationLegend() {
+  return (
+    <div className="graph-relation-legend" aria-label="relation legend">
+      <span>relation</span>
+      {RELATION_LEGEND_ITEMS.map((item) => (
+        <i className={`relation-legend-item relation-${item.relation}`} key={item.relation}>
+          <b aria-hidden="true" />
+          {item.label}
+        </i>
+      ))}
+    </div>
   );
 }
 
@@ -428,8 +476,28 @@ function buildProjectGraph(graph, selectedProjectId) {
 }
 
 function edgeClassName(edge, selectedNodeId) {
-  if (!selectedNodeId) return "ambient-edge";
-  return edge.from === selectedNodeId || edge.to === selectedNodeId ? "focused-edge" : "muted-edge";
+  const relationClass = `relation-${edge.relation || "unknown"}`;
+  if (!selectedNodeId) return `${relationClass} ambient-edge`;
+  return `${relationClass} ${edge.from === selectedNodeId || edge.to === selectedNodeId ? "focused-edge" : "muted-edge"}`;
+}
+
+function metadataTagsForNode(node) {
+  if (node.type !== "project") {
+    return [];
+  }
+  const metadata = node.metadata || node.raw || {};
+  return [
+    ...toTagList(metadata.products, "product"),
+    ...toTagList(metadata.domains, "domain"),
+    ...toTagList(metadata.role ? [metadata.role] : [], "role")
+  ];
+}
+
+function toTagList(values, kind) {
+  return (Array.isArray(values) ? values : [])
+    .map((value) => String(value || "").trim())
+    .filter(Boolean)
+    .map((value) => ({ kind, value }));
 }
 
 function getHighlightedNodeIds(edges, selectedNodeId) {

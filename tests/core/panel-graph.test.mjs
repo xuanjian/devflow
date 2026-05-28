@@ -17,6 +17,58 @@ test("buildPanelGraph adapts repository graph to panel shape", async () => {
   assert.ok(graph.edges.some((edge) => edge.from === "workset:workset-demo-task" && edge.to === "skill:demo-skill" && edge.relation === "loads-skill"));
 });
 
+test("buildPanelGraph exposes project metadata and relation edge types for panel visualization", async () => {
+  const repository = {
+    async listProjects() {
+      return [
+        { id: "goods-h5", name: "Goods H5", products: ["dhb"], domains: ["goods"], role: "h5" },
+        { id: "bff-goods", name: "BFF Goods", products: ["dhb"], domains: ["goods"], role: "bff-service" },
+        { id: "dhbfront-utils", name: "dhbfront-utils", products: ["dhb"], domains: [], role: "frontend-common" }
+      ];
+    },
+    async getProject(projectId) {
+      return (await this.listProjects()).find((project) => project.id === projectId) || null;
+    },
+    async listSceneTemplates() {
+      return [];
+    },
+    async getSceneTemplate() {
+      return null;
+    },
+    async listSkills() {
+      return [];
+    },
+    async listRules() {
+      return [];
+    },
+    async listTasks() {
+      return [];
+    },
+    async getActiveTask() {
+      return null;
+    },
+    async listGraphEdges() {
+      return [
+        { from: "project:goods-h5", to: "project:bff-goods", relation: "calls" },
+        { from: "project:goods-h5", to: "project:dhbfront-utils", relation: "depends-on" },
+        { from: "project:goods-h5", to: "project:container", relation: "chain" }
+      ];
+    }
+  };
+
+  const graph = await buildPanelGraph(repository, { rootDir: fixtureRoot });
+  const goodsH5 = graph.nodes.find((node) => node.id === "project:goods-h5");
+
+  assert.deepEqual(goodsH5.metadata, {
+    products: ["dhb"],
+    domains: ["goods"],
+    role: "h5"
+  });
+  assert.ok(graph.edges.some((edge) => edge.from === "project:goods-h5" && edge.to === "project:bff-goods" && edge.relation === "calls"));
+  assert.ok(graph.edges.some((edge) => edge.from === "project:goods-h5" && edge.to === "project:dhbfront-utils" && edge.relation === "depends-on"));
+  assert.ok(graph.edges.some((edge) => edge.from === "project:goods-h5" && edge.to === "project:container" && edge.relation === "chain"));
+});
+
 test("buildPanelGraph hides DevFlow framework self nodes", async () => {
   const repository = {
     async listProjects() {

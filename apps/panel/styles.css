@@ -658,6 +658,11 @@ summary:focus-visible {
   font-size: 12px;
 }
 
+.task-project-relation-legend {
+  justify-content: flex-start;
+  margin-top: 10px;
+}
+
 .task-project-map svg {
   display: block;
   height: min(270px, 34vh);
@@ -671,6 +676,27 @@ summary:focus-visible {
   stroke: rgba(125, 163, 255, 0.34);
   stroke-linecap: round;
   stroke-width: 1.2;
+}
+
+.project-map-relation-edge {
+  opacity: 0.94;
+  pointer-events: none;
+  stroke-linecap: round;
+  stroke-width: 1.9;
+}
+
+.project-map-relation-edge.relation-chain {
+  stroke: var(--cyan);
+}
+
+.project-map-relation-edge.relation-depends-on {
+  stroke: var(--orange);
+  stroke-dasharray: 7 6;
+}
+
+.project-map-relation-edge.relation-calls {
+  stroke: var(--green);
+  stroke-dasharray: 2 5;
 }
 
 .project-map-node-shell {
@@ -843,6 +869,12 @@ summary:focus-visible {
   z-index: 2;
 }
 
+.graph-toolbar-copy {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
 .graph-toolbar strong {
   font-size: 17px;
   letter-spacing: 0;
@@ -851,6 +883,40 @@ summary:focus-visible {
 .graph-toolbar span {
   color: var(--muted);
   font-size: 13px;
+}
+
+.graph-relation-legend {
+  align-items: center;
+  color: var(--muted);
+  display: flex;
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.graph-relation-legend > span {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.relation-legend-item {
+  align-items: center;
+  color: var(--muted-strong);
+  display: inline-flex;
+  font-size: 12px;
+  font-style: normal;
+  gap: 5px;
+  white-space: nowrap;
+}
+
+.relation-legend-item b {
+  border-top: 2px solid rgba(185, 185, 185, 0.42);
+  display: inline-block;
+  width: 22px;
 }
 
 .graph-canvas svg {
@@ -875,6 +941,37 @@ summary:focus-visible {
   opacity: 0.92;
   stroke: rgba(232, 232, 232, 0.54);
   stroke-width: 1.8;
+}
+
+.graph-edge.relation-chain {
+  stroke: var(--cyan);
+  stroke-width: 1.7;
+}
+
+.graph-edge.relation-depends-on {
+  stroke: var(--orange);
+  stroke-dasharray: 7 6;
+  stroke-width: 1.6;
+}
+
+.graph-edge.relation-calls {
+  stroke: var(--green);
+  stroke-dasharray: 2 5;
+  stroke-width: 1.9;
+}
+
+.relation-legend-item.relation-chain b {
+  border-color: var(--cyan);
+}
+
+.relation-legend-item.relation-depends-on b {
+  border-color: var(--orange);
+  border-style: dashed;
+}
+
+.relation-legend-item.relation-calls b {
+  border-color: var(--green);
+  border-style: dotted;
 }
 
 .graph-node-shell {
@@ -934,6 +1031,41 @@ summary:focus-visible {
   text-overflow: ellipsis;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.58);
   white-space: nowrap;
+}
+
+.node-metadata-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  justify-content: center;
+  max-width: 176px;
+}
+
+.node-metadata-chip {
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 5px;
+  color: #e8e8e8;
+  display: inline-flex;
+  font-size: 10px;
+  font-weight: 750;
+  line-height: 1.1;
+  max-width: 82px;
+  overflow: hidden;
+  padding: 3px 5px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.node-metadata-chip.product {
+  background: rgba(138, 180, 248, 0.18);
+}
+
+.node-metadata-chip.domain {
+  background: rgba(112, 214, 200, 0.16);
+}
+
+.node-metadata-chip.role {
+  background: rgba(242, 176, 95, 0.16);
 }
 
 .graph-node.selected,
