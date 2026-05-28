@@ -445,9 +445,35 @@ R3 里这个 `migrate-git-json-relations.mjs` 旧脚本会被删掉。
 
 ## 6. Round 3：写入路径统一
 
-> 同样，等 R2 合并后再细化。这里给出**改动总图与边界**。
+> 本节在 R1/R2 落地后修订过。R1/R2 实现暴露了原计划没料到的依赖关系，**§6.0 的依赖陷阱必须先读**，不要照 §6.2 的表格字面删文件。
 
-### 6.1 改动总图
+### 6.0 依赖陷阱（R1/R2 落地后才暴露，务必先处理）
+
+R2 的 `migrate-from-json.mjs` 直接复用了 `createJsonRepository` 作为"从 JSON 读一次"的读取器。所以本节原稿里"删除 json-repository.mjs / rebuild-index.mjs"的字面指令会破坏迁移命令和 db 缺失时的初始化。动手前先 `grep -rln "json-repository\|rebuild-index" src/ scripts/ tests/` 确认所有引用，再按下面的方式处理：
+
+| 文件 | 当前被谁依赖 | R3 正确处理 |
+|------|--------------|-------------|
+| `src/core/repositories/json-repository.mjs` | `migrate-from-json.mjs`（必须保留）、`rebuild-index.mjs`、`devflow-service.mjs`、若干测试 | **降级**为"仅 `migrate-from-json` 使用的只读 JSON 导入器"。从 service / checks / cli 的**运行时**路径移除引用，文件保留。**不要裸删**。 |
+| `src/core/storage/rebuild-index.mjs` | `devflow-service.mjs`、`checks.mjs`、`devflow-cli.mjs`（`index rebuild`）、测试 | 删除前，先把这些消费方"db 不存在 → 从 JSON rebuild"的逻辑替换成 §6.1 的新初始化策略，再删。 |
+| `scripts/migrate-git-json-relations.mjs` | 无运行时引用（更早期的一次性脚本） | 可删。 |
+| `createCompatibilityService`（`devflow-cli.mjs` 内 ~230 行） | CLI fallback（service 模块存在时跑不到） | 可删。 |
+
+### 6.1 backend resolver 三态初始化策略（替换"db 不存在就 rebuild"的旧逻辑）
+
+`devflow-service.mjs` / `checks.mjs` 现在的逻辑是"db 不存在 → `rebuildDevFlowIndex` 从 JSON 重建"。R3 删 rebuild-index 后，统一改成下面三态：
+
+1. **db 存在** → 直接用 sqlite-repository。
+2. **db 不存在 + `config/**.json` 还在**（老 checkout 没迁移）→ 抛清晰错误，提示用户先跑 `devflow migrate from-json`。**不要自动迁移**（迁移会删 JSON，必须用户显式触发）。
+3. **db 不存在 + 没有 JSON**（全新安装，npm 包已不含 config/runtime）→ 用 `src/core/defaults/*` 常量建一个最小可用 db：跑 schema migration + 插入默认 entry/profile/gates/current + 插入 `DEFAULT_DEVFLOW_PROJECT`（见 §6.2）。
+
+### 6.2 全新安装的 devflow 自身 project 种子
+
+原来 `config/projects/devflow.json` 是 npm 包模板里的种子项目记录。JSON 退役后，全新安装的 db 里需要这条记录，否则 `devflow query` 在新装环境下没有任何项目。
+
+- 新增 `src/core/defaults/devflow-project.mjs`，导出 `DEFAULT_DEVFLOW_PROJECT`（内容 = 当前 `config/projects/devflow.json`）。
+- 在 §6.1 第 3 态（全新安装初始化）里 `writeProject(DEFAULT_DEVFLOW_PROJECT)`。
+
+### 6.3 改动总图
 
 ```
 当前：
@@ -459,28 +485,25 @@ R3 里这个 `migrate-git-json-relations.mjs` 旧脚本会被删掉。
   Panel UI ──→ actions.mjs (thin shell) ──┐
                                           ├──→ service.commands.* ──→ sqlite-repo ──→ data/devflow.db
   CLI ──→ devflow-cli.mjs ─────────────────┘
+  migrate-from-json ──→ json-repo (只读导入器，唯一保留的 JSON 消费方)
 ```
 
-### 6.2 R3 任务边界
+### 6.4 建议拆成 3 个可独立测试、可回滚的子提交
 
-| 操作 | 文件 |
+| 子轮 | 内容 |
 |------|------|
-| 删除 | `src/core/repositories/json-repository.mjs` |
-| 删除 | `src/core/storage/rebuild-index.mjs`（已被 migrate from-json 取代） |
-| 删除 | `scripts/migrate-git-json-relations.mjs` |
-| 删除 | `scripts/devflow-cli.mjs` 里的 `createCompatibilityService` 函数（230 行）+ 相关 fallback 代码 |
-| 简化 | `src/core/services/devflow-service.mjs` 砍掉 `backend === "json"` 分支，service 工厂只接 sqlite-repo |
-| 重写 | `src/core/actions.mjs` 所有 `writeRootJson` → 调 service.commands.*；目标文件长度 ≤ 400 行 |
-| 重写 | `scripts/install-ai-context.mjs` 拆成模块；不再写 `config/**.json`；`actions.mjs` 直接 in-process 调用，去掉 spawn |
-| 更新 | `package.json` `files` 字段砍掉所有 `config/*` 和 `runtime/*` 条目 |
-| 更新 | `src/core/repositories/repository-contract.mjs` 把 `getEntry / getProfile / getGates / setConfig / listTaskDocuments / writeTaskDocument` 加进 `REPOSITORY_METHODS` |
+| **R3a** | 读路径统一：实现 §6.1 三态 resolver + §6.2 种子；删 `devflow-service` 的 `backend === "json"` 分支；json-repository 降级为 migrate-only；删 `rebuild-index.mjs`（消费方改完后） |
+| **R3b** | 写路径统一：`actions.mjs` 所有 `writeRootJson` → `service.commands.*`，目标 ≤ 400 行 |
+| **R3c** | 收尾：`install-ai-context.mjs` 模块化 + actions 去 spawn 改 in-process；删 `createCompatibilityService` / `migrate-git-json-relations.mjs`；`repository-contract.mjs` 的 `REPOSITORY_METHODS` 加 `getConfig/setConfig/getEntry/getProfile/getGates/listTaskDocuments/writeTaskDocument`；`package.json` `files` 砍 `config/*`、`runtime/*` |
 
-### 6.3 R3 约束
+### 6.5 R3 约束（红线）
 
-- 提交前 `find . -name "*.json" -path "./config/*" -not -path "./node_modules/*"` 应为空。
-- `find . -name "*.json" -path "./runtime/*" -not -path "./node_modules/*"` 应为空。
-- 删除 `data/devflow.db` 后 `devflow init` 创建一个全新空 DB，所有 query 命令仍能正常返回（用 DEFAULT 常量兜底）。
-- 所有现有测试（除 fixture 路径相关的）继续通过。
+- **本仓库开发期间不要真跑 `migrate from-json`，不要删本仓库的 `config/**.json` / `runtime/**.json`**。R3 开发期需要这些 JSON 作为测试 fixture 和参照。真删 JSON 是用户后续显式做的事，不是 R3 提交的验收条件。
+- 因此原稿"提交前 config/runtime JSON 应为空"这条**作废**——那是用户跑完迁移后的终态，不是 R3 提交状态。
+- **删除 `data/devflow.db` 后**，全新初始化（§6.1 第 3 态）应能建出可用 db，`devflow query current` / `devflow query route` 正常返回。
+- `actions.mjs` 改完后无法在 CI 验证 `apps/panel` 的 UI 行为。汇报里必须明确写"panel UI 未经人工验证，需用户自测新增项目/场景/任务"。
+- handoff.md 不能丢。每个子提交 `npm test` 全绿。不引入新依赖。
+- 遇到测试 fixture 依赖被删的 `rebuild-index` 等情况，先输出现状 + 建议，等用户确认，不要自行删测试或改契约语义。
 
 ---
 
