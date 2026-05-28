@@ -114,9 +114,61 @@ export function createSqliteRepository({ rootDir = process.cwd(), dbPath = defau
       return repository.getSceneTemplate(normalized.id);
     },
 
+    async writeSkill(skill) {
+      upsertSkill(db, skill);
+      return getRaw(db, "skills", skill.id);
+    },
+
+    async writeRule(rule) {
+      upsertRule(db, rule);
+      return getRaw(db, "rules", rule.id);
+    },
+
     async writeTask(task) {
       upsertTask(db, normalizeTask(task));
       return repository.getTask(task.id);
+    },
+
+    async deleteProject(projectId) {
+      deleteEntity(db, "projects", projectId, [
+        ["documents", "owner_type = 'project' AND owner_id = ?"],
+        ["project_skill_mounts", "project_id = ?"],
+        ["project_rule_mounts", "project_id = ?"],
+        ["workset_projects", "project_id = ?"],
+        ["scene_template_project_hints", "project_id = ?"]
+      ]);
+      return null;
+    },
+
+    async deleteSceneTemplate(sceneTemplateId) {
+      deleteEntity(db, "scene_templates", sceneTemplateId, [
+        ["documents", "owner_type = 'sceneTemplate' AND owner_id = ?"],
+        ["scene_template_capabilities", "scene_template_id = ?"],
+        ["scene_template_project_hints", "scene_template_id = ?"],
+        ["scene_template_skill_hints", "scene_template_id = ?"],
+        ["scene_template_rule_hints", "scene_template_id = ?"]
+      ]);
+      return null;
+    },
+
+    async deleteSkill(skillId) {
+      deleteEntity(db, "skills", skillId, [
+        ["documents", "owner_type = 'skill' AND owner_id = ?"],
+        ["project_skill_mounts", "skill_id = ?"],
+        ["workset_skills", "skill_id = ?"],
+        ["scene_template_skill_hints", "skill_id = ?"]
+      ]);
+      return null;
+    },
+
+    async deleteRule(ruleId) {
+      deleteEntity(db, "rules", ruleId, [
+        ["documents", "owner_type = 'rule' AND owner_id = ?"],
+        ["project_rule_mounts", "rule_id = ?"],
+        ["workset_rules", "rule_id = ?"],
+        ["scene_template_rule_hints", "rule_id = ?"]
+      ]);
+      return null;
     },
 
     async setRuntimeState(runtimeState) {
@@ -167,30 +219,72 @@ function normalizeTask(task) {
 
 function upsertProject(db, project) {
   if (!project?.id) throw new TypeError("Cannot write project without an id");
-  db.prepare(`
-    INSERT OR REPLACE INTO projects (id, name, technology_family_id, source_path, doc_path, raw_json)
-    VALUES (@id, @name, @technologyFamilyId, @sourcePath, @docPath, @rawJson)
-  `).run({
-    id: project.id,
-    name: project.name || project.id,
-    technologyFamilyId: project.technologyFamilyId || "",
-    sourcePath: project.sourcePath || "",
-    docPath: project.doc?.path || "",
-    rawJson: stringify(project)
+  const tx = db.transaction(() => {
+    db.prepare(`
+      INSERT OR REPLACE INTO projects (id, name, technology_family_id, source_path, doc_path, raw_json)
+      VALUES (@id, @name, @technologyFamilyId, @sourcePath, @docPath, @rawJson)
+    `).run({
+      id: project.id,
+      name: project.name || project.id,
+      technologyFamilyId: project.technologyFamilyId || "",
+      sourcePath: project.sourcePath || "",
+      docPath: project.doc?.path || "",
+      rawJson: stringify(project)
+    });
+    db.prepare("DELETE FROM project_skill_mounts WHERE project_id = ?").run(project.id);
+    db.prepare("DELETE FROM project_rule_mounts WHERE project_id = ?").run(project.id);
+    for (const skill of project.skills || []) insertRef(db, "project_skill_mounts", "project_id", project.id, "skill_id", skill.id, skill);
+    for (const rule of project.rules || []) insertRef(db, "project_rule_mounts", "project_id", project.id, "rule_id", rule.id, rule);
   });
+  tx();
 }
 
 function upsertSceneTemplate(db, sceneTemplate) {
   if (!sceneTemplate?.id) throw new TypeError("Cannot write sceneTemplate without an id");
-  db.prepare(`
-    INSERT OR REPLACE INTO scene_templates (id, name, summary, source_path, raw_json)
-    VALUES (@id, @name, @summary, @sourcePath, @rawJson)
-  `).run({
-    id: sceneTemplate.id,
-    name: sceneTemplate.name || sceneTemplate.id,
-    summary: sceneTemplate.summary || "",
-    sourcePath: sceneTemplate.sourcePath || "",
-    rawJson: stringify(sceneTemplate)
+  const tx = db.transaction(() => {
+    db.prepare(`
+      INSERT OR REPLACE INTO scene_templates (id, name, summary, source_path, raw_json)
+      VALUES (@id, @name, @summary, @sourcePath, @rawJson)
+    `).run({
+      id: sceneTemplate.id,
+      name: sceneTemplate.name || sceneTemplate.id,
+      summary: sceneTemplate.summary || "",
+      sourcePath: sceneTemplate.sourcePath || "",
+      rawJson: stringify(sceneTemplate)
+    });
+    db.prepare("DELETE FROM scene_template_capabilities WHERE scene_template_id = ?").run(sceneTemplate.id);
+    db.prepare("DELETE FROM scene_template_project_hints WHERE scene_template_id = ?").run(sceneTemplate.id);
+    db.prepare("DELETE FROM scene_template_skill_hints WHERE scene_template_id = ?").run(sceneTemplate.id);
+    db.prepare("DELETE FROM scene_template_rule_hints WHERE scene_template_id = ?").run(sceneTemplate.id);
+    const insertCapability = db.prepare("INSERT OR REPLACE INTO capabilities (id, raw_json) VALUES (?, ?)");
+    for (const capabilityId of sceneTemplate.capabilityIds || []) {
+      insertCapability.run(capabilityId, stringify({ id: capabilityId }));
+      insertRef(db, "scene_template_capabilities", "scene_template_id", sceneTemplate.id, "capability_id", capabilityId, { id: capabilityId });
+    }
+    for (const project of sceneTemplate.projectHints || []) insertRef(db, "scene_template_project_hints", "scene_template_id", sceneTemplate.id, "project_id", project.id, project);
+    for (const skill of sceneTemplate.skillHints || []) insertRef(db, "scene_template_skill_hints", "scene_template_id", sceneTemplate.id, "skill_id", skill.id, skill);
+    for (const rule of sceneTemplate.ruleHints || []) insertRef(db, "scene_template_rule_hints", "scene_template_id", sceneTemplate.id, "rule_id", rule.id, rule);
+  });
+  tx();
+}
+
+function upsertSkill(db, skill) {
+  if (!skill?.id) throw new TypeError("Cannot write skill without an id");
+  db.prepare("INSERT OR REPLACE INTO skills (id, name, source_path, raw_json) VALUES (@id, @name, @sourcePath, @rawJson)").run({
+    id: skill.id,
+    name: skill.name || skill.id,
+    sourcePath: skill.sourcePath || "",
+    rawJson: stringify(skill)
+  });
+}
+
+function upsertRule(db, rule) {
+  if (!rule?.id) throw new TypeError("Cannot write rule without an id");
+  db.prepare("INSERT OR REPLACE INTO rules (id, name, source_path, raw_json) VALUES (@id, @name, @sourcePath, @rawJson)").run({
+    id: rule.id,
+    name: rule.name || rule.id,
+    sourcePath: rule.sourcePath || "",
+    rawJson: stringify(rule)
   });
 }
 
@@ -247,6 +341,18 @@ function insertRef(db, table, leftColumn, leftValue, rightColumn, rightValue, ra
     rightValue,
     stringify(rawValue)
   );
+}
+
+function deleteEntity(db, table, id, relatedDeletes = []) {
+  if (!id) throw new TypeError(`Cannot delete ${table} without an id`);
+  const tx = db.transaction(() => {
+    for (const [relatedTable, whereClause] of relatedDeletes) {
+      db.prepare(`DELETE FROM ${relatedTable} WHERE ${whereClause}`).run(id);
+    }
+    db.prepare(`DELETE FROM ${table} WHERE id = ?`).run(id);
+    db.prepare("DELETE FROM graph_edges WHERE from_id LIKE ? OR to_id LIKE ?").run(`%:${id}`, `%:${id}`);
+  });
+  tx();
 }
 
 function parseRaw(value) {
