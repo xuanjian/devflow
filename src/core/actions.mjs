@@ -1,9 +1,14 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { spawn } from "node:child_process";
+import {
+  check as checkAiContext,
+  install as installAiContext,
+  syncProjects as syncAiContextProjects,
+  validate as validateAiContext
+} from "../../scripts/install-ai-context.mjs";
 import { createActionCommandService } from "./commands/action-store-commands.mjs";
 import { PROFILE_CONFIG_KEY } from "./defaults/profile.mjs";
-import { readJsonFile } from "./json-loader.mjs";
 import { resolveInside, toPath } from "./paths.mjs";
 
 const COMMAND_TIMEOUT_MS = 60000;
@@ -13,13 +18,13 @@ const ACTIONS = {
     run: ({ rootPath }) => runFixedCommand(rootPath, ["npm", "install"])
   },
   install_ai_context: {
-    run: ({ rootPath }) => runFixedCommand(rootPath, ["node", "scripts/install-ai-context.mjs", "install"])
+    run: ({ rootPath, actionId }) => runInstallModuleAction(rootPath, actionId, "install", () => installAiContext({ rootDir: rootPath }))
   },
   validate_ai_context: {
-    run: ({ rootPath }) => runFixedCommand(rootPath, ["node", "scripts/install-ai-context.mjs", "validate"])
+    run: ({ rootPath, actionId }) => runInstallModuleAction(rootPath, actionId, "validate", () => validateAiContext({ rootDir: rootPath }))
   },
   check_ai_context: {
-    run: ({ rootPath }) => runFixedCommand(rootPath, ["node", "scripts/install-ai-context.mjs", "check"])
+    run: ({ rootPath, actionId }) => runInstallModuleAction(rootPath, actionId, "check", () => checkAiContext({ rootDir: rootPath }))
   },
   sync_project_entry: {
     run: syncProjectEntry
@@ -80,13 +85,17 @@ async function syncProjectEntry({ rootPath, actionId, body }) {
     return actionError(actionId, "invalid_project_id", "sync_project_entry requires a safe projectId.");
   }
 
-  const index = await readJsonFile(resolveInside(rootPath, "config/projects/index.json"));
-  const exists = index.data?.projects?.some((project) => project.id === projectId);
-  if (!exists) {
+  const commands = await actionCommands(rootPath);
+  const project = await commands.getProject(projectId);
+  if (!project) {
     return actionError(actionId, "invalid_project_id", `Unknown projectId: ${projectId}`);
   }
 
-  return runFixedCommand(rootPath, ["node", "scripts/install-ai-context.mjs", "sync-projects", "--project", projectId, "--write"], actionId);
+  return runInstallModuleAction(rootPath, actionId, "sync-projects", () => syncAiContextProjects({
+    rootDir: rootPath,
+    projectId,
+    write: true
+  }));
 }
 
 async function addProjectFromPath({ rootPath, actionId, body }) {
@@ -1104,6 +1113,57 @@ async function runFixedCommand(rootPath, command, actionId) {
     output: result.output,
     changedPaths: [],
     nextCheckIds: ["install_check_command", "install_validate_command"]
+  };
+}
+
+async function runInstallModuleAction(rootPath, actionId, commandName, callback) {
+  const result = await captureConsoleOutput(callback);
+  if (result.error) {
+    return {
+      ok: false,
+      actionId,
+      error: {
+        code: "action_failed",
+        message: result.error.message || String(result.error)
+      },
+      summary: `Failed install-ai-context ${commandName}`,
+      output: result.output,
+      changedPaths: [],
+      nextCheckIds: ["install_check_command", "install_validate_command"]
+    };
+  }
+  return {
+    ok: true,
+    actionId,
+    summary: `Ran install-ai-context ${commandName}`,
+    output: result.output,
+    changedPaths: [],
+    nextCheckIds: ["install_check_command", "install_validate_command"]
+  };
+}
+
+async function captureConsoleOutput(callback) {
+  const originalLog = console.log;
+  const originalWarn = console.warn;
+  const originalError = console.error;
+  const stdout = [];
+  const stderr = [];
+  let error;
+  console.log = (...args) => stdout.push(args.join(" "));
+  console.warn = (...args) => stderr.push(args.join(" "));
+  console.error = (...args) => stderr.push(args.join(" "));
+  try {
+    await callback();
+  } catch (caught) {
+    error = caught;
+  } finally {
+    console.log = originalLog;
+    console.warn = originalWarn;
+    console.error = originalError;
+  }
+  return {
+    output: [...stdout, ...stderr].join("\n").trim(),
+    error
   };
 }
 

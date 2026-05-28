@@ -3,15 +3,13 @@ import fs from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
 import { execFileSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
+import { createSqliteRepository } from '../src/core/repositories/sqlite-repository.mjs';
+import { defaultDbPath } from '../src/core/storage/schema.mjs';
+import { ensureSqliteDatabase } from '../src/core/storage/sqlite-bootstrap.mjs';
 
-const root = path.resolve(new URL('..', import.meta.url).pathname);
-const entryPath = path.join(root, 'config', 'entry.json');
-const currentPath = path.join(root, 'runtime', 'current.json');
-const managedSkillsRoot = path.join(root, 'bundles', 'skills');
-const coreSkills = [
-  { id: 'devflow', sourcePath: path.join(managedSkillsRoot, 'devflow') },
-  { id: 'devflow-init', sourcePath: path.join(managedSkillsRoot, 'devflow-init') },
-];
+const scriptPath = fileURLToPath(import.meta.url);
+const defaultRoot = path.resolve(new URL('..', import.meta.url).pathname);
 const managedEntryMarker = '<!-- devflow:managed-entry:start -->';
 const managedEntryEndMarker = '<!-- devflow:managed-entry:end -->';
 const legacyManagedEntryMarkers = [
@@ -20,17 +18,73 @@ const legacyManagedEntryMarkers = [
     end: '<!-- ai-context:managed-entry:end -->',
   },
 ];
-const userHome = process.env.HOME || path.resolve(root, '..', '..');
-const superpowersDir = process.env.AI_CONTEXT_SUPERPOWERS_DIR || path.join(userHome, '.codex', 'superpowers');
-const projectPathOverrides = resolveProjectPathOverrides();
-const projectSearchRoots = resolveProjectSearchRoots();
 const allowedRuleApplyModes = new Set(['global', 'project-on-demand', 'scene-on-demand', 'task-gate', 'manual']);
-const skillsHomes = resolveSkillsHomes();
-const skillLinks = skillsHomes.flatMap(skillsHome => coreSkills.map(skill => ({
-  id: skill.id,
-  linkPath: path.join(skillsHome, skill.id),
-  sourcePath: skill.sourcePath,
-})));
+let root;
+let managedSkillsRoot;
+let coreSkills;
+let userHome;
+let superpowersDir;
+let projectPathOverrides;
+let projectSearchRoots;
+let skillsHomes;
+let skillLinks;
+
+setInstallContext();
+
+function setInstallContext(options = {}) {
+  root = path.resolve(options.rootDir || defaultRoot);
+  managedSkillsRoot = path.join(root, 'bundles', 'skills');
+  coreSkills = [
+    { id: 'devflow', sourcePath: path.join(managedSkillsRoot, 'devflow') },
+    { id: 'devflow-init', sourcePath: path.join(managedSkillsRoot, 'devflow-init') },
+  ];
+  userHome = process.env.HOME || path.resolve(root, '..', '..');
+  superpowersDir = process.env.AI_CONTEXT_SUPERPOWERS_DIR || path.join(userHome, '.codex', 'superpowers');
+  projectPathOverrides = resolveProjectPathOverrides();
+  projectSearchRoots = resolveProjectSearchRoots();
+  skillsHomes = resolveSkillsHomes();
+  skillLinks = skillsHomes.flatMap(skillsHome => coreSkills.map(skill => ({
+    id: skill.id,
+    linkPath: path.join(skillsHome, skill.id),
+    sourcePath: skill.sourcePath,
+  })));
+}
+
+function captureInstallContext() {
+  return {
+    root,
+    managedSkillsRoot,
+    coreSkills,
+    userHome,
+    superpowersDir,
+    projectPathOverrides,
+    projectSearchRoots,
+    skillsHomes,
+    skillLinks,
+  };
+}
+
+function restoreInstallContext(context) {
+  root = context.root;
+  managedSkillsRoot = context.managedSkillsRoot;
+  coreSkills = context.coreSkills;
+  userHome = context.userHome;
+  superpowersDir = context.superpowersDir;
+  projectPathOverrides = context.projectPathOverrides;
+  projectSearchRoots = context.projectSearchRoots;
+  skillsHomes = context.skillsHomes;
+  skillLinks = context.skillLinks;
+}
+
+async function withInstallContext(options = {}, callback) {
+  const previousContext = captureInstallContext();
+  setInstallContext(options);
+  try {
+    return await callback();
+  } finally {
+    restoreInstallContext(previousContext);
+  }
+}
 
 function resolveSkillsHomes() {
   const explicitHomes = process.env.AI_CONTEXT_SKILLS_HOMES || process.env.AI_CONTEXT_SKILLS_HOME;
@@ -136,16 +190,87 @@ function commandVersion(command) {
   }
 }
 
-function readJson(relativePath) {
-  return JSON.parse(fs.readFileSync(path.join(root, relativePath), 'utf8'));
-}
-
 function exists(relativeOrAbsolutePath) {
   if (!relativeOrAbsolutePath) return false;
   const file = path.isAbsolute(relativeOrAbsolutePath)
     ? relativeOrAbsolutePath
     : path.join(root, relativeOrAbsolutePath);
   return fs.existsSync(file);
+}
+
+async function openRepository() {
+  const dbPath = defaultDbPath(root);
+  await ensureSqliteDatabase({ rootDir: root, dbPath });
+  return createSqliteRepository({ rootDir: root, dbPath });
+}
+
+async function loadDevFlowState() {
+  const repository = await openRepository();
+  const [
+    entry,
+    profile,
+    gates,
+    projects,
+    sceneTemplates,
+    skills,
+    rules,
+    tasks,
+    activeTask,
+  ] = await Promise.all([
+    repository.getEntry(),
+    repository.getProfile(),
+    repository.getGates(),
+    repository.listProjects(),
+    repository.listSceneTemplates(),
+    repository.listSkills(),
+    repository.listRules(),
+    repository.listTasks(),
+    repository.getActiveTask(),
+  ]);
+  const current = synthesizeCurrentState(activeTask, tasks);
+  return {
+    repository,
+    entry,
+    profile,
+    gates,
+    projects,
+    sceneTemplates,
+    skillCatalog: { version: 1, skills },
+    ruleCatalog: { version: 1, rules },
+    tasks,
+    activeTask,
+    current,
+  };
+}
+
+function synthesizeCurrentState(activeTask, tasks = []) {
+  if (!activeTask) {
+    return {
+      version: 1,
+      activeTaskId: "",
+      activeTaskPath: "",
+      activeProjectIds: [],
+      activeSceneIds: [],
+      activeWorksetId: "",
+      currentGate: "",
+      recentTaskIds: tasks.map(task => task.id).filter(Boolean).slice(0, 20),
+      note: "",
+    };
+  }
+  const sceneIds = activeTask.sceneIds?.length
+    ? activeTask.sceneIds
+    : (activeTask.workset?.sceneTemplateId ? [activeTask.workset.sceneTemplateId] : []);
+  return {
+    version: 1,
+    activeTaskId: activeTask.id,
+    activeTaskPath: `runtime/tasks/${activeTask.id}.json`,
+    activeProjectIds: activeTask.projectIds || [],
+    activeSceneIds: sceneIds,
+    activeWorksetId: activeTask.workset?.id || "",
+    currentGate: activeTask.currentGate || activeTask.gate || "",
+    recentTaskIds: [activeTask.id, ...tasks.map(task => task.id).filter(id => id && id !== activeTask.id)].slice(0, 20),
+    note: activeTask.recoveryPoint || "",
+  };
 }
 
 function writeFile(filePath, content) {
@@ -420,14 +545,16 @@ function ensureSkillLink(skillLink) {
   ensureSymlink(skillLink.linkPath, skillLink.sourcePath);
 }
 
-function install(options = {}) {
-  for (const skill of coreSkills) ensureSkill(skill);
-  validate();
-  for (const skillLink of skillLinks) ensureSkillLink(skillLink);
+export async function install(options = {}) {
+  return withInstallContext(options, async () => {
+    for (const skill of coreSkills) ensureSkill(skill);
+    await validateCurrent();
+    for (const skillLink of skillLinks) ensureSkillLink(skillLink);
 
-  for (const skillLink of skillLinks) console.log(`installed skill: ${skillLink.linkPath} -> ${skillLink.sourcePath}`);
-  console.log('next: ask your AI tool to run the devflow-init skill to initialize profile, projects, scenes, skills, and rules.');
-  if (options.projectSkills) syncProjects({ write: true, skillsOnly: true });
+    for (const skillLink of skillLinks) console.log(`installed skill: ${skillLink.linkPath} -> ${skillLink.sourcePath}`);
+    console.log('next: ask your AI tool to run the devflow-init skill to initialize profile, projects, scenes, skills, and rules.');
+    if (options.projectSkills) await syncProjectsCurrent({ write: true, skillsOnly: true });
+  });
 }
 
 function workflowToolStatuses() {
@@ -489,53 +616,63 @@ function printWorkflowToolReport(statuses, { strict = false } = {}) {
   }
 }
 
-function setup(options = {}) {
-  install(options);
-  if (options.installOpenSpec) ensureOpenSpecInstalled();
-  const statuses = workflowToolStatuses();
-  printWorkflowToolReport(statuses);
-  console.log('setup complete');
-  console.log('next: run node scripts/install-ai-context.mjs doctor after OpenSpec and superpowers are available.');
+export async function setup(options = {}) {
+  return withInstallContext(options, async () => {
+    await install({ ...options, rootDir: root });
+    if (options.installOpenSpec) ensureOpenSpecInstalled();
+    const statuses = workflowToolStatuses();
+    printWorkflowToolReport(statuses);
+    console.log('setup complete');
+    console.log('next: run node scripts/install-ai-context.mjs doctor after OpenSpec and superpowers are available.');
+  });
 }
 
-function doctor() {
-  validate();
-  check();
-  const statuses = workflowToolStatuses();
-  printWorkflowToolReport(statuses, { strict: true });
-  const failed = statuses.filter(status => !status.ok);
-  if (failed.length) {
-    console.error(`doctor failed: ${failed.map(status => status.id).join(', ')}`);
-    process.exit(1);
-  }
-  console.log('doctor passed');
-}
-
-function uninstall() {
-  for (const skillLink of skillLinks) {
-    if (!fs.existsSync(skillLink.linkPath)) {
-      console.log(`skill link not installed: ${skillLink.linkPath}`);
-      continue;
+export async function doctor(options = {}) {
+  return withInstallContext(options, async () => {
+    await validateCurrent();
+    await checkCurrent();
+    const statuses = workflowToolStatuses();
+    printWorkflowToolReport(statuses, { strict: true });
+    const failed = statuses.filter(status => !status.ok);
+    if (failed.length) {
+      throw new Error(`doctor failed: ${failed.map(status => status.id).join(', ')}`);
     }
-    const stat = fs.lstatSync(skillLink.linkPath);
-    if (!stat.isSymbolicLink()) throw new Error(`refusing to remove non-symlink: ${skillLink.linkPath}`);
-    const target = fs.readlinkSync(skillLink.linkPath);
-    if (path.resolve(path.dirname(skillLink.linkPath), target) !== skillLink.sourcePath && path.resolve(target) !== skillLink.sourcePath) {
-      throw new Error(`refusing to remove symlink with unexpected target: ${skillLink.linkPath} -> ${target}`);
-    }
-    fs.unlinkSync(skillLink.linkPath);
-    console.log(`removed skill link: ${skillLink.linkPath}`);
-  }
+    console.log('doctor passed');
+  });
 }
 
-function check() {
+export async function uninstall(options = {}) {
+  return withInstallContext(options, async () => {
+    for (const skillLink of skillLinks) {
+      if (!fs.existsSync(skillLink.linkPath)) {
+        console.log(`skill link not installed: ${skillLink.linkPath}`);
+        continue;
+      }
+      const stat = fs.lstatSync(skillLink.linkPath);
+      if (!stat.isSymbolicLink()) throw new Error(`refusing to remove non-symlink: ${skillLink.linkPath}`);
+      const target = fs.readlinkSync(skillLink.linkPath);
+      if (path.resolve(path.dirname(skillLink.linkPath), target) !== skillLink.sourcePath && path.resolve(target) !== skillLink.sourcePath) {
+        throw new Error(`refusing to remove symlink with unexpected target: ${skillLink.linkPath} -> ${target}`);
+      }
+      fs.unlinkSync(skillLink.linkPath);
+      console.log(`removed skill link: ${skillLink.linkPath}`);
+    }
+  });
+}
+
+export async function check(options = {}) {
+  return withInstallContext(options, checkCurrent);
+}
+
+async function checkCurrent() {
+  const state = await loadDevFlowState();
   const installedLinks = skillLinks.filter(skillLink => fs.existsSync(skillLink.linkPath)
     && fs.lstatSync(skillLink.linkPath).isSymbolicLink()
     && (path.resolve(path.dirname(skillLink.linkPath), fs.readlinkSync(skillLink.linkPath)) === skillLink.sourcePath
       || path.resolve(fs.readlinkSync(skillLink.linkPath)) === skillLink.sourcePath));
-  console.log(`entry: ${exists('config/entry.json') ? 'ok' : 'missing'}`);
-  console.log(`profile: ${exists('config/profile.json') ? 'ok' : 'missing'}`);
-  console.log(`current: ${exists('runtime/current.json') ? 'ok' : 'missing'}`);
+  console.log(`entry: ${state.entry ? 'ok' : 'missing'}`);
+  console.log(`profile: ${state.profile ? 'ok' : 'missing'}`);
+  console.log(`current: ${state.current ? 'ok' : 'missing'}`);
   for (const skill of coreSkills) {
     console.log(`skill source ${skill.id}: ${fs.existsSync(path.join(skill.sourcePath, 'SKILL.md')) ? 'ok' : 'missing'}`);
   }
@@ -549,17 +686,20 @@ function check() {
   }
 }
 
-function syncProjects(options = {}) {
+export async function syncProjects(options = {}) {
+  return withInstallContext(options, () => syncProjectsCurrent(options));
+}
+
+async function syncProjectsCurrent(options = {}) {
   const write = Boolean(options.write);
   const projectFilter = options.projectId;
   const syncEntries = !options.skillsOnly;
   const syncSkills = !options.entriesOnly;
-  validate();
-  const index = readJson('config/projects/index.json');
+  await validateCurrent();
+  const { projects } = await loadDevFlowState();
   let count = 0;
-  for (const item of index.projects || []) {
-    if (projectFilter && item.id !== projectFilter) continue;
-    const project = readJson(item.path);
+  for (const project of projects) {
+    if (projectFilter && project.id !== projectFilter) continue;
     const projectPath = resolveProjectPath(project);
     if (!projectPath) {
       if (!write) console.log(`dry-run would skip missing project path: ${project.id} -> ${project.path || '<missing>'}`);
@@ -737,22 +877,22 @@ function resolvePrivacyScanPath(filePath) {
   return path.isAbsolute(filePath) ? filePath : path.join(root, filePath);
 }
 
-function publicPrivacyScanFiles(projectIndex, sceneIndex) {
+function publicPrivacyScanFiles(projects, sceneTemplates) {
   const files = [
     'README.md',
     'docs/install.md',
     'docs/project-introduction.md',
     'docs/product/devflow-workset-redesign.md',
-    'config/profile.json',
-    'config/projects/index.json',
-    'config/scenes/index.json',
-    'config/skills/skills.json',
-    'config/rules/rules.json',
-    'runtime/current.json',
     'bundles/skills/devflow/SKILL.md',
     'bundles/skills/devflow-init/SKILL.md',
-    ...(projectIndex.projects || []).map(project => project.path).filter(Boolean),
-    ...(sceneIndex.scenes || []).map(scene => scene.path).filter(Boolean),
+    ...(projects || []).flatMap(project => [
+      project.doc?.path,
+      project.sourcePath,
+    ]).filter(Boolean),
+    ...(sceneTemplates || []).flatMap(scene => [
+      scene.source?.path,
+      scene.sourcePath,
+    ]).filter(Boolean),
   ];
   const extraFiles = (process.env.AI_CONTEXT_PUBLIC_PRIVACY_SCAN_EXTRA_FILES || '')
     .split(/[,;]/)
@@ -761,8 +901,8 @@ function publicPrivacyScanFiles(projectIndex, sceneIndex) {
   return unique([...files, ...extraFiles]);
 }
 
-function validatePublicPrivacyBoundary(projectIndex, sceneIndex, errors) {
-  for (const file of publicPrivacyScanFiles(projectIndex, sceneIndex)) {
+function validatePublicPrivacyBoundary(projects, sceneTemplates, errors) {
+  for (const file of publicPrivacyScanFiles(projects, sceneTemplates)) {
     const filePath = resolvePrivacyScanPath(file);
     if (!fs.existsSync(filePath)) continue;
     const stat = fs.lstatSync(filePath);
@@ -777,62 +917,55 @@ function validatePublicPrivacyBoundary(projectIndex, sceneIndex, errors) {
   }
 }
 
-function validate() {
+export async function validate(options = {}) {
+  return withInstallContext(options, validateCurrent);
+}
+
+async function validateCurrent() {
   const errors = [];
   const warnings = [];
 
   for (const file of [
-    'config/entry.json',
-    'config/profile.json',
-    'config/projects/index.json',
-    'config/scenes/index.json',
-    'config/skills/skills.json',
-    'config/rules/rules.json',
-    'config/tasks/gates.json',
-    'runtime/current.json',
     'bundles/skills/devflow/SKILL.md',
     'bundles/skills/devflow-init/SKILL.md',
   ]) {
     if (!exists(file)) pushUniqueError(errors, `missing required file: ${file}`);
   }
+  let state;
+  try {
+    state = await loadDevFlowState();
+  } catch (error) {
+    pushUniqueError(errors, error.message);
+  }
   if (errors.length) return finishValidation(errors, warnings);
 
-  const entry = readJson('config/entry.json');
-  const projectIndex = readJson('config/projects/index.json');
-  const sceneIndex = readJson('config/scenes/index.json');
-  const skillCatalog = readJson('config/skills/skills.json');
-  const ruleCatalog = readJson('config/rules/rules.json');
-  const gates = readJson('config/tasks/gates.json');
-  const current = readJson('runtime/current.json');
-  const profile = readJson('config/profile.json');
+  const {
+    entry,
+    projects,
+    sceneTemplates,
+    skillCatalog,
+    ruleCatalog,
+    gates,
+    current,
+    activeTask,
+    profile,
+  } = state;
 
   const skillIds = new Set((skillCatalog.skills || []).map(item => item.id));
   const ruleIds = new Set((ruleCatalog.rules || []).map(item => item.id));
   const ruleById = new Map((ruleCatalog.rules || []).map(item => [item.id, item]));
-  const sceneIds = new Set((sceneIndex.scenes || []).map(item => item.id));
-  const projectIds = new Set((projectIndex.projects || []).map(item => item.id));
+  const sceneIds = new Set((sceneTemplates || []).map(item => item.id));
+  const projectIds = new Set((projects || []).map(item => item.id));
 
-  for (const item of projectIndex.projects || []) {
-    if (!exists(item.path)) pushUniqueError(errors, `project index points to missing file: ${item.path}`);
-    if (!item.id) pushUniqueError(errors, `project index item missing id: ${item.path}`);
-    if (exists(item.path)) {
-      const project = readJson(item.path);
-      if (project.id !== item.id) pushUniqueError(errors, `project index id mismatch: ${item.id} -> ${item.path}`);
-    }
+  for (const project of projects || []) {
+    if (!project.id) pushUniqueError(errors, `project missing id: ${project.name || '<unnamed>'}`);
   }
 
-  for (const item of sceneIndex.scenes || []) {
-    if (!exists(item.path)) pushUniqueError(errors, `scene index points to missing file: ${item.path}`);
-    if (!item.id) pushUniqueError(errors, `scene index item missing id: ${item.path}`);
-    if (exists(item.path)) {
-      const scene = readJson(item.path);
-      if (scene.id !== item.id) pushUniqueError(errors, `scene index id mismatch: ${item.id} -> ${item.path}`);
-    }
+  for (const scene of sceneTemplates || []) {
+    if (!scene.id) pushUniqueError(errors, `scene missing id: ${scene.name || '<unnamed>'}`);
   }
 
-  for (const item of projectIndex.projects || []) {
-    if (!exists(item.path)) continue;
-    const project = readJson(item.path);
+  for (const project of projects || []) {
     if (project.doc?.path && !exists(project.doc.path)) {
       pushUniqueError(errors, `project ${project.id} doc path missing: ${project.doc.path}`);
     }
@@ -853,15 +986,12 @@ function validate() {
     }
   }
 
-  for (const item of sceneIndex.scenes || []) {
-    if (!exists(item.path)) continue;
-    const scene = readJson(item.path);
+  for (const scene of sceneTemplates || []) {
     if (scene.source?.path && !exists(scene.source.path)) {
       pushUniqueError(errors, `scene ${scene.id} source path missing: ${scene.source.path}`);
     }
     for (const project of scene.projects || []) {
       if (!projectIds.has(project.id)) pushUniqueError(errors, `scene ${scene.id} references unknown project ${project.id}`);
-      if (project.projectIndexPath && !exists(project.projectIndexPath)) pushUniqueError(errors, `scene ${scene.id} missing project index ${project.projectIndexPath}`);
     }
     for (const rule of scene.rules || []) {
       if (!ruleIds.has(rule.id)) {
@@ -890,10 +1020,7 @@ function validate() {
     if (!/^G[1-7]$/.test(gate.id)) pushUniqueError(errors, `invalid gate id: ${gate.id}`);
   }
 
-  if (current.activeTaskPath && !exists(current.activeTaskPath)) {
-    pushUniqueError(errors, `active task missing: ${current.activeTaskPath}`);
-  }
-  if (current.activeTaskPath) {
+  if (current.activeTaskId) {
     for (const projectId of current.activeProjectIds || []) {
       if (!projectIds.has(projectId)) pushUniqueError(errors, `current references unknown project ${projectId}`);
     }
@@ -901,14 +1028,17 @@ function validate() {
       if (!sceneIds.has(sceneId)) pushUniqueError(errors, `current references unknown scene ${sceneId}`);
     }
   }
-  if (current.activeTaskPath && exists(current.activeTaskPath)) {
-    const activeTask = readJson(current.activeTaskPath);
-    if (activeTask.id !== current.activeTaskId) pushUniqueError(errors, `current active task id mismatch: ${current.activeTaskId} -> ${current.activeTaskPath}`);
-    for (const projectId of activeTask.projectIds || []) {
-      if (!projectIds.has(projectId)) pushUniqueError(errors, `active task references unknown project ${projectId}`);
-    }
-    for (const sceneId of activeTask.sceneIds || []) {
-      if (!sceneIds.has(sceneId)) pushUniqueError(errors, `active task references unknown scene ${sceneId}`);
+  if (current.activeTaskId) {
+    if (!activeTask) {
+      pushUniqueError(errors, `current active task missing in SQLite: ${current.activeTaskId}`);
+    } else {
+      if (activeTask.id !== current.activeTaskId) pushUniqueError(errors, `current active task id mismatch: ${current.activeTaskId} -> ${current.activeTaskPath}`);
+      for (const projectId of activeTask.projectIds || []) {
+        if (!projectIds.has(projectId)) pushUniqueError(errors, `active task references unknown project ${projectId}`);
+      }
+      for (const sceneId of activeTask.sceneIds || []) {
+        if (!sceneIds.has(sceneId)) pushUniqueError(errors, `active task references unknown scene ${sceneId}`);
+      }
     }
   }
   if (!entry.installation?.script || !exists(entry.installation.script)) {
@@ -917,7 +1047,7 @@ function validate() {
   if (profile.sourcePath && !exists(profile.sourcePath)) {
     pushUniqueError(errors, `profile source path missing: ${profile.sourcePath}`);
   }
-  validatePublicPrivacyBoundary(projectIndex, sceneIndex, errors);
+  validatePublicPrivacyBoundary(projects, sceneTemplates, errors);
 
   finishValidation(errors, warnings);
 }
@@ -926,37 +1056,41 @@ function finishValidation(errors, warnings) {
   for (const warning of warnings) console.warn(`WARN ${warning}`);
   if (errors.length) {
     for (const error of errors) console.error(`ERROR ${error}`);
-    process.exit(1);
+    throw new Error('DevFlow validation failed');
   }
   console.log(`DevFlow validation passed${warnings.length ? ` with ${warnings.length} warning(s)` : ''}`);
 }
 
-try {
-  const [command, ...args] = process.argv.slice(2);
+async function main(argv = process.argv.slice(2)) {
+  const [command, ...args] = argv;
   if (!command || command === 'help' || command === '-h' || command === '--help') {
     usage();
   } else if (command === 'setup') {
-    setup({
+    await setup({
       projectSkills: args.includes('--project-skills'),
       installOpenSpec: args.includes('--install-openspec'),
     });
   } else if (command === 'doctor') {
-    doctor();
+    await doctor();
   } else if (command === 'install') {
-    install({ projectSkills: args.includes('--project-skills') });
+    await install({ projectSkills: args.includes('--project-skills') });
   } else if (command === 'check') {
-    check();
+    await check();
   } else if (command === 'uninstall') {
-    uninstall();
+    await uninstall();
   } else if (command === 'sync-projects') {
-    syncProjects(parseOptions(args));
+    await syncProjects(parseOptions(args));
   } else if (command === 'validate') {
-    validate();
+    await validate();
   } else {
     usage();
     process.exit(1);
   }
-} catch (error) {
-  console.error(error.message);
-  process.exit(1);
+}
+
+if (process.argv[1] && path.resolve(process.argv[1]) === scriptPath) {
+  main().catch(error => {
+    console.error(error.message);
+    process.exit(1);
+  });
 }

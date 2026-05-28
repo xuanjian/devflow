@@ -5,10 +5,14 @@ import os from "node:os";
 import path from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
+import { check, syncProjects, validate } from "../scripts/install-ai-context.mjs";
+import { createSqliteRepository } from "../src/core/repositories/sqlite-repository.mjs";
+import { seedSqliteFromJsonFixture } from "./helpers/sqlite-fixtures.mjs";
 
 const testFile = fileURLToPath(import.meta.url);
 const rootDir = path.resolve(path.dirname(testFile), "..");
 const scriptPath = path.join(rootDir, "scripts/install-ai-context.mjs");
+const basicFixtureRoot = path.join(rootDir, "tests/core/fixtures/basic-ai-context");
 
 function runInstallScript(args, env) {
   return spawnSync(process.execPath, [scriptPath, ...args], {
@@ -43,6 +47,51 @@ test("install links routing and initialization skills, then tells the user what 
   assert.equal(uninstall.status, 0, uninstall.stderr);
   assert.equal(fs.existsSync(path.join(skillsHome, "devflow")), false);
   assert.equal(fs.existsSync(path.join(skillsHome, "devflow-init")), false);
+});
+
+test("validate reads DevFlow state from SQLite when legacy config and runtime JSON are absent", async () => {
+  const fixtureRoot = await copySqliteOnlyFixture();
+  try {
+    await assert.doesNotReject(() => validate({ rootDir: fixtureRoot }));
+  } finally {
+    fs.rmSync(fixtureRoot, { recursive: true, force: true });
+  }
+});
+
+test("check reports SQLite-backed entry, profile, and current state", async () => {
+  const fixtureRoot = await copySqliteOnlyFixture();
+  try {
+    const output = await captureConsole(() => check({ rootDir: fixtureRoot }));
+
+    assert.match(output.stdout, /entry: ok/);
+    assert.match(output.stdout, /profile: ok/);
+    assert.match(output.stdout, /current: ok/);
+  } finally {
+    fs.rmSync(fixtureRoot, { recursive: true, force: true });
+  }
+});
+
+test("sync-projects reads projects from SQLite when config project indexes are absent", async () => {
+  const fixtureRoot = await copySqliteOnlyFixture({ keepRuntimeDir: false });
+  const projectDir = fs.mkdtempSync(path.join(os.tmpdir(), "devflow-sqlite-sync-project-"));
+  try {
+    const repository = createSqliteRepository({ rootDir: fixtureRoot });
+    const project = await repository.getProject("demo-project");
+    await repository.writeProject({ ...project, path: projectDir });
+
+    await syncProjects({
+      rootDir: fixtureRoot,
+      projectId: "demo-project",
+      entriesOnly: true,
+      write: true
+    });
+
+    const agentsEntry = fs.readFileSync(path.join(projectDir, "AGENTS.md"), "utf8");
+    assert.match(agentsEntry, /devflow query route "<user request>"/);
+  } finally {
+    fs.rmSync(fixtureRoot, { recursive: true, force: true });
+    fs.rmSync(projectDir, { recursive: true, force: true });
+  }
 });
 
 test("setup installs core skills and reports required workflow tools", () => {
@@ -214,3 +263,59 @@ test("validate can use caller-provided private privacy patterns", () => {
   assert.match(result.stderr, /public template privacy leak/i);
   assert.match(result.stderr, /private pattern 1/i);
 });
+
+async function copySqliteOnlyFixture() {
+  const fixtureRoot = fs.mkdtempSync(path.join(os.tmpdir(), "devflow-sqlite-install-"));
+  fs.cpSync(basicFixtureRoot, fixtureRoot, { recursive: true });
+  fs.mkdirSync(path.join(fixtureRoot, "bundles", "skills"), { recursive: true });
+  fs.mkdirSync(path.join(fixtureRoot, "scripts"), { recursive: true });
+  fs.cpSync(path.join(rootDir, "bundles/skills/devflow"), path.join(fixtureRoot, "bundles/skills/devflow"), { recursive: true });
+  fs.cpSync(path.join(rootDir, "bundles/skills/devflow-init"), path.join(fixtureRoot, "bundles/skills/devflow-init"), { recursive: true });
+  fs.cpSync(path.join(rootDir, "scripts/install-ai-context.mjs"), path.join(fixtureRoot, "scripts/install-ai-context.mjs"));
+  await seedSqliteFromJsonFixture(fixtureRoot);
+  await prepareValidationState(fixtureRoot);
+  fs.rmSync(path.join(fixtureRoot, "config"), { recursive: true, force: true });
+  fs.rmSync(path.join(fixtureRoot, "runtime"), { recursive: true, force: true });
+  return fixtureRoot;
+}
+
+async function prepareValidationState(fixtureRoot) {
+  const repository = createSqliteRepository({ rootDir: fixtureRoot });
+  const entry = await repository.getEntry();
+  await repository.setConfig("entry", {
+    ...entry,
+    installation: {
+      ...(entry.installation || {}),
+      script: "scripts/install-ai-context.mjs"
+    }
+  });
+  const [rule] = await repository.listRules();
+  const validRule = {
+    ...rule,
+    applyMode: "scene-on-demand",
+    globs: ["**/*"],
+    whenToRead: "Read this demo rule for validation fixtures."
+  };
+  await repository.writeRule(validRule);
+}
+
+async function captureConsole(fn) {
+  const originalLog = console.log;
+  const originalWarn = console.warn;
+  const originalError = console.error;
+  const lines = { stdout: [], stderr: [] };
+  console.log = (...args) => lines.stdout.push(args.join(" "));
+  console.warn = (...args) => lines.stderr.push(args.join(" "));
+  console.error = (...args) => lines.stderr.push(args.join(" "));
+  try {
+    await fn();
+  } finally {
+    console.log = originalLog;
+    console.warn = originalWarn;
+    console.error = originalError;
+  }
+  return {
+    stdout: lines.stdout.join("\n"),
+    stderr: lines.stderr.join("\n")
+  };
+}

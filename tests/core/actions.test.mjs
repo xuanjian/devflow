@@ -3,9 +3,13 @@ import os from "node:os";
 import path from "node:path";
 import test from "node:test";
 import assert from "node:assert/strict";
+import { fileURLToPath } from "node:url";
 import { runAction } from "../../src/core/actions.mjs";
 import { createSqliteRepository } from "../../src/core/repositories/sqlite-repository.mjs";
 import { seedSqliteFromJsonFixture } from "../helpers/sqlite-fixtures.mjs";
+
+const testFile = fileURLToPath(import.meta.url);
+const repoRoot = path.resolve(path.dirname(testFile), "../..");
 
 test("runAction rejects unknown actions", async () => {
   const result = await runAction({
@@ -39,6 +43,34 @@ test("sync_project_entry requires a known project id", async () => {
 
   assert.equal(result.ok, false);
   assert.equal(result.error.code, "invalid_project_id");
+});
+
+test("ai context actions run install-ai-context in-process against SQLite state", async () => {
+  const rootDir = await copyFixture();
+  const projectDir = await fs.mkdtemp(path.join(os.tmpdir(), "context-studio-sync-project-"));
+  try {
+    await copyCoreSkills(rootDir);
+    const repository = createSqliteRepository({ rootDir });
+    const project = await repository.getProject("demo-project");
+    await repository.writeProject({ ...project, path: projectDir });
+    await fs.rm(path.join(rootDir, "config"), { recursive: true, force: true });
+    await fs.rm(path.join(rootDir, "runtime"), { recursive: true, force: true });
+
+    const validate = await runAction({ rootDir, actionId: "validate_ai_context" });
+    assert.equal(validate.ok, true, validate.output || validate.error?.message);
+    assert.match(validate.output, /DevFlow validation passed/);
+
+    const sync = await runAction({
+      rootDir,
+      actionId: "sync_project_entry",
+      body: { projectId: "demo-project" }
+    });
+    assert.equal(sync.ok, true, sync.output || sync.error?.message);
+    assert.match(await fs.readFile(path.join(projectDir, "AGENTS.md"), "utf8"), /devflow query route "<user request>"/);
+  } finally {
+    await fs.rm(rootDir, { recursive: true, force: true });
+    await fs.rm(projectDir, { recursive: true, force: true });
+  }
 });
 
 test("create_minimal_person_profile creates only the missing allowlisted file", async () => {
@@ -317,4 +349,28 @@ async function exists(filePath) {
   } catch {
     return false;
   }
+}
+
+async function copyCoreSkills(rootDir) {
+  await fs.mkdir(path.join(rootDir, "bundles", "skills"), { recursive: true });
+  await fs.mkdir(path.join(rootDir, "scripts"), { recursive: true });
+  await fs.cp(path.join(repoRoot, "bundles/skills/devflow"), path.join(rootDir, "bundles/skills/devflow"), { recursive: true });
+  await fs.cp(path.join(repoRoot, "bundles/skills/devflow-init"), path.join(rootDir, "bundles/skills/devflow-init"), { recursive: true });
+  await fs.cp(path.join(repoRoot, "scripts/install-ai-context.mjs"), path.join(rootDir, "scripts/install-ai-context.mjs"));
+  const repository = createSqliteRepository({ rootDir });
+  const entry = await repository.getEntry();
+  await repository.setConfig("entry", {
+    ...entry,
+    installation: {
+      ...(entry.installation || {}),
+      script: "scripts/install-ai-context.mjs"
+    }
+  });
+  const [rule] = await repository.listRules();
+  await repository.writeRule({
+    ...rule,
+    applyMode: "scene-on-demand",
+    globs: ["**/*"],
+    whenToRead: "Read this demo rule for validation fixtures."
+  });
 }
