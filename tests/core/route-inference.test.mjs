@@ -66,6 +66,43 @@ test("query route prunes a pure iOS task to native app candidates", async () => 
   assert.deepEqual(route.workset.projects, [{ id: "dhb", role: "native" }]);
 });
 
+test("query route uses the goods subpackage landing point and asks P5 clarification dimensions for poster tasks", async () => {
+  const { service } = await createRoutingFixture();
+
+  const route = await service.queryRoute({ text: "商品海报" });
+  const candidateIds = route.candidates.map((candidate) => candidate.id);
+  const clarifyCodes = route.clarify.map((item) => item.code);
+
+  for (const projectId of [
+    "bff-goods",
+    "dhbfront-domain-goods",
+    "dhbfront-cash-mini",
+    "dhb-mobile-index",
+    "new-mobile-h5",
+    "customize-mini-program",
+    "dhb",
+    "dhbfront-utils",
+    "egg-business",
+    "egg-dhb-framework",
+    "egg-dhb-permission"
+  ]) {
+    assert.ok(candidateIds.includes(projectId), `missing ${projectId}`);
+  }
+
+  assert.ok(route.candidates.find((candidate) => candidate.id === "dhbfront-domain-goods").reason.includes("domain:goods"));
+  assert.ok(route.candidates.find((candidate) => candidate.id === "dhbfront-utils").reason.includes("depends-on"));
+  assert.ok(clarifyCodes.includes("product-line-unknown"));
+  assert.ok(clarifyCodes.includes("client-role"));
+  assert.ok(clarifyCodes.includes("coverage-targets"));
+  assert.ok(clarifyCodes.includes("backend-bff"));
+  assert.deepEqual(route.clarify.find((item) => item.code === "coverage-targets").options, [
+    "小程序",
+    "h5",
+    "原生",
+    "管理端 web 模块"
+  ]);
+});
+
 async function createRoutingFixture() {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "devflow-route-inference-"));
   fs.cpSync(basicFixtureRoot, root, { recursive: true });
@@ -103,6 +140,7 @@ function routingProjects() {
     { id: "egg-dhb-framework", name: "egg-dhb-framework", products: ["dhb"], domains: [], role: "bff-common" },
     { id: "egg-dhb-permission", name: "egg-dhb-permission", products: ["dhb"], domains: [], role: "bff-common" },
     { id: "dhb-packages", name: "dhb-packages", products: ["dhb"], domains: [], role: "subpackage" },
+    { id: "dhbfront-domain-goods", name: "dhbfront-domain-goods", products: ["dhb"], domains: ["goods"], role: "subpackage" },
     { id: "dhbfront-cash-mini", name: "dhbfront-cash-mini", products: ["dhb"], domains: [], role: "main-package" },
     { id: "dhb-mobile-index", name: "dhb-mobile-index", products: ["dhb"], domains: [], role: "h5" },
     { id: "new-mobile-h5", name: "new-mobile-h5", products: ["dhb"], domains: [], role: "container" },
@@ -120,6 +158,8 @@ function routingEdges() {
     { from: "project:bff-order", to: "project:egg-business", relation: "depends-on" },
     { from: "project:bff-order", to: "project:egg-dhb-framework", relation: "depends-on" },
     { from: "project:bff-order", to: "project:egg-dhb-permission", relation: "depends-on" },
+    { from: "project:dhbfront-domain-goods", to: "project:dhbfront-cash-mini", relation: "chain" },
+    { from: "project:dhbfront-domain-goods", to: "project:dhbfront-utils", relation: "depends-on" },
     { from: "project:dhb-packages", to: "project:dhbfront-cash-mini", relation: "chain" },
     { from: "project:dhbfront-cash-mini", to: "project:dhb-mobile-index", relation: "chain" },
     { from: "project:dhb-mobile-index", to: "project:new-mobile-h5", relation: "chain" },

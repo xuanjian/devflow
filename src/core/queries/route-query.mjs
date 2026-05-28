@@ -188,6 +188,7 @@ function inferProjectCandidates({ projects, projectEdges, tasks, sourceText }) {
   for (const project of projects) {
     const matchedDomains = (project.domains || []).filter((domain) => domains.includes(domain));
     if (!matchedDomains.length || isCommonRole(project.role) || shouldSkipDomainSeed(project, text)) continue;
+    if (isFrontendRole(project.role) && !scope.frontendHint) continue;
     addCandidate(project.id, `domain:${matchedDomains.join(",")}`, [`domain:${matchedDomains.join(",")}`, `project:${project.id}`]);
   }
 
@@ -321,21 +322,32 @@ function buildClarifications({ product, domains, scope }) {
       options: ["dhb", "hxb", "yxt"]
     });
   }
-  if (product === "dhb" && domains.some((domain) => ["goods", "order"].includes(domain)) && !scope.explicitSurface && !scope.frontendHint) {
+  if (isDhbDomainSurface({ product, domains }) && !scope.explicitClientRole) {
     clarify.push({
-      code: "ordering-or-manager-surface",
-      message: "DHB 商品/订单相关需求可能属于订货端或管理端,请确认是订货端还是管理端。",
+      code: "client-role",
+      message: "DHB 商品/订单相关需求可能属于订货端、管理端或两端,请确认端角色。",
       options: ["订货端", "管理端"]
     });
   }
-  if (domains.length && !scope.explicitLayer) {
+  if (isDhbDomainSurface({ product, domains }) && !scope.explicitCoverageTargets) {
     clarify.push({
-      code: "change-scope-unknown",
-      message: "改动范围未明确,请确认是否仅后端、仅前端、仅 iOS,或需要联调链路。",
-      options: ["仅后端", "仅前端", "仅 iOS", "联调链路"]
+      code: "coverage-targets",
+      message: "请确认本次覆盖哪些端,可多选或只选子集。",
+      options: ["小程序", "h5", "原生", "管理端 web 模块"]
+    });
+  }
+  if (domains.length && !scope.explicitBackendBff) {
+    clarify.push({
+      code: "backend-bff",
+      message: "请确认本次需要哪些 BFF;inner/老 API 属于 BFF 内部细节,DevFlow 不追问。",
+      options: domains.map((domain) => `bff-${domain}`)
     });
   }
   return clarify;
+}
+
+function isDhbDomainSurface({ product, domains }) {
+  return (!product || product === "dhb") && domains.some((domain) => ["goods", "order", "user", "payment", "warehouse", "manager"].includes(domain));
 }
 
 function inferProduct(text) {
@@ -373,9 +385,11 @@ function inferScope(text) {
   const onlyBackend = /(?:只改|仅).{0,8}(后端|服务端|bff|node)|(?:后端|服务端|bff|node).{0,8}(only|仅|只改)/.test(text);
   const onlyFrontend = /(?:只改|仅).{0,8}(前端|h5|小程序)|(?:前端|h5|小程序).{0,8}(only|仅|只改)/.test(text);
   const iosHint = /\bios\b|\bnative\b|\bapp\b|原生/.test(text);
-  const frontendHint = /\b(yorder|frontend|h5|taro|cash-mini)\b|前端|页面|列表|小程序|商品列表|建议订单/.test(text);
+  const frontendHint = /\b(yorder|frontend|h5|taro|cash-mini)\b|前端|页面|列表|小程序|商品列表|建议订单|海报/.test(text);
   const backendHint = /\b(bff|backend|node|server)\b|后端|服务端|接口/.test(text);
-  const explicitSurface = /订货端|管理端|管理后台|后台|\bios\b|原生|\bh5\b|小程序/.test(text);
+  const explicitClientRole = /订货端|管理端|管理后台|后台/.test(text);
+  const explicitCoverageTargets = /\bios\b|原生|\bh5\b|小程序|管理端 web|管理端web/.test(text);
+  const explicitBackendBff = /\bbff-[a-z-]+\b|\bbff\b|后端|服务端/.test(text);
   return {
     onlyIos,
     onlyBackend,
@@ -383,7 +397,9 @@ function inferScope(text) {
     iosHint,
     frontendHint,
     backendHint,
-    explicitSurface,
+    explicitClientRole,
+    explicitCoverageTargets,
+    explicitBackendBff,
     explicitLayer: onlyIos || onlyBackend || onlyFrontend || iosHint || frontendHint || backendHint
   };
 }

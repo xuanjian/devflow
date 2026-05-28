@@ -51,6 +51,45 @@ test("set-products previews and writes project products idempotently", async () 
   assert.deepEqual((await repository.getProject("demo-project")).products, ["dhb", "hxb"]);
 });
 
+test("add project supports metadata dry-run without writing sqlite", async () => {
+  const root = copyFixture();
+  await seedSqliteFromJsonFixture(root);
+  const repository = createSqliteRepository({ rootDir: root });
+
+  const preview = parseJson(runCli(root, [
+    "add",
+    "project",
+    "/tmp/dhbfront-domain-goods",
+    "--id",
+    "dhbfront-domain-goods",
+    "--name",
+    "dhbfront-domain-goods",
+    "--family",
+    "frontend",
+    "--products",
+    "dhb",
+    "--domains",
+    "goods",
+    "--role",
+    "subpackage",
+    "--dry-run"
+  ]));
+
+  assert.equal(preview.status, "noop");
+  assert.equal(preview.action, "addProject");
+  assert.equal(preview.willWrite, true);
+  assert.deepEqual(preview.project, {
+    id: "dhbfront-domain-goods",
+    name: "dhbfront-domain-goods",
+    technologyFamilyId: "frontend",
+    path: "/tmp/dhbfront-domain-goods",
+    products: ["dhb"],
+    domains: ["goods"],
+    role: "subpackage"
+  });
+  assert.equal(await repository.getProject("dhbfront-domain-goods"), null);
+});
+
 test("set-domain and set-role write project metadata", async () => {
   const root = copyFixture();
   await seedSqliteFromJsonFixture(root);

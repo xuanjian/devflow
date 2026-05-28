@@ -493,6 +493,10 @@ async function runFacadeCommand(root, command, type, rest, flags) {
       projectId: firstValue(flags.id),
       name: firstValue(flags.name),
       technologyFamilyId: firstValue(flags.family, flags.technologyFamilyId),
+      products: listFromFlag(flags.products),
+      domains: listFromFlag(flags.domains, flags.domain),
+      role: firstValue(flags.role),
+      dryRun: Boolean(flags['dry-run'])
     }));
     return;
   }
