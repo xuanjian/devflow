@@ -1,4 +1,4 @@
-export const DEVFLOW_SCHEMA_VERSION = 3;
+export const DEVFLOW_SCHEMA_VERSION = 4;
 
 export const ROUTE_MODES = ["none", "resume", "light", "full"];
 
@@ -7,6 +7,22 @@ export const ENTITY_TYPES = ["project", "sceneTemplate", "capability", "skill", 
 export const QUERY_RESULT_TYPES = ["route", "current", "skills", "rules", "graph"];
 
 export const COMMAND_RESULT_STATUSES = ["ok", "noop", "error"];
+
+export const GRAPH_EDGE_RELATIONS = [
+  "uses-scene-template",
+  "uses-skill",
+  "uses-rule",
+  "hints-project",
+  "hints-skill",
+  "hints-rule",
+  "applies-project",
+  "applies-scene-template",
+  "workset-project",
+  "workset-scene-template",
+  "chain",
+  "depends-on",
+  "calls"
+];
 
 export const REPOSITORY_METHODS = [
   "listProjects",
@@ -27,12 +43,24 @@ export const REPOSITORY_METHODS = [
   "getGates",
   "listTaskDocuments",
   "writeTaskDocument",
+  "setProjectProducts",
+  "setProjectDomains",
+  "setProjectRole",
+  "upsertGraphEdge",
+  "deleteGraphEdge",
   "writeProject",
   "writeSceneTemplate",
   "writeTask",
   "deleteTask",
   "setRuntimeState"
 ];
+
+export function assertGraphEdgeRelation(relation) {
+  if (!GRAPH_EDGE_RELATIONS.includes(relation)) {
+    throw new Error(`unsupported graph edge relation: ${relation}`);
+  }
+  return relation;
+}
 
 export const SERVICE_METHODS = [
   "queryRoute",

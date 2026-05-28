@@ -6,6 +6,7 @@ import {
   COMMAND_RESULT_STATUSES,
   DEVFLOW_SCHEMA_VERSION,
   ENTITY_TYPES,
+  GRAPH_EDGE_RELATIONS,
   QUERY_RESULT_TYPES,
   REPOSITORY_METHODS,
   ROUTE_MODES,
@@ -22,6 +23,21 @@ test("locks route modes, entity types, query result types, and public method nam
   assert.deepEqual(ENTITY_TYPES, ["project", "sceneTemplate", "capability", "skill", "rule", "task", "workset"]);
   assert.deepEqual(QUERY_RESULT_TYPES, ["route", "current", "skills", "rules", "graph"]);
   assert.deepEqual(COMMAND_RESULT_STATUSES, ["ok", "noop", "error"]);
+  assert.deepEqual(GRAPH_EDGE_RELATIONS, [
+    "uses-scene-template",
+    "uses-skill",
+    "uses-rule",
+    "hints-project",
+    "hints-skill",
+    "hints-rule",
+    "applies-project",
+    "applies-scene-template",
+    "workset-project",
+    "workset-scene-template",
+    "chain",
+    "depends-on",
+    "calls"
+  ]);
   assert.deepEqual(REPOSITORY_METHODS, [
     "listProjects",
     "getProject",
@@ -41,6 +57,11 @@ test("locks route modes, entity types, query result types, and public method nam
     "getGates",
     "listTaskDocuments",
     "writeTaskDocument",
+    "setProjectProducts",
+    "setProjectDomains",
+    "setProjectRole",
+    "upsertGraphEdge",
+    "deleteGraphEdge",
     "writeProject",
     "writeSceneTemplate",
     "writeTask",
@@ -78,7 +99,7 @@ test("normalizes scene templates with the scene-template marker", () => {
     source: { path: "docs/scenes/demo-scene.md" }
   });
 
-  assert.equal(DEVFLOW_SCHEMA_VERSION, 3);
+  assert.equal(DEVFLOW_SCHEMA_VERSION, 4);
   assert.deepEqual(sceneTemplate, {
     id: "demo-scene",
     templateType: "scene-template",

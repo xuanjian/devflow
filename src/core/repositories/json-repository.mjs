@@ -89,7 +89,26 @@ export function createJsonRepository({ rootDir = process.cwd() } = {}) {
 async function readProjectRecord(rootPath, indexItem) {
   const detailPath = indexItem.path || `config/projects/${indexItem.id}.json`;
   const detail = await readData(rootPath, detailPath, null);
-  return { ...indexItem, ...(detail || {}), sourcePath: detailPath };
+  return normalizeProjectMetadata({ ...indexItem, ...(detail || {}), sourcePath: detailPath });
+}
+
+function normalizeProjectMetadata(project = {}) {
+  return {
+    ...project,
+    products: normalizeStringList(project.products),
+    domains: normalizeStringList(project.domains),
+    role: normalizeString(project.role)
+  };
+}
+
+function normalizeStringList(values) {
+  return [...new Set((Array.isArray(values) ? values : [])
+    .map((value) => normalizeString(value))
+    .filter(Boolean))];
+}
+
+function normalizeString(value) {
+  return String(value ?? "").trim();
 }
 
 async function readSceneTemplateRecord(rootPath, indexItem) {

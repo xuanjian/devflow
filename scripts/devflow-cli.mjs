@@ -7,6 +7,7 @@ import { setup as setupAiContext } from './install-ai-context.mjs';
 import {
   normalizeCommandResult,
 } from '../src/core/contracts/devflow-types.mjs';
+import { createActionCommandService } from '../src/core/commands/action-store-commands.mjs';
 import { createDefaultSqliteDatabase } from '../src/core/storage/sqlite-bootstrap.mjs';
 
 const packageRoot = path.resolve(new URL('..', import.meta.url).pathname);
@@ -40,6 +41,10 @@ function usage() {
   devflow task current
   devflow task start "<title>" --project <id> --template <id>
   devflow task update <task-id> --gate <G1-G7> --note "<progress>"
+  devflow set-products <projectId> <product...> [--dry-run]
+  devflow set-domain <projectId> <domain...> [--dry-run]
+  devflow set-role <projectId> <role> [--dry-run]
+  devflow add-relation <fromId> <toId> --type <chain|depends-on|calls> [--remove] [--dry-run]
   devflow add project <repo-path>
   devflow add scene-template "<name>"
   devflow doctor
@@ -434,6 +439,44 @@ async function runFacadeCommand(root, command, type, rest, flags) {
   }
   if (command === 'task' && type === 'finish') {
     printJson(await service.finishTask({ taskId: rest[0], note: firstValue(flags.note) }));
+    return;
+  }
+  if (command === 'set-products') {
+    const commands = await createActionCommandService({ rootDir: root });
+    printJson(await commands.setProjectProducts({
+      projectId: type,
+      products: rest,
+      dryRun: Boolean(flags['dry-run'])
+    }));
+    return;
+  }
+  if (command === 'set-domain') {
+    const commands = await createActionCommandService({ rootDir: root });
+    printJson(await commands.setProjectDomains({
+      projectId: type,
+      domains: rest,
+      dryRun: Boolean(flags['dry-run'])
+    }));
+    return;
+  }
+  if (command === 'set-role') {
+    const commands = await createActionCommandService({ rootDir: root });
+    printJson(await commands.setProjectRole({
+      projectId: type,
+      role: rest.join(' '),
+      dryRun: Boolean(flags['dry-run'])
+    }));
+    return;
+  }
+  if (command === 'add-relation') {
+    const commands = await createActionCommandService({ rootDir: root });
+    printJson(await commands.addRelation({
+      fromId: type,
+      toId: rest[0],
+      type: firstValue(flags.type),
+      remove: Boolean(flags.remove),
+      dryRun: Boolean(flags['dry-run'])
+    }));
     return;
   }
   if (command === 'add' && type === 'project') {

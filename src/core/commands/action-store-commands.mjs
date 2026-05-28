@@ -1,4 +1,4 @@
-import { normalizeCommandResult } from "../contracts/devflow-types.mjs";
+import { assertGraphEdgeRelation, normalizeCommandResult } from "../contracts/devflow-types.mjs";
 import { createSqliteRepository } from "../repositories/sqlite-repository.mjs";
 import { ensureSqliteDatabase } from "../storage/sqlite-bootstrap.mjs";
 import { deleteTask as deleteTaskCommand, finishTask as finishTaskCommand } from "./task-commands.mjs";
@@ -19,6 +19,10 @@ export async function createActionCommandService({ rootDir }) {
     getConfig: (key) => repository.getConfig(key),
     getProfile: () => repository.getProfile(),
     writeProject: (project) => writeProject(repository, project),
+    setProjectProducts: (input) => setProjectProducts(repository, input),
+    setProjectDomains: (input) => setProjectDomains(repository, input),
+    setProjectRole: (input) => setProjectRole(repository, input),
+    addRelation: (input) => addRelation(repository, input),
     writeSceneTemplate: (sceneTemplate) => writeSceneTemplate(repository, sceneTemplate),
     writeSkill: (skill) => writeSkill(repository, skill),
     writeRule: (rule) => writeRule(repository, rule),
@@ -37,6 +41,64 @@ export async function createActionCommandService({ rootDir }) {
 async function writeProject(repository, project) {
   await repository.writeProject(project);
   return commandResult("writeProject", "project", project.id);
+}
+
+async function setProjectProducts(repository, { projectId, products = [], dryRun = false } = {}) {
+  const project = await requireProject(repository, projectId);
+  const after = { ...project, products: normalizeStringList(products) };
+  if (dryRun) return previewResult("setProjectProducts", projectId, project, after);
+  if (sameJson(project.products || [], after.products)) return noopResult("setProjectProducts", "project", projectId, "No project product changes.");
+  await repository.setProjectProducts(projectId, after.products);
+  return commandResult("setProjectProducts", "project", projectId);
+}
+
+async function setProjectDomains(repository, { projectId, domains = [], dryRun = false } = {}) {
+  const project = await requireProject(repository, projectId);
+  const after = { ...project, domains: normalizeStringList(domains) };
+  if (dryRun) return previewResult("setProjectDomains", projectId, project, after);
+  if (sameJson(project.domains || [], after.domains)) return noopResult("setProjectDomains", "project", projectId, "No project domain changes.");
+  await repository.setProjectDomains(projectId, after.domains);
+  return commandResult("setProjectDomains", "project", projectId);
+}
+
+async function setProjectRole(repository, { projectId, role = "", dryRun = false } = {}) {
+  const project = await requireProject(repository, projectId);
+  const after = { ...project, role: normalizeString(role) };
+  if (dryRun) return previewResult("setProjectRole", projectId, project, after);
+  if ((project.role || "") === after.role) return noopResult("setProjectRole", "project", projectId, "No project role changes.");
+  await repository.setProjectRole(projectId, after.role);
+  return commandResult("setProjectRole", "project", projectId);
+}
+
+async function addRelation(repository, { fromId, toId, type, remove = false, dryRun = false } = {}) {
+  const from = await requireProjectNode(repository, fromId);
+  const to = await requireProjectNode(repository, toId);
+  const edge = { from: from.nodeId, to: to.nodeId, relation: assertGraphEdgeRelation(normalizeString(type)) };
+  const existing = (await repository.listGraphEdges())
+    .some((item) => item.from === edge.from && item.to === edge.to && item.relation === edge.relation);
+
+  if (dryRun) {
+    return {
+      ...normalizeCommandResult({
+        status: "noop",
+        action: remove ? "deleteGraphEdge" : "upsertGraphEdge",
+        message: "Dry run only. SQLite was not changed.",
+        paths: ["data/devflow.db"]
+      }),
+      edge,
+      willWrite: !remove && !existing,
+      willRemove: remove && existing
+    };
+  }
+
+  if (remove) {
+    if (!existing) return noopResult("deleteGraphEdge", undefined, undefined, "No relation changes.");
+    await repository.deleteGraphEdge(edge);
+    return commandResult("deleteGraphEdge");
+  }
+  if (existing) return noopResult("upsertGraphEdge", undefined, undefined, "No relation changes.");
+  await repository.upsertGraphEdge(edge);
+  return commandResult("upsertGraphEdge");
 }
 
 async function writeSceneTemplate(repository, sceneTemplate) {
@@ -98,4 +160,67 @@ function commandResult(action, entityType, entityId) {
     message: entityId ? `${action} ${entityId}` : `${action} complete.`,
     paths: ["data/devflow.db"]
   });
+}
+
+function noopResult(action, entityType, entityId, message) {
+  return normalizeCommandResult({
+    status: "noop",
+    action,
+    entityType,
+    entityId,
+    message,
+    paths: ["data/devflow.db"]
+  });
+}
+
+function previewResult(action, projectId, before, after) {
+  return {
+    ...normalizeCommandResult({
+      status: "noop",
+      action,
+      entityType: "project",
+      entityId: projectId,
+      message: "Dry run only. SQLite was not changed.",
+      paths: ["data/devflow.db"]
+    }),
+    before: pickProjectMetadata(before),
+    after: pickProjectMetadata(after),
+    willWrite: !sameJson(pickProjectMetadata(before), pickProjectMetadata(after))
+  };
+}
+
+async function requireProject(repository, projectId) {
+  if (!projectId) throw new Error("projectId is required");
+  const project = await repository.getProject(projectId);
+  if (!project) throw new Error(`unknown projectId: ${projectId}`);
+  return project;
+}
+
+async function requireProjectNode(repository, id) {
+  const value = normalizeString(id);
+  const projectId = value.startsWith("project:") ? value.slice("project:".length) : value;
+  await requireProject(repository, projectId);
+  return { projectId, nodeId: `project:${projectId}` };
+}
+
+function pickProjectMetadata(project) {
+  return {
+    products: project.products || [],
+    domains: project.domains || [],
+    role: project.role || ""
+  };
+}
+
+function normalizeStringList(values) {
+  return [...new Set((Array.isArray(values) ? values : [])
+    .map((value) => normalizeString(value))
+    .filter(Boolean))];
+}
+
+function normalizeString(value) {
+  return String(value ?? "").trim();
+}
+
+function sameJson(left, right) {
+  return JSON.stringify(left) === JSON.stringify(right);
 }

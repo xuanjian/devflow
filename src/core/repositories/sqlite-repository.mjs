@@ -1,4 +1,4 @@
-import { normalizeSceneTemplate, normalizeWorkset } from "../contracts/devflow-types.mjs";
+import { assertGraphEdgeRelation, normalizeSceneTemplate, normalizeWorkset } from "../contracts/devflow-types.mjs";
 import { DEFAULT_ENTRY, ENTRY_CONFIG_KEY } from "../defaults/entry.mjs";
 import { DEFAULT_GATES, GATES_CONFIG_KEY } from "../defaults/gates.mjs";
 import { DEFAULT_PROFILE, PROFILE_CONFIG_KEY } from "../defaults/profile.mjs";
@@ -143,6 +143,27 @@ export function createSqliteRepository({ rootDir = process.cwd(), dbPath = defau
       return doc;
     },
 
+    async setProjectProducts(projectId, products) {
+      return updateProjectMetadata(db, projectId, { products: normalizeStringList(products) });
+    },
+
+    async setProjectDomains(projectId, domains) {
+      return updateProjectMetadata(db, projectId, { domains: normalizeStringList(domains) });
+    },
+
+    async setProjectRole(projectId, role) {
+      return updateProjectMetadata(db, projectId, { role: normalizeString(role) });
+    },
+
+    async upsertGraphEdge(edge) {
+      return upsertGraphEdge(db, edge);
+    },
+
+    async deleteGraphEdge(edge) {
+      deleteGraphEdge(db, edge);
+      return null;
+    },
+
     async writeProject(project) {
       upsertProject(db, project);
       return repository.getProject(project.id);
@@ -234,7 +255,7 @@ function getRaw(db, table, id) {
 
 function hydrateProject(db, project) {
   return {
-    ...project,
+    ...normalizeProjectMetadata(project),
     skills: listRefs(db, "project_skill_mounts", "project_id", project.id),
     rules: listRefs(db, "project_rule_mounts", "project_id", project.id)
   };
@@ -336,24 +357,75 @@ function normalizeTask(task) {
 
 function upsertProject(db, project) {
   if (!project?.id) throw new TypeError("Cannot write project without an id");
+  const current = getRaw(db, "projects", project.id);
+  const normalized = normalizeProjectMetadata({
+    ...project,
+    products: Object.hasOwn(project, "products") ? project.products : current?.products,
+    domains: Object.hasOwn(project, "domains") ? project.domains : current?.domains,
+    role: Object.hasOwn(project, "role") ? project.role : current?.role
+  });
   const tx = db.transaction(() => {
     db.prepare(`
-      INSERT OR REPLACE INTO projects (id, name, technology_family_id, source_path, doc_path, raw_json)
-      VALUES (@id, @name, @technologyFamilyId, @sourcePath, @docPath, @rawJson)
+      INSERT OR REPLACE INTO projects (id, name, technology_family_id, source_path, doc_path, products, domains, role, raw_json)
+      VALUES (@id, @name, @technologyFamilyId, @sourcePath, @docPath, @products, @domains, @role, @rawJson)
     `).run({
-      id: project.id,
-      name: project.name || project.id,
-      technologyFamilyId: project.technologyFamilyId || "",
-      sourcePath: project.sourcePath || "",
-      docPath: project.doc?.path || "",
-      rawJson: stringify(project)
+      id: normalized.id,
+      name: normalized.name || normalized.id,
+      technologyFamilyId: normalized.technologyFamilyId || "",
+      sourcePath: normalized.sourcePath || "",
+      docPath: normalized.doc?.path || "",
+      products: stringify(normalized.products),
+      domains: stringify(normalized.domains),
+      role: normalized.role,
+      rawJson: stringify(normalized)
     });
-    db.prepare("DELETE FROM project_skill_mounts WHERE project_id = ?").run(project.id);
-    db.prepare("DELETE FROM project_rule_mounts WHERE project_id = ?").run(project.id);
-    for (const skill of project.skills || []) insertRef(db, "project_skill_mounts", "project_id", project.id, "skill_id", skill.id, skill);
-    for (const rule of project.rules || []) insertRef(db, "project_rule_mounts", "project_id", project.id, "rule_id", rule.id, rule);
+    db.prepare("DELETE FROM project_skill_mounts WHERE project_id = ?").run(normalized.id);
+    db.prepare("DELETE FROM project_rule_mounts WHERE project_id = ?").run(normalized.id);
+    for (const skill of normalized.skills || []) insertRef(db, "project_skill_mounts", "project_id", normalized.id, "skill_id", skill.id, skill);
+    for (const rule of normalized.rules || []) insertRef(db, "project_rule_mounts", "project_id", normalized.id, "rule_id", rule.id, rule);
   });
   tx();
+}
+
+function updateProjectMetadata(db, projectId, patch) {
+  const current = getRaw(db, "projects", projectId);
+  if (!current) throw new Error(`unknown projectId: ${projectId}`);
+  const next = normalizeProjectMetadata({ ...current, ...patch });
+  db.prepare(`
+    UPDATE projects
+    SET products = @products, domains = @domains, role = @role, raw_json = @rawJson
+    WHERE id = @id
+  `).run({
+    id: projectId,
+    products: stringify(next.products),
+    domains: stringify(next.domains),
+    role: next.role,
+    rawJson: stringify(next)
+  });
+  return next;
+}
+
+function upsertGraphEdge(db, edge) {
+  const normalized = normalizeGraphEdge(edge);
+  db.prepare(`
+    INSERT OR REPLACE INTO graph_edges (from_id, to_id, relation, raw_json)
+    VALUES (@from, @to, @relation, @rawJson)
+  `).run({ ...normalized, rawJson: stringify(normalized) });
+  return normalized;
+}
+
+function deleteGraphEdge(db, edge) {
+  const normalized = normalizeGraphEdge(edge);
+  db.prepare("DELETE FROM graph_edges WHERE from_id = ? AND to_id = ? AND relation = ?")
+    .run(normalized.from, normalized.to, normalized.relation);
+}
+
+function normalizeGraphEdge(edge = {}) {
+  const from = normalizeString(edge.from || edge.fromId);
+  const to = normalizeString(edge.to || edge.toId);
+  const relation = assertGraphEdgeRelation(normalizeString(edge.relation || edge.type));
+  if (!from || !to) throw new TypeError("graph edge requires from and to");
+  return { from, to, relation };
 }
 
 function upsertSceneTemplate(db, sceneTemplate) {
@@ -500,6 +572,25 @@ function deleteEntity(db, table, id, relatedDeletes = []) {
     db.prepare("DELETE FROM graph_edges WHERE from_id LIKE ? OR to_id LIKE ?").run(`%:${id}`, `%:${id}`);
   });
   tx();
+}
+
+function normalizeProjectMetadata(project = {}) {
+  return {
+    ...project,
+    products: normalizeStringList(project.products),
+    domains: normalizeStringList(project.domains),
+    role: normalizeString(project.role)
+  };
+}
+
+function normalizeStringList(values) {
+  return [...new Set((Array.isArray(values) ? values : [])
+    .map((value) => normalizeString(value))
+    .filter(Boolean))];
+}
+
+function normalizeString(value) {
+  return String(value ?? "").trim();
 }
 
 function parseRaw(value) {

@@ -83,3 +83,71 @@ test("writeTaskDocument requires taskId kind and path", async () => {
   await assert.rejects(() => repository.writeTaskDocument("demo", { path: "runtime/tasks/demo/handoff.md" }), TypeError);
   await assert.rejects(() => repository.writeTaskDocument("demo", { kind: "handoff" }), TypeError);
 });
+
+test("project metadata methods update normalized columns and raw JSON", async () => {
+  const repository = createRepository();
+  await repository.writeProject({ id: "demo-project", name: "Demo Project" });
+
+  await repository.setProjectProducts("demo-project", ["dhb", "hxb", "dhb"]);
+  await repository.setProjectDomains("demo-project", ["goods", "order"]);
+  await repository.setProjectRole("demo-project", "bff-service");
+
+  const project = await repository.getProject("demo-project");
+  assert.deepEqual(project.products, ["dhb", "hxb"]);
+  assert.deepEqual(project.domains, ["goods", "order"]);
+  assert.equal(project.role, "bff-service");
+});
+
+test("project metadata methods reject unknown project ids", async () => {
+  const repository = createRepository();
+
+  await assert.rejects(() => repository.setProjectProducts("missing-project", ["dhb"]), /unknown projectId: missing-project/);
+  await assert.rejects(() => repository.setProjectDomains("missing-project", ["goods"]), /unknown projectId: missing-project/);
+  await assert.rejects(() => repository.setProjectRole("missing-project", "native"), /unknown projectId: missing-project/);
+});
+
+test("writeProject preserves existing metadata when an update omits P1 fields", async () => {
+  const repository = createRepository();
+  await repository.writeProject({ id: "demo-project", name: "Demo Project" });
+  await repository.setProjectProducts("demo-project", ["dhb"]);
+  await repository.setProjectDomains("demo-project", ["goods"]);
+  await repository.setProjectRole("demo-project", "bff-service");
+
+  await repository.writeProject({ id: "demo-project", name: "Renamed Demo Project" });
+
+  const project = await repository.getProject("demo-project");
+  assert.equal(project.name, "Renamed Demo Project");
+  assert.deepEqual(project.products, ["dhb"]);
+  assert.deepEqual(project.domains, ["goods"]);
+  assert.equal(project.role, "bff-service");
+});
+
+test("graph edge methods validate P1 relation types and support removal", async () => {
+  const repository = createRepository();
+  await repository.writeProject({ id: "from-project" });
+  await repository.writeProject({ id: "to-project" });
+
+  const edge = await repository.upsertGraphEdge({
+    from: "project:from-project",
+    to: "project:to-project",
+    relation: "chain"
+  });
+  assert.deepEqual(edge, {
+    from: "project:from-project",
+    to: "project:to-project",
+    relation: "chain"
+  });
+  assert.deepEqual(await repository.listGraphEdges(), [edge]);
+
+  await assert.rejects(
+    () => repository.upsertGraphEdge({ from: "project:from-project", to: "project:to-project", relation: "syncs" }),
+    /unsupported graph edge relation: syncs/
+  );
+
+  await repository.deleteGraphEdge({
+    from: "project:from-project",
+    to: "project:to-project",
+    relation: "chain"
+  });
+  assert.deepEqual(await repository.listGraphEdges(), []);
+});

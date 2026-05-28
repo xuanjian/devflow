@@ -265,21 +265,25 @@ function insertConfigRecords(db, configRecords) {
 
 function insertProjects(db, rootPath, projects, warnings) {
   const insert = db.prepare(`
-    INSERT OR REPLACE INTO projects (id, name, technology_family_id, source_path, doc_path, raw_json)
-    VALUES (@id, @name, @technologyFamilyId, @sourcePath, @docPath, @rawJson)
+    INSERT OR REPLACE INTO projects (id, name, technology_family_id, source_path, doc_path, products, domains, role, raw_json)
+    VALUES (@id, @name, @technologyFamilyId, @sourcePath, @docPath, @products, @domains, @role, @rawJson)
   `);
   for (const project of projects) {
+    const normalized = normalizeProjectMetadata(project);
     insert.run({
-      id: project.id,
-      name: project.name || project.id,
-      technologyFamilyId: project.technologyFamilyId || "",
-      sourcePath: project.sourcePath || "",
-      docPath: project.doc?.path || "",
-      rawJson: stringify(project)
+      id: normalized.id,
+      name: normalized.name || normalized.id,
+      technologyFamilyId: normalized.technologyFamilyId || "",
+      sourcePath: normalized.sourcePath || "",
+      docPath: normalized.doc?.path || "",
+      products: stringify(normalized.products),
+      domains: stringify(normalized.domains),
+      role: normalized.role,
+      rawJson: stringify(normalized)
     });
-    warnMissingSourcePath(rootPath, warnings, "project", project.id, project.doc?.path);
-    for (const skill of project.skills || []) insertRef(db, "project_skill_mounts", "project_id", project.id, "skill_id", skill.id, skill);
-    for (const rule of project.rules || []) insertRef(db, "project_rule_mounts", "project_id", project.id, "rule_id", rule.id, rule);
+    warnMissingSourcePath(rootPath, warnings, "project", normalized.id, normalized.doc?.path);
+    for (const skill of normalized.skills || []) insertRef(db, "project_skill_mounts", "project_id", normalized.id, "skill_id", skill.id, skill);
+    for (const rule of normalized.rules || []) insertRef(db, "project_rule_mounts", "project_id", normalized.id, "rule_id", rule.id, rule);
   }
 }
 
@@ -503,4 +507,23 @@ function toRelativePath(rootPath, absolutePath) {
 
 function stringify(value) {
   return JSON.stringify(value ?? null);
+}
+
+function normalizeProjectMetadata(project = {}) {
+  return {
+    ...project,
+    products: normalizeStringList(project.products),
+    domains: normalizeStringList(project.domains),
+    role: normalizeString(project.role)
+  };
+}
+
+function normalizeStringList(values) {
+  return [...new Set((Array.isArray(values) ? values : [])
+    .map((value) => normalizeString(value))
+    .filter(Boolean))];
+}
+
+function normalizeString(value) {
+  return String(value ?? "").trim();
 }
