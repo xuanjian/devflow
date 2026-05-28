@@ -356,9 +356,11 @@ summary:focus-visible {
 }
 
 .task-board-view {
+  align-items: stretch;
   display: grid;
   gap: 16px;
   grid-template-columns: 320px minmax(0, 1fr);
+  min-height: 100vh;
 }
 
 .persona-view {
@@ -446,6 +448,10 @@ summary:focus-visible {
   align-self: start;
   display: grid;
   gap: 10px;
+  max-height: 100vh;
+  overflow: auto;
+  position: sticky;
+  top: 0;
 }
 
 .task-list-panel button {
@@ -491,6 +497,42 @@ summary:focus-visible {
   border-color: rgba(10, 132, 255, 0.66);
 }
 
+.task-context-menu {
+  background: #2b2b2b;
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  box-shadow: 0 16px 42px rgba(0, 0, 0, 0.35);
+  display: grid;
+  gap: 4px;
+  min-width: 170px;
+  padding: 6px;
+  position: fixed;
+  z-index: 20;
+}
+
+.task-context-menu button {
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  color: var(--text);
+  cursor: pointer;
+  justify-items: start;
+  min-height: 34px;
+  padding: 7px 9px;
+  text-align: left;
+}
+
+.task-context-menu button:hover,
+.task-context-menu button:focus-visible {
+  background: #383838;
+  border-color: var(--line);
+  outline: 0;
+}
+
+.task-context-menu button.danger {
+  color: var(--red);
+}
+
 .task-list-panel span,
 .gate-card p,
 .gate-card small {
@@ -509,6 +551,14 @@ summary:focus-visible {
   display: grid;
   gap: 14px;
   grid-template-columns: minmax(0, 1fr) minmax(220px, 0.36fr);
+}
+
+.gate-panel {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  min-height: 100vh;
+  overflow: auto;
 }
 
 .task-flow-header p {

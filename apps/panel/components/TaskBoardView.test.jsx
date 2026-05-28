@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { expect, test, vi } from "vitest";
 import TaskBoardView from "./TaskBoardView.jsx";
@@ -39,4 +39,39 @@ test("TaskBoardView renders tasks and gate progress from graph nodes", async () 
   view.rerender(<TaskBoardView graph={graph} selectedNodeId="task:other" onSelectNode={onSelectNode} />);
   expect(screen.getByLabelText("当前流程")).toHaveTextContent("G2 Discovery");
   expect(screen.queryAllByRole("button", { name: /G4 Development/ }).find((item) => item.classList.contains("gate-card"))).toBeUndefined();
+});
+
+test("TaskBoardView opens task context menu and confirms destructive deletion", async () => {
+  const onTaskAction = vi.fn();
+  const confirm = vi.spyOn(window, "confirm").mockReturnValue(false);
+  const graph = {
+    nodes: [
+      { id: "task:demo", type: "task", title: "Demo Task", summary: "Active work", status: "ok", raw: { id: "demo", currentGate: "G4", status: "active" } },
+      { id: "gate:demo:G4", type: "gate", title: "G4 Development", summary: "Development", status: "warning", raw: { id: "G4", name: "Development", status: "in_progress" } }
+    ],
+    edges: [
+      { from: "task:demo", to: "gate:demo:G4", relation: "has-gate" }
+    ]
+  };
+
+  render(<TaskBoardView graph={graph} selectedNodeId="" onSelectNode={() => {}} onTaskAction={onTaskAction} />);
+
+  fireEvent.contextMenu(screen.getByRole("button", { name: /Demo Task/ }), { clientX: 120, clientY: 150 });
+  const menu = screen.getByRole("menu", { name: "任务操作" });
+  expect(menu).toBeInTheDocument();
+  expect(menu.parentElement).toBe(document.body);
+
+  await userEvent.click(screen.getByRole("menuitem", { name: "直接完成任务" }));
+  expect(onTaskAction).toHaveBeenCalledWith("finish", expect.objectContaining({ id: "task:demo" }));
+
+  fireEvent.contextMenu(screen.getByRole("button", { name: /Demo Task/ }), { clientX: 120, clientY: 150 });
+  await userEvent.click(screen.getByRole("menuitem", { name: "删除任务" }));
+  expect(confirm).toHaveBeenCalledWith(expect.stringContaining("Demo Task"));
+  expect(onTaskAction).toHaveBeenCalledTimes(1);
+
+  confirm.mockReturnValue(true);
+  fireEvent.contextMenu(screen.getByRole("button", { name: /Demo Task/ }), { clientX: 120, clientY: 150 });
+  await userEvent.click(screen.getByRole("menuitem", { name: "删除任务" }));
+  expect(onTaskAction).toHaveBeenCalledWith("delete", expect.objectContaining({ id: "task:demo" }));
+  confirm.mockRestore();
 });

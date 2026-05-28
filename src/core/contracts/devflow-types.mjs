@@ -30,6 +30,7 @@ export const REPOSITORY_METHODS = [
   "writeProject",
   "writeSceneTemplate",
   "writeTask",
+  "deleteTask",
   "setRuntimeState"
 ];
 
@@ -46,6 +47,7 @@ export const SERVICE_METHODS = [
   "startTask",
   "updateTask",
   "finishTask",
+  "deleteTask",
   "addProject",
   "addSceneTemplate"
 ];

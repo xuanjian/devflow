@@ -1,7 +1,7 @@
 import { queryRoute } from "../queries/route-query.mjs";
 import { queryCurrent, queryRules, querySkills } from "../queries/current-query.mjs";
 import { buildGraph } from "../queries/graph-query.mjs";
-import { startTask, updateTask, finishTask } from "../commands/task-commands.mjs";
+import { startTask, updateTask, finishTask, deleteTask } from "../commands/task-commands.mjs";
 import { addProject } from "../commands/project-commands.mjs";
 import { addSceneTemplate } from "../commands/template-commands.mjs";
 import { runAction as runPanelAction } from "../actions.mjs";
@@ -49,6 +49,9 @@ export function createDevFlowService({ rootDir, backend = "auto", repository } =
     },
     async finishTask(input = {}) {
       return finishTask(await getRepository(), { rootDir, ...input });
+    },
+    async deleteTask(input = {}) {
+      return deleteTask(await getRepository(), { rootDir, ...input });
     },
     async addProject(input = {}) {
       return addProject(await getRepository(), input);

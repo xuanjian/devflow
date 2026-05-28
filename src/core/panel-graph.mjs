@@ -13,6 +13,12 @@ import {
 import { addArtifactNodes, readGateCatalog, readProfileNode } from "./panel-graph/artifact-resolver.mjs";
 import { toPath } from "./paths.mjs";
 
+const HIDDEN_FRAMEWORK_NODE_IDS = new Set([
+  "project:devflow",
+  "skill:devflow",
+  "skill:devflow-init"
+]);
+
 export async function buildPanelGraph(repository, { rootDir = process.cwd() } = {}) {
   const rootPath = toPath(rootDir);
   const [queryGraph, activeTask, profile, gateCatalog] = await Promise.all([
@@ -43,16 +49,20 @@ export async function buildPanelGraph(repository, { rootDir = process.cwd() } = 
   }
 
   for (const node of queryGraph.nodes || []) {
+    if (isHiddenFrameworkNode(node.id)) continue;
     addQueryNode(graph, node, activeTask?.id);
   }
   for (const edge of queryGraph.edges || []) {
+    if (isHiddenFrameworkNode(edge.from) || isHiddenFrameworkNode(edge.to)) continue;
     addEdge(graph, edge.from, edge.to, edge.relation, edge.source || "repository");
   }
 
   addWorksetNodes(graph);
   addTaskGateNodes(graph, gateCatalog);
   await addArtifactNodes(graph, rootPath, gateCatalog);
+  pruneHiddenFrameworkReferences(graph);
   materializeMissingReferenceNodes(graph);
+  pruneHiddenFrameworkReferences(graph);
   if (profile) {
     addNode(graph, profile);
   }
@@ -60,6 +70,15 @@ export async function buildPanelGraph(repository, { rootDir = process.cwd() } = 
   addMissingReferenceWarnings(graph);
   buildDetails(graph);
   return graph;
+}
+
+function isHiddenFrameworkNode(nodeId) {
+  return HIDDEN_FRAMEWORK_NODE_IDS.has(nodeId);
+}
+
+function pruneHiddenFrameworkReferences(graph) {
+  graph.nodes = graph.nodes.filter((node) => !isHiddenFrameworkNode(node.id));
+  graph.edges = graph.edges.filter((edge) => !isHiddenFrameworkNode(edge.from) && !isHiddenFrameworkNode(edge.to));
 }
 
 export function getPanelNodeDetails(graph, nodeId) {

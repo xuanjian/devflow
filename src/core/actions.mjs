@@ -4,6 +4,7 @@ import { projectActions } from "./actions/project.mjs";
 import { sceneActions } from "./actions/scene.mjs";
 import { skillActions } from "./actions/skill.mjs";
 import { ruleActions } from "./actions/rule.mjs";
+import { taskActions } from "./actions/task.mjs";
 import { actionError } from "./actions/shared.mjs";
 import { toPath } from "./paths.mjs";
 
@@ -13,7 +14,8 @@ const ACTIONS = {
   ...projectActions,
   ...sceneActions,
   ...skillActions,
-  ...ruleActions
+  ...ruleActions,
+  ...taskActions
 };
 
 export async function runAction({ rootDir = process.cwd(), actionId, body = {} } = {}) {

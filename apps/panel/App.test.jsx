@@ -1,5 +1,7 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import fs from "node:fs";
+import path from "node:path";
 import { afterEach, expect, test, vi } from "vitest";
 import App from "./App.jsx";
 
@@ -60,4 +62,43 @@ test("App relation view hides the root node and starts with four relation groups
   expect(screen.getByTestId("edge-project:demo-sceneTemplate:demo-uses-scene-template")).toBeInTheDocument();
   await userEvent.click(screen.getByRole("button", { name: "任务" }));
   expect(screen.getByText("Tasks")).toBeInTheDocument();
+});
+
+test("App routes task context menu actions through panel actions API", async () => {
+  const graph = {
+    nodes: [
+      { id: "task:demo", type: "task", title: "Demo Task", status: "ok", raw: { id: "demo", currentGate: "G4", status: "active" } },
+      { id: "gate:demo:G4", type: "gate", title: "G4 Development", status: "warning", raw: { id: "G4", name: "Development", status: "in_progress" } }
+    ],
+    edges: [{ from: "task:demo", to: "gate:demo:G4", relation: "has-gate" }],
+    groups: [],
+    warnings: []
+  };
+  global.fetch = vi.fn()
+    .mockResolvedValueOnce({ ok: true, json: async () => graph })
+    .mockResolvedValueOnce({ ok: true, json: async () => ({ ok: true }) })
+    .mockResolvedValueOnce({ ok: true, json: async () => graph });
+
+  render(<App />);
+
+  await userEvent.click(await screen.findByRole("button", { name: "任务" }));
+  fireEvent.contextMenu(screen.getByRole("button", { name: /Demo Task/ }), { clientX: 100, clientY: 120 });
+  await userEvent.click(screen.getByRole("menuitem", { name: "直接完成任务" }));
+
+  await waitFor(() => {
+    expect(global.fetch).toHaveBeenCalledWith("/api/actions/finish_task", expect.objectContaining({
+      method: "POST",
+      body: JSON.stringify({ taskId: "demo", note: "Panel direct completion." })
+    }));
+  });
+});
+
+test("task detail panel keeps content near the top instead of vertical centering", () => {
+  const css = fs.readFileSync(path.join(import.meta.dirname, "styles.css"), "utf8");
+  const gatePanelRule = [...css.matchAll(/\.gate-panel\s*\{[^}]+\}/g)]
+    .map((match) => match[0])
+    .join("\n");
+
+  expect(gatePanelRule).not.toContain("justify-content: center");
+  expect(gatePanelRule).toContain("justify-content: flex-start");
 });

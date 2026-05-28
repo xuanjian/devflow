@@ -1,6 +1,7 @@
 import { normalizeCommandResult } from "../contracts/devflow-types.mjs";
 import { createSqliteRepository } from "../repositories/sqlite-repository.mjs";
 import { ensureSqliteDatabase } from "../storage/sqlite-bootstrap.mjs";
+import { deleteTask as deleteTaskCommand, finishTask as finishTaskCommand } from "./task-commands.mjs";
 
 export async function createActionCommandService({ rootDir }) {
   await ensureSqliteDatabase({ rootDir });
@@ -22,6 +23,8 @@ export async function createActionCommandService({ rootDir }) {
     writeSkill: (skill) => writeSkill(repository, skill),
     writeRule: (rule) => writeRule(repository, rule),
     writeTask: (task) => writeTask(repository, task),
+    finishTask: (input) => finishTaskCommand(repository, { rootDir, ...input }),
+    deleteTask: (input) => deleteTaskCommand(repository, { rootDir, ...input }),
     setRuntimeState: (runtimeState) => setRuntimeState(repository, runtimeState),
     setConfig: (key, value) => setConfig(repository, key, value),
     deleteProject: (projectId) => deleteProject(repository, projectId),

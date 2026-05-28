@@ -282,6 +282,42 @@ test("delete_project removes project indexes and graph references without touchi
   assert.equal(externalPath, "/tmp/demo-project");
 });
 
+test("finish_task action marks a task finished at G7 through SQLite state", async () => {
+  const rootDir = await copyFixture();
+
+  const result = await runAction({
+    rootDir,
+    actionId: "finish_task",
+    body: { taskId: "demo-task", note: "completed from panel" }
+  });
+
+  assert.equal(result.ok, true);
+  assert.ok(result.changedPaths.includes("data/devflow.db"));
+  assert.ok(result.changedPaths.includes("runtime/tasks/demo-task/handoff.md"));
+  const task = await createSqliteRepository({ rootDir }).getTask("demo-task");
+  assert.equal(task.status, "finished");
+  assert.equal(task.currentGate, "G7");
+});
+
+test("delete_task action removes only SQLite task records and leaves markdown handoff in place", async () => {
+  const rootDir = await copyFixture();
+  const handoffPath = path.join(rootDir, "runtime/tasks/demo-task/handoff.md");
+
+  const result = await runAction({
+    rootDir,
+    actionId: "delete_task",
+    body: { taskId: "demo-task" }
+  });
+
+  assert.equal(result.ok, true);
+  assert.ok(result.changedPaths.includes("data/devflow.db"));
+  assert.equal(await exists(handoffPath), true);
+  const repository = createSqliteRepository({ rootDir });
+  assert.equal(await repository.getTask("demo-task"), null);
+  assert.equal(await repository.getWorkset("demo-task"), null);
+  assert.equal(await repository.getActiveTask(), null);
+});
+
 test("delete_scene removes scene indexes and task references", async () => {
   const rootDir = await copyFixture();
 

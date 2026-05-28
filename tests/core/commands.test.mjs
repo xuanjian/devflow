@@ -69,7 +69,41 @@ test("finishTask marks the task complete through repository writes", async () =>
   assert.equal(result.status, "ok");
   assert.equal(result.action, "finishTask");
   assert.equal(repository.writes.tasks.at(-1).status, "finished");
+  assert.equal(repository.writes.tasks.at(-1).gate, "G7");
+  assert.equal(repository.writes.tasks.at(-1).currentGate, "G7");
   assert.equal(repository.writes.tasks.at(-1).finishedNote, "Verified.");
+  assert.deepEqual(repository.writes.runtime.at(-1), {
+    activeTaskId: "",
+    activeTaskPath: "",
+    activeWorksetId: "",
+    activeProjectIds: [],
+    activeSceneTemplateId: "",
+    currentGate: ""
+  });
+});
+
+test("finishTask does not clear a different active task when finishing an older task", async () => {
+  const repository = createFakeRepository({ activeTaskId: "other-task" });
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "devflow-command-"));
+  const service = createDevFlowService({ rootDir, repository });
+
+  const result = await service.finishTask({ taskId: "demo-task", note: "Old task done." });
+
+  assert.equal(result.status, "ok");
+  assert.equal(repository.writes.tasks.at(-1).status, "finished");
+  assert.equal(repository.writes.runtime.length, 0);
+});
+
+test("deleteTask removes the task from the repository and clears active runtime state only for active task", async () => {
+  const repository = createFakeRepository();
+  const service = createDevFlowService({ rootDir: "/repo/devflow", repository });
+
+  const result = await service.deleteTask({ taskId: "demo-task" });
+
+  assert.equal(result.status, "ok");
+  assert.equal(result.action, "deleteTask");
+  assert.equal(result.entityId, "demo-task");
+  assert.deepEqual(repository.writes.deletedTasks, ["demo-task"]);
   assert.deepEqual(repository.writes.runtime.at(-1), {
     activeTaskId: "",
     activeTaskPath: "",
@@ -111,7 +145,7 @@ test("addProject and addSceneTemplate are thin repository command wrappers", asy
   assert.equal(repository.writes.sceneTemplates.at(-1).templateType, "scene-template");
 });
 
-function createFakeRepository() {
+function createFakeRepository({ activeTaskId = "demo-task" } = {}) {
   const task = {
     id: "demo-task",
     title: "Demo task",
@@ -131,6 +165,7 @@ function createFakeRepository() {
     projects: [],
     sceneTemplates: [],
     tasks: [],
+    deletedTasks: [],
     runtime: []
   };
 
@@ -161,7 +196,7 @@ function createFakeRepository() {
       return taskId === task.id ? task : null;
     },
     async getActiveTask() {
-      return task;
+      return activeTaskId === task.id ? task : null;
     },
     async getWorkset(worksetId) {
       return worksetId === task.workset.id ? task.workset : null;
@@ -180,6 +215,10 @@ function createFakeRepository() {
     async writeTask(nextTask) {
       writes.tasks.push(nextTask);
       return nextTask;
+    },
+    async deleteTask(taskId) {
+      writes.deletedTasks.push(taskId);
+      return null;
     },
     async setRuntimeState(state) {
       writes.runtime.push(state);

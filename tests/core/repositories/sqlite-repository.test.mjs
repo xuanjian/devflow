@@ -67,6 +67,26 @@ test("sqlite backend supports service task commands without changing public call
   assert.equal(current.task, null);
 });
 
+test("sqlite deleteTask removes task rows and workset relations without deleting handoff markdown", async () => {
+  const root = copyFixture(basicFixtureRoot, "devflow-sqlite-delete-task-");
+  await seedSqliteFromJsonFixture(root);
+  const service = createDevFlowService({ rootDir: root, backend: "sqlite" });
+  const repository = createSqliteRepository({ rootDir: root });
+  await repository.writeTaskDocument("demo-task", {
+    kind: "artifact",
+    path: "runtime/tasks/demo-task/G4/demo.md"
+  });
+
+  const result = await service.deleteTask({ taskId: "demo-task" });
+
+  assert.equal(result.status, "ok");
+  assert.equal(fs.existsSync(path.join(root, "runtime/tasks/demo-task/handoff.md")), true);
+  assert.equal(await repository.getTask("demo-task"), null);
+  assert.equal(await repository.getWorkset("demo-task"), null);
+  assert.deepEqual(await repository.listTaskDocuments("demo-task"), []);
+  assert.equal((await service.queryCurrent()).task, null);
+});
+
 test("sqlite runtime state writes stay in SQLite and do not create compatibility current.json", async () => {
   const root = copyFixture(basicFixtureRoot, "devflow-sqlite-current-");
   await seedSqliteFromJsonFixture(root);

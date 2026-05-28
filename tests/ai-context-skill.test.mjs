@@ -154,7 +154,7 @@ test("public template config stays skeleton-only and avoids private inventory", 
 
   assert.equal(profile.name || "", "");
   assert.deepEqual((projects.projects || []).map(project => project.id), ["devflow"]);
-  assert.deepEqual((scenes.scenes || []).map(scene => scene.id), ["devflow-config"]);
+  assert.deepEqual((scenes.scenes || []).map(scene => scene.id), []);
   assert.deepEqual((skills.skills || []).map(skill => skill.id).sort(), ["devflow", "devflow-init"]);
   assert.deepEqual(rules.rules || [], []);
   assert.doesNotMatch(combined, /\/Users\/[A-Za-z0-9._-]+|C:\\Users\\|token\s*[:=]|password\s*[:=]|api[_-]?key\s*[:=]/i);

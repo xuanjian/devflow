@@ -26,7 +26,7 @@
 刚安装的公开模板只包含：
 
 - 1 个项目：`DevFlow`
-- 1 个配置场景：`devflow-config`
+- 无默认场景配置
 - 2 个核心 skill：`devflow`、`devflow-init`
 - 空 rules
 - 空当前任务

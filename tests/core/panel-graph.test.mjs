@@ -17,6 +17,72 @@ test("buildPanelGraph adapts repository graph to panel shape", async () => {
   assert.ok(graph.edges.some((edge) => edge.from === "workset:workset-demo-task" && edge.to === "skill:demo-skill" && edge.relation === "loads-skill"));
 });
 
+test("buildPanelGraph hides DevFlow framework self nodes", async () => {
+  const repository = {
+    async listProjects() {
+      return [
+        { id: "devflow", name: "DevFlow" },
+        { id: "business-app", name: "Business App" }
+      ];
+    },
+    async getProject(projectId) {
+      return (await this.listProjects()).find((project) => project.id === projectId) || null;
+    },
+    async listSceneTemplates() {
+      return [];
+    },
+    async getSceneTemplate() {
+      return null;
+    },
+    async listSkills() {
+      return [
+        { id: "devflow", name: "DevFlow" },
+        { id: "devflow-init", name: "devflow-init" },
+        { id: "business-skill", name: "Business Skill" }
+      ];
+    },
+    async listRules() {
+      return [];
+    },
+    async listTasks() {
+      return [
+        {
+          id: "demo-task",
+          title: "Demo Task",
+          workset: {
+            id: "workset-demo-task",
+            taskId: "demo-task",
+            projects: [{ id: "devflow" }, { id: "business-app" }]
+          }
+        }
+      ];
+    },
+    async getActiveTask() {
+      return null;
+    },
+    async listGraphEdges() {
+      return [
+        { from: "project:devflow", to: "skill:devflow", relation: "uses-skill" },
+        { from: "project:devflow", to: "skill:devflow-init", relation: "uses-skill" },
+        { from: "project:business-app", to: "skill:business-skill", relation: "uses-skill" }
+      ];
+    }
+  };
+
+  const graph = await buildPanelGraph(repository, { rootDir: fixtureRoot });
+
+  assert.equal(graph.nodes.some((node) => node.id === "project:devflow"), false);
+  assert.equal(graph.nodes.some((node) => node.id === "skill:devflow"), false);
+  assert.equal(graph.nodes.some((node) => node.id === "skill:devflow-init"), false);
+  assert.ok(graph.nodes.some((node) => node.id === "project:business-app"));
+  assert.ok(graph.nodes.some((node) => node.id === "skill:business-skill"));
+  assert.equal(graph.edges.some((edge) => edge.from === "project:devflow" || edge.to === "project:devflow"), false);
+  assert.equal(graph.edges.some((edge) => edge.from === "skill:devflow" || edge.to === "skill:devflow"), false);
+  assert.equal(graph.edges.some((edge) => edge.from === "workset:workset-demo-task" && edge.to === "project:devflow"), false);
+  assert.ok(graph.edges.some((edge) => edge.from === "project:business-app" && edge.to === "skill:business-skill"));
+  assert.ok(graph.edges.some((edge) => edge.from === "workset:workset-demo-task" && edge.to === "project:business-app"));
+});
+
 test("getPanelNodeDetails returns Workset, skill, and gate relationships", async () => {
   const repository = createJsonRepository({ rootDir: fixtureRoot });
   const graph = await buildPanelGraph(repository, { rootDir: fixtureRoot });

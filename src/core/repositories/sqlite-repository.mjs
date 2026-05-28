@@ -169,6 +169,11 @@ export function createSqliteRepository({ rootDir = process.cwd(), dbPath = defau
       return repository.getTask(task.id);
     },
 
+    async deleteTask(taskId) {
+      deleteTaskRecord(db, taskId);
+      return null;
+    },
+
     async deleteProject(projectId) {
       deleteEntity(db, "projects", projectId, [
         ["project_skill_mounts", "project_id = ?"],
@@ -444,6 +449,36 @@ function clearWorksetRefs(db, worksetId) {
   for (const table of ["workset_capabilities", "workset_projects", "workset_skills", "workset_rules"]) {
     db.prepare(`DELETE FROM ${table} WHERE workset_id = ?`).run(worksetId);
   }
+}
+
+function deleteTaskRecord(db, taskId) {
+  if (!taskId) throw new TypeError("Cannot delete task without an id");
+  const task = getRaw(db, "tasks", taskId);
+  const worksetIds = new Set(
+    db.prepare("SELECT id FROM worksets WHERE task_id = ?").all(taskId).map((row) => row.id)
+  );
+  if (task?.workset?.id) worksetIds.add(task.workset.id);
+  if (task?.worksetId) worksetIds.add(task.worksetId);
+
+  const tx = db.transaction(() => {
+    db.prepare("DELETE FROM task_documents WHERE task_id = ?").run(taskId);
+    db.prepare("DELETE FROM task_gates WHERE task_id = ?").run(taskId);
+    db.prepare("DELETE FROM task_events WHERE task_id = ?").run(taskId);
+    for (const worksetId of worksetIds) {
+      clearWorksetRefs(db, worksetId);
+      db.prepare("DELETE FROM worksets WHERE id = ?").run(worksetId);
+    }
+    db.prepare("DELETE FROM worksets WHERE task_id = ?").run(taskId);
+    db.prepare("DELETE FROM tasks WHERE id = ?").run(taskId);
+    db.prepare(`
+      DELETE FROM graph_edges
+      WHERE from_id = ?
+         OR to_id = ?
+         OR from_id LIKE ?
+         OR to_id LIKE ?
+    `).run(`task:${taskId}`, `task:${taskId}`, `gate:${taskId}:%`, `gate:${taskId}:%`);
+  });
+  tx();
 }
 
 function insertRef(db, table, leftColumn, leftValue, rightColumn, rightValue, rawValue) {

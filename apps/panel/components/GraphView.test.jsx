@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { expect, test, vi } from "vitest";
 import GraphView from "./GraphView.jsx";
@@ -91,4 +91,38 @@ test("GraphView expands the canvas height to include long node columns", () => {
   const svg = screen.getByRole("img", { name: /上下文关系图/i });
   const [, , , height] = svg.getAttribute("viewBox").split(" ").map(Number);
   expect(height).toBeGreaterThan(900);
+});
+
+test("GraphView centers the visible node cluster in the scrollable canvas", async () => {
+  const clientWidth = Object.getOwnPropertyDescriptor(HTMLElement.prototype, "clientWidth");
+  const clientHeight = Object.getOwnPropertyDescriptor(HTMLElement.prototype, "clientHeight");
+  Object.defineProperty(HTMLElement.prototype, "clientWidth", { configurable: true, value: 960 });
+  Object.defineProperty(HTMLElement.prototype, "clientHeight", { configurable: true, value: 420 });
+
+  const graph = {
+    nodes: [
+      { id: "project:demo", type: "project", title: "Demo", status: "ok" },
+      { id: "sceneTemplate:demo", type: "sceneTemplate", title: "Scene", status: "ok" },
+      { id: "skill:demo", type: "skill", title: "Skill", status: "ok" },
+      { id: "rule:demo", type: "rule", title: "Rule", status: "ok" }
+    ],
+    edges: [
+      { from: "project:demo", to: "sceneTemplate:demo", relation: "uses-scene-template" },
+      { from: "project:demo", to: "skill:demo", relation: "uses-skill" },
+      { from: "project:demo", to: "rule:demo", relation: "uses-rule" }
+    ]
+  };
+
+  try {
+    const { container } = render(<GraphView graph={graph} selectedNodeId="" onSelectNode={() => {}} />);
+    const canvas = container.querySelector(".graph-canvas");
+    expect(canvas).toBeInTheDocument();
+
+    await waitFor(() => {
+      expect(canvas.scrollTop).toBeGreaterThan(0);
+    });
+  } finally {
+    if (clientWidth) Object.defineProperty(HTMLElement.prototype, "clientWidth", clientWidth);
+    if (clientHeight) Object.defineProperty(HTMLElement.prototype, "clientHeight", clientHeight);
+  }
 });

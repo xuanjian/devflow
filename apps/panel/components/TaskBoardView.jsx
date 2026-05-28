@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { titleForNode } from "../labels.js";
 
 const PROJECT_MAP_VIEWPORT = { width: 760, height: 300 };
 const PROJECT_MAP_CENTER = { x: 380, y: 150 };
 
-export default function TaskBoardView({ graph, selectedNodeId, onSelectNode }) {
+export default function TaskBoardView({ graph, selectedNodeId, onSelectNode, onTaskAction }) {
+  const [contextMenu, setContextMenu] = useState(null);
   const edges = graph.edges || [];
   const tasks = (graph.nodes || []).filter((node) => node.type === "task").sort(compareTasks);
   const selectedTaskId = resolveSelectedTaskId(tasks, edges, selectedNodeId);
@@ -17,6 +19,52 @@ export default function TaskBoardView({ graph, selectedNodeId, onSelectNode }) {
   const progress = summarizeProgress(gates, currentGate);
   const relatedProjects = resolveTaskProjects(selectedTask, graph.nodes || [], edges);
 
+  useEffect(() => {
+    if (!contextMenu) return undefined;
+
+    function closeMenu() {
+      setContextMenu(null);
+    }
+
+    function handleKeyDown(event) {
+      if (event.key === "Escape") {
+        closeMenu();
+      }
+    }
+
+    window.addEventListener("click", closeMenu);
+    window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("scroll", closeMenu, true);
+    return () => {
+      window.removeEventListener("click", closeMenu);
+      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("scroll", closeMenu, true);
+    };
+  }, [contextMenu]);
+
+  function openTaskMenu(event, task) {
+    event.preventDefault();
+    event.stopPropagation();
+    setContextMenu({
+      task,
+      ...menuPosition(event)
+    });
+  }
+
+  function runTaskAction(action) {
+    const task = contextMenu?.task;
+    if (!task) return;
+    if (action === "delete") {
+      const confirmed = window.confirm(`确认删除任务 ${titleForNode(task)} 吗？这只会删除 SQLite 任务记录，不会删除 runtime/tasks 下的 markdown。`);
+      if (!confirmed) {
+        setContextMenu(null);
+        return;
+      }
+    }
+    onTaskAction?.(action, task);
+    setContextMenu(null);
+  }
+
   return (
     <section className="task-board-view" aria-label="任务看板">
       <div className="task-list-panel">
@@ -27,6 +75,7 @@ export default function TaskBoardView({ graph, selectedNodeId, onSelectNode }) {
             className={selectedTask?.id === task.id ? "active" : ""}
             key={task.id}
             onClick={() => onSelectNode(task.id)}
+            onContextMenu={(event) => openTaskMenu(event, task)}
             type="button"
           >
             <span className="task-title-row">
@@ -36,6 +85,7 @@ export default function TaskBoardView({ graph, selectedNodeId, onSelectNode }) {
             <span>{task.raw?.status || task.status} · {gateLabelForTask(task, graph.nodes, edges)}</span>
           </button>
         ))}
+        <TaskContextMenu contextMenu={contextMenu} onTaskAction={runTaskAction} />
       </div>
       <div className="gate-panel">
         <header className="task-flow-header">
@@ -79,6 +129,39 @@ export default function TaskBoardView({ graph, selectedNodeId, onSelectNode }) {
       </div>
     </section>
   );
+}
+
+function TaskContextMenu({ contextMenu, onTaskAction }) {
+  if (!contextMenu) return null;
+  return createPortal(
+    <div
+      aria-label="任务操作"
+      className="task-context-menu"
+      onClick={(event) => event.stopPropagation()}
+      onContextMenu={(event) => event.preventDefault()}
+      role="menu"
+      style={{ left: contextMenu.x, top: contextMenu.y }}
+    >
+      <button role="menuitem" type="button" onClick={() => onTaskAction("finish")}>
+        直接完成任务
+      </button>
+      <button className="danger" role="menuitem" type="button" onClick={() => onTaskAction("delete")}>
+        删除任务
+      </button>
+    </div>,
+    document.body
+  );
+}
+
+function menuPosition(event) {
+  const menuWidth = 178;
+  const menuHeight = 92;
+  const viewportWidth = typeof window !== "undefined" && window.innerWidth ? window.innerWidth : event.clientX + menuWidth;
+  const viewportHeight = typeof window !== "undefined" && window.innerHeight ? window.innerHeight : event.clientY + menuHeight;
+  return {
+    x: Math.max(8, Math.min(event.clientX, viewportWidth - menuWidth - 8)),
+    y: Math.max(8, Math.min(event.clientY, viewportHeight - menuHeight - 8))
+  };
 }
 
 function TaskProjectMap({ projects, selectedTask, onSelectNode }) {

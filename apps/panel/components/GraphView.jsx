@@ -19,6 +19,7 @@ export default function GraphView({ graph, selectedNodeId, onSelectNode }) {
   const visibleEdges = projectGraph.edges;
   const activeFocusId = selectedProjectId || selectedNodeId;
   const highlightedNodeIds = getHighlightedNodeIds(visibleEdges, activeFocusId);
+  const nodeLayoutKey = nodes.map((node) => node.id).join("|");
   const viewportRef = useRef(null);
   const svgRef = useRef(null);
   const dragRef = useRef(null);
@@ -36,7 +37,7 @@ export default function GraphView({ graph, selectedNodeId, onSelectNode }) {
 
   useEffect(() => {
     hasCenteredRef.current = false;
-  }, [selectedProjectId]);
+  }, [nodeLayoutKey, selectedProjectId]);
 
   useEffect(() => {
     const visibleIds = new Set(nodes.map((node) => node.id));
@@ -84,10 +85,9 @@ export default function GraphView({ graph, selectedNodeId, onSelectNode }) {
     }
     hasCenteredRef.current = true;
     requestAnimationFrame(() => {
-      element.scrollLeft = Math.max(0, viewport.width / 2 - element.clientWidth / 2 - 80);
-      element.scrollTop = 0;
+      centerGraphCanvas(element, viewport, positions);
     });
-  }, [selectedProjectId, viewport.height, viewport.width]);
+  }, [positions, selectedProjectId, viewport.height, viewport.width]);
 
   function handleMouseDown(event) {
     if (event.button !== 0 || event.target.closest(".graph-node")) {
@@ -490,6 +490,27 @@ function getGraphViewport(positions) {
   return {
     width: maxX,
     height: maxY
+  };
+}
+
+function centerGraphCanvas(element, viewport, positions) {
+  const bounds = getVisibleGraphBounds(positions);
+  const centerX = bounds ? (bounds.minX + bounds.maxX) / 2 : viewport.width / 2;
+  const centerY = bounds ? (bounds.minY + bounds.maxY) / 2 : viewport.height / 2;
+  const maxScrollLeft = Math.max(0, viewport.width - element.clientWidth);
+  const maxScrollTop = Math.max(0, viewport.height - element.clientHeight);
+  element.scrollLeft = clamp(centerX - element.clientWidth / 2, 0, maxScrollLeft);
+  element.scrollTop = clamp(centerY - element.clientHeight / 2, 0, maxScrollTop);
+}
+
+function getVisibleGraphBounds(positions) {
+  const points = [...positions.values()];
+  if (!points.length) return null;
+  return {
+    minX: Math.min(...points.map((point) => point.x - 120)),
+    maxX: Math.max(...points.map((point) => point.x + 120)),
+    minY: Math.min(...points.map((point) => point.y - GRAPH_TOP_SAFE_SPACE)),
+    maxY: Math.max(...points.map((point) => point.y + 90))
   };
 }
 

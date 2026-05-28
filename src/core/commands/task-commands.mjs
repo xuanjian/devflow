@@ -109,19 +109,24 @@ export async function finishTask(repository, input = {}) {
   const nextTask = {
     ...task,
     status: "finished",
+    gate: "G7",
+    currentGate: "G7",
     finishedNote: input.note || "",
     notes: appendNote(task.notes, input.note)
   };
+  const activeTask = await repository.getActiveTask();
   await repository.writeTask(nextTask);
   await writeHandoff(input.rootDir, nextTask, [`Finished: ${new Date().toISOString()}`, input.note].filter(Boolean));
-  await repository.setRuntimeState({
-    activeTaskId: "",
-    activeTaskPath: "",
-    activeWorksetId: "",
-    activeProjectIds: [],
-    activeSceneTemplateId: "",
-    currentGate: ""
-  });
+  if (activeTask?.id === nextTask.id) {
+    await repository.setRuntimeState({
+      activeTaskId: "",
+      activeTaskPath: "",
+      activeWorksetId: "",
+      activeProjectIds: [],
+      activeSceneTemplateId: "",
+      currentGate: ""
+    });
+  }
 
   return normalizeCommandResult({
     status: "ok",
@@ -130,6 +135,41 @@ export async function finishTask(repository, input = {}) {
     entityId: nextTask.id,
     message: `Finished task ${nextTask.id}.`,
     paths: task.paths?.handoff ? [task.paths.handoff] : [`runtime/tasks/${nextTask.id}/handoff.md`]
+  });
+}
+
+export async function deleteTask(repository, input = {}) {
+  const task = await repository.getTask(input.taskId);
+  if (!task) {
+    return normalizeCommandResult({
+      status: "error",
+      action: "deleteTask",
+      entityType: "task",
+      entityId: input.taskId,
+      message: `Task not found: ${input.taskId}`
+    });
+  }
+
+  const activeTask = await repository.getActiveTask();
+  await repository.deleteTask(task.id);
+  if (activeTask?.id === task.id) {
+    await repository.setRuntimeState({
+      activeTaskId: "",
+      activeTaskPath: "",
+      activeWorksetId: "",
+      activeProjectIds: [],
+      activeSceneTemplateId: "",
+      currentGate: ""
+    });
+  }
+
+  return normalizeCommandResult({
+    status: "ok",
+    action: "deleteTask",
+    entityType: "task",
+    entityId: task.id,
+    message: `Deleted task ${task.id} from SQLite state.`,
+    paths: ["data/devflow.db"]
   });
 }
 

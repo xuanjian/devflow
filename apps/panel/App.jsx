@@ -70,6 +70,24 @@ export default function App() {
     await refresh();
   }
 
+  async function handleTaskAction(action, task) {
+    const taskId = taskIdForNode(task);
+    if (!taskId) return;
+    try {
+      if (action === "finish") {
+        await runAction("finish_task", { taskId, note: "Panel direct completion." });
+      } else if (action === "delete") {
+        await runAction("delete_task", { taskId });
+        if (selectedNodeId === task.id || selectedNodeId.startsWith(`gate:${taskId}:`)) {
+          setSelectedNodeId("");
+        }
+      }
+      await refresh();
+    } catch (err) {
+      setError(err.message);
+    }
+  }
+
   return (
     <main className="app-shell">
       <Sidebar
@@ -80,7 +98,12 @@ export default function App() {
         {loading ? <p className="state-message">正在加载上下文关系...</p> : null}
         {error ? <p className="state-message error-message" role="alert">{error}</p> : null}
         {!loading && activeView === "tasks" ? (
-          <TaskBoardView graph={scopedGraph} selectedNodeId={selectedNodeId} onSelectNode={setSelectedNodeId} />
+          <TaskBoardView
+            graph={scopedGraph}
+            selectedNodeId={selectedNodeId}
+            onSelectNode={setSelectedNodeId}
+            onTaskAction={handleTaskAction}
+          />
         ) : null}
         {!loading && activeView === "relations" ? (
           <GraphView
@@ -93,6 +116,12 @@ export default function App() {
       <DetailsDrawer details={selectedNodeDetails} onRunAction={handleRunAction} />
     </main>
   );
+}
+
+function taskIdForNode(task) {
+  return String(task?.raw?.id || task?.id || "")
+    .trim()
+    .replace(/^task:/, "");
 }
 
 function typesForView(view) {

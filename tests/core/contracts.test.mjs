@@ -44,6 +44,7 @@ test("locks route modes, entity types, query result types, and public method nam
     "writeProject",
     "writeSceneTemplate",
     "writeTask",
+    "deleteTask",
     "setRuntimeState"
   ]);
   assert.deepEqual(SERVICE_METHODS, [
@@ -59,6 +60,7 @@ test("locks route modes, entity types, query result types, and public method nam
     "startTask",
     "updateTask",
     "finishTask",
+    "deleteTask",
     "addProject",
     "addSceneTemplate"
   ]);
