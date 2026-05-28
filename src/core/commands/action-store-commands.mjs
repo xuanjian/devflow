@@ -1,6 +1,7 @@
 import { assertGraphEdgeRelation, normalizeCommandResult } from "../contracts/devflow-types.mjs";
 import { createSqliteRepository } from "../repositories/sqlite-repository.mjs";
 import { ensureSqliteDatabase } from "../storage/sqlite-bootstrap.mjs";
+import { scanRelations as scanRelationsCommand } from "./relation-scan-command.mjs";
 import { deleteTask as deleteTaskCommand, finishTask as finishTaskCommand } from "./task-commands.mjs";
 
 export async function createActionCommandService({ rootDir }) {
@@ -23,6 +24,7 @@ export async function createActionCommandService({ rootDir }) {
     setProjectDomains: (input) => setProjectDomains(repository, input),
     setProjectRole: (input) => setProjectRole(repository, input),
     addRelation: (input) => addRelation(repository, input),
+    scanRelations: (input) => scanRelationsCommand(repository, { rootDir, ...input }),
     writeSceneTemplate: (sceneTemplate) => writeSceneTemplate(repository, sceneTemplate),
     writeSkill: (skill) => writeSkill(repository, skill),
     writeRule: (rule) => writeRule(repository, rule),

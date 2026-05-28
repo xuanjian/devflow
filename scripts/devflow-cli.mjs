@@ -45,6 +45,7 @@ function usage() {
   devflow set-domain <projectId> <domain...> [--dry-run]
   devflow set-role <projectId> <role> [--dry-run]
   devflow add-relation <fromId> <toId> --type <chain|depends-on|calls> [--remove] [--dry-run]
+  devflow scan-relations [--dry-run]
   devflow add project <repo-path>
   devflow add scene-template "<name>"
   devflow doctor
@@ -475,6 +476,13 @@ async function runFacadeCommand(root, command, type, rest, flags) {
       toId: rest[0],
       type: firstValue(flags.type),
       remove: Boolean(flags.remove),
+      dryRun: Boolean(flags['dry-run'])
+    }));
+    return;
+  }
+  if (command === 'scan-relations') {
+    const commands = await createActionCommandService({ rootDir: root });
+    printJson(await commands.scanRelations({
       dryRun: Boolean(flags['dry-run'])
     }));
     return;
