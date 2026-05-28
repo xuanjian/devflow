@@ -56,6 +56,36 @@ test("query route expands yorder frontend and bff candidates through chain and d
   assert.ok(route.candidates.find((candidate) => candidate.id === "dhbfront-utils").reason.includes("depends-on"));
 });
 
+test("query route expands configured frontend calls bff candidates and keeps them clarifiable", async () => {
+  const { service } = await createRoutingFixture();
+
+  const route = await service.queryRoute({ text: "dhb h5 前端页面调整" });
+  const candidateIds = route.candidates.map((candidate) => candidate.id);
+  const backendClarify = route.clarify.find((item) => item.code === "backend-bff");
+
+  for (const projectId of [
+    "dhb-packages",
+    "dhbfront-cash-mini",
+    "dhb-mobile-index",
+    "new-mobile-h5",
+    "bff-goods",
+    "bff-order",
+    "bff-user",
+    "bff-payment",
+    "bff-warehouse"
+  ]) {
+    assert.ok(candidateIds.includes(projectId), `missing ${projectId}`);
+  }
+  assert.ok(route.candidates.find((candidate) => candidate.id === "bff-payment").reason.includes("calls"));
+  assert.deepEqual(backendClarify?.options, [
+    "bff-goods",
+    "bff-order",
+    "bff-user",
+    "bff-payment",
+    "bff-warehouse"
+  ]);
+});
+
 test("query route prunes a pure iOS task to native app candidates", async () => {
   const { service } = await createRoutingFixture();
 
@@ -136,6 +166,9 @@ function routingProjects() {
   return [
     { id: "bff-goods", name: "bff-goods", products: ["dhb"], domains: ["goods"], role: "bff-service" },
     { id: "bff-order", name: "bff-order", products: ["dhb"], domains: ["order"], role: "bff-service" },
+    { id: "bff-user", name: "bff-user", products: ["dhb"], domains: ["user"], role: "bff-service" },
+    { id: "bff-payment", name: "bff-payment", products: ["dhb"], domains: ["payment"], role: "bff-service" },
+    { id: "bff-warehouse", name: "bff-warehouse", products: ["dhb"], domains: ["warehouse"], role: "bff-service" },
     { id: "egg-business", name: "egg-business", products: ["dhb"], domains: [], role: "bff-common" },
     { id: "egg-dhb-framework", name: "egg-dhb-framework", products: ["dhb"], domains: [], role: "bff-common" },
     { id: "egg-dhb-permission", name: "egg-dhb-permission", products: ["dhb"], domains: [], role: "bff-common" },
@@ -158,6 +191,15 @@ function routingEdges() {
     { from: "project:bff-order", to: "project:egg-business", relation: "depends-on" },
     { from: "project:bff-order", to: "project:egg-dhb-framework", relation: "depends-on" },
     { from: "project:bff-order", to: "project:egg-dhb-permission", relation: "depends-on" },
+    { from: "project:dhb-mobile-index", to: "project:bff-goods", relation: "calls" },
+    { from: "project:dhb-mobile-index", to: "project:bff-order", relation: "calls" },
+    { from: "project:dhb-mobile-index", to: "project:bff-user", relation: "calls" },
+    { from: "project:dhb-mobile-index", to: "project:bff-payment", relation: "calls" },
+    { from: "project:dhb-mobile-index", to: "project:bff-warehouse", relation: "calls" },
+    { from: "project:new-mobile-h5", to: "project:bff-order", relation: "calls" },
+    { from: "project:new-mobile-h5", to: "project:bff-user", relation: "calls" },
+    { from: "project:new-mobile-h5", to: "project:bff-payment", relation: "calls" },
+    { from: "project:new-mobile-h5", to: "project:bff-warehouse", relation: "calls" },
     { from: "project:dhbfront-domain-goods", to: "project:dhbfront-cash-mini", relation: "chain" },
     { from: "project:dhbfront-domain-goods", to: "project:dhbfront-utils", relation: "depends-on" },
     { from: "project:dhb-packages", to: "project:dhbfront-cash-mini", relation: "chain" },

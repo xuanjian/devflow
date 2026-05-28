@@ -37,6 +37,12 @@ function writePackage(projectDir, pkg) {
   fs.writeFileSync(path.join(projectDir, "package.json"), `${JSON.stringify(pkg, null, 2)}\n`);
 }
 
+function writeDomainConfig(projectDir, source) {
+  const localDir = path.join(projectDir, "local");
+  fs.mkdirSync(localDir, { recursive: true });
+  fs.writeFileSync(path.join(localDir, "domainConfig.js"), `${source.trim()}\n`);
+}
+
 test("scan-relations previews depends-on edges from package names without writing sqlite", async () => {
   const root = copyFixture();
   await seedSqliteFromJsonFixture(root);
@@ -128,4 +134,69 @@ test("scan-relations writes depends-on edges idempotently", async () => {
   assert.deepEqual(edges.filter((edge) => edge.relation === "depends-on"), [
     { from: "project:bff-order", to: "project:egg-business", relation: "depends-on" }
   ]);
+});
+
+test("scan-relations previews and writes calls edges from frontend domainConfig idempotently", async () => {
+  const root = copyFixture();
+  await seedSqliteFromJsonFixture(root);
+  const repository = createSqliteRepository({ rootDir: root });
+  const mobileDir = path.join(root, "domain-config-fixtures", "dhb-mobile-index");
+  const containerDir = path.join(root, "domain-config-fixtures", "new-mobile-h5");
+  const missingConfigDir = path.join(root, "domain-config-fixtures", "missing-config");
+
+  writeDomainConfig(mobileDir, `
+    export default {
+      "bff-goods": "http://bff-goods.newdhb.com",
+      "bff-order": "http://bff-order.newdhb.com",
+      'bff-user': 'http://bff-user.newdhb.com',
+      bffPayment: "ignored because key is not a project id",
+      "bff-payment": "http://bff-payment.newdhb.com",
+      "bff-warehouse": "http://bff-warehouse.newdhb.com",
+      "bff-missing": "http://bff-missing.newdhb.com"
+    };
+  `);
+  writeDomainConfig(containerDir, `
+    module.exports = {
+      "bff-order": "http://bff-order.newdhb.com",
+      "bff-user": "http://bff-user.newdhb.com"
+    };
+  `);
+  fs.mkdirSync(missingConfigDir, { recursive: true });
+
+  await repository.writeProject({ id: "dhb-mobile-index", path: mobileDir, technologyFamilyId: "frontend", role: "h5" });
+  await repository.writeProject({ id: "new-mobile-h5", path: containerDir, role: "container" });
+  await repository.writeProject({ id: "missing-config-frontend", path: missingConfigDir, role: "mini-program" });
+  for (const projectId of ["bff-goods", "bff-order", "bff-user", "bff-payment", "bff-warehouse"]) {
+    await repository.writeProject({ id: projectId, role: "bff-service" });
+  }
+
+  const preview = parseJson(runCli(root, ["scan-relations", "--dry-run"]));
+  const previewCalls = preview.edges
+    .filter((edge) => edge.relation === "calls")
+    .map(({ from, to, relation, domainConfigKey }) => ({ from, to, relation, domainConfigKey }))
+    .sort((a, b) => `${a.from}:${a.to}`.localeCompare(`${b.from}:${b.to}`));
+
+  assert.equal(preview.status, "noop");
+  assert.deepEqual(previewCalls, [
+    { from: "project:dhb-mobile-index", to: "project:bff-goods", relation: "calls", domainConfigKey: "bff-goods" },
+    { from: "project:dhb-mobile-index", to: "project:bff-order", relation: "calls", domainConfigKey: "bff-order" },
+    { from: "project:dhb-mobile-index", to: "project:bff-payment", relation: "calls", domainConfigKey: "bff-payment" },
+    { from: "project:dhb-mobile-index", to: "project:bff-user", relation: "calls", domainConfigKey: "bff-user" },
+    { from: "project:dhb-mobile-index", to: "project:bff-warehouse", relation: "calls", domainConfigKey: "bff-warehouse" },
+    { from: "project:new-mobile-h5", to: "project:bff-order", relation: "calls", domainConfigKey: "bff-order" },
+    { from: "project:new-mobile-h5", to: "project:bff-user", relation: "calls", domainConfigKey: "bff-user" }
+  ]);
+  assert.match(JSON.stringify(preview.warnings), /missing_domain_config/);
+  assert.match(JSON.stringify(preview.warnings), /unmapped_bff_domain_config_key/);
+  assert.equal((await repository.listGraphEdges()).some((edge) => edge.relation === "calls"), false);
+
+  const write = parseJson(runCli(root, ["scan-relations"]));
+  const secondWrite = parseJson(runCli(root, ["scan-relations"]));
+  const calls = (await repository.listGraphEdges())
+    .filter((edge) => edge.relation === "calls")
+    .sort((a, b) => `${a.from}:${a.to}`.localeCompare(`${b.from}:${b.to}`));
+
+  assert.equal(write.status, "ok");
+  assert.equal(secondWrite.status, "noop");
+  assert.deepEqual(calls, previewCalls.map(({ from, to, relation }) => ({ from, to, relation })));
 });

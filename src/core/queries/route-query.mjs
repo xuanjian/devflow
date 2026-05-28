@@ -211,6 +211,7 @@ function inferProjectCandidates({ projects, projectEdges, tasks, sourceText }) {
   }
 
   expandChain({ projectEdges, addCandidate, evidence });
+  expandCalls({ projectEdges, addCandidate, evidence });
   expandDependsOn({ projectEdges, addCandidate, evidence });
   applyScopePruning({ evidence, order, scope });
 
@@ -229,6 +230,17 @@ function expandChain({ projectEdges, addCandidate, evidence }) {
       addCandidate(toId, `chain:${fromId}->${toId}`, [`project:${fromId}`, "chain", `project:${toId}`]);
       changed = true;
     }
+  }
+}
+
+function expandCalls({ projectEdges, addCandidate, evidence }) {
+  const sourceIds = [...evidence.keys()];
+  for (const edge of projectEdges) {
+    if (edge.relation !== "calls") continue;
+    const fromId = projectIdFromNode(edge.from);
+    const toId = projectIdFromNode(edge.to);
+    if (!fromId || !toId || !sourceIds.includes(fromId)) continue;
+    addCandidate(toId, `calls:${fromId}->${toId}`, [`project:${fromId}`, "calls", `project:${toId}`]);
   }
 }
 
@@ -260,7 +272,7 @@ function finalizeInference({ evidence, order, product, domains, scope, tasks, so
     projects: candidates.map((candidate) => evidence.get(candidate.id).project),
     candidates,
     historyHints: collectHistoryHints({ tasks, candidates, domains, sourceText }),
-    clarify: buildClarifications({ product, domains, scope }),
+    clarify: buildClarifications({ product, domains, scope, candidates }),
     refinementHint: candidates.length
       ? "以下是规则候选+证据,请结合 task 语义精排;遇 clarify 先问用户,不要把规则候选当最终决策。"
       : "",
@@ -313,8 +325,14 @@ function taskProjectIds(task) {
     .filter(Boolean))];
 }
 
-function buildClarifications({ product, domains, scope }) {
+function buildClarifications({ product, domains, scope, candidates = [] }) {
   const clarify = [];
+  const backendOptions = backendBffOptions({
+    domains,
+    candidateBffIds: candidates
+      .filter((candidate) => candidate.role === "bff-service" || candidate.id.startsWith("bff-"))
+      .map((candidate) => candidate.id)
+  });
   if (!product && domains.length) {
     clarify.push({
       code: "product-line-unknown",
@@ -336,14 +354,26 @@ function buildClarifications({ product, domains, scope }) {
       options: ["小程序", "h5", "原生", "管理端 web 模块"]
     });
   }
-  if (domains.length && !scope.explicitBackendBff) {
+  if (backendOptions.length && !scope.explicitBackendBff) {
     clarify.push({
       code: "backend-bff",
       message: "请确认本次需要哪些 BFF;inner/老 API 属于 BFF 内部细节,DevFlow 不追问。",
-      options: domains.map((domain) => `bff-${domain}`)
+      options: backendOptions
     });
   }
   return clarify;
+}
+
+function backendBffOptions({ domains, candidateBffIds }) {
+  const options = [...domains.map((domain) => `bff-${domain}`), ...candidateBffIds];
+  const order = new Map(["goods", "order", "user", "payment", "warehouse", "manager", "im", "print"]
+    .map((domain, index) => [`bff-${domain}`, index]));
+  return [...new Set(options)]
+    .sort((a, b) => {
+      const aOrder = order.has(a) ? order.get(a) : Number.MAX_SAFE_INTEGER;
+      const bOrder = order.has(b) ? order.get(b) : Number.MAX_SAFE_INTEGER;
+      return aOrder === bOrder ? a.localeCompare(b) : aOrder - bOrder;
+    });
 }
 
 function isDhbDomainSurface({ product, domains }) {

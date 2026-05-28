@@ -4,6 +4,12 @@ import { titleForNode } from "../labels.js";
 
 const PROJECT_MAP_VIEWPORT = { width: 760, height: 300 };
 const PROJECT_MAP_CENTER = { x: 380, y: 150 };
+const PROJECT_RELATIONS = new Set(["chain", "depends-on", "calls"]);
+const RELATION_LEGEND_ITEMS = [
+  { relation: "chain", label: "chain" },
+  { relation: "depends-on", label: "depends-on" },
+  { relation: "calls", label: "calls" }
+];
 
 export default function TaskBoardView({ graph, selectedNodeId, onSelectNode, onTaskAction }) {
   const [contextMenu, setContextMenu] = useState(null);
@@ -18,6 +24,7 @@ export default function TaskBoardView({ graph, selectedNodeId, onSelectNode, onT
   const currentGate = gates.find((gate) => gate.raw?.id === selectedTask?.raw?.currentGate);
   const progress = summarizeProgress(gates, currentGate);
   const relatedProjects = resolveTaskProjects(selectedTask, graph.nodes || [], edges);
+  const relatedProjectEdges = resolveProjectRelationEdges(relatedProjects, edges);
 
   useEffect(() => {
     if (!contextMenu) return undefined;
@@ -123,6 +130,7 @@ export default function TaskBoardView({ graph, selectedNodeId, onSelectNode, onT
         </div>
         <TaskProjectMap
           projects={relatedProjects}
+          projectEdges={relatedProjectEdges}
           selectedTask={selectedTask}
           onSelectNode={onSelectNode}
         />
@@ -164,7 +172,7 @@ function menuPosition(event) {
   };
 }
 
-function TaskProjectMap({ projects, selectedTask, onSelectNode }) {
+function TaskProjectMap({ projects, projectEdges = [], selectedTask, onSelectNode }) {
   const [positions, setPositions] = useState(new Map());
   const [pinnedPositions, setPinnedPositions] = useState({});
   const svgRef = useRef(null);
@@ -262,6 +270,7 @@ function TaskProjectMap({ projects, selectedTask, onSelectNode }) {
         <h3>关联项目</h3>
         <span>{projects.length ? `${projects.length} 个项目` : "未记录项目"}</span>
       </header>
+      {projectEdges.length ? <RelationLegend /> : null}
       {!projects.length ? <p className="empty-state">这个任务还没有挂载项目。</p> : (
         <svg
           onMouseLeave={stopDrag}
@@ -285,6 +294,21 @@ function TaskProjectMap({ projects, selectedTask, onSelectNode }) {
               />
             );
           })}
+          {projectEdges.map((edge) => {
+            const from = positions.get(edge.from) || seedProjectMapPosition(projects, { id: edge.from });
+            const to = positions.get(edge.to) || seedProjectMapPosition(projects, { id: edge.to });
+            return (
+              <line
+                className={`project-map-relation-edge relation-${edge.relation}`}
+                data-testid={`task-project-edge-${edge.from}-${edge.to}-${edge.relation}`}
+                key={`${edge.from}-${edge.to}-${edge.relation}`}
+                x1={from.x}
+                y1={from.y}
+                x2={to.x}
+                y2={to.y}
+              />
+            );
+          })}
           <foreignObject className="graph-node-shell project-map-node-shell" height="82" width="190" x={PROJECT_MAP_CENTER.x - 95} y={PROJECT_MAP_CENTER.y - 42}>
             <button
               aria-label={`${titleForNode(selectedTask)} 任务`}
@@ -298,8 +322,9 @@ function TaskProjectMap({ projects, selectedTask, onSelectNode }) {
           </foreignObject>
           {projects.map((project) => {
             const point = positions.get(project.id) || seedProjectMapPosition(projects, project);
+            const metadataTags = metadataTagsForNode(project);
             return (
-              <foreignObject className="graph-node-shell project-map-node-shell" height="82" key={project.id} width="190" x={point.x - 95} y={point.y - 42}>
+              <foreignObject className="graph-node-shell project-map-node-shell" height="116" key={project.id} width="190" x={point.x - 95} y={point.y - 58}>
                 <button
                   aria-label={`${titleForNode(project)} 项目`}
                   className={`graph-node project-map-graph-node node-project status-${project.status || "ok"} project-node`}
@@ -309,6 +334,13 @@ function TaskProjectMap({ projects, selectedTask, onSelectNode }) {
                 >
                   <span className="node-dot" aria-hidden="true" />
                   <span className="node-copy">{titleForNode(project)}</span>
+                  {metadataTags.length ? (
+                    <span className="node-metadata-tags" aria-label="项目 metadata">
+                      {metadataTags.map((tag) => (
+                        <span className={`node-metadata-chip ${tag.kind}`} key={`${tag.kind}:${tag.value}`}>{tag.value}</span>
+                      ))}
+                    </span>
+                  ) : null}
                 </button>
               </foreignObject>
             );
@@ -316,6 +348,20 @@ function TaskProjectMap({ projects, selectedTask, onSelectNode }) {
         </svg>
       )}
     </section>
+  );
+}
+
+function RelationLegend() {
+  return (
+    <div className="graph-relation-legend task-project-relation-legend" aria-label="relation legend">
+      <span>relation</span>
+      {RELATION_LEGEND_ITEMS.map((item) => (
+        <i className={`relation-legend-item relation-${item.relation}`} key={item.relation}>
+          <b aria-hidden="true" />
+          {item.label}
+        </i>
+      ))}
+    </div>
   );
 }
 
@@ -455,6 +501,31 @@ function resolveTaskProjects(task, nodes, edges) {
   return [...projectIds]
     .map((id) => nodesById.get(id) || { id, type: "project", title: id.slice("project:".length), status: "unknown" })
     .sort(compareNodesByTitle);
+}
+
+function resolveProjectRelationEdges(projects, edges) {
+  const projectIds = new Set(projects.map((project) => project.id));
+  return edges.filter((edge) => (
+    PROJECT_RELATIONS.has(edge.relation)
+      && projectIds.has(edge.from)
+      && projectIds.has(edge.to)
+  ));
+}
+
+function metadataTagsForNode(node) {
+  const metadata = node.metadata || node.raw || {};
+  return [
+    ...toTagList(metadata.products, "product"),
+    ...toTagList(metadata.domains, "domain"),
+    ...toTagList(metadata.role ? [metadata.role] : [], "role")
+  ];
+}
+
+function toTagList(values, kind) {
+  return (Array.isArray(values) ? values : [])
+    .map((value) => String(value || "").trim())
+    .filter(Boolean)
+    .map((value) => ({ kind, value }));
 }
 
 function seedProjectMapPosition(projects, project) {

@@ -3,6 +3,8 @@ import path from "node:path";
 import { normalizeCommandResult } from "../contracts/devflow-types.mjs";
 
 const DEPENDENCY_FIELDS = ["dependencies", "devDependencies"];
+const DOMAIN_CONFIG_RELATIVE_PATH = path.join("local", "domainConfig.js");
+const FRONTEND_DOMAIN_CONFIG_ROLES = new Set(["h5", "container", "main-package", "subpackage", "mini-program"]);
 const SPECIAL_PACKAGE_PROJECTS = [
   { prefix: "@dhbmini/", projectId: "dhb-packages", warningCode: "unmapped_dhbmini_package" },
   { prefix: "@dhbfront-domain-", projectId: "dhb-packages", warningCode: "unmapped_dhbfront_domain_package" },
@@ -44,6 +46,13 @@ export async function scanRelations(repository, { rootDir = process.cwd(), dryRu
     }
   }
 
+  for (const edge of collectDomainConfigCalls(projects, { rootDir, projectIds, warnings })) {
+    const key = edgeKey(edge.from, edge.to, edge.relation);
+    if (plannedEdgeKeys.has(key) || existingEdges.has(key)) continue;
+    plannedEdgeKeys.add(key);
+    plannedEdges.push(edge);
+  }
+
   if (dryRun) {
     return scanResult({
       status: "noop",
@@ -60,7 +69,7 @@ export async function scanRelations(repository, { rootDir = process.cwd(), dryRu
 
   return scanResult({
     status: plannedEdges.length ? "ok" : "noop",
-    message: plannedEdges.length ? `Inserted ${plannedEdges.length} depends-on relation(s).` : "No relation changes.",
+    message: plannedEdges.length ? `Inserted ${plannedEdges.length} relation(s).` : "No relation changes.",
     edges: plannedEdges,
     warnings,
     willWrite: plannedEdges.length
@@ -104,6 +113,64 @@ function collectPackageInfos(projects, { rootDir, warnings }) {
     }
   }
   return packageInfos;
+}
+
+function collectDomainConfigCalls(projects, { rootDir, projectIds, warnings }) {
+  const edges = [];
+  for (const project of projects) {
+    if (!isFrontendDomainConfigProject(project)) continue;
+
+    const rawPath = typeof project.path === "string" ? project.path.trim() : "";
+    if (!rawPath) {
+      warnings.push({ code: "missing_project_path", projectId: project.id, relation: "calls" });
+      continue;
+    }
+
+    const projectPath = path.isAbsolute(rawPath) ? rawPath : path.resolve(rootDir, rawPath);
+    if (!fs.existsSync(projectPath)) {
+      warnings.push({ code: "missing_path", projectId: project.id, path: projectPath, relation: "calls" });
+      continue;
+    }
+
+    const domainConfigPath = path.join(projectPath, DOMAIN_CONFIG_RELATIVE_PATH);
+    if (!fs.existsSync(domainConfigPath)) {
+      warnings.push({ code: "missing_domain_config", projectId: project.id, path: domainConfigPath });
+      continue;
+    }
+
+    let bffProjectIds = [];
+    try {
+      bffProjectIds = extractBffDomainConfigKeys(fs.readFileSync(domainConfigPath, "utf8"));
+    } catch (error) {
+      warnings.push({
+        code: "unreadable_domain_config",
+        projectId: project.id,
+        path: domainConfigPath,
+        message: error.message
+      });
+      continue;
+    }
+
+    for (const bffProjectId of bffProjectIds) {
+      if (!projectIds.has(bffProjectId)) {
+        warnings.push({
+          code: "unmapped_bff_domain_config_key",
+          projectId: project.id,
+          path: domainConfigPath,
+          key: bffProjectId
+        });
+        continue;
+      }
+      if (bffProjectId === project.id) continue;
+      edges.push({
+        from: `project:${project.id}`,
+        to: `project:${bffProjectId}`,
+        relation: "calls",
+        domainConfigKey: bffProjectId
+      });
+    }
+  }
+  return edges;
 }
 
 function buildPackageNameMap(packageInfos, warnings) {
@@ -151,6 +218,87 @@ function resolveDependencyProjectId(packageName, { packageNameToProjectId, proje
     return null;
   }
   return packageNameToProjectId.get(packageName) || (projectIds.has(packageName) ? packageName : null);
+}
+
+function isFrontendDomainConfigProject(project) {
+  const technologyFamilyId = String(project.technologyFamilyId || "").trim().toLowerCase();
+  const role = String(project.role || "").trim().toLowerCase();
+  return technologyFamilyId === "frontend" || FRONTEND_DOMAIN_CONFIG_ROLES.has(role);
+}
+
+function extractBffDomainConfigKeys(source) {
+  const cleanSource = stripJavaScriptComments(source);
+  const keys = [];
+  const seen = new Set();
+  const propertyKeyPattern = /(?:^|[,{]\s*)(["'])(bff-[A-Za-z0-9_-]+)\1\s*:/g;
+  let match;
+  while ((match = propertyKeyPattern.exec(cleanSource)) !== null) {
+    const key = match[2];
+    if (seen.has(key)) continue;
+    seen.add(key);
+    keys.push(key);
+  }
+  return keys;
+}
+
+function stripJavaScriptComments(source) {
+  let result = "";
+  let quote = "";
+  let escaping = false;
+  let lineComment = false;
+  let blockComment = false;
+
+  for (let index = 0; index < source.length; index += 1) {
+    const char = source[index];
+    const next = source[index + 1];
+
+    if (lineComment) {
+      if (char === "\n") {
+        lineComment = false;
+        result += char;
+      }
+      continue;
+    }
+
+    if (blockComment) {
+      if (char === "*" && next === "/") {
+        blockComment = false;
+        index += 1;
+      }
+      continue;
+    }
+
+    if (quote) {
+      result += char;
+      if (escaping) {
+        escaping = false;
+      } else if (char === "\\") {
+        escaping = true;
+      } else if (char === quote) {
+        quote = "";
+      }
+      continue;
+    }
+
+    if (char === "/" && next === "/") {
+      lineComment = true;
+      index += 1;
+      continue;
+    }
+
+    if (char === "/" && next === "*") {
+      blockComment = true;
+      index += 1;
+      continue;
+    }
+
+    if (char === "\"" || char === "'" || char === "`") {
+      quote = char;
+    }
+    result += char;
+  }
+
+  return result;
 }
 
 function edgeKey(from, to, relation) {

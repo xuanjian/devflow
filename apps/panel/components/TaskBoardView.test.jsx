@@ -41,6 +41,38 @@ test("TaskBoardView renders tasks and gate progress from graph nodes", async () 
   expect(screen.queryAllByRole("button", { name: /G4 Development/ }).find((item) => item.classList.contains("gate-card"))).toBeUndefined();
 });
 
+test("TaskBoardView task project map renders project metadata and project relation edges", async () => {
+  const graph = {
+    nodes: [
+      { id: "task:demo", type: "task", title: "Demo Task", summary: "Active work", status: "ok", raw: { currentGate: "G4", status: "doing", projectIds: ["goods-h5", "bff-goods", "dhbfront-utils"] } },
+      { id: "project:goods-h5", type: "project", title: "Goods H5", status: "ok", metadata: { products: ["dhb"], domains: ["goods"], role: "h5" } },
+      { id: "project:bff-goods", type: "project", title: "BFF Goods", status: "ok", metadata: { products: ["dhb"], domains: ["goods"], role: "bff-service" } },
+      { id: "project:dhbfront-utils", type: "project", title: "dhbfront-utils", status: "ok", metadata: { products: ["dhb"], domains: [], role: "frontend-common" } },
+      { id: "gate:demo:G4", type: "gate", title: "G4 Development", summary: "Development", status: "warning", raw: { id: "G4", name: "Development", status: "in_progress" } }
+    ],
+    edges: [
+      { from: "task:demo", to: "gate:demo:G4", relation: "has-gate" },
+      { from: "project:goods-h5", to: "project:bff-goods", relation: "calls" },
+      { from: "project:goods-h5", to: "project:dhbfront-utils", relation: "depends-on" },
+      { from: "project:bff-goods", to: "project:dhbfront-utils", relation: "chain" }
+    ]
+  };
+
+  render(<TaskBoardView graph={graph} selectedNodeId="" onSelectNode={() => {}} />);
+
+  expect(screen.getByText("relation")).toBeInTheDocument();
+  expect(screen.getByText("chain")).toBeInTheDocument();
+  expect(screen.getByText("depends-on")).toBeInTheDocument();
+  expect(screen.getByText("calls")).toBeInTheDocument();
+  expect(screen.getAllByText("dhb").length).toBeGreaterThan(0);
+  expect(screen.getAllByText("goods").length).toBeGreaterThan(0);
+  expect(screen.getByText("h5")).toBeInTheDocument();
+  expect(screen.getByText("bff-service")).toBeInTheDocument();
+  expect(screen.getByTestId("task-project-edge-project:goods-h5-project:bff-goods-calls")).toHaveClass("relation-calls");
+  expect(screen.getByTestId("task-project-edge-project:goods-h5-project:dhbfront-utils-depends-on")).toHaveClass("relation-depends-on");
+  expect(screen.getByTestId("task-project-edge-project:bff-goods-project:dhbfront-utils-chain")).toHaveClass("relation-chain");
+});
+
 test("TaskBoardView opens task context menu and confirms destructive deletion", async () => {
   const onTaskAction = vi.fn();
   const confirm = vi.spyOn(window, "confirm").mockReturnValue(false);
