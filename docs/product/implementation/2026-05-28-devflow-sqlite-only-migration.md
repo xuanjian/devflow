@@ -439,7 +439,7 @@ devflow migrate from-json [--dry-run] [--keep-json]
 
 [scripts/migrate-git-json-relations.mjs](../../../scripts/migrate-git-json-relations.mjs)（286 行）已经实现了"从 JSON 读 → 写 SQLite"的核心循环，但它是从 git 历史 ref 读，并且只覆盖 projects / scene_templates / skills / rules / graph_edges。R2 可以拿这个文件作为参考样板，但**最终成品**是 `scripts/devflow-cli.mjs` 里新增的 `migrate from-json` 子命令 +（按需）`src/core/storage/migrate-from-json.mjs` 模块。
 
-R3 里这个 `migrate-git-json-relations.mjs` 旧脚本会被删掉。
+**修订（2026-05-28）**：`migrate-git-json-relations.mjs` **不删**。它的默认 ref 是 `8b67fdd^`——正是用户真实数据（35 项目 + 13 场景）被 reset 清空前的最后快照。它是 §12 W1（恢复历史配置）的现成工具，保留并在 W1 阶段改造成正式恢复命令。
 
 ---
 
@@ -455,7 +455,7 @@ R2 的 `migrate-from-json.mjs` 直接复用了 `createJsonRepository` 作为"从
 |------|--------------|-------------|
 | `src/core/repositories/json-repository.mjs` | `migrate-from-json.mjs`（必须保留）、`rebuild-index.mjs`、`devflow-service.mjs`、若干测试 | **降级**为"仅 `migrate-from-json` 使用的只读 JSON 导入器"。从 service / checks / cli 的**运行时**路径移除引用，文件保留。**不要裸删**。 |
 | `src/core/storage/rebuild-index.mjs` | `devflow-service.mjs`、`checks.mjs`、`devflow-cli.mjs`（`index rebuild`）、测试 | 删除前，先把这些消费方"db 不存在 → 从 JSON rebuild"的逻辑替换成 §6.1 的新初始化策略，再删。 |
-| `scripts/migrate-git-json-relations.mjs` | 无运行时引用（更早期的一次性脚本） | 可删。 |
+| `scripts/migrate-git-json-relations.mjs` | 无运行时引用 | **保留**（见 §5.4 修订）——它是 §12 W1 恢复用户真实历史数据的工具，不删。 |
 | `createCompatibilityService`（`devflow-cli.mjs` 内 ~230 行） | CLI fallback（service 模块存在时跑不到） | 可删。 |
 
 ### 6.1 backend resolver 三态初始化策略（替换"db 不存在就 rebuild"的旧逻辑）
@@ -494,7 +494,7 @@ R2 的 `migrate-from-json.mjs` 直接复用了 `createJsonRepository` 作为"从
 |------|------|
 | **R3a** | 读路径统一：抽 `applyMigrationSnapshot`（§6.4.1）；实现 §6.1 三态 resolver + §6.2 种子；**`devflow-service.mjs` 和 `checks.mjs` 两个 rebuild 消费方一起改**；删 `backend === "json"` 分支；json-repository 降级为 migrate-only；删 `rebuild-index.mjs`（消费方改完后） |
 | **R3b** | 写路径统一：`actions.mjs` 所有 `writeRootJson` → `service.commands.*`，目标 ≤ 400 行 |
-| **R3c** | 收尾：`install-ai-context.mjs` 模块化 + actions 去 spawn 改 in-process；删 `createCompatibilityService` / `migrate-git-json-relations.mjs`；`index rebuild` 改 noop+引导 migrate（exit 0）、更新 doctor 提示（[devflow-cli.mjs:784-792](../../../scripts/devflow-cli.mjs)）；`repository-contract.mjs` 的 `REPOSITORY_METHODS` 加 `getConfig/setConfig/getEntry/getProfile/getGates/listTaskDocuments/writeTaskDocument`；`package.json` `files` 砍 `config/*`、`runtime/*` |
+| **R3c** | 收尾：`install-ai-context.mjs` 模块化 + actions 去 spawn 改 in-process；删 `createCompatibilityService`（**保留 `migrate-git-json-relations.mjs`**，见 §5.4 修订）；`index rebuild` 改 noop+引导 migrate（exit 0）、更新 doctor 提示（[devflow-cli.mjs:784-792](../../../scripts/devflow-cli.mjs)）；`repository-contract.mjs` 的 `REPOSITORY_METHODS` 加 `getConfig/setConfig/getEntry/getProfile/getGates/listTaskDocuments/writeTaskDocument`；`package.json` `files` 砍 `config/*`、`runtime/*` |
 
 ### 6.4.1 复用 migrate 写入逻辑，测试不得依赖 git 检查
 
@@ -635,3 +635,31 @@ task_documents         (task_id, kind, path, raw_json)       ← R1 新增
 ```
 
 R5 完成后可能会删除：`documents`（被 `task_documents` 取代后剩下的 project/skill/rule 的 doc 元数据用各自表的 `source_path` 字段就够了，无需独立表）。这个决定留给 R5 评估。
+
+---
+
+## 12. 用户真实数据恢复（整改主线完成后再做）
+
+> 背景：R3b 面板验证暴露出 `/Users/xj/devflow` 这个仓库混了两个角色——既是 DevFlow 工具的开发仓库（公开模板要干净），又堆了用户真实工作的 task。诊断详见下面的事实，落地顺序见决定。
+
+### 12.1 诊断事实（2026-05-28）
+
+- 用户的 task 是**目录结构**（`runtime/tasks/<id>/handoff.md` + gate 子目录 G1/G2/... + codex-tasks/），**没有 `<id>.json`**。`json-repository.listTasks()` 实测返回 0，所以这些 task 从来读不进 SQLite，与 R3 无关。内容未丢，全在磁盘 markdown。
+- 用户真实的项目/场景配置（35 项目 + 13 场景）曾被 git 追踪，在 `8b67fdd "Reset lite branch to fresh install state"` 被清空，完整快照在父提交 **`8b67fdd^`**，可恢复。
+- task 引用的 `dhb-hxb-business-suite` scene **从未进 git**（gitignore 后本地创建），git 无法恢复，需重建或从 task handoff 反推。
+- `config/projects/*`、`config/scenes/*`、`runtime/tasks/`、`data/*.db` 均按 [.gitignore](../../../.gitignore) 设计为本地私有，不进公开 master。
+
+### 12.2 工作分解
+
+| 工作 | 内容 | 工具 |
+|------|------|------|
+| **W1 恢复配置** | 从 `8b67fdd^` 找回 35 项目 + 13 场景 → SQLite | 现成 `scripts/migrate-git-json-relations.mjs`（默认 ref 已是 `8b67fdd^`），改造成正式 `devflow restore-from-git` 命令 |
+| **W2 task 导入器** | 10 个目录形式 task（解析 `handoff.md` 的 Task/Workset/Scene Template/gate + 登记 gate 子目录与证据为 `task_documents`）→ SQLite | 新建，扩展 migrate 或独立命令 |
+| **W3 缺失 scene** | `dhb-hxb-business-suite` 等 git 没有的，重建或从 task handoff 反推 | 手工 / 半自动 |
+| **W4 分目录** | 工具仓库保持干净；真实数据迁到独立 `devflow init --dir` 数据目录 | 环境归置，非代码 |
+
+### 12.3 决定（2026-05-28）
+
+- **顺序**：先走完整改主线 R3c → R4 → R5，SQLite schema 最终稳定后再统一做 W1/W2/W3/W4。理由：W1/W2 导数据依赖最终 schema，R5 还要改关系表查询，提前导会返工。
+- **R3b 已提交**：commit `8d973a8`，面板空 task 已确认与 R3b 无关（数据模型 gap）。
+- W1-W4 在 R5 完成后另列详细任务清单。
