@@ -810,7 +810,11 @@ function pushUniqueError(errors, message) {
   if (!errors.includes(message)) errors.push(message);
 }
 
-function validateRuleMetadata(rule, label, errors) {
+function pushUniqueWarning(warnings, message) {
+  if (!warnings.includes(message)) warnings.push(message);
+}
+
+function validateRuleMetadata(rule, label, errors, warnings = []) {
   if (!rule.sourcePath) {
     pushUniqueError(errors, `${label} missing sourcePath`);
   } else {
@@ -828,7 +832,7 @@ function validateRuleMetadata(rule, label, errors) {
       pushUniqueError(errors, `${label} active rule source must be Markdown .md: ${rule.sourcePath}`);
     }
     if (!exists(rule.sourcePath)) {
-      pushUniqueError(errors, `${label} source missing: ${rule.sourcePath}`);
+      pushUniqueWarning(warnings, `${label} source missing: ${rule.sourcePath}`);
     }
   }
   if (!allowedRuleApplyModes.has(rule.applyMode)) {
@@ -842,7 +846,7 @@ function validateRuleMetadata(rule, label, errors) {
   }
 }
 
-function validateRuleMount(rule, catalogRule, label, errors, expectedApplyMode) {
+function validateRuleMount(rule, catalogRule, label, errors, warnings = [], expectedApplyMode) {
   if (rule.sourcePath && rule.sourcePath !== catalogRule.sourcePath) {
     pushUniqueError(errors, `${label} sourcePath differs from catalog`);
   }
@@ -856,7 +860,7 @@ function validateRuleMount(rule, catalogRule, label, errors, expectedApplyMode) 
     pushUniqueError(errors, `${label} whenToRead differs from catalog`);
   }
   if (rule.sourcePath || rule.applyMode || rule.globs || rule.whenToRead) {
-    validateRuleMetadata({ ...catalogRule, ...rule }, label, errors);
+    validateRuleMetadata({ ...catalogRule, ...rule }, label, errors, warnings);
   }
 }
 
@@ -971,11 +975,11 @@ async function validateCurrent() {
 
   for (const project of projects || []) {
     if (project.doc?.path && !exists(project.doc.path)) {
-      pushUniqueError(errors, `project ${project.id} doc path missing: ${project.doc.path}`);
+      pushUniqueWarning(warnings, `project ${project.id} doc path missing: ${project.doc.path}`);
     }
     for (const scene of project.scenes || []) {
       if (!sceneIds.has(scene.id)) pushUniqueError(errors, `project ${project.id} references unknown scene ${scene.id}`);
-      if (scene.sourcePath && !exists(scene.sourcePath)) pushUniqueError(errors, `project ${project.id} scene source missing: ${scene.sourcePath}`);
+      if (scene.sourcePath && !exists(scene.sourcePath)) pushUniqueWarning(warnings, `project ${project.id} scene source missing: ${scene.sourcePath}`);
     }
     for (const skill of project.skills || []) {
       if (!skillIds.has(skill.id)) pushUniqueError(errors, `project ${project.id} references unknown skill ${skill.id}`);
@@ -985,14 +989,14 @@ async function validateCurrent() {
         pushUniqueError(errors, `project ${project.id} references unknown rule ${rule.id}`);
       } else {
         const catalogRule = ruleById.get(rule.id);
-        validateRuleMount(rule, catalogRule, `project ${project.id} rule ${rule.id}`, errors);
+        validateRuleMount(rule, catalogRule, `project ${project.id} rule ${rule.id}`, errors, warnings);
       }
     }
   }
 
   for (const scene of sceneTemplates || []) {
     if (scene.source?.path && !exists(scene.source.path)) {
-      pushUniqueError(errors, `scene ${scene.id} source path missing: ${scene.source.path}`);
+      pushUniqueWarning(warnings, `scene ${scene.id} source path missing: ${scene.source.path}`);
     }
     for (const project of scene.projects || []) {
       if (!projectIds.has(project.id)) pushUniqueError(errors, `scene ${scene.id} references unknown project ${project.id}`);
@@ -1002,7 +1006,7 @@ async function validateCurrent() {
         pushUniqueError(errors, `scene ${scene.id} references unknown rule ${rule.id}`);
       } else {
         const catalogRule = ruleById.get(rule.id);
-        validateRuleMount(rule, catalogRule, `scene ${scene.id} rule ${rule.id}`, errors, 'scene-on-demand');
+        validateRuleMount(rule, catalogRule, `scene ${scene.id} rule ${rule.id}`, errors, warnings, 'scene-on-demand');
       }
     }
   }
@@ -1017,7 +1021,7 @@ async function validateCurrent() {
   }
 
   for (const rule of ruleCatalog.rules || []) {
-    validateRuleMetadata(rule, `rule catalog ${rule.id}`, errors);
+    validateRuleMetadata(rule, `rule catalog ${rule.id}`, errors, warnings);
   }
 
   for (const gate of gates.gates || []) {
@@ -1029,7 +1033,7 @@ async function validateCurrent() {
       if (!projectIds.has(projectId)) pushUniqueError(errors, `current references unknown project ${projectId}`);
     }
     for (const sceneId of current.activeSceneIds || []) {
-      if (!sceneIds.has(sceneId)) pushUniqueError(errors, `current references unknown scene ${sceneId}`);
+      if (!sceneIds.has(sceneId)) pushUniqueWarning(warnings, `current references unknown scene ${sceneId}`);
     }
   }
   if (current.activeTaskId) {
@@ -1041,7 +1045,7 @@ async function validateCurrent() {
         if (!projectIds.has(projectId)) pushUniqueError(errors, `active task references unknown project ${projectId}`);
       }
       for (const sceneId of activeTask.sceneIds || []) {
-        if (!sceneIds.has(sceneId)) pushUniqueError(errors, `active task references unknown scene ${sceneId}`);
+        if (!sceneIds.has(sceneId)) pushUniqueWarning(warnings, `active task references unknown scene ${sceneId}`);
       }
     }
   }

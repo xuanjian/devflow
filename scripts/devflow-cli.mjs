@@ -7,6 +7,7 @@ import { setup as setupAiContext } from './install-ai-context.mjs';
 import {
   normalizeCommandResult,
 } from '../src/core/contracts/devflow-types.mjs';
+import { createDefaultSqliteDatabase } from '../src/core/storage/sqlite-bootstrap.mjs';
 
 const packageRoot = path.resolve(new URL('..', import.meta.url).pathname);
 const serviceModulePath = path.join(packageRoot, 'src/core/services/devflow-service.mjs');
@@ -34,6 +35,8 @@ function usage() {
   devflow query rules --template <id>
   devflow graph
   devflow migrate from-json [--dry-run] [--keep-json]
+  devflow restore-from-git [--ref <ref>] [--dry-run]
+  devflow import-tasks [--dry-run]
   devflow task current
   devflow task start "<title>" --project <id> --template <id>
   devflow task update <task-id> --gate <G1-G7> --note "<progress>"
@@ -123,8 +126,11 @@ function shouldSkipTemplateEntry(relativePath) {
     'node_modules',
     '.playwright-mcp',
     '.superpowers',
+    'data',
     'dist',
     'package-lock.json',
+    'runtime/current.json',
+    'runtime/tasks',
   ].some(skipPath => normalized === skipPath || normalized.startsWith(`${skipPath}/`))
     || normalized.endsWith('.tgz')
     || normalized.endsWith('.tmp')
@@ -157,6 +163,7 @@ function ensureLocalRoot(targetRoot) {
     throw new Error(`target directory is not empty and is not a DevFlow checkout: ${targetRoot}`);
   }
   copyTemplateDirectory(packageRoot, targetRoot);
+  createDefaultSqliteDatabase({ rootDir: targetRoot });
   if (!isDevFlowRoot(targetRoot)) throw new Error(`failed to create DevFlow checkout: ${targetRoot}`);
   return targetRoot;
 }
@@ -377,6 +384,25 @@ async function runFacadeCommand(root, command, type, rest, flags) {
       rootDir: root,
       dryRun: Boolean(flags['dry-run']),
       keepJson: Boolean(flags['keep-json']),
+    }));
+    return;
+  }
+  if (command === 'restore-from-git') {
+    const module = await import('../src/core/storage/restore-from-git.mjs');
+    printJson(await module.restoreDevFlowFromGit({
+      rootDir: root,
+      dbPath: firstValue(flags.db),
+      ref: firstValue(flags.ref),
+      dryRun: Boolean(flags['dry-run']),
+    }));
+    return;
+  }
+  if (command === 'import-tasks') {
+    const module = await import('../src/core/storage/import-tasks.mjs');
+    printJson(await module.importTaskDirectories({
+      rootDir: root,
+      dbPath: firstValue(flags.db),
+      dryRun: Boolean(flags['dry-run']),
     }));
     return;
   }

@@ -9,6 +9,60 @@ import { resolveInside, toPath } from "../paths.mjs";
 import { applyMigrationSnapshot } from "./migrate-from-json.mjs";
 import { defaultDbPath, initializeSchema, openDevFlowDatabase } from "./schema.mjs";
 
+const DEFAULT_DEVFLOW_SCENE_TEMPLATE = {
+  version: 1,
+  id: "devflow-config",
+  templateType: "scene-template",
+  name: "DevFlow configuration",
+  summary: "Install, validate, and initialize DevFlow.",
+  sourcePath: "config/entry.json",
+  source: {
+    path: "config/entry.json",
+    whenToRead: "Read when installing, validating, or initializing DevFlow."
+  },
+  projectHints: [
+    {
+      id: "devflow",
+      name: "DevFlow",
+      role: "configuration-center",
+      projectIndexPath: "config/projects/devflow.json",
+      reason: "Core project required for installation and onboarding."
+    }
+  ],
+  skillHints: [
+    { id: "devflow" },
+    { id: "devflow-init" }
+  ],
+  ruleHints: []
+};
+
+const DEFAULT_DEVFLOW_SKILLS = [
+  {
+    id: "devflow",
+    name: "DevFlow",
+    description: "Use when entering, installing, validating, or modifying DevFlow, or when routing tasks through project/scene/rule/skill state.",
+    trigger: "Use when installing DevFlow, checking configuration, routing a new task, updating indexes, or advancing task state.",
+    sourcePath: "bundles/skills/devflow/SKILL.md",
+    tags: ["devflow", "workflow"],
+    defaultSceneIds: ["devflow-config"],
+    whenToLoad: "Load when the current request explicitly needs DevFlow data or DevFlow maintenance.",
+    sourceExists: true,
+    sourceType: "file"
+  },
+  {
+    id: "devflow-init",
+    name: "devflow-init",
+    description: "Use after installing DevFlow when the user needs first-time onboarding, personal AI preferences, project inventory, scene creation, skill/rule mounting, or migration from scattered notes into DevFlow state.",
+    trigger: "Use after install, first-time setup, onboarding, importing project inventory, creating profile, creating scenes, or turning messy notes into DevFlow configuration.",
+    sourcePath: "bundles/skills/devflow-init/SKILL.md",
+    tags: ["devflow", "onboarding", "workflow"],
+    defaultSceneIds: ["devflow-config"],
+    whenToLoad: "Load after install or when initializing profile, projects, scenes, skills, and rules from user-provided notes.",
+    sourceExists: true,
+    sourceType: "file"
+  }
+];
+
 export async function ensureSqliteDatabase({ rootDir = process.cwd(), dbPath = defaultDbPath(rootDir) } = {}) {
   const rootPath = toPath(rootDir);
   const resolvedDbPath = toPath(dbPath);
@@ -20,6 +74,24 @@ export async function ensureSqliteDatabase({ rootDir = process.cwd(), dbPath = d
     throw new Error(
       "DevFlow SQLite database is missing, but legacy config/runtime JSON sources are still present. Run `devflow migrate from-json` explicitly before using this checkout; automatic JSON rebuild is disabled."
     );
+  }
+
+  fs.mkdirSync(path.dirname(resolvedDbPath), { recursive: true });
+  const db = openDevFlowDatabase({ rootDir: rootPath, dbPath: resolvedDbPath });
+  try {
+    initializeSchema(db);
+    applyMigrationSnapshot(db, buildDefaultSnapshot(rootPath, resolvedDbPath));
+  } finally {
+    db.close();
+  }
+  return { status: "created", dbPath: resolvedDbPath };
+}
+
+export function createDefaultSqliteDatabase({ rootDir = process.cwd(), dbPath = defaultDbPath(rootDir) } = {}) {
+  const rootPath = toPath(rootDir);
+  const resolvedDbPath = toPath(dbPath);
+  if (fs.existsSync(resolvedDbPath)) {
+    return { status: "exists", dbPath: resolvedDbPath };
   }
 
   fs.mkdirSync(path.dirname(resolvedDbPath), { recursive: true });
@@ -48,8 +120,8 @@ function buildDefaultSnapshot(rootPath, dbPath) {
       { key: GATES_CONFIG_KEY, path: "defaults/gates", data: DEFAULT_GATES }
     ],
     projects: [DEFAULT_DEVFLOW_PROJECT],
-    sceneTemplates: [],
-    skills: [],
+    sceneTemplates: [DEFAULT_DEVFLOW_SCENE_TEMPLATE],
+    skills: DEFAULT_DEVFLOW_SKILLS,
     rules: [],
     tasks: [],
     taskDocuments: [],
@@ -60,8 +132,8 @@ function buildDefaultSnapshot(rootPath, dbPath) {
     sourceCounts: {
       config: 3,
       projects: 1,
-      sceneTemplates: 0,
-      skills: 0,
+      sceneTemplates: 1,
+      skills: 2,
       rules: 0,
       tasks: 0,
       taskDocuments: 0,
