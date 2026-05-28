@@ -69,7 +69,7 @@ test("normalizes scene templates with the scene-template marker", () => {
     source: { path: "docs/scenes/demo-scene.md" }
   });
 
-  assert.equal(DEVFLOW_SCHEMA_VERSION, 1);
+  assert.equal(DEVFLOW_SCHEMA_VERSION, 2);
   assert.deepEqual(sceneTemplate, {
     id: "demo-scene",
     templateType: "scene-template",

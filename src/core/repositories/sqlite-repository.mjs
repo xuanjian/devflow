@@ -1,4 +1,9 @@
+import fs from "node:fs";
+import path from "node:path";
 import { normalizeSceneTemplate, normalizeWorkset } from "../contracts/devflow-types.mjs";
+import { DEFAULT_ENTRY, ENTRY_CONFIG_KEY } from "../defaults/entry.mjs";
+import { DEFAULT_GATES, GATES_CONFIG_KEY } from "../defaults/gates.mjs";
+import { DEFAULT_PROFILE, PROFILE_CONFIG_KEY } from "../defaults/profile.mjs";
 import { assertRepositoryContract } from "./repository-contract.mjs";
 import { defaultDbPath, initializeSchema, openDevFlowDatabase } from "../storage/schema.mjs";
 
@@ -58,6 +63,48 @@ export function createSqliteRepository({ rootDir = process.cwd(), dbPath = defau
       return listRaw(db, "graph_edges");
     },
 
+    async getConfig(key) {
+      const row = db.prepare("SELECT raw_json FROM config WHERE key = ?").get(key);
+      return row ? parseRaw(row.raw_json) : null;
+    },
+
+    async setConfig(key, value) {
+      db.prepare(`
+        INSERT OR REPLACE INTO config (key, raw_json, updated_at)
+        VALUES (?, ?, ?)
+      `).run(key, stringify(value), new Date().toISOString());
+      return value;
+    },
+
+    async getEntry() {
+      return await repository.getConfig(ENTRY_CONFIG_KEY) ?? DEFAULT_ENTRY;
+    },
+
+    async getProfile() {
+      return await repository.getConfig(PROFILE_CONFIG_KEY) ?? DEFAULT_PROFILE;
+    },
+
+    async getGates() {
+      return await repository.getConfig(GATES_CONFIG_KEY) ?? DEFAULT_GATES;
+    },
+
+    async listTaskDocuments(taskId) {
+      return db.prepare("SELECT raw_json FROM task_documents WHERE task_id = ? ORDER BY rowid")
+        .all(taskId)
+        .map((row) => parseRaw(row.raw_json));
+    },
+
+    async writeTaskDocument(taskId, doc) {
+      if (!taskId || !doc?.kind || !doc?.path) {
+        throw new TypeError("writeTaskDocument requires taskId, kind, path");
+      }
+      db.prepare(`
+        INSERT OR REPLACE INTO task_documents (task_id, kind, path, raw_json)
+        VALUES (?, ?, ?, ?)
+      `).run(taskId, doc.kind, doc.path, stringify(doc));
+      return doc;
+    },
+
     async writeProject(project) {
       upsertProject(db, project);
       return repository.getProject(project.id);
@@ -76,8 +123,9 @@ export function createSqliteRepository({ rootDir = process.cwd(), dbPath = defau
 
     async setRuntimeState(runtimeState) {
       const current = getRuntimeState(db) || {};
-      const nextState = { ...current, ...runtimeState };
+      const nextState = normalizeRuntimeState({ ...current, ...runtimeState });
       db.prepare("INSERT OR REPLACE INTO runtime_state (key, raw_json) VALUES (?, ?)").run("current", stringify(nextState));
+      writeCompatibilityCurrentJson(rootDir, nextState);
       return nextState;
     }
   };
@@ -206,6 +254,24 @@ function insertRef(db, table, leftColumn, leftValue, rightColumn, rightValue, ra
 
 function parseRaw(value) {
   return JSON.parse(value);
+}
+
+function normalizeRuntimeState(runtimeState) {
+  const nextState = { ...runtimeState };
+  if (nextState.activeSceneTemplateId !== undefined) {
+    nextState.activeSceneIds = nextState.activeSceneTemplateId ? [nextState.activeSceneTemplateId] : [];
+  }
+  if (nextState.activeTaskId) {
+    const recentTaskIds = Array.isArray(nextState.recentTaskIds) ? nextState.recentTaskIds : [];
+    nextState.recentTaskIds = [nextState.activeTaskId, ...recentTaskIds.filter((taskId) => taskId !== nextState.activeTaskId)];
+  }
+  return nextState;
+}
+
+function writeCompatibilityCurrentJson(rootDir, runtimeState) {
+  const currentPath = path.join(rootDir, "runtime/current.json");
+  fs.mkdirSync(path.dirname(currentPath), { recursive: true });
+  fs.writeFileSync(currentPath, `${JSON.stringify(runtimeState, null, 2)}\n`, "utf8");
 }
 
 function stringify(value) {

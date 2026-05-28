@@ -893,11 +893,13 @@ function validate() {
   if (current.activeTaskPath && !exists(current.activeTaskPath)) {
     pushUniqueError(errors, `active task missing: ${current.activeTaskPath}`);
   }
-  for (const projectId of current.activeProjectIds || []) {
-    if (!projectIds.has(projectId)) pushUniqueError(errors, `current references unknown project ${projectId}`);
-  }
-  for (const sceneId of current.activeSceneIds || []) {
-    if (!sceneIds.has(sceneId)) pushUniqueError(errors, `current references unknown scene ${sceneId}`);
+  if (current.activeTaskPath) {
+    for (const projectId of current.activeProjectIds || []) {
+      if (!projectIds.has(projectId)) pushUniqueError(errors, `current references unknown project ${projectId}`);
+    }
+    for (const sceneId of current.activeSceneIds || []) {
+      if (!sceneIds.has(sceneId)) pushUniqueError(errors, `current references unknown scene ${sceneId}`);
+    }
   }
   if (current.activeTaskPath && exists(current.activeTaskPath)) {
     const activeTask = readJson(current.activeTaskPath);

@@ -67,6 +67,28 @@ test("sqlite backend supports service task commands without changing public call
   assert.equal(current.task, null);
 });
 
+test("sqlite runtime state writes refresh the compatibility current.json pointer", async () => {
+  const root = copyFixture(basicFixtureRoot, "devflow-sqlite-current-");
+  await rebuildDevFlowIndex({ rootDir: root });
+  const service = createDevFlowService({ rootDir: root, backend: "sqlite" });
+
+  await service.startTask({
+    title: "SQLite current pointer",
+    projectIds: ["demo-project"],
+    templateId: "new-scene",
+    gate: "G3"
+  });
+
+  const current = JSON.parse(fs.readFileSync(path.join(root, "runtime/current.json"), "utf8"));
+  assert.equal(current.activeTaskId, "sqlite-current-pointer");
+  assert.equal(current.activeWorksetId, "workset-sqlite-current-pointer");
+  assert.deepEqual(current.activeProjectIds, ["demo-project"]);
+  assert.equal(current.activeSceneTemplateId, "new-scene");
+  assert.deepEqual(current.activeSceneIds, ["new-scene"]);
+  assert.equal(current.currentGate, "G3");
+  assert.equal(current.recentTaskIds[0], "sqlite-current-pointer");
+});
+
 test("rebuildDevFlowIndex preserves records and reports missing source path warnings", async () => {
   const root = copyFixture(missingDocFixtureRoot, "devflow-sqlite-missing-");
   const result = await rebuildDevFlowIndex({ rootDir: root });
