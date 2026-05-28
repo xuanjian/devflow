@@ -23,6 +23,7 @@ export async function createActionCommandService({ rootDir }) {
     setProjectProducts: (input) => setProjectProducts(repository, input),
     setProjectDomains: (input) => setProjectDomains(repository, input),
     setProjectRole: (input) => setProjectRole(repository, input),
+    setProjectComponents: (input) => setProjectComponents(repository, input),
     addRelation: (input) => addRelation(repository, input),
     scanRelations: (input) => scanRelationsCommand(repository, { rootDir, ...input }),
     writeSceneTemplate: (sceneTemplate) => writeSceneTemplate(repository, sceneTemplate),
@@ -70,6 +71,15 @@ async function setProjectRole(repository, { projectId, role = "", dryRun = false
   if ((project.role || "") === after.role) return noopResult("setProjectRole", "project", projectId, "No project role changes.");
   await repository.setProjectRole(projectId, after.role);
   return commandResult("setProjectRole", "project", projectId);
+}
+
+async function setProjectComponents(repository, { projectId, components = [], dryRun = false } = {}) {
+  const project = await requireProject(repository, projectId);
+  const after = { ...project, components: normalizeComponents(components) };
+  if (dryRun) return previewResult("setProjectComponents", projectId, project, after);
+  if (sameJson(project.components || [], after.components)) return noopResult("setProjectComponents", "project", projectId, "No project component changes.");
+  await repository.setProjectComponents(projectId, after.components);
+  return commandResult("setProjectComponents", "project", projectId);
 }
 
 async function addRelation(repository, { fromId, toId, type, remove = false, dryRun = false } = {}) {
@@ -209,8 +219,27 @@ function pickProjectMetadata(project) {
   return {
     products: project.products || [],
     domains: project.domains || [],
-    role: project.role || ""
+    role: project.role || "",
+    components: project.components || []
   };
+}
+
+function normalizeComponents(values) {
+  const components = [];
+  const seen = new Set();
+  for (const value of Array.isArray(values) ? values : []) {
+    const component = {
+      name: normalizeString(value?.name),
+      purpose: normalizeString(value?.purpose),
+      path: normalizeString(value?.path)
+    };
+    if (!component.name || !component.path) continue;
+    const key = `${component.name}\0${component.path}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    components.push(component);
+  }
+  return components;
 }
 
 function normalizeStringList(values) {

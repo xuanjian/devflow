@@ -44,6 +44,7 @@ function usage() {
   devflow set-products <projectId> <product...> [--dry-run]
   devflow set-domain <projectId> <domain...> [--dry-run]
   devflow set-role <projectId> <role> [--dry-run]
+  devflow set-components <projectId> <name|purpose|path...> [--dry-run]
   devflow add-relation <fromId> <toId> --type <chain|depends-on|calls> [--remove] [--dry-run]
   devflow scan-relations [--dry-run]
   devflow add project <repo-path>
@@ -93,6 +94,34 @@ function parseToolIds(value) {
     .split(',')
     .map(item => item.trim())
     .filter(Boolean);
+}
+
+function parseComponentSpecs(values, jsonValue) {
+  if (jsonValue && jsonValue !== true) {
+    const parsed = JSON.parse(String(jsonValue));
+    if (!Array.isArray(parsed)) throw new Error('--json must be a component array');
+    return parsed.map(normalizeComponentSpec).filter(Boolean);
+  }
+  return values.map((value) => {
+    const parts = String(value).split('|');
+    if (parts.length < 3) {
+      throw new Error('component spec must be name|purpose|path');
+    }
+    return normalizeComponentSpec({
+      name: parts[0],
+      purpose: parts[1],
+      path: parts.slice(2).join('|')
+    });
+  }).filter(Boolean);
+}
+
+function normalizeComponentSpec(value) {
+  const component = {
+    name: String(value?.name ?? '').trim(),
+    purpose: String(value?.purpose ?? '').trim(),
+    path: String(value?.path ?? '').trim()
+  };
+  return component.name && component.path ? component : null;
 }
 
 function providerById(id) {
@@ -465,6 +494,15 @@ async function runFacadeCommand(root, command, type, rest, flags) {
     printJson(await commands.setProjectRole({
       projectId: type,
       role: rest.join(' '),
+      dryRun: Boolean(flags['dry-run'])
+    }));
+    return;
+  }
+  if (command === 'set-components') {
+    const commands = await createActionCommandService({ rootDir: root });
+    printJson(await commands.setProjectComponents({
+      projectId: type,
+      components: parseComponentSpecs(rest, flags.json),
       dryRun: Boolean(flags['dry-run'])
     }));
     return;

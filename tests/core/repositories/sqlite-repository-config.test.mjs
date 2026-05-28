@@ -96,6 +96,25 @@ test("project metadata methods update normalized columns and raw JSON", async ()
   assert.deepEqual(project.products, ["dhb", "hxb"]);
   assert.deepEqual(project.domains, ["goods", "order"]);
   assert.equal(project.role, "bff-service");
+  assert.deepEqual(project.components, []);
+});
+
+test("project component metadata methods update normalized components", async () => {
+  const repository = createRepository();
+  await repository.writeProject({ id: "demo-project", name: "Demo Project" });
+
+  const components = await repository.setProjectComponents("demo-project", [
+    { name: "formatMoney", purpose: "Format money display", path: "src/money.js" },
+    { name: "formatMoney", purpose: "Duplicate should be removed", path: "src/money.js" },
+    { name: "useBridge", purpose: "Legacy bridge helper", path: "src/bridge.js" },
+    { name: "", purpose: "ignored", path: "src/ignored.js" }
+  ]);
+
+  assert.deepEqual(components.components, [
+    { name: "formatMoney", purpose: "Format money display", path: "src/money.js" },
+    { name: "useBridge", purpose: "Legacy bridge helper", path: "src/bridge.js" }
+  ]);
+  assert.deepEqual((await repository.getProject("demo-project")).components, components.components);
 });
 
 test("project metadata methods reject unknown project ids", async () => {
@@ -104,14 +123,18 @@ test("project metadata methods reject unknown project ids", async () => {
   await assert.rejects(() => repository.setProjectProducts("missing-project", ["dhb"]), /unknown projectId: missing-project/);
   await assert.rejects(() => repository.setProjectDomains("missing-project", ["goods"]), /unknown projectId: missing-project/);
   await assert.rejects(() => repository.setProjectRole("missing-project", "native"), /unknown projectId: missing-project/);
+  await assert.rejects(() => repository.setProjectComponents("missing-project", []), /unknown projectId: missing-project/);
 });
 
-test("writeProject preserves existing metadata when an update omits P1 fields", async () => {
+test("writeProject preserves existing metadata when an update omits project metadata fields", async () => {
   const repository = createRepository();
   await repository.writeProject({ id: "demo-project", name: "Demo Project" });
   await repository.setProjectProducts("demo-project", ["dhb"]);
   await repository.setProjectDomains("demo-project", ["goods"]);
   await repository.setProjectRole("demo-project", "bff-service");
+  await repository.setProjectComponents("demo-project", [
+    { name: "formatMoney", purpose: "Format money display", path: "src/money.js" }
+  ]);
 
   await repository.writeProject({ id: "demo-project", name: "Renamed Demo Project" });
 
@@ -120,6 +143,9 @@ test("writeProject preserves existing metadata when an update omits P1 fields", 
   assert.deepEqual(project.products, ["dhb"]);
   assert.deepEqual(project.domains, ["goods"]);
   assert.equal(project.role, "bff-service");
+  assert.deepEqual(project.components, [
+    { name: "formatMoney", purpose: "Format money display", path: "src/money.js" }
+  ]);
 });
 
 test("graph edge methods validate P1 relation types and support removal", async () => {

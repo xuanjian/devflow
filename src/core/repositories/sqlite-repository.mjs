@@ -159,6 +159,10 @@ export function createSqliteRepository({ rootDir = process.cwd(), dbPath = defau
       return updateProjectMetadata(db, projectId, { role: normalizeString(role) });
     },
 
+    async setProjectComponents(projectId, components) {
+      return updateProjectMetadata(db, projectId, { components: normalizeComponents(components) });
+    },
+
     async upsertGraphEdge(edge) {
       return upsertGraphEdge(db, edge);
     },
@@ -381,12 +385,13 @@ function upsertProject(db, project) {
     ...project,
     products: Object.hasOwn(project, "products") ? project.products : current?.products,
     domains: Object.hasOwn(project, "domains") ? project.domains : current?.domains,
-    role: Object.hasOwn(project, "role") ? project.role : current?.role
+    role: Object.hasOwn(project, "role") ? project.role : current?.role,
+    components: Object.hasOwn(project, "components") ? project.components : current?.components
   });
   const tx = db.transaction(() => {
     db.prepare(`
-      INSERT OR REPLACE INTO projects (id, name, technology_family_id, source_path, doc_path, products, domains, role, raw_json)
-      VALUES (@id, @name, @technologyFamilyId, @sourcePath, @docPath, @products, @domains, @role, @rawJson)
+      INSERT OR REPLACE INTO projects (id, name, technology_family_id, source_path, doc_path, products, domains, role, components, raw_json)
+      VALUES (@id, @name, @technologyFamilyId, @sourcePath, @docPath, @products, @domains, @role, @components, @rawJson)
     `).run({
       id: normalized.id,
       name: normalized.name || normalized.id,
@@ -396,6 +401,7 @@ function upsertProject(db, project) {
       products: stringify(normalized.products),
       domains: stringify(normalized.domains),
       role: normalized.role,
+      components: stringify(normalized.components),
       rawJson: stringify(normalized)
     });
     db.prepare("DELETE FROM project_skill_mounts WHERE project_id = ?").run(normalized.id);
@@ -412,13 +418,14 @@ function updateProjectMetadata(db, projectId, patch) {
   const next = normalizeProjectMetadata({ ...current, ...patch });
   db.prepare(`
     UPDATE projects
-    SET products = @products, domains = @domains, role = @role, raw_json = @rawJson
+    SET products = @products, domains = @domains, role = @role, components = @components, raw_json = @rawJson
     WHERE id = @id
   `).run({
     id: projectId,
     products: stringify(next.products),
     domains: stringify(next.domains),
     role: next.role,
+    components: stringify(next.components),
     rawJson: stringify(next)
   });
   return next;
@@ -598,8 +605,27 @@ function normalizeProjectMetadata(project = {}) {
     ...project,
     products: normalizeStringList(project.products),
     domains: normalizeStringList(project.domains),
-    role: normalizeString(project.role)
+    role: normalizeString(project.role),
+    components: normalizeComponents(project.components)
   };
+}
+
+function normalizeComponents(values) {
+  const components = [];
+  const seen = new Set();
+  for (const value of Array.isArray(values) ? values : []) {
+    const component = {
+      name: normalizeString(value?.name),
+      purpose: normalizeString(value?.purpose),
+      path: normalizeString(value?.path)
+    };
+    if (!component.name || !component.path) continue;
+    const key = `${component.name}\0${component.path}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    components.push(component);
+  }
+  return components;
 }
 
 function normalizeStringList(values) {

@@ -8,7 +8,8 @@ export async function addProject(repository, input = {}) {
     path: input.projectPath || input.path || ".",
     products: normalizeStringList(input.products),
     domains: normalizeStringList(input.domains),
-    role: normalizeString(input.role)
+    role: normalizeString(input.role),
+    components: normalizeComponents(input.components)
   };
 
   if (input.dryRun) {
@@ -46,6 +47,24 @@ function normalizeStringList(values) {
   return [...new Set((Array.isArray(values) ? values : [])
     .map((value) => normalizeString(value))
     .filter(Boolean))];
+}
+
+function normalizeComponents(values) {
+  const components = [];
+  const seen = new Set();
+  for (const value of Array.isArray(values) ? values : []) {
+    const component = {
+      name: normalizeString(value?.name),
+      purpose: normalizeString(value?.purpose),
+      path: normalizeString(value?.path)
+    };
+    if (!component.name || !component.path) continue;
+    const key = `${component.name}\0${component.path}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    components.push(component);
+  }
+  return components;
 }
 
 function normalizeString(value) {

@@ -148,8 +148,8 @@ function isGitPathMissing(error) {
 function upsertProject(db, project) {
   const normalized = normalizeProjectMetadata(project);
   db.prepare(`
-    INSERT OR REPLACE INTO projects (id, name, technology_family_id, source_path, doc_path, products, domains, role, raw_json)
-    VALUES (@id, @name, @technologyFamilyId, @sourcePath, @docPath, @products, @domains, @role, @rawJson)
+    INSERT OR REPLACE INTO projects (id, name, technology_family_id, source_path, doc_path, products, domains, role, components, raw_json)
+    VALUES (@id, @name, @technologyFamilyId, @sourcePath, @docPath, @products, @domains, @role, @components, @rawJson)
   `).run({
     id: normalized.id,
     name: normalized.name || normalized.id,
@@ -159,6 +159,7 @@ function upsertProject(db, project) {
     products: stringify(normalized.products),
     domains: stringify(normalized.domains),
     role: normalized.role,
+    components: stringify(normalized.components),
     rawJson: stringify(normalized)
   });
   db.prepare("DELETE FROM project_skill_mounts WHERE project_id = ?").run(normalized.id);
@@ -330,8 +331,27 @@ function normalizeProjectMetadata(project = {}) {
     ...project,
     products: normalizeStringList(project.products),
     domains: normalizeStringList(project.domains),
-    role: normalizeString(project.role)
+    role: normalizeString(project.role),
+    components: normalizeComponents(project.components)
   };
+}
+
+function normalizeComponents(values) {
+  const components = [];
+  const seen = new Set();
+  for (const value of Array.isArray(values) ? values : []) {
+    const component = {
+      name: normalizeString(value?.name),
+      purpose: normalizeString(value?.purpose),
+      path: normalizeString(value?.path)
+    };
+    if (!component.name || !component.path) continue;
+    const key = `${component.name}\0${component.path}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    components.push(component);
+  }
+  return components;
 }
 
 function normalizeStringList(values) {

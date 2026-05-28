@@ -97,8 +97,27 @@ function normalizeProjectMetadata(project = {}) {
     ...project,
     products: normalizeStringList(project.products),
     domains: normalizeStringList(project.domains),
-    role: normalizeString(project.role)
+    role: normalizeString(project.role),
+    components: normalizeComponents(project.components)
   };
+}
+
+function normalizeComponents(values) {
+  const components = [];
+  const seen = new Set();
+  for (const value of Array.isArray(values) ? values : []) {
+    const component = {
+      name: normalizeString(value?.name),
+      purpose: normalizeString(value?.purpose),
+      path: normalizeString(value?.path)
+    };
+    if (!component.name || !component.path) continue;
+    const key = `${component.name}\0${component.path}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    components.push(component);
+  }
+  return components;
 }
 
 function normalizeStringList(values) {

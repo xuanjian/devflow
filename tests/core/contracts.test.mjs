@@ -60,6 +60,7 @@ test("locks route modes, entity types, query result types, and public method nam
     "setProjectProducts",
     "setProjectDomains",
     "setProjectRole",
+    "setProjectComponents",
     "upsertGraphEdge",
     "deleteGraphEdge",
     "writeProject",
@@ -99,7 +100,7 @@ test("normalizes scene templates with the scene-template marker", () => {
     source: { path: "docs/scenes/demo-scene.md" }
   });
 
-  assert.equal(DEVFLOW_SCHEMA_VERSION, 4);
+  assert.equal(DEVFLOW_SCHEMA_VERSION, 5);
   assert.deepEqual(sceneTemplate, {
     id: "demo-scene",
     templateType: "scene-template",

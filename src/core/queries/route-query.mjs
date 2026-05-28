@@ -263,6 +263,7 @@ function finalizeInference({ evidence, order, product, domains, scope, tasks, so
       return {
         id: projectId,
         role: entry.project.role || "primary",
+        components: entry.project.components || [],
         reason: entry.reasons.join("; "),
         paths: entry.paths
       };
@@ -313,6 +314,18 @@ function collectHistoryHints({ tasks, candidates, domains, sourceText }) {
       reason: domainMatch ? "matched domain history" : "matched task text history"
     });
     if (hints.length >= 5) break;
+  }
+  for (const candidate of candidates) {
+    const components = candidate.components || [];
+    if (!components.length) continue;
+    hints.push({
+      type: "components",
+      projectId: candidate.id,
+      title: `${candidate.id} reusable components`,
+      projectIds: [candidate.id],
+      components,
+      reason: "candidate reusable components"
+    });
   }
   return hints;
 }

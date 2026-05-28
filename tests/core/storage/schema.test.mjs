@@ -25,7 +25,7 @@ test("initializeSchema creates all required SQLite tables and records schema ver
     assert.equal(tableNames.includes("task_documents"), true, "missing table task_documents");
     const version = db.prepare("SELECT version FROM schema_version ORDER BY version DESC LIMIT 1").get();
     assert.equal(version.version, DEVFLOW_SCHEMA_VERSION);
-    assert.equal(DEVFLOW_SCHEMA_VERSION, 4);
+    assert.equal(DEVFLOW_SCHEMA_VERSION, 5);
     assert.equal(tableNames.includes("documents"), false, "documents table should not be created");
   } finally {
     db.close();

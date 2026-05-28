@@ -85,7 +85,8 @@ test("add project supports metadata dry-run without writing sqlite", async () =>
     path: "/tmp/dhbfront-domain-goods",
     products: ["dhb"],
     domains: ["goods"],
-    role: "subpackage"
+    role: "subpackage",
+    components: []
   });
   assert.equal(await repository.getProject("dhbfront-domain-goods"), null);
 });
@@ -105,11 +106,47 @@ test("set-domain and set-role write project metadata", async () => {
   assert.equal(project.role, "bff-service");
 });
 
+test("set-components previews and writes reusable project components idempotently", async () => {
+  const root = copyFixture();
+  await seedSqliteFromJsonFixture(root);
+  const repository = createSqliteRepository({ rootDir: root });
+  const componentArgs = [
+    "formatMoney|Format money display|src/money.js",
+    "useBridge|Legacy bridge helper|src/bridge.js"
+  ];
+
+  const preview = parseJson(runCli(root, ["set-components", "demo-project", ...componentArgs, "--dry-run"]));
+  assert.equal(preview.status, "noop");
+  assert.equal(preview.action, "setProjectComponents");
+  assert.deepEqual(preview.before.components, []);
+  assert.deepEqual(preview.after.components, [
+    { name: "formatMoney", purpose: "Format money display", path: "src/money.js" },
+    { name: "useBridge", purpose: "Legacy bridge helper", path: "src/bridge.js" }
+  ]);
+  assert.deepEqual((await repository.getProject("demo-project")).components, []);
+
+  const write = parseJson(runCli(root, ["set-components", "demo-project", ...componentArgs]));
+  const secondWrite = parseJson(runCli(root, ["set-components", "demo-project", ...componentArgs]));
+  assert.equal(write.status, "ok");
+  assert.equal(secondWrite.status, "noop");
+  assert.deepEqual((await repository.getProject("demo-project")).components, preview.after.components);
+});
+
 test("metadata commands report unknown project ids", async () => {
   const root = copyFixture();
   await seedSqliteFromJsonFixture(root);
 
   const result = runCli(root, ["set-products", "missing-project", "dhb"]);
+
+  assert.notEqual(result.status, 0);
+  assert.match(result.stderr, /unknown projectId: missing-project/);
+});
+
+test("set-components reports unknown project ids", async () => {
+  const root = copyFixture();
+  await seedSqliteFromJsonFixture(root);
+
+  const result = runCli(root, ["set-components", "missing-project", "formatMoney|Format money display|src/money.js"]);
 
   assert.notEqual(result.status, 0);
   assert.match(result.stderr, /unknown projectId: missing-project/);

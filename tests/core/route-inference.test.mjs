@@ -37,6 +37,7 @@ test("query route expands yorder frontend and bff candidates through chain and d
 
   const route = await service.queryRoute({ text: "yorder 建议订单商品列表" });
   const candidateIds = route.candidates.map((candidate) => candidate.id);
+  const utilsCandidate = route.candidates.find((candidate) => candidate.id === "dhbfront-utils");
 
   assert.ok(route.inference.domains.includes("order"));
   assert.ok(route.inference.domains.includes("goods"));
@@ -53,7 +54,15 @@ test("query route expands yorder frontend and bff candidates through chain and d
     assert.ok(candidateIds.includes(projectId), `missing ${projectId}`);
   }
   assert.ok(route.candidates.find((candidate) => candidate.id === "dhbfront-cash-mini").reason.includes("chain"));
-  assert.ok(route.candidates.find((candidate) => candidate.id === "dhbfront-utils").reason.includes("depends-on"));
+  assert.ok(utilsCandidate.reason.includes("depends-on"));
+  assert.deepEqual(utilsCandidate.components, [
+    {
+      name: "formatMoney",
+      purpose: "Format money display shared by frontend packages",
+      path: "src/money/formatMoney.ts"
+    }
+  ]);
+  assert.ok(route.historyHints.some((hint) => hint.type === "components" && hint.projectId === "dhbfront-utils"));
 });
 
 test("query route expands configured frontend calls bff candidates and keeps them clarifiable", async () => {
@@ -179,7 +188,20 @@ function routingProjects() {
     { id: "new-mobile-h5", name: "new-mobile-h5", products: ["dhb"], domains: [], role: "container" },
     { id: "customize-mini-program", name: "customize-mini-program", products: ["dhb"], domains: [], role: "mini-program" },
     { id: "dhb", name: "dhb", products: ["dhb"], domains: [], role: "native" },
-    { id: "dhbfront-utils", name: "dhbfront-utils", products: ["dhb"], domains: [], role: "frontend-common" }
+    {
+      id: "dhbfront-utils",
+      name: "dhbfront-utils",
+      products: ["dhb"],
+      domains: [],
+      role: "frontend-common",
+      components: [
+        {
+          name: "formatMoney",
+          purpose: "Format money display shared by frontend packages",
+          path: "src/money/formatMoney.ts"
+        }
+      ]
+    }
   ];
 }
 

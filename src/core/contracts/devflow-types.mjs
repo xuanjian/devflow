@@ -1,4 +1,4 @@
-export const DEVFLOW_SCHEMA_VERSION = 4;
+export const DEVFLOW_SCHEMA_VERSION = 5;
 
 export const ROUTE_MODES = ["none", "resume", "light", "full"];
 
@@ -46,6 +46,7 @@ export const REPOSITORY_METHODS = [
   "setProjectProducts",
   "setProjectDomains",
   "setProjectRole",
+  "setProjectComponents",
   "upsertGraphEdge",
   "deleteGraphEdge",
   "writeProject",
