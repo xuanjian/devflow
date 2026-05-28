@@ -86,6 +86,9 @@ function scoreTemplate(template, projects, text) {
 
 async function resolveProjects(repository, projects, sceneTemplate, text) {
   if (sceneTemplate?.projectHints?.length) {
+    if (typeof repository.listProjectsForSceneTemplate === "function") {
+      return repository.listProjectsForSceneTemplate(sceneTemplate.id);
+    }
     const resolved = await Promise.all(sceneTemplate.projectHints.map(async (hint) => {
       const project = await repository.getProject(hint.id);
       return project ? { ...project, role: hint.role } : null;

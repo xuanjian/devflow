@@ -11,20 +11,21 @@ export function createSqliteRepository({ rootDir = process.cwd(), dbPath = defau
 
   const repository = {
     async listProjects() {
-      return listRaw(db, "projects");
+      return listRaw(db, "projects").map((project) => hydrateProject(db, project));
     },
 
     async getProject(projectId) {
-      return getRaw(db, "projects", projectId);
+      const project = getRaw(db, "projects", projectId);
+      return project ? hydrateProject(db, project) : null;
     },
 
     async listSceneTemplates() {
-      return listRaw(db, "scene_templates").map((sceneTemplate) => normalizeSceneTemplate(sceneTemplate));
+      return listRaw(db, "scene_templates").map((sceneTemplate) => normalizeSceneTemplate(hydrateSceneTemplate(db, sceneTemplate)));
     },
 
     async getSceneTemplate(sceneTemplateId) {
       const sceneTemplate = getRaw(db, "scene_templates", sceneTemplateId);
-      return sceneTemplate ? normalizeSceneTemplate(sceneTemplate) : null;
+      return sceneTemplate ? normalizeSceneTemplate(hydrateSceneTemplate(db, sceneTemplate)) : null;
     },
 
     async listSkills() {
@@ -36,12 +37,12 @@ export function createSqliteRepository({ rootDir = process.cwd(), dbPath = defau
     },
 
     async listTasks() {
-      return listRaw(db, "tasks").map((task) => normalizeTask(task));
+      return listRaw(db, "tasks").map((task) => hydrateTask(db, task)).map((task) => normalizeTask(task));
     },
 
     async getTask(taskId) {
       const task = getRaw(db, "tasks", taskId);
-      return task ? normalizeTask(task) : null;
+      return task ? normalizeTask(hydrateTask(db, task)) : null;
     },
 
     async getActiveTask() {
@@ -51,10 +52,49 @@ export function createSqliteRepository({ rootDir = process.cwd(), dbPath = defau
     },
 
     async getWorkset(worksetOrTaskId) {
-      const task = await repository.getTask(worksetOrTaskId);
-      if (task?.workset) return task.workset;
-      const workset = getRaw(db, "worksets", worksetOrTaskId);
+      const workset = getHydratedWorkset(db, worksetOrTaskId)
+        || getHydratedWorksetByTaskId(db, worksetOrTaskId);
       return workset ? normalizeWorkset(workset) : null;
+    },
+
+    async listSkillsForProject(projectId) {
+      return listJoinedEntities(db, "skills", "project_skill_mounts", "skill_id", "project_id", projectId);
+    },
+
+    async listRulesForProject(projectId) {
+      return listJoinedEntities(db, "rules", "project_rule_mounts", "rule_id", "project_id", projectId);
+    },
+
+    async listProjectsForSceneTemplate(sceneTemplateId) {
+      return listJoinedProjectsForSceneTemplate(db, sceneTemplateId);
+    },
+
+    async listSkillsForSceneTemplate(sceneTemplateId) {
+      return listJoinedEntities(db, "skills", "scene_template_skill_hints", "skill_id", "scene_template_id", sceneTemplateId);
+    },
+
+    async listRulesForSceneTemplate(sceneTemplateId) {
+      return listJoinedEntities(db, "rules", "scene_template_rule_hints", "rule_id", "scene_template_id", sceneTemplateId);
+    },
+
+    async listCapabilitiesForSceneTemplate(sceneTemplateId) {
+      return listRefs(db, "scene_template_capabilities", "scene_template_id", sceneTemplateId);
+    },
+
+    async listProjectsForWorkset(worksetId) {
+      return listRefs(db, "workset_projects", "workset_id", worksetId);
+    },
+
+    async listSkillsForWorkset(worksetId) {
+      return listRefs(db, "workset_skills", "workset_id", worksetId);
+    },
+
+    async listRulesForWorkset(worksetId) {
+      return listRefs(db, "workset_rules", "workset_id", worksetId);
+    },
+
+    async listCapabilitiesForWorkset(worksetId) {
+      return listRefs(db, "workset_capabilities", "workset_id", worksetId);
     },
 
     async listGraphEdges() {
@@ -189,6 +229,82 @@ function listRaw(db, table) {
 function getRaw(db, table, id) {
   const row = db.prepare(`SELECT raw_json FROM ${table} WHERE id = ?`).get(id);
   return row ? parseRaw(row.raw_json) : null;
+}
+
+function hydrateProject(db, project) {
+  return {
+    ...project,
+    skills: listRefs(db, "project_skill_mounts", "project_id", project.id),
+    rules: listRefs(db, "project_rule_mounts", "project_id", project.id)
+  };
+}
+
+function hydrateSceneTemplate(db, sceneTemplate) {
+  return {
+    ...sceneTemplate,
+    capabilityIds: listRefs(db, "scene_template_capabilities", "scene_template_id", sceneTemplate.id).map((capability) => capability.id).filter(Boolean),
+    projectHints: listRefs(db, "scene_template_project_hints", "scene_template_id", sceneTemplate.id),
+    skillHints: listRefs(db, "scene_template_skill_hints", "scene_template_id", sceneTemplate.id),
+    ruleHints: listRefs(db, "scene_template_rule_hints", "scene_template_id", sceneTemplate.id)
+  };
+}
+
+function hydrateTask(db, task) {
+  const worksetId = task.workset?.id || task.worksetId || "";
+  const workset = (worksetId ? getHydratedWorkset(db, worksetId) : null)
+    || getHydratedWorksetByTaskId(db, task.id)
+    || task.workset;
+  return workset ? { ...task, workset } : task;
+}
+
+function getHydratedWorkset(db, worksetId) {
+  const workset = getRaw(db, "worksets", worksetId);
+  return workset ? hydrateWorkset(db, workset) : null;
+}
+
+function getHydratedWorksetByTaskId(db, taskId) {
+  const row = db.prepare("SELECT raw_json FROM worksets WHERE task_id = ? ORDER BY rowid LIMIT 1").get(taskId);
+  return row ? hydrateWorkset(db, parseRaw(row.raw_json)) : null;
+}
+
+function hydrateWorkset(db, workset) {
+  return {
+    ...workset,
+    capabilities: listRefs(db, "workset_capabilities", "workset_id", workset.id),
+    projects: listRefs(db, "workset_projects", "workset_id", workset.id),
+    skills: listRefs(db, "workset_skills", "workset_id", workset.id),
+    rules: listRefs(db, "workset_rules", "workset_id", workset.id)
+  };
+}
+
+function listRefs(db, table, leftColumn, leftValue) {
+  return db.prepare(`SELECT raw_json FROM ${table} WHERE ${leftColumn} = ? ORDER BY rowid`)
+    .all(leftValue)
+    .map((row) => parseRaw(row.raw_json));
+}
+
+function listJoinedEntities(db, entityTable, relationTable, entityIdColumn, leftColumn, leftValue) {
+  return db.prepare(`
+    SELECT e.raw_json
+    FROM ${entityTable} e
+    JOIN ${relationTable} r ON e.id = r.${entityIdColumn}
+    WHERE r.${leftColumn} = ?
+    ORDER BY e.rowid
+  `).all(leftValue).map((row) => parseRaw(row.raw_json));
+}
+
+function listJoinedProjectsForSceneTemplate(db, sceneTemplateId) {
+  return db.prepare(`
+    SELECT p.raw_json AS project_json, h.raw_json AS hint_json
+    FROM projects p
+    JOIN scene_template_project_hints h ON p.id = h.project_id
+    WHERE h.scene_template_id = ?
+    ORDER BY h.rowid
+  `).all(sceneTemplateId).map((row) => {
+    const project = hydrateProject(db, parseRaw(row.project_json));
+    const hint = parseRaw(row.hint_json);
+    return hint?.role ? { ...project, role: hint.role } : project;
+  });
 }
 
 function getRuntimeState(db) {

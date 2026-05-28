@@ -59,22 +59,38 @@ async function resolveRelatedItemIds(repository, { projectId, templateId, workse
   const ids = new Set((workset?.[itemType] || []).map((item) => item.id).filter(Boolean));
 
   for (const id of [projectId, ...(workset?.projects || []).map((project) => project.id)].filter(Boolean)) {
-    const project = await repository.getProject(id);
-    for (const item of project?.[itemType] || []) {
+    for (const item of await listProjectItems(repository, id, itemType)) {
       if (item?.id) ids.add(item.id);
     }
   }
 
   const sceneTemplateId = templateId || workset?.sceneTemplateId;
   if (sceneTemplateId) {
-    const sceneTemplate = await repository.getSceneTemplate(sceneTemplateId);
-    const hintKey = itemType === "skills" ? "skillHints" : "ruleHints";
-    for (const item of sceneTemplate?.[hintKey] || []) {
+    for (const item of await listSceneTemplateItems(repository, sceneTemplateId, itemType)) {
       if (item?.id) ids.add(item.id);
     }
   }
 
   return ids;
+}
+
+async function listProjectItems(repository, projectId, itemType) {
+  const methodName = itemType === "skills" ? "listSkillsForProject" : "listRulesForProject";
+  if (typeof repository[methodName] === "function") {
+    return repository[methodName](projectId);
+  }
+  const project = await repository.getProject(projectId);
+  return project?.[itemType] || [];
+}
+
+async function listSceneTemplateItems(repository, sceneTemplateId, itemType) {
+  const methodName = itemType === "skills" ? "listSkillsForSceneTemplate" : "listRulesForSceneTemplate";
+  if (typeof repository[methodName] === "function") {
+    return repository[methodName](sceneTemplateId);
+  }
+  const sceneTemplate = await repository.getSceneTemplate(sceneTemplateId);
+  const hintKey = itemType === "skills" ? "skillHints" : "ruleHints";
+  return sceneTemplate?.[hintKey] || [];
 }
 
 function filterContextItems(items, { projectId, templateId, worksetId, workset, relatedItemIds, itemType }) {

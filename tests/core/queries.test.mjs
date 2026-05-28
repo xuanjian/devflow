@@ -1,6 +1,16 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import Database from "better-sqlite3";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
 import { createDevFlowService } from "../../src/core/services/devflow-service.mjs";
+import { createJsonRepository } from "../../src/core/repositories/json-repository.mjs";
+import { createSqliteRepository } from "../../src/core/repositories/sqlite-repository.mjs";
+import { defaultDbPath } from "../../src/core/storage/schema.mjs";
+import { seedSqliteFromJsonFixture } from "../helpers/sqlite-fixtures.mjs";
+
+const basicFixtureRoot = new URL("./fixtures/basic-ai-context/", import.meta.url);
 
 test("queryRoute returns the locked route shape with workset and readPaths", async () => {
   const repository = createFakeRepository();
@@ -65,6 +75,96 @@ test("buildGraph returns repository graph edges with entity nodes", async () => 
   assert.ok(graph.nodes.some((node) => node.id === "sceneTemplate:demo-scene"));
   assert.ok(graph.edges.some((edge) => edge.from === "project:demo-project" && edge.to === "sceneTemplate:demo-scene"));
 });
+
+test("SQLite query paths use relation tables when raw relationship arrays are stale", async () => {
+  const root = copyFixture();
+  await seedSqliteFromJsonFixture(root);
+
+  const jsonService = createDevFlowService({
+    rootDir: root,
+    repository: createJsonRepository({ rootDir: root })
+  });
+  const expectedRoute = await jsonService.queryRoute({ text: "demo task" });
+  const expectedCurrent = await jsonService.queryCurrent();
+  const expectedSkillsByProject = await jsonService.querySkills({ projectId: "demo-project" });
+  const expectedSkillsByTemplate = await jsonService.querySkills({ templateId: "demo-scene" });
+  const expectedSkillsByWorkset = await jsonService.querySkills({ worksetId: "workset-demo-task" });
+  const expectedRulesByProject = await jsonService.queryRules({ projectId: "demo-project" });
+  const expectedRulesByTemplate = await jsonService.queryRules({ templateId: "demo-scene" });
+  const expectedRulesByWorkset = await jsonService.queryRules({ worksetId: "workset-demo-task" });
+
+  stripRawRelationshipArrays(root);
+
+  const sqliteService = createDevFlowService({
+    rootDir: root,
+    repository: createSqliteRepository({ rootDir: root })
+  });
+  assert.deepEqual(await sqliteService.queryRoute({ text: "demo task" }), expectedRoute);
+  assert.deepEqual(await sqliteService.queryCurrent(), expectedCurrent);
+  assert.deepEqual(await sqliteService.querySkills({ projectId: "demo-project" }), expectedSkillsByProject);
+  assert.deepEqual(await sqliteService.querySkills({ templateId: "demo-scene" }), expectedSkillsByTemplate);
+  assert.deepEqual(await sqliteService.querySkills({ worksetId: "workset-demo-task" }), expectedSkillsByWorkset);
+  assert.deepEqual(await sqliteService.queryRules({ projectId: "demo-project" }), expectedRulesByProject);
+  assert.deepEqual(await sqliteService.queryRules({ templateId: "demo-scene" }), expectedRulesByTemplate);
+  assert.deepEqual(await sqliteService.queryRules({ worksetId: "workset-demo-task" }), expectedRulesByWorkset);
+
+  const panelGraph = await sqliteService.buildContextGraph();
+  assert.ok(panelGraph.edges.some((edge) => edge.from === "workset:workset-demo-task" && edge.to === "project:demo-project" && edge.relation === "loads-project"));
+  assert.ok(panelGraph.edges.some((edge) => edge.from === "workset:workset-demo-task" && edge.to === "skill:demo-skill" && edge.relation === "loads-skill"));
+  assert.ok(panelGraph.edges.some((edge) => edge.from === "workset:workset-demo-task" && edge.to === "rule:demo-rule" && edge.relation === "loads-rule"));
+});
+
+function copyFixture() {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "devflow-query-parity-"));
+  fs.cpSync(basicFixtureRoot, root, { recursive: true });
+  return root;
+}
+
+function stripRawRelationshipArrays(rootDir) {
+  const db = new Database(defaultDbPath(rootDir));
+  try {
+    updateRawJson(db, "projects", "demo-project", (project) => ({
+      ...project,
+      scenes: [],
+      skills: [],
+      rules: []
+    }));
+    updateRawJson(db, "scene_templates", "demo-scene", (sceneTemplate) => ({
+      ...sceneTemplate,
+      capabilityIds: [],
+      projectHints: [],
+      skillHints: [],
+      ruleHints: [],
+      projects: [],
+      rules: []
+    }));
+    updateRawJson(db, "worksets", "workset-demo-task", (workset) => ({
+      ...workset,
+      capabilities: [],
+      projects: [],
+      skills: [],
+      rules: []
+    }));
+    updateRawJson(db, "tasks", "demo-task", (task) => ({
+      ...task,
+      workset: task.workset ? {
+        ...task.workset,
+        capabilities: [],
+        projects: [],
+        skills: [],
+        rules: []
+      } : task.workset
+    }));
+  } finally {
+    db.close();
+  }
+}
+
+function updateRawJson(db, table, id, update) {
+  const row = db.prepare(`SELECT raw_json FROM ${table} WHERE id = ?`).get(id);
+  assert.ok(row, `missing ${table} row ${id}`);
+  db.prepare(`UPDATE ${table} SET raw_json = ? WHERE id = ?`).run(JSON.stringify(update(JSON.parse(row.raw_json))), id);
+}
 
 function createFakeRepository() {
   const projects = [
