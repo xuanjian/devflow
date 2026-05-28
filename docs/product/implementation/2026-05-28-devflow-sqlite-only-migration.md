@@ -492,9 +492,23 @@ R2 的 `migrate-from-json.mjs` 直接复用了 `createJsonRepository` 作为"从
 
 | 子轮 | 内容 |
 |------|------|
-| **R3a** | 读路径统一：实现 §6.1 三态 resolver + §6.2 种子；删 `devflow-service` 的 `backend === "json"` 分支；json-repository 降级为 migrate-only；删 `rebuild-index.mjs`（消费方改完后） |
+| **R3a** | 读路径统一：抽 `applyMigrationSnapshot`（§6.4.1）；实现 §6.1 三态 resolver + §6.2 种子；**`devflow-service.mjs` 和 `checks.mjs` 两个 rebuild 消费方一起改**；删 `backend === "json"` 分支；json-repository 降级为 migrate-only；删 `rebuild-index.mjs`（消费方改完后） |
 | **R3b** | 写路径统一：`actions.mjs` 所有 `writeRootJson` → `service.commands.*`，目标 ≤ 400 行 |
-| **R3c** | 收尾：`install-ai-context.mjs` 模块化 + actions 去 spawn 改 in-process；删 `createCompatibilityService` / `migrate-git-json-relations.mjs`；`repository-contract.mjs` 的 `REPOSITORY_METHODS` 加 `getConfig/setConfig/getEntry/getProfile/getGates/listTaskDocuments/writeTaskDocument`；`package.json` `files` 砍 `config/*`、`runtime/*` |
+| **R3c** | 收尾：`install-ai-context.mjs` 模块化 + actions 去 spawn 改 in-process；删 `createCompatibilityService` / `migrate-git-json-relations.mjs`；`index rebuild` 改 noop+引导 migrate（exit 0）、更新 doctor 提示（[devflow-cli.mjs:784-792](../../../scripts/devflow-cli.mjs)）；`repository-contract.mjs` 的 `REPOSITORY_METHODS` 加 `getConfig/setConfig/getEntry/getProfile/getGates/listTaskDocuments/writeTaskDocument`；`package.json` `files` 砍 `config/*`、`runtime/*` |
+
+### 6.4.1 复用 migrate 写入逻辑，测试不得依赖 git 检查
+
+`migrateDevFlowFromJson` 非 dry-run 第一步是 `assertCleanGitWorktree`（[migrate-from-json.mjs:53](../../../src/core/storage/migrate-from-json.mjs)）。测试 fixture 经 `copyFixture` 拷到 `os.tmpdir()`，那里**不是 git 仓库**，`git status` 会报 "not a git repository" → migrate throw。所以**测试不能直接调 `migrateDevFlowFromJson`**（`keepJson` 也救不了，它不绕过 git 检查）。
+
+正确做法：把 migrate-from-json 的写入核心抽成导出函数 `applyMigrationSnapshot(db, snapshot)`（读取侧 `collectJsonMigrationSnapshot` 已经是导出的），让三方共享：
+
+- **migrate 命令**：`collect → assertCleanGitWorktree → openDb → initSchema → applyMigrationSnapshot → sanity check → 删 JSON`
+- **bootstrap（§6.1 第 3 态全新安装）**：不走 JSON，只 `initSchema + 写 defaults + DEFAULT_DEVFLOW_PROJECT`
+- **测试**：`collectJsonMigrationSnapshot + openDb + initSchema + applyMigrationSnapshot`，不碰 git（可包 helper `seedSqliteFromJsonFixture(root)`）
+
+这样写入逻辑单一来源（DRY），测试与生产共用同一条写入路径。
+
+`sqlite-repository.test.mjs:23` 的 "sqlite repository matches JSON repository" parity 测试**保留语义、换实现**：用 `collect + applyMigrationSnapshot` 建库后断言 sqlite repo 与 json repo 数据一致——它能防 migrate 写入逻辑回归，别删。
 
 ### 6.5 R3 约束（红线）
 
