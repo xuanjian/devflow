@@ -12,7 +12,7 @@ DevFlow is the local context and task-state workbench. Use it on demand; do not 
 Before loading DevFlow data, classify the request:
 
 - `none`: ordinary questions, explanations, or code snippets. Do not read DevFlow unless project context is explicitly needed.
-- `resume`: user says continue/current/last task. Read `runtime/current.json`, the active task, Workset, `nextAction`, and `recoveryPoint`.
+- `resume`: user says continue/current/last task. Run `devflow query current` and read only the returned task, Workset, `nextAction`, and `recoveryPoint`.
 - `light`: small bug or small change. Use minimal project/context lookup and light tracking only when the work should survive the chat.
 - `full`: large, cross-project, high-risk, Jira/Notion/Figma/PRD-backed work. Use full task tracking, G1-G7, and OpenSpec when selected.
 
@@ -27,7 +27,7 @@ For project/task/continue/scene template/Workset/skill/panel requests, run:
 devflow query route "<user request>"
 ```
 
-Read only returned readPaths and skills.sourcePath.
+Read only returned readPaths and skills.sourcePath; use rules.sourcePath for selected rules.
 
 For resume requests, run:
 
@@ -35,26 +35,18 @@ For resume requests, run:
 devflow query current
 ```
 
-If devflow query is unavailable, fall back to the current DevFlow skill read order and report that the SQLite/query migration is incomplete.
+For explicit skill or rule inventory, run:
 
-Fallback read order:
+```bash
+devflow query skills
+devflow query rules
+```
 
-1. `config/entry.json`
-2. `config/profile.json`
-3. `runtime/current.json`
-4. Active task file from `runtime/current.json`, only for `resume`, task status, or tracked work
-5. Project, scene template, rule, or skill JSON selected by the task
+Load source Markdown, rules, or skills only from returned `readPaths`, `skills.sourcePath`, or `rules.sourcePath`.
+
+If devflow query is unavailable, report that the SQLite/query migration is incomplete. Do not read legacy JSON indexes unless the user explicitly asks you to inspect or repair legacy files.
 
 Do not read home-level compatibility files unless the user asks to inspect or repair those files.
-
-## Routing Sources
-
-- Projects: `config/projects/index.json` -> `config/projects/<project-id>.json`
-- Scene templates: `config/scenes/index.json` -> `config/scenes/<scene-id>.json`
-- Skills: `config/skills/skills.json`
-- Rules: `config/rules/rules.json`
-- Gates: `config/tasks/gates.json`
-- Task state: `runtime/current.json` and `runtime/tasks/*.json`
 
 ## Chat Subcommands
 
@@ -123,6 +115,8 @@ DevFlow init
 DevFlow init --tools codex,claude-code,cursor
 devflow query route "<request>"
 devflow query current
+devflow query skills
+devflow query rules
 devflow task start "<title>" --project <id> --template <scene-template-id> --gate G1 --level <L1-L4>
 devflow task update <task-id> --gate <G1-G7> --note "<progress or decision>"
 devflow task finish <task-id> --note "<verification and handoff>"

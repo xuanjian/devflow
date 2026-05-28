@@ -10,6 +10,7 @@ import { seedSqliteFromJsonFixture } from "../helpers/sqlite-fixtures.mjs";
 
 const testFile = fileURLToPath(import.meta.url);
 const repoRoot = path.resolve(path.dirname(testFile), "../..");
+const legacyGeneratedDocGuidancePattern = /config\/(?:projects\/[^`\s]+\.json|scenes\/[^`\s]+\.json|rules\/rules\.json)/;
 
 test("runAction rejects unknown actions", async () => {
   const result = await runAction({
@@ -128,6 +129,9 @@ test("add_project_from_path scans project docs, skills, rules and writes relatio
   assert.equal(project.skills[0].sourcePath, path.join(projectDir, ".codex/skills/release-helper/SKILL.md"));
   assert.equal(project.rules[0].id, "payment-app/payment");
   assert.equal(project.rules[0].sourcePath, path.join(projectDir, ".cursor/rules/payment.mdc"));
+  const projectDoc = await fs.readFile(path.join(projectDir, ".ai-configs/project.md"), "utf8");
+  assert.match(projectDoc, /devflow query route/);
+  assert.doesNotMatch(projectDoc, legacyGeneratedDocGuidancePattern);
 
   const skills = await repository.listSkills();
   assert.ok(skills.some((skill) => skill.id === "payment-app-release-helper" && skill.sourceType === "external-file"));
@@ -205,6 +209,10 @@ test("add_scene creates scene docs and mounts it to projects", async () => {
   const project = await repository.getProject("demo-project");
   assert.ok(project.scenes.some((item) => item.id === "payment-debug"));
   assert.ok(result.changedPaths.includes("docs/scenes/payment-debug.md"));
+  const sceneDoc = await fs.readFile(path.join(rootDir, "docs/scenes/payment-debug.md"), "utf8");
+  assert.match(sceneDoc, /devflow query route/);
+  assert.match(sceneDoc, /devflow query rules/);
+  assert.doesNotMatch(sceneDoc, legacyGeneratedDocGuidancePattern);
 });
 
 test("add_skill_from_path copies skill and mounts it to selected projects", async () => {

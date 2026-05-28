@@ -12,7 +12,7 @@ Portable project override:
 
 Query first:
 
-Use DevFlow query commands before reading JSON indexes. Only load source Markdown, rules, or skills from returned readPaths and skills.sourcePath.
+Use DevFlow query commands before loading project, task, skill, or rule context. Only load source Markdown, rules, or skills from returned readPaths, skills.sourcePath, or rules.sourcePath.
 
 On-demand DevFlow routing:
 
@@ -23,7 +23,11 @@ On-demand DevFlow routing:
 - Read only returned readPaths and skills.sourcePath.
 - For resume requests, run:
 `devflow query current`
-- If devflow query is unavailable, fall back to the current DevFlow skill read order and report that the SQLite/query migration is incomplete.
+- For explicit skill inventory, run:
+`devflow query skills`
+- For explicit rule inventory, run:
+`devflow query rules`
+- If devflow query is unavailable, report that the SQLite/query migration is incomplete.
 - Classify the user's current request before loading extra DevFlow data:
   - `none`: ordinary questions, explanations, or code snippets. Do not read DevFlow unless project context is explicitly needed.
   - `resume`: continuing the current task or an existing task. Prefer `devflow query current` and read only the returned task, Workset, `nextAction`, and `recoveryPoint`.

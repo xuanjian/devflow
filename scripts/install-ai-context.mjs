@@ -344,7 +344,11 @@ ${code('devflow query route "<user request>"')}
 - Read only returned readPaths and skills.sourcePath.
 - For resume requests, run:
 ${code('devflow query current')}
-- If devflow query is unavailable, fall back to the current DevFlow skill read order and report that the SQLite/query migration is incomplete.
+- For explicit skill inventory, run:
+${code('devflow query skills')}
+- For explicit rule inventory, run:
+${code('devflow query rules')}
+- If devflow query is unavailable, report that the SQLite/query migration is incomplete.
 - Classify the user's current request before loading extra DevFlow data:
   - ${code('none')}: ordinary questions, explanations, or code snippets. Do not read DevFlow unless project context is explicitly needed.
   - ${code('resume')}: continuing the current task or an existing task. Prefer ${code('devflow query current')} and read only the returned task, Workset, ${code('nextAction')}, and ${code('recoveryPoint')}.
@@ -371,7 +375,7 @@ function projectEntry(project) {
 
 ${portableProjectOverrideSection()}Query first:
 
-Use DevFlow query commands before reading JSON indexes. Only load source Markdown, rules, or skills from returned readPaths and skills.sourcePath.
+Use DevFlow query commands before loading project, task, skill, or rule context. Only load source Markdown, rules, or skills from returned readPaths, skills.sourcePath, or rules.sourcePath.
 ${onDemandRoutingSection()}
 ${projectSkillsSection(project)}
 ${managedEntryEndMarker}
@@ -387,7 +391,7 @@ ${managedEntryMarker}
 
 ${portableProjectOverrideSection()}Query first:
 
-Use DevFlow query commands before reading JSON indexes. Only load source Markdown, rules, or skills from returned readPaths and skills.sourcePath.
+Use DevFlow query commands before loading project, task, skill, or rule context. Only load source Markdown, rules, or skills from returned readPaths, skills.sourcePath, or rules.sourcePath.
 ${onDemandRoutingSection({ markdownTicks: true })}
 ${projectSkillsSection(project)}
 ${managedEntryEndMarker}

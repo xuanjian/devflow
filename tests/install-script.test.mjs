@@ -13,6 +13,7 @@ const testFile = fileURLToPath(import.meta.url);
 const rootDir = path.resolve(path.dirname(testFile), "..");
 const scriptPath = path.join(rootDir, "scripts/install-ai-context.mjs");
 const basicFixtureRoot = path.join(rootDir, "tests/core/fixtures/basic-ai-context");
+const legacyJsonEntryGuidancePattern = /config\/(?:entry\.json|projects\/index\.json|projects\/<project-id>\.json|scenes\/index\.json|scenes\/<scene-id>\.json|skills\/skills\.json|rules\/rules\.json|tasks\/gates\.json)|runtime\/current\.json/;
 
 function runInstallScript(args, env) {
   return spawnSync(process.execPath, [scriptPath, ...args], {
@@ -216,9 +217,13 @@ test("sync-projects writes on-demand DevFlow routing policy into agent entries",
     assert.match(content, /DevFlow is an on-demand capability set/i);
     assert.match(content, /Do not load all projects, scene templates, skills, rules, or task history by default/);
     assert.match(content, /devflow query route "<user request>"/);
+    assert.match(content, /devflow query skills/);
+    assert.match(content, /devflow query rules/);
     assert.match(content, /Read only returned readPaths and skills\.sourcePath/);
     assert.match(content, /devflow query current/);
     assert.match(content, /If devflow query is unavailable[\s\S]+SQLite\/query migration is incomplete/);
+    assert.doesNotMatch(content, legacyJsonEntryGuidancePattern);
+    assert.doesNotMatch(content, /before reading JSON indexes/i);
     assert.match(content, /none.*ordinary questions/i);
     assert.match(content, /resume.*current task/i);
     assert.match(content, /light.*small bug/i);

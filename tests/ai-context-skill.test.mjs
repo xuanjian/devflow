@@ -10,6 +10,7 @@ const skillPath = path.join(rootDir, "bundles", "skills", "devflow", "SKILL.md")
 const initSkillPath = path.join(rootDir, "bundles", "skills", "devflow-init", "SKILL.md");
 const readmePath = path.join(rootDir, "README.md");
 const projectIntroPath = path.join(rootDir, "docs", "project-introduction.md");
+const legacyJsonRoutingGuidancePattern = /config\/(?:entry\.json|projects\/index\.json|projects\/<project-id>\.json|scenes\/index\.json|scenes\/<scene-id>\.json|skills\/skills\.json|rules\/rules\.json)|runtime\/current\.json/;
 
 test("DevFlow skill documents chat subcommands as one routed skill", () => {
   const skill = fs.readFileSync(skillPath, "utf8");
@@ -43,11 +44,26 @@ test("DevFlow skill routes panel and task work through query-first Workset scope
 
   assert.match(skill, /devflow query route/);
   assert.match(skill, /devflow query current/);
+  assert.match(skill, /devflow query skills/);
+  assert.match(skill, /devflow query rules/);
   assert.match(skill, /Read only returned readPaths and skills\.sourcePath/);
   assert.match(skill, /If devflow query is unavailable[\s\S]+SQLite\/query migration is incomplete/);
   assert.match(skill, /@devflow:panel[\s\S]+panel is optional/i);
   assert.match(skill, /CLI\/TUI and query commands are primary/i);
   assert.match(skill, /@devflow:task[\s\S]+Workset as task runtime scope/i);
+});
+
+test("DevFlow skills do not route agents through legacy config JSON indexes", () => {
+  const combined = [
+    fs.readFileSync(skillPath, "utf8"),
+    fs.readFileSync(initSkillPath, "utf8")
+  ].join("\n");
+
+  assert.match(combined, /devflow query route/);
+  assert.match(combined, /devflow query current/);
+  assert.match(combined, /devflow query skills/);
+  assert.match(combined, /devflow query rules/);
+  assert.doesNotMatch(combined, legacyJsonRoutingGuidancePattern);
 });
 
 test("devflow:del contract covers safe removal actions", () => {

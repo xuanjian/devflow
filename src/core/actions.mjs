@@ -680,8 +680,8 @@ async function ensureProjectEntryNote(projectPath, rootPath) {
 ## DevFlow 协作入口
 
 - 当前项目的 AI 正文在 \`.ai-configs/project.md\`。
-- 当前项目已接入 DevFlow，请先读取 \`${path.join(rootPath, "config/entry.json")}\`。
-- 命中项目后再按需读取 DevFlow 中的项目、场景、skill、rule JSON。
+- 当前项目已接入 DevFlow，请先运行 \`devflow query route "<user request>"\`。
+- 继续已有任务时运行 \`devflow query current\`；查看 skill/rule 清单时运行 \`devflow query skills\` 或 \`devflow query rules\`。
 - 不要在聊天窗口一次性加载所有上下文，按任务需要加载。
 <!-- DevFlow:managed-entry:end -->
 `;
@@ -734,6 +734,7 @@ ${project.summary}
 - DevFlow 项目 ID：\`${project.id}\`
 - 这是该业务项目自己的 AI 正文，跟随业务仓库维护。
 - DevFlow 只集中维护项目关系、场景、任务状态和挂载索引。
+- 进入该项目上下文前运行 \`devflow query route "<user request>"\`，只读取返回的 readPaths、skills.sourcePath 或 rules.sourcePath。
 
 ## 原始资料来源
 
@@ -783,9 +784,9 @@ ${docLines}
 
 ## DevFlow 读取规则
 
-- 用户选择该项目后，先读取 \`config/projects/${project.id}.json\`。
-- 只有 JSON 摘要不足时，再读取本文件和项目内原始说明文档。
-- skill 与 rule 只按挂载关系按需加载，减少聊天窗口上下文。
+- 用户选择该项目后，先运行 \`devflow query route "<user request>"\`。
+- 只有 query 返回本文件或项目内原始说明文档时，再读取对应 source path。
+- skill 与 rule 通过 \`devflow query skills\` / \`devflow query rules\` 或 route 结果按需加载，减少聊天窗口上下文。
 
 ## 已导入 Skills
 
@@ -811,8 +812,8 @@ ${projectLines}
 
 ## 关系读取
 
-- 进入该场景时先读 \`config/scenes/${scene.id}.json\`。
-- 场景下的 rules 通过 \`config/rules/rules.json\` 解析，再按需读取 rule 文件。
+- 进入该场景时先运行 \`devflow query route "<user request>"\`，确认命中的 scene template 与 Workset。
+- 场景下的 rules 通过 \`devflow query rules\` 或 route 结果按需读取 rule source path。
 `;
 }
 
